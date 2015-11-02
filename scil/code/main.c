@@ -42,7 +42,7 @@ void write_data(void* buf, size_t num, uint8_t size, char* path){
 	fclose(file);
 }
 
-void printb_uint64(uint64_t a){
+void print_bits_uint64(uint64_t a){
 
 	uint8_t bits = 8 * sizeof(uint64_t);
 
@@ -53,7 +53,7 @@ void printb_uint64(uint64_t a){
 
 }
 
-void printb_uint8(uint8_t a){
+void print_bits_uint8(uint8_t a){
 
 	uint8_t bits = 8 * sizeof(uint8_t);
 
@@ -66,31 +66,7 @@ void printb_uint8(uint8_t a){
 
 int main(int argc, char** argv){
 
-	
-	size_t num = 10;
 
-	double* buf = (double*)SAFE_MALLOC(num * sizeof(double));
-
-	printf("Before Comp-Decomp\n");
-	for(size_t i = 0; i < num; i++){
-		buf[i] = 1 - i % 2;
-		printf("%f\n", buf[i]);
-	}
-	printf("\n");
-
-	cdata* comp = compress(buf, num, 0, 1.0, 1.0);
-
-	buf = decompress(comp, num, 0, 1.0, 1.0);
-
-	printf("\n");
-
-	printf("After Comp-Decomp\n");
-	for(size_t i = 0; i < num; i++){
-		printf("%f\n", buf[i]);
-	}
-
-	free(comp->buffer);
-	free(comp);
 	
 
 	return 0;

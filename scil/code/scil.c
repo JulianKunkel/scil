@@ -83,7 +83,7 @@ int scil_create_compression_context(scil_context * out_ctx, scil_hints * hints){
 	return 0;
 }
 
-int scil_compress(scil_context* ctx, char* compressed_buf_out, const size_t* out_size, const double* data_in, const size_t in_size);
+int scil_compress(const scil_context* ctx, char* compressed_buf_out, const size_t* out_size, const double* data_in, const size_t in_size);
 
 	assert(ctx != NULL);
 	assert(data_in != NULL);
@@ -145,34 +145,11 @@ int scil_compress(scil_context* ctx, char* compressed_buf_out, const size_t* out
 }
 
 int scil_decompress(scil_context* ctx, double* data_out, size_t* out_size, const char* compressed_buf_in, const size_t in_size);
-	
+	/*
 	assert(ctx != NULL);
 	assert(compressed_buf_in != NULL);
 
-	return 0;
-}
-
-cdata* compress(double* buf, size_t size, double min_value, double max_value, double error_step){
-
-	cdata* result = (cdata*)SAFE_MALLOC(sizeof(cdata));
-
-	uint8_t bits = get_needed_bit_count(min_value, max_value, error_step);
-	result->bytes_num = round_up_byte(bits * size);
-
-	//printf("\nBit Size:\t\t%d Bit\n", bits);
-	//printf("Buffer Size:\t\t%d Byte\n", size * sizeof(double));
-	//rintf("Compressed Buffer Size:\t%d Byte\n\n", result->size);
-
-	result->buffer = (uint8_t*)SAFE_CALLOC(result->bytes_num, 1);
-
-	
-
-	return result;
-}
-
-double* decompress(cdata* data, size_t size, double min_value, double max_value, double error_step){
-
-	double* result = (double*)SAFE_MALLOC(size * sizeof(double));
+	data_out = (double*)SAFE_MALLOC(out_size * sizeof(double));
 
 	uint8_t bits = get_needed_bit_count(min_value, max_value, error_step);
 
@@ -208,7 +185,6 @@ double* decompress(cdata* data, size_t size, double min_value, double max_value,
 		from_i += from_filled;
 		to_i += to_filled;
 	}
-
-	return result;
+	*/
+	return 0;
 }
-
