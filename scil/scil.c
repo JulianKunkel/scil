@@ -30,7 +30,7 @@ static double find_max(const double* buf, const size_t size){
 	return result;
 }
 
-static int find_min_max(double* min, double* max, const double* buf, const size_t size){
+static int find_min_max(const double* min, const double* max, const double* buf, const size_t size){
 
 	assert(buf != NULL);
 
@@ -83,7 +83,7 @@ int scil_create_compression_context(scil_context * out_ctx, scil_hints * hints){
 	return 0;
 }
 
-int scil_compress(scil_context* ctx, char* compressed_buf_out, size_t* out_size, const double* data_in, const size_t in_size);
+int scil_compress(scil_context* ctx, char* compressed_buf_out, const size_t* out_size, const double* data_in, const size_t in_size);
 
 	assert(ctx != NULL);
 	assert(data_in != NULL);
@@ -92,8 +92,54 @@ int scil_compress(scil_context* ctx, char* compressed_buf_out, size_t* out_size,
 	double min, max;
 	find_min_max(&min, &max, data_in, in_size);
 
-	//Get needed bits per number in data
-	uint8_t bits = get_needed_bit_count(min, max, ctx->hints->absolute_tolerance);
+	//Locally assigning absolute tolerance
+	double abs_tol = ctx->hints->absolute_tolerance;
+
+	//Get needed bits per compressed number in data
+	uint8_t bits_per_num = get_needed_bit_count(min, max, abs_tol);
+
+	//Get number of needed bytes for the whole compressed buffer
+	*out_size = round_up_byte(bits * size);
+
+	//Initialize every bit in output buffer to 0
+	compressed_buf_out = (char*)SAFE_CALLOC(*out_size, sizeof(char));
+
+	//Input and output buffer indices
+	size_t from_i = 0;
+	size_t to_i = 0;
+
+	//Needed shifts (also left as negative right) for bit perfect packing
+	int8_t right_shifts = 0;
+
+	//Helper booleans to determine if a number form input buffer is done packing
+	//and if a byte in outbut buffer is full
+	uint8_t from_filled = 1;
+	uint8_t to_filled = 1;
+
+	//As long as there are numbers not done packing in input buffer, do
+	while(from_i < size){
+
+		//If last number is done packing, increment right_shifts by bits per compressed number
+		right_shifts += from_filled * bits;
+		//If last target byte was filled, decrement right_shifts by one byte
+		right_shifts -= to_filled * 8;
+
+		//Get integer representation of a compressed number
+		uint64_t integ = int_repres(data_in[from_i], min, abs_tol);
+
+		//Set the current bytes bit to current bits of integ
+		compressed_buf_out[to_i] |= right_shifts < 0 ? (integ << -right_shifts) : (integ >> right_shifts);
+
+		//If right_shifts were smaller or equal 0, the current compressed number is done packing
+		from_filled = right_shifts <= 0;
+		//If it was greater or equal 0, the current byte is filled
+		to_filled = right_shifts >= 0;
+
+		//Increment the index of the data buffer if the current number is done packing
+		from_i += from_filled;
+		//Increment the target byte index if the current byte was filled
+		to_i += to_filled;
+	}
 
 	return 0;
 }
@@ -119,32 +165,7 @@ cdata* compress(double* buf, size_t size, double min_value, double max_value, do
 
 	result->buffer = (uint8_t*)SAFE_CALLOC(result->bytes_num, 1);
 
-	size_t from_i = 0;
-	size_t to_i = 0;
-
-	int8_t right_shifts = 0;
-
-	uint8_t from_filled = 1;
-	uint8_t to_filled = 1;
-
-	while(from_i < size){
-
-		right_shifts += from_filled * bits;
-		right_shifts -= to_filled * 8;
-
-		uint64_t integ = int_repres(buf[from_i], min_value, error_step);
-
-		result->buffer[to_i] |= right_shifts < 0 ? (integ << -right_shifts) : (integ >> right_shifts); //Hier liegt das Problem!!
-
-		//printb_uint8(result->buffer[to_i]);
-
-		from_filled = right_shifts <= 0;
-		to_filled = right_shifts >= 0;
-
-		from_i += from_filled;
-		to_i += to_filled;
-
-	}
+	
 
 	return result;
 }
