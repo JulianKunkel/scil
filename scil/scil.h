@@ -18,8 +18,8 @@ typedef struct{
 
 int scil_create_compression_context(scil_context * out_ctx, scil_hints * hints);
 
-int scil_compress(scil_context * ctx, size_t count, float/double * data, char * compressed_buf, size_t * out_size);
+int scil_compress(scil_context * ctx, char* compressed_buf, size_t* out_size, double * data, size_t count);
 
-int scil_decompress(scil_context * ctx, char * compressed_buf, float/double * data_out, size_t * out_size);
+int scil_decompress(scil_context * ctx, double * data_out, size_t * out_size, char * compressed_buf);
 
 #endif
