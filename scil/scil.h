@@ -5,7 +5,7 @@ typedef struct{
   // relative tolerance e.g. 1 means the value 2 can become 1-3
   double relative_tolerance;
   // 1 means 1% tolerance
-  double absolute_tolerance_percent; 
+  double absolute_tolerance_percent;
 } scil_hints;
 
 
