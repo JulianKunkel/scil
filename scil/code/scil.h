@@ -48,7 +48,7 @@ int scil_create_compression_context(scil_context * out_ctx, scil_hints * hints);
  * \pre data_in != NULL
  * \return success state of the compression
  */
-int scil_compress(scil_context* ctx, char* compressed_buf_out, size_t* out_size, const double* data_in, const size_t in_size);
+int scil_compress(const scil_context* ctx, char** compressed_buf_out, size_t* out_size, const double* data_in, const size_t in_size);
 
 /**
  * \brief Deompression method of a buffer of data
@@ -61,6 +61,6 @@ int scil_compress(scil_context* ctx, char* compressed_buf_out, size_t* out_size,
  * \pre compressed_buf_in != NULL
  * \return success state of the decompression
  */
-int scil_decompress(scil_context* ctx, double* data_out, size_t* out_size, const char* compressed_buf_in, const size_t in_size);
+int scil_decompress(const scil_context* ctx, double* data_out, const size_t* out_size, const char* compressed_buf_in, const size_t in_size);
 
 #endif

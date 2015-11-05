@@ -8,7 +8,7 @@
 #include "scil.h"
 #include "util.h"
 
-double* read_data(const char* path){
+char* read_data(const char* path){
 	
 	assert(path != NULL);
 
@@ -18,11 +18,11 @@ double* read_data(const char* path){
 	size_t size = (size_t)ftell(file);
 	rewind(file);
 
-	double* buf = (double*)SAFE_MALLOC(size);
+	char* buf = (char*)SAFE_MALLOC(size+1);
 
-	size_t result = fread(buf, sizeof(double), size, file);
+	size_t result = fread(buf, 1, size, file);
 	if(result != size){
-		fprintf(stderr, "Reading error of file %s", path);
+		fprintf(stderr, "Reading error of file %s\n", path);
 		exit(EXIT_FAILURE);
 	}
 
@@ -46,8 +46,8 @@ void print_bits_uint64(uint64_t a){
 
 	uint8_t bits = 8 * sizeof(uint64_t);
 
-	for(uint8_t i = bits - 1; i < bits; --i){
-		printf("%d", (a >> i) % 2);
+	for(uint8_t i = (uint8_t)(bits - 1); i < bits; --i){
+		printf("%lu", (a >> i) % 2);
 	}
 	printf("\n");
 
@@ -57,7 +57,7 @@ void print_bits_uint8(uint8_t a){
 
 	uint8_t bits = 8 * sizeof(uint8_t);
 
-	for(uint8_t i = bits - 1; i < bits; --i){
+	for(uint8_t i = (uint8_t)(bits - 1); i < bits; --i){
 		printf("%d", (a >> i) % 2);
 	}
 	printf("\n");
@@ -66,8 +66,33 @@ void print_bits_uint8(uint8_t a){
 
 int main(int argc, char** argv){
 
+	size_t count = 1000;
 
+	char* u_path = "uncomp_1000_d.data";
+	char* c_path = "comp_1000_d.data";
+
+	double* buf = (double*)read_data(u_path);
 	
+	scil_context* ctx = (scil_context*)SAFE_MALLOC(sizeof(scil_context));
+	ctx->hints.absolute_tolerance = 1.0;
+
+	char* c_buf = NULL;
+	size_t c_size;
+	scil_compress(ctx, &c_buf, &c_size, buf, count);
+
+	free(buf);
+	free(ctx);
+	free(c_buf);
+	/*
+
+	double* buf = (double*)SAFE_MALLOC(count * sizeof(double));
+
+	for(size_t i = 0; i < count; ++i){
+		buf[i] = (double)(i % 10);
+	}
+
+	write_data(buf, count, sizeof(double), u_path);
+	*/
 
 	return 0;
 }

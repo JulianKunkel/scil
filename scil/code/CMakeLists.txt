@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.8)
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
 # project name
-set (PROJECT_NAME numcrush)
+set (PROJECT_NAME scil)
 project (${PROJECT_NAME})
 
 # version numbers
@@ -20,8 +20,9 @@ set (CMAKE_C_FLAGS_RELEASE "-O3")
 
 set (SOURCE
 	main.c
+	scil.c
 	util.c
 )
 
 # add the executable
-add_executable(numcrush ${SOURCE})
+add_executable(scil ${SOURCE})
