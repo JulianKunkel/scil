@@ -1,0 +1,194 @@
+\documentclass[compress]{beamer}
+
+\usetheme{Hamburg}
+
+\usepackage[utf8]{inputenc}
+\usepackage{units}
+
+\title{SCIL - Scientific Compression Interface Library}
+\author{Armin Schaare}
+\institute{Arbeitsbereich Wissenschaftliches Rechnen\\Fachbereich Informatik\\Fakultät für Mathematik, Informatik und Naturwissenschaften\\Universität Hamburg}
+\date{2015-11-04}
+
+\titlegraphic{\includegraphics[width=0.5\textwidth]{logo}}
+
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+\begin{frame}
+	\frametitle{Outline}
+
+	\tableofcontents[hidesubsections]
+\end{frame}
+
+\section{Goal / Task}
+\subsection*{}
+
+\begin{frame}
+	\frametitle{Goal}
+
+	Implementation of a C-library for compression of scientific data
+\end{frame}
+
+\begin{frame}
+	\frametitle{Task}
+
+	\begin{itemize}[<+->]
+		\item Compression of the data
+		\begin{itemize}[<+->]
+			\item Lossy
+			\item Efficient (compression rate and speed)
+		\end{itemize}
+		\item Interface
+		\begin{itemize}[<+->]
+			\item Input: array of float/double values
+			\item Control: relative/absolute error tolerance
+			\item Output: compressed array
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\section{Realisation}
+\subsection*{}
+
+\begin{frame}
+	\frametitle{Timetable}
+
+	\begin{itemize}[<+->]
+		\item<1-5> 02.12.15 Compression with absolute error tolerance
+		\item<2-4> 06.01.16 Compression with relativer error tolerance
+		\item<3-4> 24.02.16 Useful subtools
+		\item<4> 30.03.16 Final touch and time for coping of arised problems
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Compression with absolute error tolerance}
+
+	Concept:
+
+	\begin{itemize}[<+->]
+		\pause
+		\item Find minimum and maximum of the data
+		\item Calculate number of discrete values (by means of error tolerance)
+		\item Calculate needed bit count per number
+		\item Calculate needed Bytes of the whole compressed array
+		\item Map all values to lossy compressed ones and store those
+
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Compression with absolute error tolerance}
+
+	Assume 3 bits to represent a number:
+	\bigskip\mbox{}
+	\pause
+
+	\begin{tabular}{|ccccccccccccccccc}
+		\hline
+		0 & 0 & \multicolumn{1}{c|}{0} & 0 & 0 & \multicolumn{1}{c|}{1} & 0 & 1 & \multicolumn{1}{c|}{0} & 0 & 1 & \multicolumn{1}{c|}{1} & 1 & 0 & \multicolumn{1}{c|}{0} & 0 & ... \\ \hline
+		\hline
+		* & * & * & * & * & * & * & \multicolumn{1}{c|}{*} & * & * & * & * & * & * & * & \multicolumn{1}{c|}{*} & ... \\ \hline
+	\end{tabular}
+	\bigskip\bigskip\mbox{}
+	\pause 
+
+	Assume 11 ... :
+	\bigskip\mbox{}
+	\pause
+
+	\begin{tabular}{|ccccccccccccccccc}
+		\hline
+		0 & 1 & 0 & 0 & 0 & 1 & 1 & 0 & 1 & 1 & \multicolumn{1}{c|}{0} & 0 & 1 & 0 & 0 & 0 & ... \\ \hline
+		\hline
+		* & * & * & * & * & * & * & \multicolumn{1}{c|}{*} & * & * & * & * & * & * & * & \multicolumn{1}{c|}{*} & ... \\ \hline
+	\end{tabular}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Compression with absolute error tolerance}
+
+	Achieved compression:
+	\pause
+
+	\begin{center}
+		\LARGE{$S=\frac{\lceil\log_2{(1 + \frac{max - min}{2 * tol})}\rceil}{U_{bit}}$}\large{ , with}
+	\end{center}
+
+	\begin{tabular}{ll}
+		$min$: & Minimum of the data \\
+		$max$: & Maximum of the data \\
+		$tol$: & Absolute error tolerance \\
+		$U_{bit}$: & Number of bits in float resp. double values \\
+		$S$: & Memory consumption, relative to the uncompressed data
+	\end{tabular}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Compression with absolute error tolerance}
+
+	\begin{columns}[T]
+	\column{.5\textwidth}
+		Example
+		\bigskip
+		\pause
+
+		Temperaturvariable, with
+		\bigskip\mbox{}
+		\begin{tabular}{lcr}
+			$min$ & $=$ & $-100$ \\
+			$max$ & $=$ & $100$ \\
+			$tol$ & $=$ & $0.01$ \\
+			$U_{bit}$ & $=$ & $64$
+		\end{tabular}
+		\pause
+
+	\column{.5\textwidth}
+		Yields
+		\bigskip\mbox{}
+		\begin{tabular}{lcl}
+			$S$ & $=$ & $\frac{\lceil\log_2{(1 + \frac{max - min}{2 * tol})}\rceil}{U_{bit}}$ \\
+			& & \\
+			& $=$ & $\frac{\lceil\log_2{10001}\rceil}{64}$ \\
+			& & \\
+			& $=$ & $\frac{14}{64}$ \\
+			& & \\
+			& $=$ & $0.21875$
+		\end{tabular}
+	\end{columns}
+	\bigskip
+	\pause
+
+	\begin{center}
+		\LARGE{Data compression of factor $\sim$\underline{5}}
+	\end{center}
+
+\end{frame}
+
+\section{Conclusion}
+\subsection*{}
+
+\begin{frame}
+	\frametitle{Conclusion}
+
+	\begin{itemize}[<+->]
+		\item Great potential for data compression
+		\item Fast because of $O(n)$ time complexity
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Questions}
+
+	\begin{center}
+		\Huge{Questions?}
+	\end{center}
+\end{frame}
+
+\end{document}
