@@ -17,8 +17,20 @@
 typedef struct{
   /** \brief relative tolerable error (1 means 1%) */
   double relative_tolerance_percent;
+
+  /** with a relative tolerance small numbers may be problematic, e.g. 1% for 0.01 becomes 0.01 +- 0.0001 
+      the finest tolerance limits the smallest relative error 
+      e.g. when compressing the value 0.01 with a filest abs tolerance of 0.01 it becomes 0.01 +- 0.01
+      So this is the lower bound of the resolution and guaranteed error for relative errors, 
+      where as the absolute tolerance is the guaranteed resolution for all data points.
+  **/
+  double relative_err_finest_abs_tolerance;
+
   /** \brief absolute tolerable error (e.g. 1 means the value 2 can become 1-3) */
   double absolute_tolerance;
+
+  /* Number of significant digits */
+  int significant_digits;
 } scil_hints;
 
 
