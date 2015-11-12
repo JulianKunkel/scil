@@ -19,12 +19,19 @@ set (CMAKE_C_FLAGS
 set (CMAKE_C_FLAGS_DEBUG "-O0")
 set (CMAKE_C_FLAGS_RELEASE "-O3")
 
+
 set (SOURCE
 	main.c
-	scil.c
 	util.c
 )
 
-# add the executable
-add_executable(scil ${SOURCE})
+add_library(scil SHARED scil.c)
 target_link_libraries(scil m)
+
+# add the executable
+add_executable(scil-test ${SOURCE})
+target_link_libraries(scil-test scil)
+
+## Installation
+install(TARGETS scil LIBRARY DESTINATION lib)
+install(FILES scil.h DESTINATION include)
