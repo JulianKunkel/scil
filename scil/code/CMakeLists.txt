@@ -22,6 +22,7 @@ set (CMAKE_C_FLAGS_RELEASE "-O3")
 
 set (SOURCE
 	main.c
+    algo-1.c
 	util.c
 )
 

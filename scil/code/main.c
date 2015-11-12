@@ -84,6 +84,8 @@ int main(int argc, char** argv){
 	size_t c_size;
 	scil_compress(ctx, &c_buf, &c_size, buf, count);
 
+	ret = scil_validate_compression(ctx, count, buf, c_size, c_buf);	
+
 	free(buf);
 	free(ctx);
 	free(c_buf);
@@ -97,6 +99,12 @@ int main(int argc, char** argv){
 
 	write_data(buf, count, sizeof(double), u_path);
 	*/
+
+	
+	if (ret != 0){
+		printf("Error in the validation!\n");
+		return 1;
+	}
 
 	return 0;
 }
