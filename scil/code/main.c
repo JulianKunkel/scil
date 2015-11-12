@@ -72,9 +72,13 @@ int main(int argc, char** argv){
 	char* c_path = "comp_1000_d.data";
 
 	double* buf = (double*)read_data(u_path);
-	
-	scil_context* ctx = (scil_context*)SAFE_MALLOC(sizeof(scil_context));
-	ctx->hints.absolute_tolerance = 1.0;
+	int ret;
+
+	scil_context * ctx;
+	scil_hints hints;
+	hints.absolute_tolerance = 1.0;
+
+	ret = scil_create_compression_context(& ctx, & hints);
 
 	char* c_buf = NULL;
 	size_t c_size;

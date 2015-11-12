@@ -34,11 +34,16 @@ typedef struct{
 } scil_hints;
 
 
-// TODO later: hide the structure in an internal header
-typedef struct{
-  scil_hints hints;
-  //...
-} scil_context;
+// The structure is hidden in the internal header
+#ifdef SCIL_INTERNAL_HEADER_
+#warning USING INTERNAL HEADER
+#else
+struct scil_context_t{ 
+    void * tmp;
+};
+#endif
+
+typedef struct scil_context_t scil_context;
 
 /**
  * \brief Creation of a compression context
@@ -47,7 +52,7 @@ typedef struct{
  * \pre hints != NULL
  * \return success state of the creation
  */
-int scil_create_compression_context(scil_context * out_ctx, scil_hints * hints);
+int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints);
 
 /**
  * \brief Compression method of a buffer of data

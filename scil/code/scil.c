@@ -1,4 +1,4 @@
-#include "scil.h"
+#include "scil-internal.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -79,10 +79,12 @@ static double double_repres(const uint64_t num, const double min, const double a
 	return min + (double)num * 2 * absolute_tolerance; //TODO: Test this
 }
 
-int scil_create_compression_context(scil_context * out_ctx, scil_hints * hints){
+int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints){
+	scil_context * ctx =(scil_context*)SAFE_MALLOC(sizeof(scil_context));
+	*out_ctx = ctx;
 
-	out_ctx->hints.relative_tolerance_percent = hints->relative_tolerance_percent;
-	out_ctx->hints.absolute_tolerance = hints->absolute_tolerance;
+	ctx->hints.relative_tolerance_percent = hints->relative_tolerance_percent;
+	ctx->hints.absolute_tolerance = hints->absolute_tolerance;
 
 	return 0;
 }
