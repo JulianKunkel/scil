@@ -1,7 +1,7 @@
 #include <math.h>
 
-#include "scil-internal.h"
-#include "util.h"
+#include <algo/algo-1.h>
+#include <util.h>
 
 // TODO: min/max zusammen ziehen um die Cache Nutzung zu optimieren!
 static double find_min(const double* buf, const size_t size){

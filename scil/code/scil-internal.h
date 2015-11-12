@@ -5,18 +5,25 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "scil.h"
+#include <scil.h>
+
+
+typedef struct{
+    int (*compress)(const scil_context* ctx, char** restrict compressed_buf_out, size_t* restrict out_size, const double*restrict data_in, const size_t in_size);
+    int (*decompress)(const scil_context* ctx, double*restrict data_out, size_t*restrict out_size, const char*restrict compressed_buf_in, const size_t in_size);    
+    const char * name;
+    int magic_number;
+} scil_compression_algorithm;
 
 
 struct scil_context_t{
   scil_hints hints;
+
+  // the last compressor used, could be used for debugging
+  scil_compression_algorithm * last_algorithm;
+
   // bla bla
 };
-
-// known algorithms:
-
-int scil_algo1_compress(const scil_context* ctx, char** restrict compressed_buf_out, size_t* restrict out_size, const double*restrict data_in, const size_t in_size);
-int scil_algo1_decompress(const scil_context* ctx, double*restrict data_out, const size_t*restrict out_size, const char*restrict compressed_buf_in, const size_t in_size);
 
 
 #endif 

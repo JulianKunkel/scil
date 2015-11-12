@@ -20,9 +20,12 @@ set (CMAKE_C_FLAGS_DEBUG "-O0")
 set (CMAKE_C_FLAGS_RELEASE "-O3")
 
 
+include_directories(argo .)
+
 set (SOURCE
 	main.c
-    algo-1.c
+    algo/algo-1.c
+    algo/memcopy.c
 	util.c
 )
 

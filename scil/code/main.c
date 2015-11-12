@@ -5,8 +5,8 @@
 #include <sys/stat.h>
 #include <math.h>
 
-#include "scil.h"
-#include "util.h"
+#include <scil.h>
+#include <util.h>
 
 char* read_data(const char* path){
 	
