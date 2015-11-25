@@ -17,16 +17,33 @@
 typedef struct{
   /** \brief relative tolerable error (1 means 1%) */
   double relative_tolerance_percent;
+
+  /** with a relative tolerance small numbers may be problematic, e.g. 1% for 0.01 becomes 0.01 +- 0.0001 
+      the finest tolerance limits the smallest relative error 
+      e.g. when compressing the value 0.01 with a filest abs tolerance of 0.01 it becomes 0.01 +- 0.01
+      So this is the lower bound of the resolution and guaranteed error for relative errors, 
+      where as the absolute tolerance is the guaranteed resolution for all data points.
+  **/
+  double relative_err_finest_abs_tolerance;
+
   /** \brief absolute tolerable error (e.g. 1 means the value 2 can become 1-3) */
   double absolute_tolerance;
+
+  /* Number of significant digits */
+  int significant_digits;
 } scil_hints;
 
 
-// TODO later: hide the structure in an internal header
-typedef struct{
-  scil_hints hints;
-  //...
-} scil_context;
+// The structure is hidden in the internal header
+#ifdef SCIL_INTERNAL_HEADER_
+#warning USING INTERNAL HEADER
+#else
+struct scil_context_t{ 
+    void * tmp;
+};
+#endif
+
+typedef struct scil_context_t scil_context;
 
 /**
  * \brief Creation of a compression context
@@ -35,23 +52,23 @@ typedef struct{
  * \pre hints != NULL
  * \return success state of the creation
  */
-int scil_create_compression_context(scil_context * out_ctx, scil_hints * hints);
+int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints);
 
 /**
  * \brief Compression method of a buffer of data
  * \param ctx reference of the compression context
  * \param compressed_buf_out reference to the compressed buffer
- * \param out_size reference to the compressed buffer byte size
+ * \param out_size reference to the compressed buffer byte size, max size is given as argument
  * \param data_in buffer of data to compress
  * \param in_size count of numbers in data buffer
  * \pre ctx != NULL
  * \pre data_in != NULL
  * \return success state of the compression
  */
-int scil_compress(const scil_context* ctx, char** compressed_buf_out, size_t* out_size, const double* data_in, const size_t in_size);
+int scil_compress(scil_context* ctx, char** restrict compressed_buf_out, size_t* restrict in_out_size, const double*restrict data_in, const size_t in_size);
 
 /**
- * \brief Deompression method of a buffer of data
+ * \brief Decompression method of a buffer of data
  * \param ctx reference of the compression context
  * \param data_out reference to the decompressed buffer
  * \param out_size reference to the decompressed buffer element count
@@ -61,6 +78,16 @@ int scil_compress(const scil_context* ctx, char** compressed_buf_out, size_t* ou
  * \pre compressed_buf_in != NULL
  * \return success state of the decompression
  */
-int scil_decompress(const scil_context* ctx, double* data_out, const size_t* out_size, const char* compressed_buf_in, const size_t in_size);
+int scil_decompress(const scil_context* ctx, double*restrict data_out, size_t*restrict in_out_size, const char*restrict compressed_buf_in, const size_t in_size);
+
+
+/**
+ \brief Test method: check if the conditions as specified by ctx are met by comparing compressed and decompressed data.
+ */
+int scil_validate_compression(const scil_context* ctx,
+                             const size_t uncompressed_size,
+                             const double*restrict data_uncompressed,
+                             const size_t compressed_size,
+                             const double*restrict data_compressed );
 
 #endif

@@ -5,8 +5,8 @@
 #include <sys/stat.h>
 #include <math.h>
 
-#include "scil.h"
-#include "util.h"
+#include <scil.h>
+#include <util.h>
 
 char* read_data(const char* path){
 	
@@ -73,13 +73,19 @@ int main(int argc, char** argv){
 	char* c_path = "comp_1000_d.data";
 
 	double* buf = (double*)read_data(u_path);
-	
-	scil_context* ctx = (scil_context*)SAFE_MALLOC(sizeof(scil_context));
-	ctx->hints.absolute_tolerance = 1.0;
+	int ret;
+
+	scil_context * ctx;
+	scil_hints hints;
+	hints.absolute_tolerance = 1.0;
+
+	ret = scil_create_compression_context(& ctx, & hints);
 
 	char* c_buf = NULL;
 	size_t c_size;
 	scil_compress(ctx, &c_buf, &c_size, buf, count);
+
+	ret = scil_validate_compression(ctx, count, buf, c_size, c_buf);	
 
 	free(buf);
 	free(ctx);
@@ -96,6 +102,12 @@ int main(int argc, char** argv){
 	
 	write_data(buf, count, sizeof(double), u_path);
 	*/
+
+	
+	if (ret != 0){
+		printf("Error in the validation!\n");
+		return 1;
+	}
 
 	return 0;
 }
