@@ -77,7 +77,12 @@ static double double_repres(const uint64_t num, const double min, const double a
 }
 
 
-int scil_algo1_compress(const scil_context* ctx, char** restrict compressed_buf_out, size_t* restrict out_size, const double*restrict data_in, const size_t in_size){
+int scil_algo1_compress(const scil_context* ctx, 
+                        char** restrict compressed_buf_out, 
+                        size_t* restrict out_size, 
+                        const double*restrict data_in, 
+                        const size_t in_size)
+{
 
     //Finding minimum and maximum values in data
     double min, max;
@@ -135,7 +140,12 @@ int scil_algo1_compress(const scil_context* ctx, char** restrict compressed_buf_
     return 0;
 }
 
-int scil_algo1_decompress(const scil_context* ctx, double*restrict data_out, const size_t*restrict out_size, const char*restrict compressed_buf_in, const size_t in_size){
+int scil_algo1_decompress(  const scil_context* ctx, 
+                            double*restrict data_out, 
+                            const size_t*restrict out_size, 
+                            const char*restrict compressed_buf_in, 
+                            const size_t in_size)
+{
     /*
     assert(ctx != NULL);
     assert(compressed_buf_in != NULL);

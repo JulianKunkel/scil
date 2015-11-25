@@ -11,8 +11,8 @@
 #include <stdio.h>
 
 /**
- * \brief Struct containing information on the tolerable precision
- * loss on compression 
+ * \brief Struct containing information on the tolerable
+ * precision loss on compression 
  */
 typedef struct{
   /** \brief relative tolerable error (1 means 1%) */
@@ -29,7 +29,7 @@ typedef struct{
   /** \brief absolute tolerable error (e.g. 1 means the value 2 can become 1-3) */
   double absolute_tolerance;
 
-  /* Number of significant digits */
+  /** \brief Number of significant digits */
   int significant_digits;
 } scil_hints;
 

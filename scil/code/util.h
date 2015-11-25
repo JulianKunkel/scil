@@ -79,7 +79,7 @@ void* safe_realloc (void* ptr, size_t size, const char* file,
 /**
  * \brief Shortcut for safe_calloc().
  * \param nmemb Number of elements.
- * \param size Length of one element.
+ * \param size Length of one element in bytes.
  */
 #define SAFE_CALLOC(nmemb, size) safe_calloc(nmemb, size, __FILE__, __LINE__)
 
