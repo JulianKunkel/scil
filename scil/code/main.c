@@ -69,6 +69,7 @@ int main(int argc, char** argv){
 	size_t count = 1000;
 
 	char* u_path = "uncomp_1000_d.data";
+	
 	char* c_path = "comp_1000_d.data";
 
 	double* buf = (double*)read_data(u_path);
@@ -83,14 +84,16 @@ int main(int argc, char** argv){
 	free(buf);
 	free(ctx);
 	free(c_buf);
-	/*
+	
+	write_data(c_buf, c_size, sizeof(char), c_path);
 
+	/*
 	double* buf = (double*)SAFE_MALLOC(count * sizeof(double));
 
 	for(size_t i = 0; i < count; ++i){
 		buf[i] = (double)(i % 10);
 	}
-
+	
 	write_data(buf, count, sizeof(double), u_path);
 	*/
 
