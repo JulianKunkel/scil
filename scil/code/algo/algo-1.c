@@ -3,34 +3,7 @@
 #include <algo/algo-1.h>
 #include <util.h>
 
-// TODO: min/max zusammen ziehen um die Cache Nutzung zu optimieren!
-static double find_min(const double* buf, const size_t size){
-
-    assert(buf != NULL);
-
-    double result = INFINITY;
-    for(size_t i = 0; i < size; ++i)
-    {
-        if(buf[i] < result)
-            result = buf[i];
-    }
-    return result;
-}
-
-static double find_max(const double* buf, const size_t size){
-
-    assert(buf != NULL);
-
-    double result = -INFINITY;
-    for(size_t i = 0; i < size; ++i)
-    {
-        if(buf[i] > result)
-            result = buf[i];
-    }
-    return result;
-}
-
-static int find_min_max(double* min, double* max, const double* buf, const size_t size){
+static int find_min_max(double*restrict min, double*restrict max, const double* buf, const size_t size){
 
     assert(buf != NULL);
 
@@ -142,7 +115,7 @@ int scil_algo1_compress(const scil_context* ctx,
 
 int scil_algo1_decompress(  const scil_context* ctx, 
                             double*restrict data_out, 
-                            const size_t*restrict out_size, 
+                            size_t*restrict out_size, 
                             const char*restrict compressed_buf_in, 
                             const size_t in_size)
 {
