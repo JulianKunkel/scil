@@ -10,7 +10,7 @@ static uint8_t get_needed_bit_count(const double min_value, const double max_val
     assert(max_value > min_value);
     assert(absolute_tolerance > 0);
 
-    return (uint8_t)ceil(log2(1 + (max_value - min_value) / (2 * absolute_tolerance))); //TODO: Test this
+    return (uint8_t)ceil(log2(1 + (max_value - min_value) / (2 * absolute_tolerance)));
 }
 
 static size_t round_up_byte(const size_t bits){
@@ -18,19 +18,19 @@ static size_t round_up_byte(const size_t bits){
     uint8_t a = bits % 8;
     if(a == 0)
         return bits / 8;
-    return 1 + (bits - a) / 8; //TODO: Test this
+    return 1 + (bits - a) / 8;
 }
 
 static uint64_t int_repres(const double num, const double min, const double absolute_tolerance){
 
     assert(num >= min);
 
-    return (uint64_t)round((num - min) / (2 * absolute_tolerance)); //TODO: Test this
+    return (uint64_t)round((num - min) / (2 * absolute_tolerance));
 }
 
 static double double_repres(const uint64_t num, const double min, const double absolute_tolerance){
 
-    return min + (double)num * 2 * absolute_tolerance; //TODO: Test this
+    return min + (double)num * 2 * absolute_tolerance;
 }
 
 // Testing-----------------------------------------

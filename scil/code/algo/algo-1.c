@@ -34,19 +34,19 @@ static size_t round_up_byte(const size_t bits){
     uint8_t a = bits % 8;
     if(a == 0)
         return bits / 8;
-    return 1 + (bits - a) / 8; //TODO: Test this
+    return 1 + (bits - a) / 8;
 }
 
 static uint64_t int_repres(const double num, const double min, const double absolute_tolerance){
 
     assert(num >= min);
 
-    return (uint64_t)round((num - min) / (2 * absolute_tolerance)); //TODO: Test this
+    return (uint64_t)round((num - min) / (2 * absolute_tolerance));
 }
 
 static double double_repres(const uint64_t num, const double min, const double absolute_tolerance){
 
-    return min + (double)num * 2 * absolute_tolerance; //TODO: Test this
+    return min + (double)num * 2 * absolute_tolerance;
 }
 
 
