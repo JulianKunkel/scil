@@ -119,7 +119,7 @@ int scil_algo1_decompress(  const scil_context* ctx,
                             const char*restrict compressed_buf_in, 
                             const size_t in_size)
 {
-    /*
+    
     assert(ctx != NULL);
     assert(compressed_buf_in != NULL);
 

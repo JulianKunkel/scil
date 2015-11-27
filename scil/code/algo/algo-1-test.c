@@ -164,10 +164,10 @@ static int double_repres_test(){
 
 int main(int argc, char ** argv){
 
-    printf("get_needed_bit_count: %d of 25 tests failed\n", get_needed_bit_count_test());
-    printf("round_up_byte: %d of 21 tests failed\n", round_up_byte_test());
-    printf("int_repres_test: %d of 17000 tests failed\n", int_repres_test());
-    printf("double_repres_test: %d of 17000 tests failed\n", double_repres_test());
+    printf("get_needed_bit_count:\t%d of 25 tests failed\n", get_needed_bit_count_test());
+    printf("round_up_byte:\t\t%d of 21 tests failed\n", round_up_byte_test());
+    printf("int_repres_test:\t%d of 17000 tests failed\n", int_repres_test());
+    printf("double_repres_test:\t%d of 17000 tests failed\n", double_repres_test());
 
     return 0;
 
