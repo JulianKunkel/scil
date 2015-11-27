@@ -135,7 +135,7 @@ int scil_algo1_decompress(  const scil_context* ctx,
     uint8_t from_filled = 1;
     uint8_t to_filled = 1;
 
-    uint64_t current = 0;
+    size_t current = 0;
 
     while(to_i < size){
         
@@ -159,5 +159,7 @@ int scil_algo1_decompress(  const scil_context* ctx,
         from_i += from_filled;
         to_i += to_filled;
     }
-    */
+    
+
+    return 0;
 }

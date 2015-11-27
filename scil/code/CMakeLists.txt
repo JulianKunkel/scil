@@ -36,7 +36,9 @@ target_link_libraries(scil m)
 add_executable(scil-test ${SOURCE})
 target_link_libraries(scil-test scil)
 
+# algo-1-test
 add_executable(algo-1-test algo/algo-1-test.c)
+target_link_libraries(algo-1-test m)
 
 ## Installation
 install(TARGETS scil LIBRARY DESTINATION lib)

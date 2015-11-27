@@ -13,12 +13,14 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 	*out_ctx = ctx;
 
 	ctx->hints.relative_tolerance_percent = hints->relative_tolerance_percent;
+	ctx->hints.relative_err_finest_abs_tolerance = hints->relative_err_finest_abs_tolerance;
 	ctx->hints.absolute_tolerance = hints->absolute_tolerance;
+	ctx->hints.significant_digits = hints->significant_digits;
 
 	return 0;
 }
 
-int scil_compress(scil_context* ctx, char** compressed_buf_out, size_t* in_out_size, const double* data_in, const size_t in_size){
+int scil_compress(scil_context* ctx, char** compressed_buf_out, size_t* out_size, const double* data_in, const size_t in_size){
 	assert(ctx != NULL);
 	assert(data_in != NULL);
 
@@ -31,9 +33,9 @@ int scil_compress(scil_context* ctx, char** compressed_buf_out, size_t* in_out_s
 
 	scil_compression_algorithm * last_algorithm;
 
-	if (hints->absolute_tolerance == 0.0 || (hints->relative_err_finest_abs_tolerance == 0.0 || hints->relative_tolerance_percent == 0.0 || hints->significant_digits > 20) ){
+	if (hints->absolute_tolerance == 0.0 || hints->relative_err_finest_abs_tolerance == 0.0 || hints->relative_tolerance_percent == 0.0 || hints->significant_digits > 20){
 		// we cannot compress because data must be accurate!
-		last_algorithm = & algo_algo1;
+		last_algorithm = & algo_memcopy;
 	}else{
 		last_algorithm = & algo_algo1;
 	}
@@ -41,10 +43,10 @@ int scil_compress(scil_context* ctx, char** compressed_buf_out, size_t* in_out_s
 
 	// TODO add magic number to the output stream
 
-	return last_algorithm->compress(ctx, compressed_buf_out, in_out_size, data_in, in_size);
+	return last_algorithm->compress(ctx, compressed_buf_out, out_size, data_in, in_size);
 }
 
-int scil_decompress(const scil_context* ctx, double* data_out, size_t* in_out_size, const char* compressed_buf_in, const size_t in_size){
+int scil_decompress(const scil_context* ctx, double* data_out, size_t* out_size, const char* compressed_buf_in, const size_t in_size){
 	assert(ctx != NULL);
 	assert(in_out_size != NULL);
 
