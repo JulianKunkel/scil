@@ -34,7 +34,7 @@ static size_t round_up_byte(const size_t bits){
     uint8_t a = bits % 8;
     if(a == 0)
         return bits / 8;
-    return 1 + (bits - a) / 8;
+    return 1 + (bits - a) / 8; //TODO: Test this
 }
 
 static uint64_t int_repres(const double num, const double min, const double absolute_tolerance){
