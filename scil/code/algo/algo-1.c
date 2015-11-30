@@ -119,11 +119,11 @@ int scil_algo1_decompress(  const scil_context* ctx,
                             const char*restrict compressed_buf_in, 
                             const size_t in_size)
 {
-    
+    /*
     assert(ctx != NULL);
     assert(compressed_buf_in != NULL);
 
-    data_out = (double*)SAFE_MALLOC(out_size * sizeof(double));
+    data_out = (double*)SAFE_MALLOC(*out_size * sizeof(double));
 
     uint8_t bits = get_needed_bit_count(min_value, max_value, error_step);
 
@@ -160,6 +160,6 @@ int scil_algo1_decompress(  const scil_context* ctx,
         to_i += to_filled;
     }
     
-
+    */
     return 0;
 }

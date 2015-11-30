@@ -24,8 +24,6 @@ int scil_compress(scil_context* ctx, char** compressed_buf_out, size_t* out_size
 	assert(ctx != NULL);
 	assert(data_in != NULL);
 
-	int ret;
-
 	const scil_hints * hints = & ctx->hints;
 
 	// pick the best algorithm for the settings given in ctx...
@@ -48,7 +46,7 @@ int scil_compress(scil_context* ctx, char** compressed_buf_out, size_t* out_size
 
 int scil_decompress(const scil_context* ctx, double* data_out, size_t* out_size, const char* compressed_buf_in, const size_t in_size){
 	assert(ctx != NULL);
-	assert(in_out_size != NULL);
+	assert(out_size != NULL);
 
 	int ret;
 
@@ -57,7 +55,7 @@ int scil_decompress(const scil_context* ctx, double* data_out, size_t* out_size,
 	// TODO Assign decompressor according to the magic number
 
 	// TODO decompress
-	ret = scil_algo1_decompress(ctx, data_out, in_out_size, compressed_buf_in, in_size);
+	ret = scil_algo1_decompress(ctx, data_out, out_size, compressed_buf_in, in_size);
 	return ret;
 }
 
