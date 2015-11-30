@@ -11,8 +11,8 @@ int scil_memcopy_compress(const scil_context* ctx, char** restrict compressed_bu
 
 int scil_memcopy_decompress(const scil_context* ctx, double*restrict data_out, size_t*restrict out_size, const char*restrict compressed_buf_in, const size_t in_size){
     // TODO chekc if buff is sufficiently large
-    *out_size = in_size;
-    return memcpy(data_out, compressed_buf_in, in_size);
+    *out_size = in_size-1;
+    return memcpy(data_out, compressed_buf_in+1, in_size-1);
 }
  #warning USING INTERNAL HEADER
 
