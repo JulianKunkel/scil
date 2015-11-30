@@ -10,7 +10,7 @@ scil_compression_algorithm algo_algo1 = {
     scil_algo1_compress,
     scil_algo1_decompress,
     "algo1",
-    2
+    1
 };
 
 #endif

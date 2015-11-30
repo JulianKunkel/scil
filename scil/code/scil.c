@@ -51,11 +51,19 @@ int scil_decompress(const scil_context* ctx, double* data_out, size_t* out_size,
 	int ret;
 
 	// TODO check magic number from the output stream
+	char magic_number = compressed_buf_in[0];
 
-	// TODO Assign decompressor according to the magic number
+	scil_compression_algorithm * last_algorithm;
+
+	switch(magic_number){
+
+		case 0: last_algorithm = & algo_memcopy; break;
+		case 1: last_algorithm = & algo_algo1; break;
+	}
+
 
 	// TODO decompress
-	ret = scil_algo1_decompress(ctx, data_out, out_size, compressed_buf_in, in_size);
+	ret = last_algorithm->decompress(ctx, data_out, out_size, compressed_buf_in, in_size);
 	return ret;
 }
 

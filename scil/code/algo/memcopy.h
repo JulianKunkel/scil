@@ -10,7 +10,7 @@ scil_compression_algorithm algo_memcopy = {
     scil_memcopy_compress,
     scil_memcopy_decompress,
     "memcopy",
-    1
+    0
 };
 
 #endif
