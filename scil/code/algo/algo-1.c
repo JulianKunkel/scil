@@ -49,7 +49,6 @@ static double double_repres(const uint64_t num, const double min, const double a
     return min + (double)num * 2 * absolute_tolerance;
 }
 
-
 int scil_algo1_compress(const scil_context* ctx, 
                         char** restrict compressed_buf_out, 
                         size_t* restrict out_size, 
