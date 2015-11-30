@@ -31,7 +31,10 @@ typedef struct{
 
   /** \brief Number of significant digits */
   int significant_digits;
-
+  
+  int force_compression_method;
+  
+  uint64_t force_block_size;
 } scil_hints;
 
 
