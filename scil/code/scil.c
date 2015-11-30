@@ -43,6 +43,7 @@ int scil_compress(scil_context* ctx, char** compressed_buf_out, size_t* out_size
 }
 
 int scil_decompress(const scil_context* ctx, double* data_out, size_t* out_size, const char* compressed_buf_in, const size_t in_size){
+
 	assert(ctx != NULL);
 	assert(out_size != NULL);
 

@@ -66,6 +66,34 @@ void print_bits_uint8(uint8_t a){
 
 int main(int argc, char** argv){
 
+	size_t count = 25;
+
+	size_t u_buf_size = count * sizeof(double);
+	double * u_buf = (double *)SAFE_MALLOC(u_buf_size); 
+	for(size_t i = 0; i < count; ++i)
+	{
+		u_buf[i] = (double)((i % (i - 10)) << 13);
+	}
+
+	scil_context * ctx;
+	scil_hints hints;
+	hints.force_compression_method = 0;
+	scil_create_compression_context(&ctx, &hints);
+
+	size_t c_buf_size;
+	char * c_buf = (char *)SAFE_MALLOC(u_buf_size+1);
+	scil_compress(ctx, &c_buf, &c_buf_size, u_buf, u_buf_size);
+
+	for(size_t i = 0; i < c_buf_size; ++i)
+	{
+		print_bits_uint8((uint8_t)c_buf[i]);
+	}
+
+	free(c_buf);
+	free(ctx);
+	free(u_buf);
+
+	/*
 	size_t count = 1000;
 
 	char* u_path = "uncomp_1000_d.data";
@@ -98,7 +126,7 @@ int main(int argc, char** argv){
 	
 	write_data(c_buf, c_size, sizeof(char), c_path);
 
-	/*
+	
 	double* buf = (double*)SAFE_MALLOC(count * sizeof(double));
 
 	for(size_t i = 0; i < count; ++i){

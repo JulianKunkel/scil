@@ -55,7 +55,6 @@ int scil_algo1_compress(const scil_context* ctx,
                         const double*restrict data_in, 
                         const size_t in_size)
 {
-
     //Finding minimum and maximum values in data
     double min, max;
     find_min_max(&min, &max, data_in, in_size);
