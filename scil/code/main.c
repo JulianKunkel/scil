@@ -88,7 +88,7 @@ int main(int argc, char** argv){
 	{
 		print_bits_uint8((uint8_t)c_buf[i]);
 	}
-
+	
 	free(c_buf);
 	free(ctx);
 	free(u_buf);
