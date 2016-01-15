@@ -9,7 +9,7 @@
 #include <util.h>
 
 char* read_data(const char* path){
-	
+
 	assert(path != NULL);
 
 	FILE* file = SAFE_FOPEN(path, "rb");
@@ -69,10 +69,10 @@ int main(int argc, char** argv){
 	size_t count = 25;
 
 	size_t u_buf_size = count * sizeof(double);
-	double * u_buf = (double *)SAFE_MALLOC(u_buf_size); 
+	double * u_buf = (double *)SAFE_MALLOC(u_buf_size);
 	for(size_t i = 0; i < count; ++i)
 	{
-		u_buf[i] = (double)((i % (i - 10)) << 13);
+		u_buf[i] = (double)(i);
 	}
 
 	scil_context * ctx;
@@ -97,7 +97,7 @@ int main(int argc, char** argv){
 	size_t count = 1000;
 
 	char* u_path = "uncomp_1000_d.data";
-	
+
 	char* c_path = "comp_1000_d.data";
 
 	double* buf = (double*)read_data(u_path);
@@ -118,21 +118,21 @@ int main(int argc, char** argv){
 	free(buf);
 	free(ctx);
 	free(c_buf);
-	
+
 	if (ret != 0){
 		printf("Error in the validation!\n");
 		return 1;
 	}
-	
+
 	write_data(c_buf, c_size, sizeof(char), c_path);
 
-	
+
 	double* buf = (double*)SAFE_MALLOC(count * sizeof(double));
 
 	for(size_t i = 0; i < count; ++i){
 		buf[i] = (double)(i % 10);
 	}
-	
+
 	write_data(buf, count, sizeof(double), u_path);
 	*/
 

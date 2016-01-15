@@ -16,6 +16,7 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 	ctx->hints.relative_err_finest_abs_tolerance = hints->relative_err_finest_abs_tolerance;
 	ctx->hints.absolute_tolerance = hints->absolute_tolerance;
 	ctx->hints.significant_digits = hints->significant_digits;
+	ctx->hints.force_compression_method = hints->force_compression_method;
 
 	return 0;
 }
@@ -31,12 +32,21 @@ int scil_compress(scil_context* ctx, char** compressed_buf_out, size_t* out_size
 
 	scil_compression_algorithm * last_algorithm;
 
-	if (hints->absolute_tolerance == 0.0 || hints->relative_err_finest_abs_tolerance == 0.0 || hints->relative_tolerance_percent == 0.0 || hints->significant_digits > 20){
-		// we cannot compress because data must be accurate!
-		last_algorithm = & algo_memcopy;
+	if (hints->force_compression_method >= 0){
+		switch (hints->force_compression_method) {
+			case 0: last_algorithm = & algo_memcopy; break;
+			case 1: last_algorithm = & algo_algo1; break;
+			default: last_algorithm = & algo_memcopy;
+		}
 	}else{
-		last_algorithm = & algo_algo1;
+		if (hints->absolute_tolerance == 0.0 || hints->relative_err_finest_abs_tolerance == 0.0 || hints->relative_tolerance_percent == 0.0 || hints->significant_digits > 20){
+			// we cannot compress because data must be accurate!
+			last_algorithm = & algo_memcopy;
+		}else{
+			last_algorithm = & algo_algo1;
+		}
 	}
+
 	ctx->last_algorithm = last_algorithm;
 
 	return last_algorithm->compress(ctx, compressed_buf_out, out_size, data_in, in_size);

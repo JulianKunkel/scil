@@ -15,4 +15,3 @@ int scil_memcopy_decompress(const scil_context* ctx, double*restrict data_out, s
     return memcpy(data_out, compressed_buf_in+1, in_size-1);
 }
  #warning USING INTERNAL HEADER
-
