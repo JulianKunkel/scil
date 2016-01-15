@@ -21,7 +21,8 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 	return 0;
 }
 
-int scil_compress(scil_context* ctx, char** compressed_buf_out, size_t* out_size, const double* data_in, const size_t in_size){
+int scil_compress(scil_context* ctx, char* compressed_buf_out, size_t* out_size, const double* data_in, const size_t in_size){
+
 	assert(ctx != NULL);
 	assert(data_in != NULL);
 
