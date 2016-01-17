@@ -1,5 +1,5 @@
 /**
- * \file 
+ * \file
  * \brief Header containing the Scientific Compression Interface Library
  * \author Julian Kunkel <juliankunkel@googlemail.com>
  * \author Armin Schaare <3schaare@informatik.uni-hamburg.de>
@@ -12,16 +12,16 @@
 
 /**
  * \brief Struct containing information on the tolerable
- * precision loss on compression 
+ * precision loss on compression
  */
 typedef struct{
   /** \brief relative tolerable error (1 means 1%) */
   double relative_tolerance_percent;
 
-  /** with a relative tolerance small numbers may be problematic, e.g. 1% for 0.01 becomes 0.01 +- 0.0001 
-      the finest tolerance limits the smallest relative error 
+  /** with a relative tolerance small numbers may be problematic, e.g. 1% for 0.01 becomes 0.01 +- 0.0001
+      the finest tolerance limits the smallest relative error
       e.g. when compressing the value 0.01 with a filest abs tolerance of 0.01 it becomes 0.01 +- 0.01
-      So this is the lower bound of the resolution and guaranteed error for relative errors, 
+      So this is the lower bound of the resolution and guaranteed error for relative errors,
       where as the absolute tolerance is the guaranteed resolution for all data points.
   **/
   double relative_err_finest_abs_tolerance;
@@ -31,9 +31,9 @@ typedef struct{
 
   /** \brief Number of significant digits */
   int significant_digits;
-  
+
   int force_compression_method;
-  
+
   uint64_t force_block_size;
 } scil_hints;
 
@@ -42,7 +42,7 @@ typedef struct{
 #ifdef SCIL_INTERNAL_HEADER_
 #warning USING INTERNAL HEADER
 #else
-struct scil_context_t{ 
+struct scil_context_t{
     void * tmp;
 };
 #endif
@@ -69,7 +69,7 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
  * \pre data_in != NULL
  * \return success state of the compression
  */
-int scil_compress(scil_context* ctx, char** restrict compressed_buf_out, size_t* restrict out_size, const double*restrict data_in, const size_t in_size);
+int scil_compress(scil_context* ctx, char* restrict compressed_buf_out, size_t* restrict out_size, const double*restrict data_in, const size_t in_size);
 
 /**
  * \brief Decompression method of a buffer of data
