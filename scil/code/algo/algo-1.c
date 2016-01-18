@@ -30,7 +30,7 @@ static uint8_t get_needed_bit_count(const double min_value, const double max_val
 }
 
 static size_t round_up_byte(const size_t bits){
-    
+
     uint8_t a = bits % 8;
     if(a == 0)
         return bits / 8;
@@ -49,10 +49,10 @@ static double double_repres(const uint64_t num, const double min, const double a
     return min + (double)num * 2 * absolute_tolerance;
 }
 
-int scil_algo1_compress(const scil_context* ctx, 
-                        char** restrict compressed_buf_out, 
-                        size_t* restrict out_size, 
-                        const double*restrict data_in, 
+int scil_algo1_compress(const scil_context* ctx,
+                        char* restrict compressed_buf_out,
+                        size_t* restrict out_size,
+                        const double*restrict data_in,
                         const size_t in_size)
 {
     //Finding minimum and maximum values in data
@@ -69,7 +69,7 @@ int scil_algo1_compress(const scil_context* ctx,
     *out_size = round_up_byte(bits_per_num * in_size);
 
     //Initialize every bit in output buffer to 0
-    *compressed_buf_out = (char*)SAFE_CALLOC(*out_size, sizeof(char));
+    compressed_buf_out = (char*)SAFE_CALLOC(*out_size, sizeof(char));
 
     //Input and output buffer indices
     size_t from_i = 0;
@@ -95,7 +95,7 @@ int scil_algo1_compress(const scil_context* ctx,
         uint64_t integ = int_repres(data_in[from_i], min, abs_tol);
 
         //Set the current bytes bit to current bits of integ
-        (*compressed_buf_out)[to_i] = (char)((*compressed_buf_out)[to_i] |  (char)(right_shifts < 0 ? integ << -right_shifts : integ >> right_shifts));
+        compressed_buf_out[to_i] = (char)(compressed_buf_out[to_i] |  (char)(right_shifts < 0 ? integ << -right_shifts : integ >> right_shifts));
 
         //If right_shifts were smaller or equal 0, the current compressed number is done packing
         from_filled = right_shifts <= 0;
@@ -111,10 +111,10 @@ int scil_algo1_compress(const scil_context* ctx,
     return 0;
 }
 
-int scil_algo1_decompress(  const scil_context* ctx, 
-                            double*restrict data_out, 
-                            size_t*restrict out_size, 
-                            const char*restrict compressed_buf_in, 
+int scil_algo1_decompress(  const scil_context* ctx,
+                            double*restrict data_out,
+                            size_t*restrict out_size,
+                            const char*restrict compressed_buf_in,
                             const size_t in_size)
 {
     /*
@@ -136,16 +136,16 @@ int scil_algo1_decompress(  const scil_context* ctx,
     size_t current = 0;
 
     while(to_i < size){
-        
+
         right_shifts -= to_filled * bits;
         right_shifts += from_filled * 8;
 
         printf("%d\n", right_shifts);
         printb_uint8(data->buffer[from_i]);
-        
+
         current *= (1 - to_filled);
         current |= right_shifts < 0 ? (data->buffer[from_i] << -right_shifts) : (data->buffer[from_i] >> right_shifts);
-        
+
         printb_uint8(current);
         printf("\n");
 
@@ -157,7 +157,7 @@ int scil_algo1_decompress(  const scil_context* ctx,
         from_i += from_filled;
         to_i += to_filled;
     }
-    
+
     */
     return 0;
 }
