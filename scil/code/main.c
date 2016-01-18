@@ -82,6 +82,7 @@ int main(int argc, char** argv){
 
 	size_t c_buf_size;
 	char * c_buf = (char *)SAFE_MALLOC(u_buf_size+1);
+
 	scil_compress(ctx, c_buf, &c_buf_size, u_buf, u_buf_size);
 
 	for(size_t i = 0; i < c_buf_size; ++i)

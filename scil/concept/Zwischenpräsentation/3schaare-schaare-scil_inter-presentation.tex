@@ -15,6 +15,10 @@
 \usepackage{microtype}
 \usepackage{units}
 
+\makeatletter
+\newcommand*{\rom}[1]{\expandafter\@slowromancap\romannumeral #1@}
+\makeatother
+
 \lstset{
 	basicstyle=\ttfamily\footnotesize,
 	frame=single,
@@ -92,58 +96,98 @@
 	scil_compress(ctx, c_buf, &c_size, u_buf, u_size);
 	\end{lstlisting}
 
-	\bigskip
-
+	\footnotesize{
 	\begin{tabular}{ll}
 		c\_buf: & allocated destination buffer \\
 		c\_size: & will be byte size of c\_buf \\
 		u\_buf: & uncompressed source buffer \\
 		u\_size: & byte size of u\_buf
 	\end{tabular}
+	}
 
 \end{frame}
 
-\section{Hauptteil}
-\subsection*{}
+\section{Approach}
+\subsection{Compression}
 
-\begin{frame}[fragile]
-	\frametitle{Hauptteil}
+\begin{frame}
+	\frametitle{Algorithm Specific Buffer Setup}
 
 	\begin{itemize}
-		\item Hauptpunkt 1
+		\item Use scil\_hints for algorithm choice
+		\item Set up header depending on algorithm used
 		\begin{itemize}
-			\item Unterpunkt 1
-			\item Unterpunkt 2
+			\item Header contains relevant data for decompression
 		\end{itemize}
-
-		\begin{lstlisting}[caption=Beispielquelltext]
-		int foo (void)
-		{
-		    return 0;
-		}
-		\end{lstlisting}
+		\item Write compressed data into rest of buffer
 	\end{itemize}
+
+	\bigskip
+
+	General buffer setup:\\
+	\begin{center}
+	\begin{tabular}{|c|c|cc|}
+		\hline
+		id & compression info & compressed data & ... \\
+		\hline
+		\multicolumn{2}{|c|}{} & \multicolumn{2}{c|}{} \\
+		\multicolumn{2}{c}{header} & \multicolumn{2}{c}{body}
+	\end{tabular}
+	\end{center}
 \end{frame}
 
-\section{Zusammenfassung}
+\begin{frame}
+	\frametitle{Buffer Setup Examples}
+
+	Trivial compression with memcpy:\\
+	\begin{center}
+	\begin{tabular}{|c||cc|}
+		\hline
+		0 & compressed data & ... \\
+		\hline
+	\end{tabular}
+	\end{center}
+
+	\bigskip
+	\pause
+
+	Using algorithm from last presentation:\\
+	\begin{itemize}
+		\item Compressing temperature data
+		\item Smallest value: -100
+		\item Error tolerance: 0.005 (hundredth degree precision)
+	\end{itemize}
+	\begin{center}
+	\begin{tabular}{|c|c|cc|}
+		\hline
+		1 & -100 0.005 & compressed data & ... \\
+		\hline
+	\end{tabular}
+	\end{center}
+
+\end{frame}
+
+\subsection{Decompression}
+
+\begin{frame}
+	\frametitle{Decompression}
+
+	lololol
+\end{frame}
+
+\section{Conclusion}
 \subsection*{}
 
 \begin{frame}
-	\frametitle{Zusammenfassung}
+	\frametitle{Benchmark}
 
-	\begin{itemize}
-		\item Zusammenfassung 1
-		\begin{itemize}
-			\item Unterpunkt 1
-			\item Unterpunkt 2
-		\end{itemize}
-		\item Zusammenfassung 2
-		\begin{itemize}
-			\item Unterpunkt 1
-			\item Unterpunkt 2
-		\end{itemize}
-		\item Quelle: \cite{Quelle2012}
-	\end{itemize}
+	lololol
+\end{frame}
+
+\begin{frame}
+	\frametitle{Upcoming}
+
+	lololol
 \end{frame}
 
 \end{document}
