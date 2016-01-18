@@ -170,9 +170,15 @@
 \subsection{Decompression}
 
 \begin{frame}
-	\frametitle{Decompression}
+	\frametitle{Decompression Procedure}
 
-	lololol
+	\begin{itemize}
+		\item Read in compressed buffer
+		\item Decide which algorithm to use from first byte (algo-id)
+		\item Use compression information as parameter in decomp. function
+		\item Decompress the data
+
+	\end{itemize}
 \end{frame}
 
 \section{Conclusion}
@@ -187,7 +193,14 @@
 \begin{frame}
 	\frametitle{Upcoming}
 
-	lololol
+	\begin{itemize}
+		\item Implementation of first custom algorithms decompression
+		\item Minor project structure and interface changes
+		\item Implementation of second custom algorithm
+		\item Implementation of algorithms for gzip, bzip2, etc...
+		\item Thorough benchmarking
+	\end{itemize}
+
 \end{frame}
 
 \end{document}
