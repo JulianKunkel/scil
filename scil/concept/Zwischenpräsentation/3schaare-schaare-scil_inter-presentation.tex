@@ -48,30 +48,63 @@
 	\tableofcontents[hidesubsections]
 \end{frame}
 
-\section{Einleitung}
-\subsection{Untersektion}
+\section{Introduction}
+\subsection*{}
 
 \begin{frame}
-	\frametitle{Einleitung}
+	\frametitle{Introduction}
 
+	What is SCIL?
+	\bigskip
 	\begin{itemize}
-		\item Hauptpunkt 1
-		\begin{itemize}
-			\item Unterpunkt 1
-			\item Unterpunkt 2
-		\end{itemize}
+		\item C-Library for compression
+		\item Offers many different  compression algorithms
+		\item User provides arguments for lossy compression
+		\item SCIL chooses which algorithm is best suited
+		\item User can force specific compression algorithms
 	\end{itemize}
 
-	\begin{figure}
-		\begin{center}
-			\includegraphics[width=0.75\textwidth]{logo.jpg}
-		\end{center}
-		\caption{Beispielgrafik}
-	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Usage}
+
+	\begin{itemize}
+		\item Define lossy arguments in 'scil\_hints' struct
+		\item Create compression context
+		\item Allocate destination buffer
+		\item Use context to compress the given buffer
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Usage Example Code}
+
+	\begin{lstlisting}[caption=SCIL usage example]
+	scil_hints hints;
+	hints.force_compression_method = 0;
+
+	scil_context * ctx;
+	scil_create_compression_context(&ctx, &hints);
+
+	size_t c_size;
+	scil_compress(ctx, c_buf, &c_size, u_buf, u_size);
+	\end{lstlisting}
+
+	\bigskip
+
+	\begin{tabular}{ll}
+		c\_buf: & allocated destination buffer \\
+		c\_size: & will be byte size of c\_buf \\
+		u\_buf: & uncompressed source buffer \\
+		u\_size: & byte size of u\_buf
+	\end{tabular}
+
 \end{frame}
 
 \section{Hauptteil}
-\subsection{Untersektion}
+\subsection*{}
 
 \begin{frame}[fragile]
 	\frametitle{Hauptteil}
@@ -111,16 +144,6 @@
 		\end{itemize}
 		\item Quelle: \cite{Quelle2012}
 	\end{itemize}
-\end{frame}
-
-\section{Literatur}
-\subsection*{}
-
-\begin{frame}
-	\frametitle{Literatur}
-
-	\bibliographystyle{alpha}
-	\bibliography{literatur}
 \end{frame}
 
 \end{document}
