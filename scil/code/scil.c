@@ -25,6 +25,8 @@ int scil_compress(scil_context* ctx, char* compressed_buf_out, size_t* out_size,
 
 	assert(ctx != NULL);
 	assert(data_in != NULL);
+	assert(compressed_buf_out != NULL);
+	assert(out_size != NULL);
 
 	const scil_hints * hints = & ctx->hints;
 
