@@ -19,17 +19,23 @@ def main():
 
         graphs.append([xs, ys])
 
-    for g in graphs:
-        plt.plot(g[0], g[1])
+    fig, sp = plt.subplots()
 
-    plt.xscale('log')
-    plt.xlabel('buffer size in byte')
+    sp.set_title("Execution time", fontsize=20)
+    sp.set_xlabel('buffer size in byte', fontsize=16)
+    sp.set_ylabel('time in seconds', fontsize=16)
+    sp.set_xscale('log')
+    sp.set_yscale('log')
+    sp.grid(True,linestyle='-',color='0.75')
 
-    plt.yscale('log')
-    plt.ylabel('time in seconds')
+    labels = ['memcpy', 'algo1']
+
+    for g, l in zip(graphs, labels):
+        sp.plot(g[0], g[1], label=l)
+
+    sp.legend(loc='upper left')
+
     plt.show()
-
-    print(graphs)
 
 if __name__ == '__main__':
     main()
