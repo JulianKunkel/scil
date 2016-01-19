@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <sys/stat.h>
 #include <math.h>
+#include <time.h>
 
 #include <scil.h>
 #include <util.h>
@@ -64,36 +65,46 @@ void print_bits_uint8(uint8_t a){
 
 }
 
-int main(int argc, char** argv){
-
-	size_t count = 25;
-
-	size_t u_buf_size = count * sizeof(double);
-	double * u_buf = (double *)SAFE_MALLOC(u_buf_size);
-	for(size_t i = 0; i < count; ++i)
-	{
-		u_buf[i] = (double)(i);
-	}
+int main(){
 
 	scil_context * ctx;
 	scil_hints hints;
 	hints.force_compression_method = 0;
+	hints.absolute_tolerance = 1.0f;
 	scil_create_compression_context(&ctx, &hints);
 
-	size_t c_buf_size;
-	char * c_buf = (char *)SAFE_MALLOC(u_buf_size+1);
+	uint16_t repeats = 1000;
 
-	scil_compress(ctx, c_buf, &c_buf_size, u_buf, u_buf_size);
+	for(uint8_t i = 3; i < 9; ++i){
 
-	for(size_t i = 0; i < c_buf_size; ++i)
-	{
-		print_bits_uint8((uint8_t)c_buf[i]);
+		size_t count = (size_t)pow(10, i);
+		size_t u_buf_size = count * sizeof(double);
+		double * u_buf = (double *)SAFE_MALLOC(u_buf_size);
+		for(size_t i = 0; i < count; ++i)
+		{
+			u_buf[i] = (double)(i % 10);
+		}
+
+		size_t c_buf_size;
+		char * c_buf = (char*)SAFE_MALLOC(u_buf_size+1);
+
+		clock_t sum = 0;
+		for(uint16_t j = 0; j < repeats; ++j){
+
+			clock_t start = clock();
+			scil_compress(ctx, &c_buf, &c_buf_size, u_buf, count);
+			clock_t end = clock();
+
+			sum += end - start;
+		}
+
+		printf("%lu,%f\n", u_buf_size, (double)sum / (repeats * CLOCKS_PER_SEC));
+
+		free(c_buf);
+		free(u_buf);
 	}
 
-	free(c_buf);
 	free(ctx);
-	free(u_buf);
-
 	/*
 	size_t count = 1000;
 

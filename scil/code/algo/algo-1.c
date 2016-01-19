@@ -39,6 +39,9 @@ static size_t round_up_byte(const size_t bits){
 
 static uint64_t int_repres(const double num, const double min, const double absolute_tolerance){
 
+    if(num < min){
+      printf("%f\n", num);
+    }
     assert(num >= min);
 
     return (uint64_t)round((num - min) / (2 * absolute_tolerance));
@@ -50,7 +53,7 @@ static double double_repres(const uint64_t num, const double min, const double a
 }
 
 int scil_algo1_compress(const scil_context* ctx,
-                        char* restrict compressed_buf_out,
+                        char** restrict compressed_buf_out,
                         size_t* restrict out_size,
                         const double*restrict data_in,
                         const size_t in_size)
@@ -72,21 +75,21 @@ int scil_algo1_compress(const scil_context* ctx,
     *out_size = round_up_byte(bits_per_num * in_size) + head_size;
 
     //Initialize every bit in output buffer to 0
-    compressed_buf_out = (char*)SAFE_CALLOC(*out_size, sizeof(char));
+    *compressed_buf_out = (char*)SAFE_CALLOC(*out_size, sizeof(char));
 
     //Set algorithm id
-    compressed_buf_out[0] = 1;
+    *compressed_buf_out[0] = 1;
 
     //Set compression information
     //Minimum value
     char* cb_min = (char*)&min;
     for(uint8_t i = 0; i < 8; ++i){
-      compressed_buf_out[i+1] = cb_min[i];
+      (*compressed_buf_out)[i+1] = cb_min[i];
     }
     //Absolute tolerance
     char* cb_abs = (char*)&abs_tol;
     for(uint8_t i = 0; i < 8; ++i){
-      compressed_buf_out[i+9] = cb_abs[i];
+      (*compressed_buf_out)[i+9] = cb_abs[i];
     }
 
     //Input and output buffer indices
@@ -113,7 +116,7 @@ int scil_algo1_compress(const scil_context* ctx,
         uint64_t integ = int_repres(data_in[from_i], min, abs_tol);
 
         //Set the current bytes bit to current bits of integ
-        compressed_buf_out[to_i] = (char)(compressed_buf_out[to_i] |  (char)(right_shifts < 0 ? integ << -right_shifts : integ >> right_shifts));
+        (*compressed_buf_out)[to_i] = (char)((*compressed_buf_out)[to_i] |  (char)(right_shifts < 0 ? integ << -right_shifts : integ >> right_shifts));
 
         //If right_shifts were smaller or equal 0, the current compressed number is done packing
         from_filled = right_shifts <= 0;
