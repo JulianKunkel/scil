@@ -65,15 +65,33 @@ int scil_algo1_compress(const scil_context* ctx,
     //Get needed bits per compressed number in data
     uint32_t bits_per_num = get_needed_bit_count(min, max, abs_tol);
 
+    //Header byte size (currently sizes of magic number + min + abs_tol)
+    uint8_t head_size = 17;
+
     //Get number of needed bytes for the whole compressed buffer
-    *out_size = round_up_byte(bits_per_num * in_size);
+    *out_size = round_up_byte(bits_per_num * in_size) + head_size;
 
     //Initialize every bit in output buffer to 0
     compressed_buf_out = (char*)SAFE_CALLOC(*out_size, sizeof(char));
 
+    //Set algorithm id
+    compressed_buf_out[0] = 1;
+
+    //Set compression information
+    //Minimum value
+    char* cb_min = (char*)&min;
+    for(uint8_t i = 0; i < 8; ++i){
+      compressed_buf_out[i+1] = cb_min[i];
+    }
+    //Absolute tolerance
+    char* cb_abs = (char*)&abs_tol;
+    for(uint8_t i = 0; i < 8; ++i){
+      compressed_buf_out[i+9] = cb_abs[i];
+    }
+
     //Input and output buffer indices
     size_t from_i = 0;
-    size_t to_i = 0;
+    size_t to_i = head_size;
 
     //Needed shifts (also left as negative right) for bit perfect packing
     int right_shifts = 0;
