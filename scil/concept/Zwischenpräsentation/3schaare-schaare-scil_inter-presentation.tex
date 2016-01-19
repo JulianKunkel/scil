@@ -56,16 +56,22 @@
 \subsection*{}
 
 \begin{frame}
-	\frametitle{Introduction}
+	\frametitle{Scientific Compression Interface Library}
 
-	What is SCIL?
-	\bigskip
 	\begin{itemize}
-		\item C-Library for compression
-		\item Offers many different  compression algorithms
-		\item User provides arguments for lossy compression
+		\item C-Library for lossy compression
+		\item User provides required precision
+		\begin{itemize}
+			\item Many metrics possible, currently:
+			\item Relative error tolerance
+			\item Absolute error tolerance
+			\item Significant digits
+		\end{itemize}
 		\item SCIL chooses which algorithm is best suited
 		\item User can force specific compression algorithms
+		\begin{itemize}
+			\item Useful for testing
+		\end{itemize}
 	\end{itemize}
 
 \end{frame}
@@ -74,7 +80,7 @@
 	\frametitle{Usage}
 
 	\begin{itemize}
-		\item Define lossy arguments in 'scil\_hints' struct
+		\item Define required precision in 'scil\_hints' struct
 		\item Create compression context
 		\item Allocate destination buffer
 		\item Use context to compress the given buffer
@@ -87,7 +93,7 @@
 
 	\begin{lstlisting}[caption=SCIL usage example]
 	scil_hints hints;
-	hints.force_compression_method = 0;
+	hints.force_compression_method = 0; //memcpy
 
 	scil_context * ctx;
 	scil_create_compression_context(&ctx, &hints);
