@@ -21,7 +21,7 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 	return 0;
 }
 
-int scil_compress(scil_context* ctx, char** compressed_buf_out, size_t* out_size, const double* data_in, const size_t in_size){
+int scil_compress(scil_context* ctx, char* compressed_buf_out, size_t* out_size, const double* data_in, const size_t in_size){
 
 	assert(ctx != NULL);
 	assert(data_in != NULL);
@@ -52,12 +52,19 @@ int scil_compress(scil_context* ctx, char** compressed_buf_out, size_t* out_size
 
 	ctx->last_algorithm = last_algorithm;
 
-	return last_algorithm->compress(ctx, compressed_buf_out, out_size, data_in, in_size);
+
+    //Set algorithm id
+    compressed_buf_out[0] = last_algorithm->magic_number;
+    compressed_buf_out++;
+
+	// add id to output buffer...
+	int ret = last_algorithm->compress(ctx, compressed_buf_out, out_size, data_in, in_size);
+	out_size++;
+
+	return ret;
 }
 
-int scil_decompress(const scil_context* ctx, double* data_out, size_t* out_size, const char* compressed_buf_in, const size_t in_size){
-
-	assert(ctx != NULL);
+int scil_decompress(double* data_out, size_t* out_size, const char* compressed_buf_in, const size_t in_size){
 	assert(out_size != NULL);
 
 	scil_compression_algorithm * last_algorithm;
@@ -72,7 +79,7 @@ int scil_decompress(const scil_context* ctx, double* data_out, size_t* out_size,
 		case 1: last_algorithm = & algo_algo1; break;
 	}
 
-	return last_algorithm->decompress(ctx, data_out, out_size, compressed_buf_in, in_size);;
+	return last_algorithm->decompress(NULL, data_out, out_size, compressed_buf_in + 1, in_size - 1);
 }
 
 int scil_validate_compression(const scil_context* ctx,

@@ -69,16 +69,17 @@ int main(){
 
 	scil_context * ctx;
 	scil_hints hints;
-	hints.force_compression_method = 0;
+	hints.force_compression_method = 1;
 	hints.absolute_tolerance = 1.0f;
 	scil_create_compression_context(&ctx, &hints);
 
 	uint16_t repeats = 1000;
-
 	for(uint8_t i = 3; i < 9; ++i){
 
 		size_t count = (size_t)pow(10, i);
 		size_t u_buf_size = count * sizeof(double);
+		double * data_out = (double*)SAFE_MALLOC(u_buf_size + SCIL_BLOCK_HEADER_MAX_SIZE);
+
 		double * u_buf = (double *)SAFE_MALLOC(u_buf_size);
 		for(size_t i = 0; i < count; ++i)
 		{
@@ -90,9 +91,10 @@ int main(){
 
 		clock_t sum = 0;
 		for(uint16_t j = 0; j < repeats; ++j){
-
 			clock_t start = clock();
-			scil_compress(ctx, &c_buf, &c_buf_size, u_buf, count);
+			scil_compress(ctx, c_buf, &c_buf_size, u_buf, count);
+			size_t outsize;
+			scil_decompress(data_out, & outsize, c_buf, c_buf_size);
 			clock_t end = clock();
 
 			sum += end - start;
@@ -101,6 +103,7 @@ int main(){
 		printf("%lu,%f\n", u_buf_size, (double)sum / (repeats * CLOCKS_PER_SEC));
 
 		free(c_buf);
+		free(data_out);
 		free(u_buf);
 	}
 
