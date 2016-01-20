@@ -73,8 +73,8 @@ int main(){
 	hints.absolute_tolerance = 1.0f;
 	scil_create_compression_context(&ctx, &hints);
 
-	uint16_t repeats = 1000;
-	for(uint8_t i = 3; i < 9; ++i){
+	uint16_t repeats = 1;
+	for(uint8_t i = 1; i < 2; ++i){
 
 		size_t count = (size_t)pow(10, i);
 		size_t u_buf_size = count * sizeof(double);
