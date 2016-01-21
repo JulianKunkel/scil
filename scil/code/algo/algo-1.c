@@ -53,7 +53,7 @@ static double double_repres(const uint64_t num, const double min, const double a
 }
 
 int scil_algo1_compress(const scil_context* ctx,
-                        char** restrict compressed_buf_out,
+                        char* restrict compressed_buf_out,
                         size_t* restrict out_size,
                         const double*restrict data_in,
                         const size_t in_size)
@@ -66,35 +66,34 @@ int scil_algo1_compress(const scil_context* ctx,
     double abs_tol = ctx->hints.absolute_tolerance;
 
     //Get needed bits per compressed number in data
-    uint32_t bits_per_num = get_needed_bit_count(min, max, abs_tol);
+    uint8_t bits_per_num = get_needed_bit_count(min, max, abs_tol);
 
     //Header byte size (currently sizes of magic number + min + abs_tol)
-    uint8_t head_size = 17;
+    uint8_t head_size = 0;
+
+    //Set compression information
+    //Minimum value
+    *((double*)(compressed_buf_out)) = min;
+    compressed_buf_out+= 8;
+    head_size += 8;
+
+    *((double*)(compressed_buf_out)) = abs_tol;
+    compressed_buf_out+= 8;
+    head_size += 8;
+
+    *compressed_buf_out = bits_per_num;
+    compressed_buf_out++;
+    head_size += 1;
+
 
     //Get number of needed bytes for the whole compressed buffer
     *out_size = round_up_byte(bits_per_num * in_size) + head_size;
 
-    //Initialize every bit in output buffer to 0
-    *compressed_buf_out = (char*)SAFE_CALLOC(*out_size, sizeof(char));
-
-    //Set algorithm id
-    *compressed_buf_out[0] = 1;
-
-    //Set compression information
-    //Minimum value
-    char* cb_min = (char*)&min;
-    for(uint8_t i = 0; i < 8; ++i){
-      (*compressed_buf_out)[i+1] = cb_min[i];
-    }
-    //Absolute tolerance
-    char* cb_abs = (char*)&abs_tol;
-    for(uint8_t i = 0; i < 8; ++i){
-      (*compressed_buf_out)[i+9] = cb_abs[i];
-    }
+    //printf("C %d %f %f\n", bits_per_num, min, abs_tol);
 
     //Input and output buffer indices
     size_t from_i = 0;
-    size_t to_i = head_size;
+    size_t to_i = 0;
 
     //Needed shifts (also left as negative right) for bit perfect packing
     int right_shifts = 0;
@@ -114,9 +113,10 @@ int scil_algo1_compress(const scil_context* ctx,
 
         //Get integer representation of a compressed number
         uint64_t integ = int_repres(data_in[from_i], min, abs_tol);
+        printf(" %d", integ);
 
         //Set the current bytes bit to current bits of integ
-        (*compressed_buf_out)[to_i] = (char)((*compressed_buf_out)[to_i] |  (char)(right_shifts < 0 ? integ << -right_shifts : integ >> right_shifts));
+        compressed_buf_out[to_i] = compressed_buf_out[to_i] | ((char)(right_shifts < 0 ? integ << -right_shifts : integ >> right_shifts));
 
         //If right_shifts were smaller or equal 0, the current compressed number is done packing
         from_filled = right_shifts <= 0;
@@ -129,6 +129,7 @@ int scil_algo1_compress(const scil_context* ctx,
         to_i += to_filled;
     }
 
+    printf("\n");
     return 0;
 }
 
@@ -136,49 +137,59 @@ int scil_algo1_decompress(  const scil_context* ctx,
                             double*restrict data_out,
                             size_t*restrict out_size,
                             const char*restrict compressed_buf_in,
-                            const size_t in_size)
+                            const size_t min_size)
 {
-    /*
-    assert(ctx != NULL);
     assert(compressed_buf_in != NULL);
 
-    data_out = (double*)SAFE_MALLOC(*out_size * sizeof(double));
+    uint8_t bits_per_num;
+    double min, abs_tol;
 
-    uint8_t bits = get_needed_bit_count(min_value, max_value, error_step);
+    size_t in_size = min_size - 17;
 
-    size_t from_i = 0;
-    size_t to_i = 0;
+    // parse Header
 
-    int8_t right_shifts = 0;
+    min = *((double*)(compressed_buf_in));
+    compressed_buf_in+= 8;
 
-    uint8_t from_filled = 1;
-    uint8_t to_filled = 1;
+    abs_tol = *((double*)(compressed_buf_in));
+    compressed_buf_in+= 8;
 
-    size_t current = 0;
+    bits_per_num = *compressed_buf_in;
+    compressed_buf_in++;
 
-    while(to_i < size){
+    //printf("D %d %f %f\n", bits_per_num, min, abs_tol);    
+    int remaining_bits = 0;
 
-        right_shifts -= to_filled * bits;
-        right_shifts += from_filled * 8;
+    uint8_t start_mask[8] = {255,127,63,31,15,7,3,1,0};
+    uint8_t end_mask[8] = {254,255-3,255-7,255-15,255-31,255-63,255-127,0};
 
-        printf("%d\n", right_shifts);
-        printb_uint8(data->buffer[from_i]);
+    printf("DECOMPRESS %d %lld\n", bits_per_num, (long long int) in_size);
 
-        current *= (1 - to_filled);
-        current |= right_shifts < 0 ? (data->buffer[from_i] << -right_shifts) : (data->buffer[from_i] >> right_shifts);
+    for(int i=0; i < in_size*8; i+= bits_per_num){
+        int spos = i / 8;
+        int epos = (i+bits_per_num) / 8;
 
-        printb_uint8(current);
-        printf("\n");
+        // start may only keep last few bits
+        uint64_t value = start_mask[i % 8] & compressed_buf_in[spos];
 
-        result[to_i] = double_repres(current, min_value, error_step);
+        if (spos != epos){
+            uint64_t remainder = 0;
 
-        from_filled = right_shifts <= 0;
-        to_filled = right_shifts >= 0;
+            for (int byte = spos ; byte < epos; byte ++){
+                remainder = remainder | compressed_buf_in[byte];
+                remainder = remainder << 8;
+            }
+            uint8_t last_bits = (i+bits_per_num)%8;
+            value = value & (remainder >> (8 - last_bits));
 
-        from_i += from_filled;
-        to_i += to_filled;
+            // read last few bits
+            value = compressed_buf_in[epos] & end_mask[ last_bits ];
+        }else{
+            uint8_t last_bits = (i+bits_per_num)%8;
+            value = value >> (8 - last_bits);
+        }
+        printf(" %d\n", value);
     }
 
-    */
     return 0;
 }

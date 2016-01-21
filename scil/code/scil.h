@@ -10,6 +10,11 @@
 
 #include <stdio.h>
 
+/*
+ This amount of data may be needed for a block header.
+ */
+#define SCIL_BLOCK_HEADER_MAX_SIZE 128
+
 /**
  * \brief Struct containing information on the tolerable
  * precision loss on compression
@@ -32,9 +37,10 @@ typedef struct{
   /** \brief Number of significant digits */
   int significant_digits;
 
+  /** \brief */
   int force_compression_method;
 
-  uint64_t force_block_size;
+  //uint64_t force_block_size;
 } scil_hints;
 
 
@@ -49,6 +55,12 @@ struct scil_context_t{
 
 typedef struct scil_context_t scil_context;
 
+
+/*
+ * 
+ */
+int scil_retrieve_compression_magic_number(const char * str);
+
 /**
  * \brief Creation of a compression context
  * \param out_ctx reference to the created context
@@ -57,6 +69,9 @@ typedef struct scil_context_t scil_context;
  * \return success state of the creation
  */
 int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints);
+
+// scil_create_compression_context(scil_context ** out_ctx)
+// scil_context_add_hint(ctx, char * key, char * value)
 
 /**
  * \brief Compression method of a buffer of data
@@ -69,7 +84,7 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
  * \pre data_in != NULL
  * \return success state of the compression
  */
-int scil_compress(scil_context* ctx, char** restrict compressed_buf_out, size_t* restrict out_size, const double*restrict data_in, const size_t in_size);
+int scil_compress(scil_context* ctx, char* restrict compressed_buf_out, size_t* restrict out_size, const double*restrict data_in, const size_t in_size);
 
 /**
  * \brief Decompression method of a buffer of data
@@ -82,7 +97,10 @@ int scil_compress(scil_context* ctx, char** restrict compressed_buf_out, size_t*
  * \pre compressed_buf_in != NULL
  * \return success state of the decompression
  */
-int scil_decompress(const scil_context* ctx, double*restrict data_out, size_t*restrict out_size, const char*restrict compressed_buf_in, const size_t in_size);
+int scil_decompress(double*restrict data_out, size_t*restrict out_size, const char*restrict compressed_buf_in, const size_t in_size);
+
+// int scil_decompress_start_stream(scil_context ** out_ctx, const char*restrict compressed_buf_in);
+// int scil_decompress_stream(const scil_context* ctx, double*restrict data_out, size_t*restrict out_size, const char*restrict compressed_buf_in, const size_t in_size);
 
 
 /**

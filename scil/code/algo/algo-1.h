@@ -19,7 +19,7 @@
  * \param in_size Element count of uncompressed buffer (not byte size!)
  * \return Success state of the compression
  */
-int scil_algo1_compress(const scil_context* ctx, char** restrict compressed_buf_out, size_t* restrict out_size, const double*restrict data_in, const size_t in_size);
+int scil_algo1_compress(const scil_context* ctx, char* restrict compressed_buf_out, size_t* restrict out_size, const double*restrict data_in, const size_t in_size);
 
 /**
  * \brief Deompression function of algo1
