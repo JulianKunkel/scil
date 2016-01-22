@@ -65,48 +65,54 @@ void print_bits_uint8(uint8_t a){
 
 }
 
+void print_comp_buf(const uint8_t * restrict buf, const size_t buf_size, uint8_t bits_per_num){
+
+
+}
+
 int main(){
 
 	scil_context * ctx;
 	scil_hints hints;
 	hints.force_compression_method = 1;
-	hints.absolute_tolerance = 1.0f;
+	hints.absolute_tolerance = 0.5f;
 	scil_create_compression_context(&ctx, &hints);
 
-	uint16_t repeats = 1;
-	for(uint8_t i = 1; i < 2; ++i){
+	size_t count = 10;
+	size_t u_buf_size = count * sizeof(double);
 
-		size_t count = (size_t)pow(10, i);
-		size_t u_buf_size = count * sizeof(double);
-		double * data_out = (double*)SAFE_MALLOC(u_buf_size + SCIL_BLOCK_HEADER_MAX_SIZE);
-
-		double * u_buf = (double *)SAFE_MALLOC(u_buf_size);
-		for(size_t i = 0; i < count; ++i)
-		{
-			u_buf[i] = (double)(i % 10);
-		}
-
-		size_t c_buf_size;
-		char * c_buf = (char*)SAFE_MALLOC(u_buf_size+1);
-
-		clock_t sum = 0;
-		for(uint16_t j = 0; j < repeats; ++j){
-			clock_t start = clock();
-			scil_compress(ctx, c_buf, &c_buf_size, u_buf, count);
-			size_t outsize;
-			scil_decompress(data_out, & outsize, c_buf, c_buf_size);
-			clock_t end = clock();
-
-			sum += end - start;
-		}
-
-		printf("%lu,%f\n", u_buf_size, (double)sum / (repeats * CLOCKS_PER_SEC));
-
-		free(c_buf);
-		free(data_out);
-		free(u_buf);
+	double * u_buf = (double *)SAFE_MALLOC(u_buf_size);
+	printf("U ");
+	for(size_t i = 0; i < count; ++i)
+	{
+		u_buf[i] = (double)i;
+		printf("%f ", u_buf[i]);
 	}
+	printf("\n\n");
 
+	size_t c_buf_size;
+	char * c_buf = (char*)SAFE_MALLOC(u_buf_size+1);
+	scil_compress(ctx, c_buf, &c_buf_size, u_buf, count);
+
+	for (size_t i = 0; i < c_buf_size; i++) {
+		print_bits_uint8(c_buf[i]);
+	}
+	printf("\n");
+
+	double * data_out = (double*)SAFE_MALLOC(u_buf_size + SCIL_BLOCK_HEADER_MAX_SIZE);
+	size_t outsize;
+	scil_decompress(data_out, & outsize, c_buf, c_buf_size);
+
+	printf("\nD ");
+	for(size_t i = 0; i < count; ++i)
+	{
+		printf("%f ", data_out[i]);
+	}
+	printf("\n");
+
+	free(c_buf);
+	free(data_out);
+	free(u_buf);
 	free(ctx);
 	/*
 	size_t count = 1000;
