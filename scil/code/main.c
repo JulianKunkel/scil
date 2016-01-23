@@ -65,11 +65,6 @@ void print_bits_uint8(uint8_t a){
 
 }
 
-void print_comp_buf(const uint8_t * restrict buf, const size_t buf_size, uint8_t bits_per_num){
-
-
-}
-
 int main(){
 
 	scil_context * ctx;
@@ -96,7 +91,6 @@ int main(){
 
 	for (size_t i = 0; i < c_buf_size; i++) {
 		print_bits_uint8(c_buf[i]);
-		if(i == 17) printf("\n");
 	}
 
 	double * data_out = (double*)SAFE_MALLOC(u_buf_size + SCIL_BLOCK_HEADER_MAX_SIZE);
