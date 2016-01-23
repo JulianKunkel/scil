@@ -15,6 +15,7 @@
  */
 #define SCIL_BLOCK_HEADER_MAX_SIZE 128
 
+typedef unsigned char byte;
 /**
  * \brief Struct containing information on the tolerable
  * precision loss on compression
@@ -75,29 +76,32 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 
 /**
  * \brief Compression method of a buffer of data
- * \param ctx reference of the compression context
- * \param compressed_buf_out reference to the compressed buffer
- * \param out_size reference to the compressed buffer byte size, max size is given as argument
- * \param data_in buffer of data to compress
- * \param in_size count of numbers in data buffer
+ * \param ctx Reference to the compression context
+ * \param dest Destination of the compressed buffer
+ * \param dest_size Reference to the compressed buffer byte size, max size is given as argument
+ * \param source Source buffer of the data to compress
+ * \param source_count Count of elements in source buffer
  * \pre ctx != NULL
- * \pre data_in != NULL
- * \return success state of the compression
+ * \pre dest != NULL
+ * \pre dest_size != NULL
+ * \pre source != NULL
+ * \return Success state of the compression
  */
-int scil_compress(scil_context* ctx, char* restrict compressed_buf_out, size_t* restrict out_size, const double*restrict data_in, const size_t in_size);
+int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_size, const double*restrict source, const size_t source_count);
 
 /**
  * \brief Decompression method of a buffer of data
- * \param ctx reference of the compression context
- * \param data_out reference to the decompressed buffer
- * \param out_size reference to the decompressed buffer element count
- * \param compressed_buf_in buffer of data to decompress
- * \param in_size byte size of compressed data buffer
- * \pre ctx != NULL
- * \pre compressed_buf_in != NULL
- * \return success state of the decompression
+ * \param ctx Reference to the compression context
+ * \param dest Destination of the decompressed buffer
+ * \param dest_count Reference to the decompressed buffer element count
+ * \param source Source buffer of data to decompress
+ * \param source_size Byte size of compressed data source buffer
+ * \pre dest != NULL
+ * \pre dest_count != NULL
+ * \pre source != NULL
+ * \return Success state of the decompression
  */
-int scil_decompress(double*restrict data_out, size_t*restrict out_size, const char*restrict compressed_buf_in, const size_t in_size);
+int scil_decompress(double*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size);
 
 // int scil_decompress_start_stream(scil_context ** out_ctx, const char*restrict compressed_buf_in);
 // int scil_decompress_stream(const scil_context* ctx, double*restrict data_out, size_t*restrict out_size, const char*restrict compressed_buf_in, const size_t in_size);

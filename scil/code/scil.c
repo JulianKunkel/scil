@@ -21,12 +21,12 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 	return 0;
 }
 
-int scil_compress(scil_context* ctx, char* compressed_buf_out, size_t* out_size, const double* data_in, const size_t in_size){
+int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_size, const double*restrict source, const size_t source_count){
 
 	assert(ctx != NULL);
-	assert(data_in != NULL);
-	//assert(compressed_buf_out != NULL);
-	assert(out_size != NULL);
+	assert(dest != NULL);
+	assert(dest_size != NULL);
+	assert(source != NULL);
 
 	const scil_hints * hints = & ctx->hints;
 
@@ -52,25 +52,26 @@ int scil_compress(scil_context* ctx, char* compressed_buf_out, size_t* out_size,
 
 	ctx->last_algorithm = last_algorithm;
 
-
     //Set algorithm id
-    compressed_buf_out[0] = last_algorithm->magic_number;
-    compressed_buf_out++;
+    dest[0] = last_algorithm->magic_number;
+    dest++;
 
-	// add id to output buffer...
-	int ret = last_algorithm->compress(ctx, compressed_buf_out, out_size, data_in, in_size);
-	out_size++;
+	int ret = last_algorithm->compress(ctx, dest, dest_size, source, source_count);
+	dest_size++;
 
 	return ret;
 }
 
-int scil_decompress(double* data_out, size_t* out_size, const char* compressed_buf_in, const size_t in_size){
-	assert(out_size != NULL);
+int scil_decompress(double*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size){
+
+	assert(dest != NULL);
+	assert(dest_count != NULL);
+	assert(source != NULL);
 
 	scil_compression_algorithm * last_algorithm;
 
 	// Read magic number (algorithm id) from header
-	char magic_number = compressed_buf_in[0];
+	uint8_t magic_number = source[0];
 
 	// Use decompression algorithm based on algo id
 	switch(magic_number){
@@ -79,7 +80,7 @@ int scil_decompress(double* data_out, size_t* out_size, const char* compressed_b
 		case 1: last_algorithm = & algo_algo1; break;
 	}
 
-	return last_algorithm->decompress(NULL, data_out, out_size, compressed_buf_in + 1, in_size - 1);
+	return last_algorithm->decompress(NULL, dest, dest_count, source + 1, source_size - 1);
 }
 
 int scil_validate_compression(const scil_context* ctx,
