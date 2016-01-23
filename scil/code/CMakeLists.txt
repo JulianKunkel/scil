@@ -24,8 +24,9 @@ include_directories(argo .)
 
 set (SOURCE
 	main.c
-    algo/algo-1.c
     algo/memcopy.c
+    algo/algo-1.c
+    algo/gzip.c
 	util.c
 )
 
