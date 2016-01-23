@@ -70,7 +70,7 @@ int main(){
 	scil_context * ctx;
 	scil_hints hints;
 	hints.force_compression_method = 1;
-	hints.absolute_tolerance = 30000.0f;
+	hints.absolute_tolerance = 0.5f;
 	scil_create_compression_context(&ctx, &hints);
 
 	size_t count = 10;
