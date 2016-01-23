@@ -156,7 +156,7 @@ int scil_algo1_decompress(  const scil_context* ctx,
     uint8_t bits_per_num;
     double min, abs_tol;
 
-    size_t in_size = min_size - 17;
+    size_t in_size = min_size - 18;
 
     // parse Header
     min = *((double*)(compressed_buf_in));
@@ -173,30 +173,37 @@ int scil_algo1_decompress(  const scil_context* ctx,
     uint8_t end_mask[9] = {0, 255-127, 255-63, 255-31, 255-15, 255-7, 255-3, 255-1, 255};
     // 00000000 10000000 11000000 11100000 11110000 11111000 11111100 11111110 11111111
 
-    printf("DECOMP ");
     size_t index = 0;
     for(size_t i = 0; i < in_size*8; i+=bits_per_num){
 
         // Get index of start and end byte
-        size_t start_pos = i / 8;
-        size_t end_pos = (i + bits_per_num) / 8;
+        size_t start_byte = i / 8;
+        size_t end_byte = (i + bits_per_num) / 8;
 
-        // Get first bits of compressed value
-        uint64_t value = (uint64_t)(compressed_buf_in[start_pos] & start_mask[i % 8]);
+        // # of bits in byte before bit index (i)
+        uint8_t first_byte_before = i % 8;
+        // # of bits in byte after bit index (i)
+        uint8_t first_byte_after = 8 - first_byte_before;
 
-        for(size_t j = start_pos + 1; j < end_pos; ++j){
+        if(start_byte == end_byte){
 
-            value <<= 8; //???
-            value &= (uint64_t)compressed_buf_in[j];
+            uint64_t value = get_bits(compressed_buf_in[start_byte], first_byte_after, bits_per_num);
+            data_out[index] = double_repres(value, min, abs_tol);
+
+        }else if(start_byte + 1 == end_byte){
+
+            uint64_t value = get_bits(compressed_buf_in[start_byte], first_byte_after, first_byte_after);
+
+            uint8_t remaining_bits = bits_per_num - first_byte_after;
+
+            value <<= remaining_bits;
+
+            value |= get_bits(compressed_buf_in[end_byte], 8, remaining_bits);
+
+        }else{
+
         }
 
-        // Get last bits of compressed value
-        value = value << (8 - (i+bits_per_num) % 8);
-        value = value & (uint64_t)(compressed_buf_in[end_pos] & end_mask[(i+bits_per_num) % 8]);
-
-        //printf("%lu ", value);
-
-        data_out[index] = double_repres(value, min, abs_tol);
         ++index;
     }
 
