@@ -75,7 +75,7 @@ int main(){
 	scil_context * ctx;
 	scil_hints hints;
 	hints.force_compression_method = 1;
-	hints.absolute_tolerance = 0.5f;
+	hints.absolute_tolerance = 30000.0f;
 	scil_create_compression_context(&ctx, &hints);
 
 	size_t count = 10;
@@ -85,7 +85,7 @@ int main(){
 	printf("U ");
 	for(size_t i = 0; i < count; ++i)
 	{
-		u_buf[i] = (double)i;
+		u_buf[i] = (double)i * 6000;
 		printf("%f ", u_buf[i]);
 	}
 	printf("\n\n");
@@ -96,8 +96,8 @@ int main(){
 
 	for (size_t i = 0; i < c_buf_size; i++) {
 		print_bits_uint8(c_buf[i]);
+		if(i == 17) printf("\n");
 	}
-	printf("\n");
 
 	double * data_out = (double*)SAFE_MALLOC(u_buf_size + SCIL_BLOCK_HEADER_MAX_SIZE);
 	size_t outsize;

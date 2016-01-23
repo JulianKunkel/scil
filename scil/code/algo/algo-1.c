@@ -127,9 +127,7 @@ int scil_algo1_compress(const scil_context* ctx,
 
                 uint8_t bit_start = bits_per_num - first_byte_void - (j - start_byte - 1) * 8;
 
-                bits = get_bits(value, bit_start, 8);
-
-                compressed_buf_out[j] = bits;
+                compressed_buf_out[j] = get_bits(value, bit_start, 8);
             }
 
             // End byte write
@@ -156,7 +154,7 @@ int scil_algo1_decompress(  const scil_context* ctx,
     uint8_t bits_per_num;
     double min, abs_tol;
 
-    size_t in_size = min_size - 18;
+    size_t in_size = min_size - 17;
 
     // parse Header
     min = *((double*)(compressed_buf_in));
@@ -185,25 +183,36 @@ int scil_algo1_decompress(  const scil_context* ctx,
         // # of bits in byte after bit index (i)
         uint8_t first_byte_after = 8 - first_byte_before;
 
+        uint64_t value = 0;
         if(start_byte == end_byte){
 
-            uint64_t value = get_bits(compressed_buf_in[start_byte], first_byte_after, bits_per_num);
-            data_out[index] = double_repres(value, min, abs_tol);
-
-        }else if(start_byte + 1 == end_byte){
-
-            uint64_t value = get_bits(compressed_buf_in[start_byte], first_byte_after, first_byte_after);
-
-            uint8_t remaining_bits = bits_per_num - first_byte_after;
-
-            value <<= remaining_bits;
-
-            value |= get_bits(compressed_buf_in[end_byte], 8, remaining_bits);
+            value = get_bits(compressed_buf_in[start_byte], first_byte_after, bits_per_num);
 
         }else{
 
+            // Get start byte relevant bits
+            value = get_bits(compressed_buf_in[start_byte], first_byte_after, first_byte_after);
+
+            // Get intermediate bytes bits
+            for(size_t j = start_byte + 1; j < end_byte; ++j){
+
+                value <<= 8;
+                value |= get_bits(compressed_buf_in[j], 8, 8);
+            }
+
+            // Get last byte relevant bits
+            uint8_t remaining_bits = bits_per_num - first_byte_after - (end_byte - start_byte - 1) * 8;
+
+            if(remaining_bits != 0){
+
+                value <<= remaining_bits;
+                uint8_t bits = get_bits(compressed_buf_in[end_byte], 8, remaining_bits);
+                value |= bits;
+                //printf("%lu\t%f\n", value, double_repres(value, min, abs_tol));
+            }
         }
 
+        data_out[index] = double_repres(value, min, abs_tol);
         ++index;
     }
 
