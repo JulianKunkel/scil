@@ -57,7 +57,7 @@ typedef struct scil_context_t scil_context;
 
 
 /*
- * 
+ *
  */
 int scil_retrieve_compression_magic_number(const char * str);
 
