@@ -4,12 +4,12 @@
 
 #include <util.h>
 
-int scil_gzip_compress(const scil_context* ctx, char* restrict compressed_buf_out, size_t* restrict out_size, const double*restrict data_in, const size_t in_size){
+int scil_gzip_compress(const scil_context* ctx, byte* restrict dest, size_t* restrict dest_size, const double*restrict source, const size_t source_count){
 
-    return compress(compressed_buf_out, out_size, data_in, in_size);
+    return compress(dest, dest_size, source, source_count);
 }
 
-int scil_gzip_decompress(const scil_context* ctx, double*restrict data_out, size_t*restrict out_size, const char*restrict compressed_buf_in, const size_t in_size){
+int scil_gzip_decompress(const scil_context* ctx, double*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size){
 
-    return uncompress(data_out, out_size, compressed_buf_in, in_size);
+    return uncompress(dest, dest_count, source, source_size);
 }

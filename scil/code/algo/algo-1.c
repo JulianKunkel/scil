@@ -58,14 +58,14 @@ static uint8_t get_bits(const uint64_t num, const uint8_t start, const uint8_t s
 }
 
 int scil_algo1_compress(const scil_context* ctx,
-                        char* restrict compressed_buf_out,
-                        size_t* restrict out_size,
-                        const double*restrict data_in,
-                        const size_t in_size)
+                        byte * restrict dest,
+                        size_t* restrict dest_size,
+                        const double*restrict source,
+                        const size_t source_count)
 {
     //Finding minimum and maximum values in data
     double min, max;
-    find_min_max(&min, &max, data_in, in_size);
+    find_min_max(&min, &max, source, source_count);
 
     //Locally assigning absolute tolerance
     double abs_tol = ctx->hints.absolute_tolerance;
@@ -78,31 +78,31 @@ int scil_algo1_compress(const scil_context* ctx,
 
     //Set compression information
     //Minimum value
-    *((double*)(compressed_buf_out)) = min;
-    compressed_buf_out+= 8;
+    *((double*)(dest)) = min;
+    dest+= 8;
     head_size += 8;
 
-    *((double*)(compressed_buf_out)) = abs_tol;
-    compressed_buf_out+= 8;
+    *((double*)(dest)) = abs_tol;
+    dest+= 8;
     head_size += 8;
 
-    *compressed_buf_out = bits_per_num;
-    compressed_buf_out++;
+    *dest = bits_per_num;
+    dest++;
     head_size += 1;
 
     //Get number of needed bytes for the whole compressed buffer
-    *out_size = round_up_byte(bits_per_num * in_size) + head_size;
+    *dest_size = round_up_byte(bits_per_num * source_count) + head_size;
 
     uint8_t end_mask[9] = {0, 255-127, 255-63, 255-31, 255-15, 255-7, 255-3, 255-1, 255};
     // 00000000 10000000 11000000 11100000 11110000 11111000 11111100 11111110 11111111
 
     size_t bit_index = 0;
-    for(size_t i = 0; i < in_size; ++i){
+    for(size_t i = 0; i < source_count; ++i){
 
         size_t start_byte = bit_index / 8;
         size_t end_byte = (bit_index + bits_per_num) / 8;
 
-        uint64_t value = int_repres(data_in[i], min, abs_tol);
+        uint64_t value = int_repres(source[i], min, abs_tol);
 
         uint8_t first_byte_fill = bit_index % 8;
         uint8_t first_byte_void = 8 - first_byte_fill;
@@ -111,30 +111,30 @@ int scil_algo1_compress(const scil_context* ctx,
 
             uint8_t bits = get_bits(value, bits_per_num, bits_per_num);
 
-            compressed_buf_out[start_byte] &= end_mask[first_byte_fill];
-            compressed_buf_out[start_byte] |= bits << (first_byte_void - bits_per_num);
+            dest[start_byte] &= end_mask[first_byte_fill];
+            dest[start_byte] |= bits << (first_byte_void - bits_per_num);
 
         }else{
 
             // Start byte write
             uint8_t bits = get_bits(value, bits_per_num, first_byte_void);
 
-            compressed_buf_out[start_byte] &= end_mask[first_byte_fill];
-            compressed_buf_out[start_byte] |= bits;
+            dest[start_byte] &= end_mask[first_byte_fill];
+            dest[start_byte] |= bits;
 
             // Intermediate byte write
             for(uint8_t j = start_byte + 1; j < end_byte; ++j){
 
                 uint8_t bit_start = bits_per_num - first_byte_void - (j - start_byte - 1) * 8;
 
-                compressed_buf_out[j] = get_bits(value, bit_start, 8);
+                dest[j] = get_bits(value, bit_start, 8);
             }
 
             // End byte write
             uint8_t end_bit_size = bits_per_num - first_byte_void - (end_byte - start_byte - 1) * 8;
             bits = get_bits(value, end_bit_size, end_bit_size);
 
-            compressed_buf_out[end_byte] = bits << (8 - end_bit_size);
+            dest[end_byte] = bits << (8 - end_bit_size);
         }
 
         bit_index += bits_per_num;
@@ -144,27 +144,27 @@ int scil_algo1_compress(const scil_context* ctx,
 }
 
 int scil_algo1_decompress(  const scil_context* ctx,
-                            double*restrict data_out,
-                            size_t*restrict out_size,
-                            const char*restrict compressed_buf_in,
-                            const size_t min_size)
+                            double*restrict dest,
+                            size_t*restrict dest_count,
+                            const byte*restrict source,
+                            const size_t source_size)
 {
-    assert(compressed_buf_in != NULL);
+    assert(source != NULL);
 
     uint8_t bits_per_num;
     double min, abs_tol;
 
-    size_t in_size = min_size - 17;
+    size_t in_size = source_size - 17;
 
     // parse Header
-    min = *((double*)(compressed_buf_in));
-    compressed_buf_in+= 8;
+    min = *((double*)(source));
+    source+= 8;
 
-    abs_tol = *((double*)(compressed_buf_in));
-    compressed_buf_in+= 8;
+    abs_tol = *((double*)(source));
+    source+= 8;
 
-    bits_per_num = *compressed_buf_in;
-    compressed_buf_in++;
+    bits_per_num = *source;
+    source++;
 
     uint8_t start_mask[9] = {255, 127, 63, 31, 15, 7, 3, 1, 0};
 
@@ -186,18 +186,18 @@ int scil_algo1_decompress(  const scil_context* ctx,
         uint64_t value = 0;
         if(start_byte == end_byte){
 
-            value = get_bits(compressed_buf_in[start_byte], first_byte_after, bits_per_num);
+            value = get_bits(source[start_byte], first_byte_after, bits_per_num);
 
         }else{
 
             // Get start byte relevant bits
-            value = get_bits(compressed_buf_in[start_byte], first_byte_after, first_byte_after);
+            value = get_bits(source[start_byte], first_byte_after, first_byte_after);
 
             // Get intermediate bytes bits
             for(size_t j = start_byte + 1; j < end_byte; ++j){
 
                 value <<= 8;
-                value |= get_bits(compressed_buf_in[j], 8, 8);
+                value |= get_bits(source[j], 8, 8);
             }
 
             // Get last byte relevant bits
@@ -206,13 +206,13 @@ int scil_algo1_decompress(  const scil_context* ctx,
             if(remaining_bits != 0){
 
                 value <<= remaining_bits;
-                uint8_t bits = get_bits(compressed_buf_in[end_byte], 8, remaining_bits);
+                uint8_t bits = get_bits(source[end_byte], 8, remaining_bits);
                 value |= bits;
                 //printf("%lu\t%f\n", value, double_repres(value, min, abs_tol));
             }
         }
 
-        data_out[index] = double_repres(value, min, abs_tol);
+        dest[index] = double_repres(value, min, abs_tol);
         ++index;
     }
 
@@ -227,20 +227,20 @@ int scil_algo1_decompress(  const scil_context* ctx,
         int epos = (i+bits_per_num) / 8;
 
         // start may only keep last few bits
-        uint64_t value = start_mask[i % 8] & compressed_buf_in[spos];
+        uint64_t value = start_mask[i % 8] & source[spos];
 
         if (spos != epos){
             uint64_t remainder = 0;
 
             for (int byte = spos ; byte < epos; byte ++){
-                remainder = remainder | compressed_buf_in[byte];
+                remainder = remainder | source[byte];
                 remainder = remainder << 8;
             }
             uint8_t last_bits = (i+bits_per_num)%8;
             value = value & (remainder >> (8 - last_bits));
 
             // read last few bits
-            value = compressed_buf_in[epos] & end_mask[ last_bits ];
+            value = source[epos] & end_mask[ last_bits ];
         }else{
             uint8_t last_bits = (i+bits_per_num)%8;
             value = value >> (8 - last_bits);
