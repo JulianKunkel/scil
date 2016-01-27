@@ -32,6 +32,9 @@ set (SOURCE
 
 add_library(scil SHARED scil.c)
 target_link_libraries(scil m)
+target_link_libraries(scil z)
+
+#target_link_libraries(scil )
 
 # add the executable
 add_executable(scil-test ${SOURCE})
