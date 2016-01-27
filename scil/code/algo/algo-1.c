@@ -123,7 +123,7 @@ int scil_algo1_compress(const scil_context* ctx,
             dest[start_byte] |= bits;
 
             // Intermediate byte write
-            for(uint8_t j = start_byte + 1; j < end_byte; ++j){
+            for(size_t j = start_byte + 1; j < end_byte; ++j){
 
                 uint8_t bit_start = bits_per_num - first_byte_void - (j - start_byte - 1) * 8;
 
