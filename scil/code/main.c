@@ -70,28 +70,28 @@ int main(){
 	scil_context * ctx;
 	scil_hints hints;
 	hints.force_compression_method = 1;
-	hints.absolute_tolerance = 0.5f;
+	hints.absolute_tolerance = 1.0f;
 	scil_create_compression_context(&ctx, &hints);
 
-	size_t count = 10;
+	size_t count = 1000;
 	size_t u_buf_size = count * sizeof(double);
 
 	double * u_buf = (double *)SAFE_MALLOC(u_buf_size);
 	printf("U ");
 	for(size_t i = 0; i < count; ++i)
 	{
-		u_buf[i] = (double)i * 6000;
+		u_buf[i] = (double)i;
 		printf("%f ", u_buf[i]);
 	}
 	printf("\n\n");
 
+	printf("U size: %lu\n", u_buf_size);
+
 	size_t c_buf_size;
-	char * c_buf = (char*)SAFE_MALLOC(u_buf_size+1);
+	byte * c_buf = (byte*)SAFE_MALLOC(u_buf_size+1);
 	scil_compress(ctx, c_buf, &c_buf_size, u_buf, count);
 
-	for (size_t i = 0; i < c_buf_size; i++) {
-		print_bits_uint8(c_buf[i]);
-	}
+	printf("C size: %lu\n", c_buf_size);
 
 	double * data_out = (double*)SAFE_MALLOC(u_buf_size + SCIL_BLOCK_HEADER_MAX_SIZE);
 	size_t outsize;
