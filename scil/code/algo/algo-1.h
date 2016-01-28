@@ -32,11 +32,6 @@ int scil_algo1_compress(const scil_context* ctx, byte* restrict dest, size_t* re
  */
 int scil_algo1_decompress(const scil_context* ctx, double*restrict dest, size_t*restrict out_size, const byte*restrict compressed_buf_in, const size_t in_size);
 
-scil_compression_algorithm algo_algo1 = {
-    scil_algo1_compress,
-    scil_algo1_decompress,
-    "algo1",
-    1
-};
+extern scil_compression_algorithm algo_algo1;
 
 #endif

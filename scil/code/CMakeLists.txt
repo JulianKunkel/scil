@@ -27,6 +27,7 @@ set (SOURCE
     algo/memcopy.c
     algo/algo-1.c
     algo/gzip.c
+    algo/gzalgo-1.c
 	util.c
 )
 

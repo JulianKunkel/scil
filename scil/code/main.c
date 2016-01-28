@@ -69,7 +69,7 @@ int main(){
 
 	scil_context * ctx;
 	scil_hints hints;
-	hints.force_compression_method = 2;
+	hints.force_compression_method = 3;
 	hints.absolute_tolerance = 0.005f;
 	scil_create_compression_context(&ctx, &hints);
 
@@ -80,7 +80,7 @@ int main(){
 	printf("U ");
 	for(size_t i = 0; i < count; ++i)
 	{
-		u_buf[i] = (double)i-100;
+		u_buf[i] = (double)(i % 10);
 		printf("%f ", u_buf[i]);
 	}
 	printf("\n\n");

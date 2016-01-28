@@ -2,8 +2,6 @@
 
 #include <zlib.h>
 
-#include <util.h>
-
 int scil_gzip_compress(const scil_context* ctx, byte* restrict dest, size_t* restrict dest_size, const double*restrict source, const size_t source_count){
 
     /*
@@ -49,6 +47,14 @@ int scil_gzip_decompress(const scil_context* ctx, double*restrict dest, size_t*r
     */
     uLongf dest_size = *dest_count * sizeof(double);
     int ret = uncompress( (Bytef*)dest, &dest_size, (Bytef*)source, (uLong)source_size);
+    *dest_count = dest_size / sizeof(double);
 
     return ret;
 }
+
+scil_compression_algorithm algo_gzip = {
+    scil_gzip_compress,
+    scil_gzip_decompress,
+    "gzip",
+    2
+};

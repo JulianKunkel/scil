@@ -3,11 +3,11 @@
 #include <scil-internal.h>
 #include <util.h>
 
-
 // known algorithms:
 #include <algo/memcopy.h>
 #include <algo/algo-1.h>
 #include <algo/gzip.h>
+#include <algo/gzalgo-1.h>
 
 int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints){
 	scil_context * ctx =(scil_context*)SAFE_MALLOC(sizeof(scil_context));
@@ -41,6 +41,7 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
 			case 0: last_algorithm = & algo_memcopy; break;
 			case 1: last_algorithm = & algo_algo1; break;
 			case 2: last_algorithm = & algo_gzip; break;
+			case 3: last_algorithm = & algo_gzalgo1; break;
 			default: last_algorithm = & algo_memcopy;
 		}
 	}else{
@@ -81,6 +82,7 @@ int scil_decompress(double*restrict dest, size_t*restrict dest_count, const byte
 		case 0: last_algorithm = & algo_memcopy; break;
 		case 1: last_algorithm = & algo_algo1; break;
 		case 2: last_algorithm = & algo_gzip; break;
+		case 3: last_algorithm = & algo_gzalgo1; break;
 	}
 
 	return last_algorithm->decompress(NULL, dest, dest_count, source + 1, source_size - 1);

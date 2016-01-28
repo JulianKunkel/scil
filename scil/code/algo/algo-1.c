@@ -1,6 +1,7 @@
+#include <algo/algo-1.h>
+
 #include <math.h>
 
-#include <algo/algo-1.h>
 #include <util.h>
 
 static int find_min_max(double*restrict min, double*restrict max, const double* buf, const size_t size){
@@ -215,3 +216,10 @@ int scil_algo1_decompress(  const scil_context* ctx,
 
     return 0;
 }
+
+scil_compression_algorithm algo_algo1 = {
+    scil_algo1_compress,
+    scil_algo1_decompress,
+    "algo1",
+    1
+};
