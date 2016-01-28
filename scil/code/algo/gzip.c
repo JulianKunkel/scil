@@ -22,7 +22,7 @@ int scil_gzip_compress(const scil_context* ctx, byte* restrict dest, size_t* res
     deflateEnd(&stream);
     */
 
-    return compress((Bytef*)dest, (uLongf*)dest_size, (Bytef*)source, (uLong)(source_count * sizeof(double)) );
+    return compress( (Bytef*)dest, (uLongf*)dest_size, (Bytef*)source, (uLong)(source_count * sizeof(double)) );
 }
 
 int scil_gzip_decompress(const scil_context* ctx, double*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size){
