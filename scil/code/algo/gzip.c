@@ -22,7 +22,12 @@ int scil_gzip_compress(const scil_context* ctx, byte* restrict dest, size_t* res
     deflateEnd(&stream);
     */
 
-    return compress( (Bytef*)dest, (uLongf*)dest_size, (Bytef*)source, (uLong)(source_count * sizeof(double)) );
+    uLongf d_size = compressBound(source_count * sizeof(double));
+
+    int ret = compress( (Bytef*)dest, &d_size, (Bytef*)source, (uLong)(source_count * sizeof(double)) );
+
+    *dest_size = d_size;
+    return ret;
 }
 
 int scil_gzip_decompress(const scil_context* ctx, double*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size){
@@ -42,9 +47,8 @@ int scil_gzip_decompress(const scil_context* ctx, double*restrict dest, size_t*r
     inflate(&stream, Z_NO_FLUSH);
     inflateEnd(&stream);
     */
-    int ret = uncompress( (Bytef*)dest, (uLongf*)dest_count, (Bytef*)source, (uLong)source_size);
-
-    *dest_count /= sizeof(double);
+    uLongf dest_size = *dest_count * sizeof(double);
+    int ret = uncompress( (Bytef*)dest, &dest_size, (Bytef*)source, (uLong)source_size);
 
     return ret;
 }
