@@ -166,11 +166,6 @@ int scil_algo1_decompress(  const scil_context* ctx,
     bits_per_num = *source;
     source++;
 
-    uint8_t start_mask[9] = {255, 127, 63, 31, 15, 7, 3, 1, 0};
-
-    uint8_t end_mask[9] = {0, 255-127, 255-63, 255-31, 255-15, 255-7, 255-3, 255-1, 255};
-    // 00000000 10000000 11000000 11100000 11110000 11111000 11111100 11111110 11111111
-
     size_t index = 0;
     for(size_t i = 0; i < in_size*8; i+=bits_per_num){
 
@@ -216,38 +211,7 @@ int scil_algo1_decompress(  const scil_context* ctx,
         ++index;
     }
 
-    /*
-    int remaining_bits = 0;
-
-    uint8_t start_mask[8] = {255,127,63,31,15,7,3,1,0};
-    uint8_t end_mask[8] = {254,255-3,255-7,255-15,255-31,255-63,255-127,0};
-
-    for(int i=0; i < in_size*8; i+= bits_per_num){
-        int spos = i / 8;
-        int epos = (i+bits_per_num) / 8;
-
-        // start may only keep last few bits
-        uint64_t value = start_mask[i % 8] & source[spos];
-
-        if (spos != epos){
-            uint64_t remainder = 0;
-
-            for (int byte = spos ; byte < epos; byte ++){
-                remainder = remainder | source[byte];
-                remainder = remainder << 8;
-            }
-            uint8_t last_bits = (i+bits_per_num)%8;
-            value = value & (remainder >> (8 - last_bits));
-
-            // read last few bits
-            value = source[epos] & end_mask[ last_bits ];
-        }else{
-            uint8_t last_bits = (i+bits_per_num)%8;
-            value = value >> (8 - last_bits);
-        }
-    }
-    */
-
+    *dest_count = index;
 
     return 0;
 }
