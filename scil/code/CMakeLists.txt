@@ -24,13 +24,18 @@ include_directories(argo .)
 
 set (SOURCE
 	main.c
-    algo/algo-1.c
     algo/memcopy.c
+    algo/algo-1.c
+    algo/gzip.c
+    algo/gzalgo-1.c
 	util.c
 )
 
 add_library(scil SHARED scil.c)
 target_link_libraries(scil m)
+target_link_libraries(scil z)
+
+#target_link_libraries(scil )
 
 # add the executable
 add_executable(scil-test ${SOURCE})

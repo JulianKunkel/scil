@@ -4,12 +4,13 @@
 #include <assert.h>
 #include <sys/stat.h>
 #include <math.h>
+#include <time.h>
 
 #include <scil.h>
 #include <util.h>
 
 char* read_data(const char* path){
-	
+
 	assert(path != NULL);
 
 	FILE* file = SAFE_FOPEN(path, "rb");
@@ -64,40 +65,56 @@ void print_bits_uint8(uint8_t a){
 
 }
 
-int main(int argc, char** argv){
-
-	size_t count = 25;
-
-	size_t u_buf_size = count * sizeof(double);
-	double * u_buf = (double *)SAFE_MALLOC(u_buf_size); 
-	for(size_t i = 0; i < count; ++i)
-	{
-		u_buf[i] = (double)((i % (i - 10)) << 13);
-	}
+int main(){
 
 	scil_context * ctx;
 	scil_hints hints;
-	hints.force_compression_method = 0;
+	hints.force_compression_method = 3;
+	hints.absolute_tolerance = 0.005f;
 	scil_create_compression_context(&ctx, &hints);
 
-	size_t c_buf_size;
-	char * c_buf = (char *)SAFE_MALLOC(u_buf_size+1);
-	scil_compress(ctx, &c_buf, &c_buf_size, u_buf, u_buf_size);
+	size_t count = 1000;
+	size_t u_buf_size = count * sizeof(double);
 
-	for(size_t i = 0; i < c_buf_size; ++i)
+	double * u_buf = (double *)SAFE_MALLOC(u_buf_size);
+	printf("U ");
+	for(size_t i = 0; i < count; ++i)
 	{
-		print_bits_uint8((uint8_t)c_buf[i]);
+		u_buf[i] = (double)(i % 10);
+		printf("%f ", u_buf[i]);
 	}
+	printf("\n\n");
+
+	printf("U size: %lu\n", u_buf_size);
+
+	size_t c_buf_size;
+	byte * c_buf = (byte*)SAFE_MALLOC(u_buf_size+1);
+	scil_compress(ctx, c_buf, &c_buf_size, u_buf, count);
+
+	printf("C size: %lu\n", c_buf_size);
+
+	double * data_out = (double*)SAFE_MALLOC(u_buf_size + SCIL_BLOCK_HEADER_MAX_SIZE);
+	size_t out_count = count;
+	scil_decompress(data_out, &out_count, c_buf, c_buf_size);
+
+	printf("Outcount: %lu\n", out_count);
+
+	printf("\nD ");
+	for(size_t i = 0; i < count; ++i)
+	{
+		printf("%f ", data_out[i]);
+	}
+	printf("\n");
 
 	free(c_buf);
-	free(ctx);
+	free(data_out);
 	free(u_buf);
-
+	free(ctx);
 	/*
 	size_t count = 1000;
 
 	char* u_path = "uncomp_1000_d.data";
-	
+
 	char* c_path = "comp_1000_d.data";
 
 	double* buf = (double*)read_data(u_path);
@@ -118,21 +135,21 @@ int main(int argc, char** argv){
 	free(buf);
 	free(ctx);
 	free(c_buf);
-	
+
 	if (ret != 0){
 		printf("Error in the validation!\n");
 		return 1;
 	}
-	
+
 	write_data(c_buf, c_size, sizeof(char), c_path);
 
-	
+
 	double* buf = (double*)SAFE_MALLOC(count * sizeof(double));
 
 	for(size_t i = 0; i < count; ++i){
 		buf[i] = (double)(i % 10);
 	}
-	
+
 	write_data(buf, count, sizeof(double), u_path);
 	*/
 
