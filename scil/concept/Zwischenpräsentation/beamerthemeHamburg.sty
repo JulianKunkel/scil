@@ -1,0 +1,60 @@
+% Copyright 2006-2015 by Michael Kuhn
+%
+% This program can be redistributed and/or modified under the terms
+% of the GNU Public License, version 2.
+
+\mode<presentation>
+
+\useoutertheme{miniframes}
+%\useoutertheme[subsection=false]{miniframes}
+\useinnertheme{rectangles}
+\usecolortheme{beaver}
+
+\setbeamercolor{author in head/foot}{fg=white,bg=darkred}
+\setbeamercolor{title}{fg=white,bg=darkred}
+\setbeamercolor{title in head/foot}{fg=white,bg=darkred}
+\setbeamercolor{page number in head/foot}{fg=white,bg=darkred}
+\setbeamercolor{item}{fg=darkred}
+\setbeamercolor{subitem}{fg=darkred}
+\setbeamercolor{subsubitem}{fg=darkred}
+\setbeamercolor{itemize item}{fg=darkred}
+\setbeamercolor{itemize subitem}{fg=darkred}
+\setbeamercolor{itemize subsubitem}{fg=darkred}
+\setbeamercolor{enumerate item}{fg=darkred}
+\setbeamercolor{enumerate subitem}{fg=darkred}
+\setbeamercolor{enumerate subsubitem}{fg=darkred}
+\setbeamercolor{section number projected}{bg=darkred}
+\setbeamercolor{subsection number projected}{bg=darkred}
+\setbeamercolor{subsubsection number projected}{bg=darkred}
+\setbeamercolor{section in head/foot}{fg=white,bg=darkred}
+\setbeamercolor{subsection in head/foot}{fg=black,bg=white!90!black}
+\setbeamercolor{frametitle}{fg=black,bg=white!95!black}
+\setbeamercolor{block title}{fg=white,bg=darkred}
+\setbeamercolor{block body}{fg=black,bg=white!90!black}
+\setbeamercolor{caption name}{fg=darkred}
+
+\setbeamertemplate{bibliography entry title}{}
+\setbeamertemplate{bibliography entry location}{}
+\setbeamertemplate{bibliography entry note}{}
+
+\setbeamertemplate{bibliography item}[text]
+
+\setbeamertemplate{navigation symbols}{}
+
+\setbeamertemplate{footline}
+{%
+\begin{beamercolorbox}[colsep=1.5pt]{upper separation line foot}
+\end{beamercolorbox}
+\begin{beamercolorbox}[ht=2.5ex,dp=1.125ex,%
+	leftskip=.3cm,rightskip=.3cm plus1fil]{author in head/foot}%
+	\leavevmode{\usebeamerfont{author in head/foot}\insertshortauthor}%
+	\hfill%
+	{\usebeamerfont{title in head/foot}\usebeamercolor[fg]{title in head/foot}\insertshorttitle}%
+	\hfill%
+	{\usebeamerfont{page number in head/foot}\usebeamercolor[fg]{page number in head/foot}\insertframenumber\,/\,\inserttotalframenumber}%
+\end{beamercolorbox}%
+\begin{beamercolorbox}[colsep=1.5pt]{lower separation line foot}
+\end{beamercolorbox}
+}
+
+\mode<all>

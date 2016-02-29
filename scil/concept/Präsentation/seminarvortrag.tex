@@ -1,0 +1,109 @@
+\documentclass[compress]{beamer}
+
+\usetheme{Hamburg}
+
+\usepackage[utf8]{inputenc}
+\usepackage{units}
+
+\title{Titel des Vortrags}
+\author{Name des Autors}
+\institute{Arbeitsbereich Wissenschaftliches Rechnen\\Fachbereich Informatik\\Fakultät für Mathematik, Informatik und Naturwissenschaften\\Universität Hamburg}
+\date{2012-01-01}
+
+\titlegraphic{\includegraphics[width=0.5\textwidth]{logo}}
+
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+\begin{frame}
+	\frametitle{Gliederung (Agenda)}
+
+	\tableofcontents[hidesubsections]
+\end{frame}
+
+\section{Einleitung}
+\subsection*{}
+
+\begin{frame}
+	\frametitle{Einleitung}
+
+	\begin{itemize}
+		\item Hauptpunkt 1
+
+		\begin{itemize}
+			\item Unterpunkt 1
+			\item Unterpunkt 2
+		\end{itemize}
+	\end{itemize}
+
+	\begin{figure}
+		\begin{center}
+			\includegraphics[width=0.75\textwidth]{logo.jpg}
+		\end{center}
+		\caption{Beispielgrafik}
+		\label{fig:logo}
+	\end{figure}
+\end{frame}
+
+\section{Hauptteil}
+\subsection*{}
+
+\begin{frame}[fragile]
+	\frametitle{Hauptteil}
+
+	\begin{itemize}
+		\item Hauptpunkt 1
+
+		\begin{itemize}
+			\item Unterpunkt 1
+			\item Unterpunkt 2
+		\end{itemize}
+
+		\item Beispielquelltext:
+			\begin{verbatim}
+			int foo (void)
+			{
+					return 0;
+			}
+			\end{verbatim}
+	\end{itemize}
+\end{frame}
+
+\section{Zusammenfassung}
+\subsection*{}
+
+\begin{frame}
+	\frametitle{Zusammenfassung}
+
+	\begin{itemize}
+		\item Zusammenfassung 1
+
+		\begin{itemize}
+			\item Unterpunkt 1
+			\item Unterpunkt 2
+		\end{itemize}
+
+		\item Zusammenfassung 2
+
+		\begin{itemize}
+			\item Unterpunkt 1
+			\item Unterpunkt 2
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\section{Literatur}
+\subsection*{}
+
+\begin{frame}
+	\frametitle{Literatur}
+
+	\nocite*
+	\bibliographystyle{alpha}
+	\bibliography{literatur}
+\end{frame}
+
+\end{document}

@@ -3,7 +3,6 @@
 #include <scil-internal.h>
 #include <util.h>
 
-
 // known algorithms:
 #include <algo/memcopy.h>
 #include <algo/algo-1.h>
@@ -30,6 +29,8 @@ int scil_compress(scil_context* ctx, char** compressed_buf_out, size_t* out_size
 	// now only one algorithm
 
 	scil_compression_algorithm * last_algorithm;
+
+	if (hints->)
 
 	if (hints->absolute_tolerance == 0.0 || hints->relative_err_finest_abs_tolerance == 0.0 || hints->relative_tolerance_percent == 0.0 || hints->significant_digits > 20){
 		// we cannot compress because data must be accurate!
