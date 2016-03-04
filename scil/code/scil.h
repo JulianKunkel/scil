@@ -13,7 +13,7 @@
 /*
  This amount of data may be needed for a block header.
  */
-#define SCIL_BLOCK_HEADER_MAX_SIZE 128
+#define SCIL_BLOCK_HEADER_MAX_SIZE 1024
 
 typedef unsigned char byte;
 /**

@@ -45,6 +45,10 @@ target_link_libraries(scil-test scil)
 add_executable(algo-1-test algo/algo-1-test.c)
 target_link_libraries(algo-1-test m)
 
+# zlib-test
+add_executable(zlib-test test/zlib-test.c util.c)
+target_link_libraries(zlib-test z)
+
 ## Installation
 install(TARGETS scil LIBRARY DESTINATION lib)
 install(FILES scil.h DESTINATION include)
