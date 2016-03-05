@@ -73,7 +73,7 @@ int main(){
 	hints.absolute_tolerance = 0.5f;
 	scil_create_compression_context(&ctx, &hints);
 
-	size_t count = 1;
+	const size_t count = 100;
 	size_t u_buf_size = count * sizeof(double);
 
 	double * u_buf = (double *)SAFE_MALLOC(u_buf_size);
