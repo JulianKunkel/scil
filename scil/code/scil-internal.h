@@ -21,6 +21,11 @@
 
 #include <scil.h>
 
+enum compressor_type{
+  SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES,
+  SCIL_COMPRESSOR_TYPE_BASE_DATATYPE
+};
+
 
 typedef struct{
     int (*compress)(const scil_context* ctx, byte* restrict compressed_buf_out, size_t* restrict out_size, const DataType*restrict data_in, const size_t in_size);
@@ -29,7 +34,7 @@ typedef struct{
     byte magic_number;
 
     // if true, we expect the compress function to compress individual bytes and takes count as bytes
-    bool byte_compressor;
+    enum compressor_type type;
 } scil_compression_algorithm;
 
 

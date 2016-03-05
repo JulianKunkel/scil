@@ -77,7 +77,13 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
   dest[0] = last_algorithm->magic_number;
   dest++;
 
-	int ret = last_algorithm->compress(ctx, dest, dest_size, source, source_count);
+	int ret;
+
+	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_BASE_DATATYPE){
+		ret = last_algorithm->compress(ctx, dest, dest_size, source, source_count);
+	}else if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
+		ret = last_algorithm->compress(ctx, dest, dest_size, source, source_count * sizeof(DataType));
+	}
 	(*dest_size)++;
 
 	return ret;
@@ -100,14 +106,23 @@ int scil_decompress(DataType*restrict dest, size_t*restrict dest_count, const by
 
 	// Use decompression algorithm based on algo id
 	switch(magic_number){
-
 		case 0: last_algorithm = & algo_memcopy; break;
 		case 1: last_algorithm = & algo_algo1; break;
 		case 2: last_algorithm = & algo_gzip; break;
 		case 3: last_algorithm = & algo_gzalgo1; break;
 	}
+	int ret;
 
-	return last_algorithm->decompress(NULL, dest, dest_count, source + 1, source_size - 1);
+	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_BASE_DATATYPE){
+		ret = last_algorithm->decompress(NULL, dest, dest_count, source + 1, source_size - 1);
+	}else if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
+		*dest_count = (*dest_count)*sizeof(DataType);
+		ret = last_algorithm->decompress(NULL, dest, dest_count, source + 1, source_size - 1);
+		assert((*dest_count) % sizeof(DataType) == 0);
+		dest_count = (*dest_count) / sizeof(DataType);
+	}
+
+	return ret;
 }
 
 int scil_validate_compression(const scil_context* ctx,

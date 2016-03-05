@@ -1,15 +1,15 @@
 // This file is part of SCIL.
-// 
+//
 // SCIL is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // SCIL is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 #include <algo/algo-1.h>
@@ -235,5 +235,6 @@ scil_compression_algorithm algo_algo1 = {
     scil_algo1_compress,
     scil_algo1_decompress,
     "algo1",
-    1
+    1,
+    SCIL_COMPRESSOR_TYPE_BASE_DATATYPE
 };
