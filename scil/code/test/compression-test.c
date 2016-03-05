@@ -85,7 +85,8 @@ int main(){
 	scil_hints hints;
 	scil_init_hints(& hints);
 	hints.force_compression_method = 1;
-	hints.absolute_tolerance = 0.5f;
+	hints.absolute_tolerance = 0.5;
+	//hints.significant_bits = 3;
 	scil_create_compression_context(&ctx, &hints);
 
 	const size_t count = 100;
@@ -128,20 +129,16 @@ int main(){
 	DataType f2 = 10.5;
 
 	scil_determine_accuracy(& f1, &f2, 1, 0.01, & accuracy);
-	printf("Accuracy: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits:%d\n",
-		accuracy.relative_tolerance_percent, accuracy.relative_err_finest_abs_tolerance, accuracy.absolute_tolerance, accuracy.significant_digits);
+	scil_hints_print(& accuracy);
 
 	scil_determine_accuracy(& f1, &f2, 1, 0.51, & accuracy);
-	printf("Accuracy: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits:%d\n",
-		accuracy.relative_tolerance_percent, accuracy.relative_err_finest_abs_tolerance, accuracy.absolute_tolerance, accuracy.significant_digits);
+	scil_hints_print(& accuracy);
 
 
 	int ret = scil_validate_compression(ctx, u_buf_size, u_buf, c_buf_size, c_buf, & accuracy);
 
 	printf("\nscil_validate_compression returned %s\n", ret == 0 ? "OK" : "ERROR");
-	printf("Accuracy: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits:%d\n",
-		accuracy.relative_tolerance_percent, accuracy.relative_err_finest_abs_tolerance, accuracy.absolute_tolerance, accuracy.significant_digits);
-
+	scil_hints_print(& accuracy);
 
 
 	free(c_buf);

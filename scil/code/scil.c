@@ -35,6 +35,7 @@ static scil_compression_algorithm * algo_array[] = {
 
 static int check_compress_lossless_needed(scil_context * ctx){
 	const scil_hints hints = ctx->hints;
+
 	if ( (hints.absolute_tolerance != SCIL_ACCURACY_DBL_IGNORE && hints.absolute_tolerance <= SCIL_ACCURACY_DBL_FINEST)
 		|| (hints.relative_err_finest_abs_tolerance <= SCIL_ACCURACY_DBL_FINEST && hints.relative_err_finest_abs_tolerance != SCIL_ACCURACY_DBL_IGNORE)
 		|| (hints.relative_tolerance_percent <= SCIL_ACCURACY_DBL_FINEST && hints.relative_tolerance_percent != SCIL_ACCURACY_DBL_IGNORE)
@@ -53,31 +54,53 @@ static void fix_double_setting(double * dbl){
 }
 
 void scil_init_hints(scil_hints * hints){
-	memset(hints, 0, sizeof(*hints));
+	memset(hints, 0, sizeof(scil_hints));
+	hints->relative_tolerance_percent = SCIL_ACCURACY_DBL_IGNORE;
+  hints->relative_err_finest_abs_tolerance = SCIL_ACCURACY_DBL_IGNORE;
+  hints->absolute_tolerance  = SCIL_ACCURACY_DBL_IGNORE;
+}
+
+void scil_hints_print(scil_hints * h){
+	printf("Hints: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits:%d \n\tsignificant_bits:%d\n",
+		h->relative_tolerance_percent, h->relative_err_finest_abs_tolerance, h->absolute_tolerance, h->significant_digits, h->significant_bits);
 }
 
 int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints){
 	scil_context * ctx =(scil_context*)SAFE_MALLOC(sizeof(scil_context));
 	*out_ctx = ctx;
+	scil_hints * ohints = & ctx->hints;
 
-	ctx->hints.relative_tolerance_percent = hints->relative_tolerance_percent;
-	ctx->hints.relative_err_finest_abs_tolerance = hints->relative_err_finest_abs_tolerance;
-	ctx->hints.absolute_tolerance = hints->absolute_tolerance;
-	ctx->hints.significant_digits = hints->significant_digits;
-	ctx->hints.force_compression_method = hints->force_compression_method;
+	memcpy(ohints, hints, sizeof(scil_hints));
+
+	// convert between significant digits and bits
+	if (ohints->significant_digits != SCIL_ACCURACY_INT_IGNORE){
+		if (ohints->significant_bits == SCIL_ACCURACY_INT_IGNORE){
+			ohints->significant_bits = scil_convert_significant_decimals_to_bits(ohints->significant_digits);
+		}else{
+			// fix significant bits to finest resolution
+			ohints->significant_bits = max(ohints->significant_bits, scil_convert_significant_decimals_to_bits(ohints->significant_digits) );
+		}
+	}
+	if (ohints->significant_bits != SCIL_ACCURACY_INT_IGNORE && ohints->significant_digits == SCIL_ACCURACY_INT_IGNORE){
+		ohints->significant_digits = scil_convert_significant_bits_to_decimals(ohints->significant_bits);
+	}
+
 	ctx->lossless_compression_needed = check_compress_lossless_needed(ctx);
-	fix_double_setting(& ctx->hints.relative_tolerance_percent);
-	fix_double_setting(& ctx->hints.relative_err_finest_abs_tolerance);
-	fix_double_setting(& ctx->hints.absolute_tolerance);
-	ctx->hints.significant_digits = (ctx->hints.significant_digits == SCIL_ACCURACY_INT_IGNORE) ? 0 : ctx->hints.significant_digits;
+	fix_double_setting(& ohints->relative_tolerance_percent);
+	fix_double_setting(& ohints->relative_err_finest_abs_tolerance);
+	fix_double_setting(& ohints->absolute_tolerance);
+	ohints->significant_digits = (ohints->significant_digits == SCIL_ACCURACY_INT_IGNORE) ? 0 : ohints->significant_digits;
 
 	// verify correctness of algo_array
+	{
 	int i = 0;
 	for (scil_compression_algorithm ** algo = algo_array; *algo != NULL ; algo++, i++){
 		if ((*algo)->magic_number != i){
 			critical_error("Magic number does not match!");
 		}
 	}
+	}
+
 	return 0;
 }
 
@@ -162,7 +185,7 @@ int scil_decompress(DataType*restrict dest, size_t*restrict dest_count, const by
 void scil_determine_accuracy(DataType *data_1, DataType *data_2, const size_t length, const double relative_err_finest_abs_tolerance, scil_hints * out_hints){
 	scil_hints a;
 	a.absolute_tolerance = 0;
-	a.significant_digits = MANTISA_LENGTH; // in bits
+	a.significant_bits = MANTISA_LENGTH; // in bits
 	a.relative_err_finest_abs_tolerance = 0;
 	a.relative_tolerance_percent = 0;
 
@@ -219,11 +242,11 @@ void scil_determine_accuracy(DataType *data_1, DataType *data_2, const size_t le
 		a.absolute_tolerance = max(cur.absolute_tolerance, a.absolute_tolerance);
 		a.relative_err_finest_abs_tolerance = max(cur.relative_err_finest_abs_tolerance, a.relative_err_finest_abs_tolerance);
 		a.relative_tolerance_percent = max(cur.relative_tolerance_percent, a.relative_tolerance_percent);
-		a.significant_digits = min(cur.significant_digits, a.significant_digits);
+		a.significant_bits = min(cur.significant_digits, a.significant_bits);
 	}
 
 	// convert significant_digits in bits to 10 decimals
-	a.significant_digits = scil_convert_significant_bits_to_decimals(a.significant_digits);
+	a.significant_digits = scil_convert_significant_bits_to_decimals(a.significant_bits);
 	a.relative_tolerance_percent *= 100.0;
 
 	if ( a.relative_err_finest_abs_tolerance == 0 ){

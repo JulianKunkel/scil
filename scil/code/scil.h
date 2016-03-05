@@ -69,8 +69,11 @@ typedef struct{
   /** \brief absolute tolerable error (e.g. 1 means the value 2 can become 1-3) */
   double absolute_tolerance;
 
-  /** \brief Number of significant digits */
+  /** \brief Number of significant digits in decimal */
   int significant_digits;
+
+  /** \brief Alternative to the decimal digits */
+  int significant_bits;
 
   /** \brief */
   int force_compression_method;
@@ -92,6 +95,8 @@ typedef struct scil_context_t scil_context;
 
 
 void scil_init_hints(scil_hints * hints);
+
+void scil_hints_print(scil_hints * hints);
 
 /*
  *
