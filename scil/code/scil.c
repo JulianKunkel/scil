@@ -1,15 +1,15 @@
 // This file is part of SCIL.
-// 
+//
 // SCIL is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // SCIL is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
@@ -36,7 +36,7 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 	return 0;
 }
 
-int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_size, const double*restrict source, const size_t source_count){
+int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_size, const DataType*restrict source, const size_t source_count){
 	if (source_count == 0){
 		*dest_size = 0;
 		return 0;
@@ -83,7 +83,7 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
 	return ret;
 }
 
-int scil_decompress(double*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size){
+int scil_decompress(DataType*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size){
 	if (source_size == 0){
 		*dest_count = 0;
 		return 0;
@@ -112,9 +112,9 @@ int scil_decompress(double*restrict dest, size_t*restrict dest_count, const byte
 
 int scil_validate_compression(const scil_context* ctx,
                              const size_t uncompressed_size,
-                             const double*restrict data_uncompressed,
+                             const DataType*restrict data_uncompressed,
                              const size_t compressed_size,
-                             const double*restrict data_compressed )
+                             const DataType*restrict data_compressed )
 {
 	return 1;
 }

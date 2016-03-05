@@ -1,15 +1,15 @@
 // This file is part of SCIL.
-// 
+//
 // SCIL is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // SCIL is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 /**
@@ -23,6 +23,11 @@
 #define SCIL_HEADER_
 
 #include <stdio.h>
+
+// The input data type to compress from/to
+#ifndef DataType
+#define DataType double
+#endif
 
 /*
  This amount of data may be needed for a block header.
@@ -101,7 +106,7 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
  * \pre source != NULL
  * \return Success state of the compression
  */
-int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_size, const double*restrict source, const size_t source_count);
+int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_size, const DataType*restrict source, const size_t source_count);
 
 /**
  * \brief Decompression method of a buffer of data
@@ -115,7 +120,7 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
  * \pre source != NULL
  * \return Success state of the decompression
  */
-int scil_decompress(double*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size);
+int scil_decompress(DataType*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size);
 
 // int scil_decompress_start_stream(scil_context ** out_ctx, const char*restrict compressed_buf_in);
 // int scil_decompress_stream(const scil_context* ctx, double*restrict data_out, size_t*restrict out_size, const char*restrict compressed_buf_in, const size_t in_size);
@@ -126,8 +131,8 @@ int scil_decompress(double*restrict dest, size_t*restrict dest_count, const byte
  */
 int scil_validate_compression(const scil_context* ctx,
                              const size_t uncompressed_size,
-                             const double*restrict data_uncompressed,
+                             const DataType*restrict data_uncompressed,
                              const size_t compressed_size,
-                             const double*restrict data_compressed );
+                             const DataType*restrict data_compressed );
 
 #endif

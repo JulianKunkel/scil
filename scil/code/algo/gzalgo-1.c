@@ -21,11 +21,11 @@
 #include <algo/algo-1.h>
 #include <algo/gzip.h>
 
-int scil_gzalgo1_compress(const scil_context* ctx, byte* restrict dest, size_t*restrict dest_size, const double*restrict source, const size_t source_count){
+int scil_gzalgo1_compress(const scil_context* ctx, byte* restrict dest, size_t*restrict dest_size, const DataType*restrict source, const size_t source_count){
 
     int ret = 0;
 
-    size_t inter_size = source_count * sizeof(double); // Ask Julian
+    size_t inter_size = source_count * sizeof(DataType); // Ask Julian
     byte* intermed = (byte*)SAFE_MALLOC(inter_size);
 
     // Algo-1 compression
@@ -50,9 +50,9 @@ int scil_gzalgo1_compress(const scil_context* ctx, byte* restrict dest, size_t*r
     return 0;
 }
 
-int scil_gzalgo1_decompress(const scil_context* ctx, double*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size){
+int scil_gzalgo1_decompress(const scil_context* ctx, DataType*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size){
 
-    uLongf inter_size = *dest_count * sizeof(double);
+    uLongf inter_size = *dest_count * sizeof(DataType);
     Bytef* intermed = (Bytef*)SAFE_MALLOC(inter_size);
 
     printf("inter_size:%d\n", inter_size);
@@ -74,7 +74,7 @@ int scil_gzalgo1_decompress(const scil_context* ctx, double*restrict dest, size_
     /*
     int ret = 0;
 
-    uLongf inter_size = *dest_count * sizeof(double);
+    uLongf inter_size = *dest_count * sizeof(DataType);
     Bytef* intermed = (byte*)SAFE_MALLOC(inter_size);
 
     // Gzip decompression

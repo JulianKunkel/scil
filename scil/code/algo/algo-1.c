@@ -18,7 +18,7 @@
 
 #include <scil-util.h>
 
-static int find_min_max(double*restrict min, double*restrict max, const double* buf, const size_t size){
+static int find_min_max(DataType*restrict min, DataType*restrict max, const DataType* buf, const size_t size){
 
     assert(buf != NULL);
 
@@ -36,7 +36,7 @@ static int find_min_max(double*restrict min, double*restrict max, const double* 
     return 0;
 }
 
-static uint8_t get_needed_bit_count(const double min_value, const double max_value, const double absolute_tolerance){
+static uint8_t get_needed_bit_count(const DataType min_value, const DataType max_value, const DataType absolute_tolerance){
 
     assert(max_value > min_value);
     assert(absolute_tolerance > 0);
@@ -52,16 +52,16 @@ static size_t round_up_byte(const size_t bits){
     return 1 + (bits - a) / 8;
 }
 
-static uint64_t int_repres(const double num, const double min, const double absolute_tolerance){
+static uint64_t int_repres(const DataType num, const DataType min, const DataType absolute_tolerance){
 
     assert(num >= min);
 
     return (uint64_t)round((num - min) / (2 * absolute_tolerance));
 }
 
-static double double_repres(const uint64_t num, const double min, const double absolute_tolerance){
+static DataType DataType_repres(const uint64_t num, const DataType min, const DataType absolute_tolerance){
 
-    return min + (double)num * 2 * absolute_tolerance;
+    return min + (DataType)num * 2 * absolute_tolerance;
 }
 
 static uint8_t get_bits(const uint64_t num, const uint8_t start, const uint8_t size){
@@ -75,15 +75,15 @@ static uint8_t get_bits(const uint64_t num, const uint8_t start, const uint8_t s
 int scil_algo1_compress(const scil_context* ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
-                        const double*restrict source,
+                        const DataType*restrict source,
                         const size_t source_count)
 {
     //Finding minimum and maximum values in data
-    double min, max;
+    DataType min, max;
     find_min_max(&min, &max, source, source_count);
 
     //Locally assigning absolute tolerance
-    double abs_tol = ctx->hints.absolute_tolerance;
+    DataType abs_tol = ctx->hints.absolute_tolerance;
 
     //Get needed bits per compressed number in data
     uint8_t bits_per_num = get_needed_bit_count(min, max, abs_tol);
@@ -93,11 +93,11 @@ int scil_algo1_compress(const scil_context* ctx,
 
     //Set compression information
     //Minimum value
-    *((double*)(dest)) = min;
+    *((DataType*)(dest)) = min;
     dest+= 8;
     head_size += 8;
 
-    *((double*)(dest)) = abs_tol;
+    *((DataType*)(dest)) = abs_tol;
     dest+= 8;
     head_size += 8;
 
@@ -159,7 +159,7 @@ int scil_algo1_compress(const scil_context* ctx,
 }
 
 int scil_algo1_decompress(  const scil_context* ctx,
-                            double*restrict dest,
+                            DataType*restrict dest,
                             size_t*restrict dest_count,
                             const byte*restrict source,
                             const size_t source_size)
@@ -167,15 +167,15 @@ int scil_algo1_decompress(  const scil_context* ctx,
     assert(source != NULL);
 
     uint8_t bits_per_num;
-    double min, abs_tol;
+    DataType min, abs_tol;
 
     size_t in_size = source_size - 17;
 
     // parse Header
-    min = *((double*)(source));
+    min = *((DataType*)(source));
     source+= 8;
 
-    abs_tol = *((double*)(source));
+    abs_tol = *((DataType*)(source));
     source+= 8;
 
     bits_per_num = *source;
@@ -218,11 +218,11 @@ int scil_algo1_decompress(  const scil_context* ctx,
                 value <<= remaining_bits;
                 uint8_t bits = get_bits(source[end_byte], 8, remaining_bits);
                 value |= bits;
-                //printf("%lu\t%f\n", value, double_repres(value, min, abs_tol));
+                //printf("%lu\t%f\n", value, DataType_repres(value, min, abs_tol));
             }
         }
 
-        dest[index] = double_repres(value, min, abs_tol);
+        dest[index] = DataType_repres(value, min, abs_tol);
         ++index;
     }
 
