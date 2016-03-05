@@ -25,6 +25,7 @@ int main(int argc, char** argv){
 
     uLongf u_size = count;
     Bytef* u_buf = (Bytef*)SAFE_MALLOC(u_size);
+    memset(u_buf, 0, u_size);
 
     ret = uncompress(u_buf, &u_size, c_buf, c_size);
     printf("%d\n\n", ret);
