@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 #include <string.h>
+#include <float.h>
+#include <math.h>
 
 #include <scil-internal.h>
 #include <scil-util.h>
@@ -31,6 +33,29 @@ static scil_compression_algorithm * algo_array[] = {
 	NULL
 };
 
+static int check_compress_lossless_needed(scil_context * ctx){
+	const scil_hints hints = ctx->hints;
+	if ( (hints.absolute_tolerance != SCIL_ACCURACY_DBL_IGNORE && hints.absolute_tolerance <= SCIL_ACCURACY_DBL_FINEST)
+		|| (hints.relative_err_finest_abs_tolerance <= SCIL_ACCURACY_DBL_FINEST && hints.relative_err_finest_abs_tolerance != SCIL_ACCURACY_DBL_IGNORE)
+		|| (hints.relative_tolerance_percent <= SCIL_ACCURACY_DBL_FINEST && hints.relative_tolerance_percent != SCIL_ACCURACY_DBL_IGNORE)
+		|| ( hints.significant_digits != SCIL_ACCURACY_INT_IGNORE &&
+			(hints.significant_digits >= SCIL_ACCURACY_SIGNIFICANT_FINEST || hints.significant_digits == SCIL_ACCURACY_INT_FINEST)) ){
+		return 1;
+	}
+	return 0;
+}
+
+// This function is useful as it changes the sensitivity o the maximum double value
+static void fix_double_setting(double * dbl){
+	if(*dbl == SCIL_ACCURACY_DBL_IGNORE){
+		*dbl = DBL_MAX;
+	}
+}
+
+void scil_init_hints(scil_hints * hints){
+	memset(hints, 0, sizeof(*hints));
+}
+
 int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints){
 	scil_context * ctx =(scil_context*)SAFE_MALLOC(sizeof(scil_context));
 	*out_ctx = ctx;
@@ -40,6 +65,11 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 	ctx->hints.absolute_tolerance = hints->absolute_tolerance;
 	ctx->hints.significant_digits = hints->significant_digits;
 	ctx->hints.force_compression_method = hints->force_compression_method;
+	ctx->lossless_compression_needed = check_compress_lossless_needed(ctx);
+	fix_double_setting(& ctx->hints.relative_tolerance_percent);
+	fix_double_setting(& ctx->hints.relative_err_finest_abs_tolerance);
+	fix_double_setting(& ctx->hints.absolute_tolerance);
+	ctx->hints.significant_digits = (ctx->hints.significant_digits == SCIL_ACCURACY_INT_IGNORE) ? 0 : ctx->hints.significant_digits;
 
 	// verify correctness of algo_array
 	int i = 0;
@@ -72,7 +102,7 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
 	if (hints->force_compression_method >= 0){
 			last_algorithm = algo_array[hints->force_compression_method];
 	}else{
-		if (hints->absolute_tolerance == 0.0 || hints->relative_err_finest_abs_tolerance == 0.0 || hints->relative_tolerance_percent == 0.0 || hints->significant_digits > 20){
+		if (ctx->lossless_compression_needed){
 			// we cannot compress because data must be accurate!
 			last_algorithm = & algo_memcopy;
 		}else{
@@ -133,30 +163,63 @@ int scil_validate_compression(const scil_context* ctx,
                              const size_t uncompressed_size,
                              const DataType*restrict data_uncompressed,
                              const size_t compressed_size,
-                             const byte*restrict data_compressed )
+                             const byte*restrict data_compressed,
+													 	 scil_hints * out_accuracy )
 {
 	byte * data_out = (byte*)SAFE_MALLOC(uncompressed_size);
 	size_t data_out_count = uncompressed_size;
+	scil_hints a;
+
 	int ret = scil_decompress((DataType*) data_out, &data_out_count, data_compressed, compressed_size);
 	if (ret != 0){
 		goto end;
-		return ret;
 	}
 
 	// check length
 	if (data_out_count*sizeof(DataType) != uncompressed_size){
-		return 1;
+		ret = 1;
+		goto end;
 	}
 
-	if(uncompressed_size % sizeof(DataType) != 0){
+	if(uncompressed_size % sizeof(DataType) != 0 || ctx->lossless_compression_needed){
 		// check bytes for identity
+		if (! ctx->lossless_compression_needed){
+			printf("INFO: can check only for identical data as data is not a multiple of DataType\n");
+		}
 		ret = memcmp(data_out, (byte*) data_uncompressed, uncompressed_size);
+		memset(&a, 0, sizeof(a));
+		goto end;
 	}else{
-		// TODO check if tolerance level is met
+		// determine achieved accuracy
+		a.absolute_tolerance = 0;
+		a.significant_digits = 100;
+		a.relative_err_finest_abs_tolerance = 0;
+		a.relative_tolerance_percent = 0;
+
+		for(size_t i = 0; i < uncompressed_size/sizeof(DataType); i++ ){
+			const DataType c = ((DataType*)data_out)[i];
+			const DataType o = data_uncompressed[i];
+			const DataType err = o - c;
+
+			a.absolute_tolerance = (fabs(err) > a.absolute_tolerance)  ? err : a.absolute_tolerance;
+
+			// determine significant digits
+
+			//double relative_tolerance_percent;
+			//double relative_err_finest_abs_tolerance;
+			//int significant_digits;
+		}
+
+		const scil_hints h = ctx->hints;
+		// check if tolerance level is met:
+		ret = 0;
+		if (a.absolute_tolerance > h.absolute_tolerance){
+			ret = 1;
+		}
 	}
 
 end:
   free(data_out);
-
+	*out_accuracy = a;
 	return ret;
 }

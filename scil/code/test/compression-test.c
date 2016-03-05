@@ -83,7 +83,8 @@ int main(){
 
 	scil_context * ctx;
 	scil_hints hints;
-	hints.force_compression_method = 0;
+	scil_init_hints(& hints);
+	hints.force_compression_method = 1;
 	hints.absolute_tolerance = 0.5f;
 	scil_create_compression_context(&ctx, &hints);
 
@@ -119,9 +120,12 @@ int main(){
 		printf("%f ", data_out[i]);
 	}
 	printf("\n");
+	scil_hints accuracy;
+	int ret = scil_validate_compression(ctx, u_buf_size, u_buf, c_buf_size, c_buf, & accuracy);
 
-	int ret = scil_validate_compression(ctx, u_buf_size, u_buf, c_buf_size, c_buf);
 	printf("\nscil_validate_compression returned %s\n", ret == 0 ? "OK" : "ERROR");
+	printf("Accuracy: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits:%d\n",
+		accuracy.relative_tolerance_percent, accuracy.relative_err_finest_abs_tolerance, accuracy.absolute_tolerance, accuracy.significant_digits);
 
 	free(c_buf);
 	free(data_out);

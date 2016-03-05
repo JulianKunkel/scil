@@ -89,7 +89,7 @@ int scil_algo1_compress(const scil_context* ctx,
     uint8_t bits_per_num = get_needed_bit_count(min, max, abs_tol);
 
     //Header byte size (currently sizes of magic number + min + abs_tol)
-    uint8_t head_size = 1;
+    uint8_t head_size = 0;
 
     //Set compression information
     //Minimum value

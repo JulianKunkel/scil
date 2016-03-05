@@ -34,6 +34,16 @@
  */
 #define SCIL_BLOCK_HEADER_MAX_SIZE 1024
 
+// These values define that the particular metrics is not of interest
+#define SCIL_ACCURACY_DBL_IGNORE 0.0
+#define SCIL_ACCURACY_INT_IGNORE 0
+
+// These values define the limit for the accuracy
+#define SCIL_ACCURACY_DBL_FINEST 1e-307
+#define SCIL_ACCURACY_INT_FINEST -1
+#define SCIL_ACCURACY_SIGNIFICANT_FINEST 16
+
+
 typedef unsigned char byte;
 /**
  * \brief Struct containing information on the tolerable
@@ -45,7 +55,7 @@ typedef struct{
 
   /** with a relative tolerance small numbers may be problematic, e.g. 1% for 0.01 becomes 0.01 +- 0.0001
       the finest tolerance limits the smallest relative error
-      e.g. when compressing the value 0.01 with a filest abs tolerance of 0.01 it becomes 0.01 +- 0.01
+      e.g. when compressing the value 0.01 with a finest absolute tolerance of 0.01 it becomes 0.01 +- 0.01
       So this is the lower bound of the resolution and guaranteed error for relative errors,
       where as the absolute tolerance is the guaranteed resolution for all data points.
   **/
@@ -75,6 +85,8 @@ struct scil_context_t{
 
 typedef struct scil_context_t scil_context;
 
+
+void scil_init_hints(scil_hints * hints);
 
 /*
  *
@@ -128,11 +140,13 @@ int scil_decompress(DataType*restrict dest, size_t*restrict dest_count, const by
 
 /**
  \brief Test method: check if the conditions as specified by ctx are met by comparing compressed and decompressed data.
+ out_accuracy contains a set of hints with the observed finest resolution/required precision to accept the data.
  */
 int scil_validate_compression(const scil_context* ctx,
                              const size_t uncompressed_size,
                              const DataType*restrict data_uncompressed,
                              const size_t compressed_size,
-                             const byte*restrict data_compressed );
+                             const byte*restrict data_compressed,
+                             scil_hints * out_accuracy);
 
 #endif

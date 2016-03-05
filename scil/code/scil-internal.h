@@ -39,6 +39,7 @@ typedef struct{
 
 
 struct scil_context_t{
+  int lossless_compression_needed;
   scil_hints hints;
 
   // the last compressor used, could be used for debugging
