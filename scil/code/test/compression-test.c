@@ -127,6 +127,15 @@ int main(){
 	printf("Accuracy: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits:%d\n",
 		accuracy.relative_tolerance_percent, accuracy.relative_err_finest_abs_tolerance, accuracy.absolute_tolerance, accuracy.significant_digits);
 
+	DataType f1 = 10.0;
+	DataType f2 = 10.5;
+
+	scil_determine_accuracy(& f1, &f2, 1, & accuracy);
+	printf("Accuracy: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits:%d\n",
+		accuracy.relative_tolerance_percent, accuracy.relative_err_finest_abs_tolerance, accuracy.absolute_tolerance, accuracy.significant_digits);
+
+
+
 	free(c_buf);
 	free(data_out);
 	free(u_buf);

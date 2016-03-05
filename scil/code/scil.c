@@ -173,7 +173,8 @@ void scil_determine_accuracy(DataType *data_1, DataType *data_2, size_t length, 
 		const DataType c2 = data_2[i];
 		const DataType err = c2 - c1;
 
-		a.absolute_tolerance = (fabs(err) > a.absolute_tolerance)  ? err : a.absolute_tolerance;
+		scil_hints cur;
+		cur.absolute_tolerance = fabs(err);
 
 		// determine significant digits
 		{
@@ -181,25 +182,36 @@ void scil_determine_accuracy(DataType *data_1, DataType *data_2, size_t length, 
 			f1.f = c1;
 			f2.f = c2;
 			if (f1.p.sign != f2.p.sign || f1.p.exponent != f2.p.exponent){
-				a.significant_digits = 0;
+				cur.significant_digits = 0;
 			}else{
 				// check mantisa, bit by bit
 				//printf("%lld %lld\n", f1.p.mantisa, f2.p.mantisa);
-				for(int m = 0 ; m < MANTISA_LENGTH; m++){
+				cur.significant_digits = MANTISA_LENGTH;
+				for(int m = MANTISA_LENGTH-1 ; m >= 0; m--){
 					int b1 = (f1.p.mantisa>>m) & (1);
 					int b2 = (f2.p.mantisa>>m) & (1);
 					// printf("%d %d\n", (int) b1, (int) b2);
 					if( b1 != b2){
-						printf("%d\n", m);
-						a.significant_digits = (int) m;
+						cur.significant_digits = MANTISA_LENGTH - (int) m;
 						break;
 					}
 				}
 			}
 		}
 
-		//double relative_tolerance_percent;
+		// determine relative tolerance
+		if (c2 == 0){
+			if(c1 == 0){
+
+			}
+		}
+
 		//double relative_err_finest_abs_tolerance;
+
+		a.absolute_tolerance = cur.absolute_tolerance > a.absolute_tolerance ? cur.absolute_tolerance : a.absolute_tolerance;
+		a.relative_err_finest_abs_tolerance = cur.relative_err_finest_abs_tolerance > a.relative_err_finest_abs_tolerance ? cur.relative_err_finest_abs_tolerance : a.relative_err_finest_abs_tolerance;
+		a.relative_tolerance_percent = cur.relative_tolerance_percent > a.relative_tolerance_percent ? cur.relative_tolerance_percent : a.relative_tolerance_percent;
+		a.significant_digits = cur.significant_digits < a.significant_digits ? cur.significant_digits :  a.significant_digits;
 	}
 
 	// convert significant_digits in bits to 10 decimals

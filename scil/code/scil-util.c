@@ -190,11 +190,13 @@ static void compute_significant_bit_mapping(){
 }
 
 int scil_convert_significant_decimals_to_bits(int decimals){
+  assert(decimals > 0);
 	compute_significant_bit_mapping();
 	return sig_bits[decimals];
 }
 
 int scil_convert_significant_bits_to_decimals(int bits){
+  assert(bits > 0);
 	// compute mapping between decimals and bits
 	compute_significant_bit_mapping();
 	return sig_decimals[bits];
