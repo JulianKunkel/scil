@@ -165,3 +165,37 @@ void critical_error(const char * msg){
   printf("Critical error: %s\n", msg);
   exit(1);
 }
+
+
+static char sig_bits[sizeof(datatype_cast)*8] = {0};
+static char sig_decimals[sizeof(datatype_cast)*8] = {0};
+
+static void compute_significant_bit_mapping(){
+	if(sig_bits[0] == 0){
+		int c = 0;
+		for(int i=0; i < MANTISA_LENGTH; i++){
+			int v;
+			if (i%3 == 0){
+				v = 4;
+			}else{
+				v = 3;
+			}
+			for(int b=c; b < c+v; b++){
+				sig_decimals[b] = i + 1;
+			}
+			c += v;
+			sig_bits[i] = (char) c;
+		}
+	}
+}
+
+int scil_convert_significant_decimals_to_bits(int decimals){
+	compute_significant_bit_mapping();
+	return sig_bits[decimals];
+}
+
+int scil_convert_significant_bits_to_decimals(int bits){
+	// compute mapping between decimals and bits
+	compute_significant_bit_mapping();
+	return sig_decimals[bits];
+}

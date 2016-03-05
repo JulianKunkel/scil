@@ -188,4 +188,32 @@ uint64_t timespec_to_uint64 (struct timespec t);
 
 void critical_error(const char * msg);
 
+#if (DATA_TYPE == 1)
+
+#define MANTISA_LENGTH 23
+
+typedef union {
+  struct {
+    uint32_t mantisa  : MANTISA_LENGTH;
+    uint32_t exponent : 8;
+    uint32_t sign     : 1;
+  } p;
+	float f;
+} datatype_cast;
+#elif (DATA_TYPE == 0)
+
+#define MANTISA_LENGTH 52
+
+typedef union {
+  struct {
+    uint64_t mantisa  : MANTISA_LENGTH;
+    uint32_t exponent : 11;
+    uint32_t sign     : 1;
+  } p;
+	double f;
+} datatype_cast;
+#endif
+
+int scil_convert_significant_decimals_to_bits(int decimals);
+int scil_convert_significant_bits_to_decimals(int bits);
 #endif /* UTIL_H */

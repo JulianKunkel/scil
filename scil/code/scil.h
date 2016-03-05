@@ -24,10 +24,15 @@
 
 #include <stdio.h>
 
+#define DATA_TYPE 0
+
 // The input data type to compress from/to
-#ifndef DataType
+#if (DATA_TYPE == 0)
 #define DataType double
+#elif (DATA_TYPE == 1)
+#define DataType float
 #endif
+
 
 /*
  This amount of data may be needed for a block header.
@@ -134,9 +139,8 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
  */
 int scil_decompress(DataType*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size);
 
-// int scil_decompress_start_stream(scil_context ** out_ctx, const char*restrict compressed_buf_in);
-// int scil_decompress_stream(const scil_context* ctx, double*restrict data_out, size_t*restrict out_size, const char*restrict compressed_buf_in, const size_t in_size);
 
+void scil_determine_accuracy(DataType *data_1, DataType *data_2, size_t length, scil_hints * out_hints);
 
 /**
  \brief Test method: check if the conditions as specified by ctx are met by comparing compressed and decompressed data.

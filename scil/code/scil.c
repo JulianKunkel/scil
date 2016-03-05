@@ -159,6 +159,54 @@ int scil_decompress(DataType*restrict dest, size_t*restrict dest_count, const by
 	return ret;
 }
 
+
+
+void scil_determine_accuracy(DataType *data_1, DataType *data_2, size_t length, scil_hints * out_hints){
+	scil_hints a;
+	a.absolute_tolerance = 0;
+	a.significant_digits = MANTISA_LENGTH; // in bits
+	a.relative_err_finest_abs_tolerance = 0;
+	a.relative_tolerance_percent = 0;
+
+	for(size_t i = 0; i < length; i++ ){
+		const DataType c1 = data_1[i];
+		const DataType c2 = data_2[i];
+		const DataType err = c2 - c1;
+
+		a.absolute_tolerance = (fabs(err) > a.absolute_tolerance)  ? err : a.absolute_tolerance;
+
+		// determine significant digits
+		{
+			datatype_cast f1, f2;
+			f1.f = c1;
+			f2.f = c2;
+			if (f1.p.sign != f2.p.sign || f1.p.exponent != f2.p.exponent){
+				a.significant_digits = 0;
+			}else{
+				// check mantisa, bit by bit
+				//printf("%lld %lld\n", f1.p.mantisa, f2.p.mantisa);
+				for(int m = 0 ; m < MANTISA_LENGTH; m++){
+					int b1 = (f1.p.mantisa>>m) & (1);
+					int b2 = (f2.p.mantisa>>m) & (1);
+					// printf("%d %d\n", (int) b1, (int) b2);
+					if( b1 != b2){
+						printf("%d\n", m);
+						a.significant_digits = (int) m;
+						break;
+					}
+				}
+			}
+		}
+
+		//double relative_tolerance_percent;
+		//double relative_err_finest_abs_tolerance;
+	}
+
+	// convert significant_digits in bits to 10 decimals
+	a.significant_digits = scil_convert_significant_bits_to_decimals(a.significant_digits);
+	*out_hints = a;
+}
+
 int scil_validate_compression(const scil_context* ctx,
                              const size_t uncompressed_size,
                              const DataType*restrict data_uncompressed,
@@ -183,37 +231,32 @@ int scil_validate_compression(const scil_context* ctx,
 
 	if(uncompressed_size % sizeof(DataType) != 0 || ctx->lossless_compression_needed){
 		// check bytes for identity
-		if (! ctx->lossless_compression_needed){
-			printf("INFO: can check only for identical data as data is not a multiple of DataType\n");
-		}
 		ret = memcmp(data_out, (byte*) data_uncompressed, uncompressed_size);
 		memset(&a, 0, sizeof(a));
+
+		if (! ctx->lossless_compression_needed){
+			printf("INFO: can check only for identical data as data is not a multiple of DataType\n");
+		}else{
+			scil_determine_accuracy((DataType*) data_out, (DataType*) data_uncompressed, uncompressed_size/sizeof(DataType), & a);
+		}
 		goto end;
 	}else{
 		// determine achieved accuracy
-		a.absolute_tolerance = 0;
-		a.significant_digits = 100;
-		a.relative_err_finest_abs_tolerance = 0;
-		a.relative_tolerance_percent = 0;
-
-		for(size_t i = 0; i < uncompressed_size/sizeof(DataType); i++ ){
-			const DataType c = ((DataType*)data_out)[i];
-			const DataType o = data_uncompressed[i];
-			const DataType err = o - c;
-
-			a.absolute_tolerance = (fabs(err) > a.absolute_tolerance)  ? err : a.absolute_tolerance;
-
-			// determine significant digits
-
-			//double relative_tolerance_percent;
-			//double relative_err_finest_abs_tolerance;
-			//int significant_digits;
-		}
+		scil_determine_accuracy((DataType*) data_out, (DataType*) data_uncompressed, uncompressed_size/sizeof(DataType), & a);
 
 		const scil_hints h = ctx->hints;
 		// check if tolerance level is met:
 		ret = 0;
 		if (a.absolute_tolerance > h.absolute_tolerance){
+			ret = 1;
+		}
+		if (a.relative_tolerance_percent > h.relative_tolerance_percent){
+			ret = 1;
+		}
+		if (a.relative_err_finest_abs_tolerance > h.relative_err_finest_abs_tolerance){
+			ret = 1;
+		}
+		if (a.significant_digits < h.significant_digits){
 			ret = 1;
 		}
 	}
