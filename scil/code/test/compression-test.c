@@ -86,7 +86,7 @@ int main(){
 	scil_init_hints(& hints);
 	hints.force_compression_method = 1;
 	hints.absolute_tolerance = 0.5;
-	//hints.significant_bits = 3;
+	hints.significant_bits = 2;
 	scil_create_compression_context(&ctx, &hints);
 
 	const size_t count = 100;

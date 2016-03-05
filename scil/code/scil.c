@@ -33,6 +33,7 @@ static scil_compression_algorithm * algo_array[] = {
 	NULL
 };
 
+#pragma GCC diagnostic ignored "-Wfloat-equal"
 static int check_compress_lossless_needed(scil_context * ctx){
 	const scil_hints hints = ctx->hints;
 
@@ -61,7 +62,7 @@ void scil_init_hints(scil_hints * hints){
 }
 
 void scil_hints_print(scil_hints * h){
-	printf("Hints: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits:%d \n\tsignificant_bits:%d\n",
+	printf("Hints: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits (after 1. so in the mantisa):%d \n\tsignificant_bits (in the mantisa):%d\n",
 		h->relative_tolerance_percent, h->relative_err_finest_abs_tolerance, h->absolute_tolerance, h->significant_digits, h->significant_bits);
 }
 
@@ -83,6 +84,12 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 	}
 	if (ohints->significant_bits != SCIL_ACCURACY_INT_IGNORE && ohints->significant_digits == SCIL_ACCURACY_INT_IGNORE){
 		ohints->significant_digits = scil_convert_significant_bits_to_decimals(ohints->significant_bits);
+
+		// we need to round the bits properly to decimals, i.e., 1 bit precision in the mantisa requires 1 decimal digit.
+		const int newbits = scil_convert_significant_decimals_to_bits(ohints->significant_digits);
+		if ( newbits < ohints->significant_bits ){
+			ohints->significant_digits = scil_convert_significant_bits_to_decimals(ohints->significant_bits) + 1;
+		}
 	}
 
 	ctx->lossless_compression_needed = check_compress_lossless_needed(ctx);
