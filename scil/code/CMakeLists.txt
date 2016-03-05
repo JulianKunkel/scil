@@ -20,34 +20,18 @@ set (CMAKE_C_FLAGS_DEBUG "-O0")
 set (CMAKE_C_FLAGS_RELEASE "-O3")
 
 
-include_directories(argo .)
+include_directories(.)
 
-set (SOURCE
-	main.c
-    algo/memcopy.c
-    algo/algo-1.c
-    algo/gzip.c
-    algo/gzalgo-1.c
-	util.c
-)
 
-add_library(scil SHARED scil.c)
+FILE(GLOB ALGO algo/*.c)
+
+MESSAGE( STATUS "Available algorithms: " ${ALGO})
+
+add_library(scil SHARED scil.c scil-util.c ${ALGO})
 target_link_libraries(scil m)
 target_link_libraries(scil z)
 
-#target_link_libraries(scil )
-
-# add the executable
-add_executable(scil-test ${SOURCE})
-target_link_libraries(scil-test scil)
-
-# algo-1-test
-add_executable(algo-1-test algo/algo-1-test.c)
-target_link_libraries(algo-1-test m)
-
-# zlib-test
-add_executable(zlib-test test/zlib-test.c util.c)
-target_link_libraries(zlib-test z)
+SUBDIRS (test)
 
 ## Installation
 install(TARGETS scil LIBRARY DESTINATION lib)

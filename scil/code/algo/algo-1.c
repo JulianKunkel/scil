@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-#include <util.h>
+#include <scil-util.h>
 
 static int find_min_max(double*restrict min, double*restrict max, const double* buf, const size_t size){
 

@@ -1,7 +1,7 @@
 #include <string.h>
 
 #include <scil-internal.h>
-#include <util.h>
+#include <scil-util.h>
 
 // known algorithms:
 #include <algo/memcopy.h>

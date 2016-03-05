@@ -1,4 +1,4 @@
-#include "util.h"
+#include <scil-util.h>
 
 #include <assert.h>
 #include <math.h>
@@ -69,7 +69,7 @@ void swap_float_buffer(float** buf1, float** buf2){
 }
 
 FILE* safe_fopen(const char* path, const char* args, const char* src, unsigned long line){
-    
+
     assert(path!=NULL);
     assert(args!=NULL);
 

@@ -1,9 +1,9 @@
-#include <algo/gzalgo-1.h>
-
 #include <zlib.h>
 #include <string.h>
 
-#include <util.h>
+#include <scil-util.h>
+
+#include <algo/gzalgo-1.h>
 #include <algo/algo-1.h>
 #include <algo/gzip.h>
 
@@ -88,6 +88,7 @@ int scil_gzalgo1_decompress(const scil_context* ctx, double*restrict dest, size_
 
     return 0;*/
 }
+
 
 scil_compression_algorithm algo_gzalgo1 = {
     scil_gzalgo1_compress,

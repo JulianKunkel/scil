@@ -2,7 +2,7 @@
 
 #include <zlib.h>
 
-#include <util.h>
+#include <scil-util.h>
 
 
 int main(int argc, char** argv){

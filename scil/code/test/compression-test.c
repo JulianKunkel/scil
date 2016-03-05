@@ -7,7 +7,7 @@
 #include <time.h>
 
 #include <scil.h>
-#include <util.h>
+#include <scil-util.h>
 
 char* read_data(const char* path){
 

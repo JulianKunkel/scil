@@ -47,7 +47,7 @@ typedef struct{
 
 // The structure is hidden in the internal header
 #ifdef SCIL_INTERNAL_HEADER_
-#warning USING INTERNAL HEADER
+//#warning USING INTERNAL HEADER
 #else
 struct scil_context_t{
     void * tmp;
