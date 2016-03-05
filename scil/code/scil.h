@@ -133,6 +133,6 @@ int scil_validate_compression(const scil_context* ctx,
                              const size_t uncompressed_size,
                              const DataType*restrict data_uncompressed,
                              const size_t compressed_size,
-                             const DataType*restrict data_compressed );
+                             const byte*restrict data_compressed );
 
 #endif

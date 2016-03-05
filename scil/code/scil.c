@@ -117,14 +117,13 @@ int scil_decompress(DataType*restrict dest, size_t*restrict dest_count, const by
 	int ret;
 	last_algorithm = algo_array[magic_number];
 
-
 	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_BASE_DATATYPE){
 		ret = last_algorithm->decompress(NULL, dest, dest_count, source + 1, source_size - 1);
 	}else if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
 		*dest_count = (*dest_count)*sizeof(DataType);
 		ret = last_algorithm->decompress(NULL, dest, dest_count, source + 1, source_size - 1);
 		assert((*dest_count) % sizeof(DataType) == 0);
-		dest_count = (*dest_count) / sizeof(DataType);
+		*dest_count = (*dest_count) / sizeof(DataType);
 	}
 
 	return ret;
@@ -134,7 +133,30 @@ int scil_validate_compression(const scil_context* ctx,
                              const size_t uncompressed_size,
                              const DataType*restrict data_uncompressed,
                              const size_t compressed_size,
-                             const DataType*restrict data_compressed )
+                             const byte*restrict data_compressed )
 {
-	return 1;
+	byte * data_out = (byte*)SAFE_MALLOC(uncompressed_size);
+	size_t data_out_count = uncompressed_size;
+	int ret = scil_decompress((DataType*) data_out, &data_out_count, data_compressed, compressed_size);
+	if (ret != 0){
+		goto end;
+		return ret;
+	}
+
+	// check length
+	if (data_out_count*sizeof(DataType) != uncompressed_size){
+		return 1;
+	}
+
+	if(uncompressed_size % sizeof(DataType) != 0){
+		// check bytes for identity
+		ret = memcmp(data_out, (byte*) data_uncompressed, uncompressed_size);
+	}else{
+		// TODO check if tolerance level is met
+	}
+
+end:
+  free(data_out);
+
+	return ret;
 }

@@ -88,13 +88,13 @@ int main(){
 	scil_create_compression_context(&ctx, &hints);
 
 	const size_t count = 100;
-	size_t u_buf_size = count * sizeof(double);
+	size_t u_buf_size = count * sizeof(DataType);
 
-	double * u_buf = (double *)SAFE_MALLOC(u_buf_size);
+	DataType * u_buf = (DataType *)SAFE_MALLOC(u_buf_size);
 	printf("U ");
 	for(size_t i = 0; i < count; ++i)
 	{
-		u_buf[i] = (double)(i % 10+0.1);
+		u_buf[i] = (DataType)(i % 10+0.1);
 		printf("%f ", u_buf[i]);
 	}
 	printf("\n\n");
@@ -107,7 +107,7 @@ int main(){
 
 	printf("C size: %lu\n", c_buf_size);
 
-	double * data_out = (double*)SAFE_MALLOC(u_buf_size);
+	DataType * data_out = (DataType*)SAFE_MALLOC(u_buf_size);
 	size_t out_count = count;
 	scil_decompress(data_out, &out_count, c_buf, c_buf_size);
 
@@ -120,52 +120,13 @@ int main(){
 	}
 	printf("\n");
 
+	int ret = scil_validate_compression(ctx, u_buf_size, u_buf, c_buf_size, c_buf);
+	printf("\nscil_validate_compression returned %s\n", ret == 0 ? "OK" : "ERROR");
+
 	free(c_buf);
 	free(data_out);
 	free(u_buf);
 	free(ctx);
-	/*
-	size_t count = 1000;
-
-	char* u_path = "uncomp_1000_d.data";
-
-	char* c_path = "comp_1000_d.data";
-
-	double* buf = (double*)read_data(u_path);
-	int ret;
-
-	scil_context * ctx;
-	scil_hints hints;
-	hints.absolute_tolerance = 1.0;
-
-	ret = scil_create_compression_context(& ctx, & hints);
-
-	char* c_buf = NULL;
-	size_t c_size;
-	scil_compress(ctx, &c_buf, &c_size, buf, count);
-
-	ret = scil_validate_compression(ctx, count, buf, c_size, c_buf);
-
-	free(buf);
-	free(ctx);
-	free(c_buf);
-
-	if (ret != 0){
-		printf("Error in the validation!\n");
-		return 1;
-	}
-
-	write_data(c_buf, c_size, sizeof(char), c_path);
-
-
-	double* buf = (double*)SAFE_MALLOC(count * sizeof(double));
-
-	for(size_t i = 0; i < count; ++i){
-		buf[i] = (double)(i % 10);
-	}
-
-	write_data(buf, count, sizeof(double), u_path);
-	*/
 
 	return 0;
 }
