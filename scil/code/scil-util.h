@@ -1,15 +1,15 @@
 // This file is part of SCIL.
-// 
+//
 // SCIL is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // SCIL is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef UTIL_H
@@ -105,7 +105,6 @@ void* safe_realloc (void* ptr, size_t size, const char* file,
  */
 #define SAFE_REALLOC(ptr, size) safe_realloc(ptr, size, __FILE__, __LINE__)
 
-
 /**
  * \brief Opens a file with error checking.
  * \param path Path of the file to open.
@@ -186,5 +185,7 @@ void print_time (struct timespec time, FILE* file);
 double timespec_to_double (struct timespec t);
 
 uint64_t timespec_to_uint64 (struct timespec t);
+
+void critical_error(const char * msg);
 
 #endif /* UTIL_H */

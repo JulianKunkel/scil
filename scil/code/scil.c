@@ -23,6 +23,14 @@
 #include <algo/gzip.h>
 #include <algo/gzalgo-1.h>
 
+static scil_compression_algorithm * algo_array[] = {
+	& algo_memcopy,
+	& algo_algo1,
+	& algo_gzip,
+	& algo_gzalgo1,
+	NULL
+};
+
 int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints){
 	scil_context * ctx =(scil_context*)SAFE_MALLOC(sizeof(scil_context));
 	*out_ctx = ctx;
@@ -33,6 +41,13 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 	ctx->hints.significant_digits = hints->significant_digits;
 	ctx->hints.force_compression_method = hints->force_compression_method;
 
+	// verify correctness of algo_array
+	int i = 0;
+	for (scil_compression_algorithm ** algo = algo_array; *algo != NULL ; algo++, i++){
+		if ((*algo)->magic_number != i){
+			critical_error("Magic number does not match!");
+		}
+	}
 	return 0;
 }
 
@@ -55,13 +70,7 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
 	scil_compression_algorithm * last_algorithm;
 
 	if (hints->force_compression_method >= 0){
-		switch (hints->force_compression_method) {
-			case 0: last_algorithm = & algo_memcopy; break;
-			case 1: last_algorithm = & algo_algo1; break;
-			case 2: last_algorithm = & algo_gzip; break;
-			case 3: last_algorithm = & algo_gzalgo1; break;
-			default: last_algorithm = & algo_memcopy;
-		}
+			last_algorithm = algo_array[hints->force_compression_method];
 	}else{
 		if (hints->absolute_tolerance == 0.0 || hints->relative_err_finest_abs_tolerance == 0.0 || hints->relative_tolerance_percent == 0.0 || hints->significant_digits > 20){
 			// we cannot compress because data must be accurate!
@@ -102,16 +111,12 @@ int scil_decompress(DataType*restrict dest, size_t*restrict dest_count, const by
 	scil_compression_algorithm * last_algorithm;
 
 	// Read magic number (algorithm id) from header
-	uint8_t magic_number = source[0];
+	const uint8_t magic_number = source[0];
 
 	// Use decompression algorithm based on algo id
-	switch(magic_number){
-		case 0: last_algorithm = & algo_memcopy; break;
-		case 1: last_algorithm = & algo_algo1; break;
-		case 2: last_algorithm = & algo_gzip; break;
-		case 3: last_algorithm = & algo_gzalgo1; break;
-	}
 	int ret;
+	last_algorithm = algo_array[magic_number];
+
 
 	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_BASE_DATATYPE){
 		ret = last_algorithm->decompress(NULL, dest, dest_count, source + 1, source_size - 1);
