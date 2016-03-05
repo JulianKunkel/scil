@@ -23,6 +23,10 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 }
 
 int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_size, const double*restrict source, const size_t source_count){
+	if (source_count == 0){
+		*dest_size = 0;
+		return 0;
+	}
 
 	assert(ctx != NULL);
 	assert(dest != NULL);
@@ -55,17 +59,21 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
 
 	ctx->last_algorithm = last_algorithm;
 
-    //Set algorithm id
-    dest[0] = last_algorithm->magic_number;
-    dest++;
+  //Set algorithm id
+  dest[0] = last_algorithm->magic_number;
+  dest++;
 
 	int ret = last_algorithm->compress(ctx, dest, dest_size, source, source_count);
-	dest_size++;
+	(*dest_size)++;
 
 	return ret;
 }
 
 int scil_decompress(double*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size){
+	if (source_size == 0){
+		*dest_count = 0;
+		return 0;
+	}
 
 	assert(dest != NULL);
 	assert(dest_count != NULL);

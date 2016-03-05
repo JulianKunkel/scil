@@ -6,7 +6,6 @@
 
 
 int main(int argc, char** argv){
-
     uLong count = 100;
 
     Bytef* buf = (Bytef*)SAFE_MALLOC(count * sizeof(Bytef));
