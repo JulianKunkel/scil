@@ -140,7 +140,7 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
 int scil_decompress(DataType*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size);
 
 
-void scil_determine_accuracy(DataType *data_1, DataType *data_2, size_t length, scil_hints * out_hints);
+void scil_determine_accuracy(DataType *data_1, DataType *data_2, const size_t length, const double relative_err_finest_abs_tolerance, scil_hints * out_hints);
 
 /**
  \brief Test method: check if the conditions as specified by ctx are met by comparing compressed and decompressed data.

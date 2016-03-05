@@ -159,9 +159,7 @@ int scil_decompress(DataType*restrict dest, size_t*restrict dest_count, const by
 	return ret;
 }
 
-
-
-void scil_determine_accuracy(DataType *data_1, DataType *data_2, size_t length, scil_hints * out_hints){
+void scil_determine_accuracy(DataType *data_1, DataType *data_2, const size_t length, const double relative_err_finest_abs_tolerance, scil_hints * out_hints){
 	scil_hints a;
 	a.absolute_tolerance = 0;
 	a.significant_digits = MANTISA_LENGTH; // in bits
@@ -171,10 +169,10 @@ void scil_determine_accuracy(DataType *data_1, DataType *data_2, size_t length, 
 	for(size_t i = 0; i < length; i++ ){
 		const DataType c1 = data_1[i];
 		const DataType c2 = data_2[i];
-		const DataType err = c2 - c1;
+		const DataType err = fabs(c2 - c1);
 
 		scil_hints cur;
-		cur.absolute_tolerance = fabs(err);
+		cur.absolute_tolerance = err;
 
 		// determine significant digits
 		{
@@ -200,22 +198,38 @@ void scil_determine_accuracy(DataType *data_1, DataType *data_2, size_t length, 
 		}
 
 		// determine relative tolerance
-		if (c2 == 0){
-			if(c1 == 0){
-
+		cur.relative_tolerance_percent = 0;
+		cur.relative_err_finest_abs_tolerance = 0;
+		if (err >= relative_err_finest_abs_tolerance){
+			if (c1 == 0 && c2 != 0){
+				cur.relative_tolerance_percent = INFINITY;
+			}else{
+				// sign check not needed
+				//if (c2 < 0 && c1 > 0 || c2 > 0 && c1 < 0){
+					// signs are different
+					cur.relative_tolerance_percent = fabs(1 - c2 / c1);
+				//}else{
+				//	cur.relative_tolerance_percent = 1 - c2 / c1;
+				//}
 			}
+		}else{
+			cur.relative_err_finest_abs_tolerance = err;
 		}
 
-		//double relative_err_finest_abs_tolerance;
-
-		a.absolute_tolerance = cur.absolute_tolerance > a.absolute_tolerance ? cur.absolute_tolerance : a.absolute_tolerance;
-		a.relative_err_finest_abs_tolerance = cur.relative_err_finest_abs_tolerance > a.relative_err_finest_abs_tolerance ? cur.relative_err_finest_abs_tolerance : a.relative_err_finest_abs_tolerance;
-		a.relative_tolerance_percent = cur.relative_tolerance_percent > a.relative_tolerance_percent ? cur.relative_tolerance_percent : a.relative_tolerance_percent;
-		a.significant_digits = cur.significant_digits < a.significant_digits ? cur.significant_digits :  a.significant_digits;
+		a.absolute_tolerance = max(cur.absolute_tolerance, a.absolute_tolerance);
+		a.relative_err_finest_abs_tolerance = max(cur.relative_err_finest_abs_tolerance, a.relative_err_finest_abs_tolerance);
+		a.relative_tolerance_percent = max(cur.relative_tolerance_percent, a.relative_tolerance_percent);
+		a.significant_digits = min(cur.significant_digits, a.significant_digits);
 	}
 
 	// convert significant_digits in bits to 10 decimals
 	a.significant_digits = scil_convert_significant_bits_to_decimals(a.significant_digits);
+	a.relative_tolerance_percent *= 100.0;
+
+	if ( a.relative_err_finest_abs_tolerance == 0 ){
+		a.relative_err_finest_abs_tolerance = a.absolute_tolerance;
+	}
+
 	*out_hints = a;
 }
 
@@ -249,12 +263,12 @@ int scil_validate_compression(const scil_context* ctx,
 		if (! ctx->lossless_compression_needed){
 			printf("INFO: can check only for identical data as data is not a multiple of DataType\n");
 		}else{
-			scil_determine_accuracy((DataType*) data_out, (DataType*) data_uncompressed, uncompressed_size/sizeof(DataType), & a);
+			scil_determine_accuracy((DataType*) data_out, (DataType*) data_uncompressed, uncompressed_size/sizeof(DataType), ctx->hints.relative_err_finest_abs_tolerance, & a);
 		}
 		goto end;
 	}else{
 		// determine achieved accuracy
-		scil_determine_accuracy((DataType*) data_out, (DataType*) data_uncompressed, uncompressed_size/sizeof(DataType), & a);
+		scil_determine_accuracy((DataType*) data_out, (DataType*) data_uncompressed, uncompressed_size/sizeof(DataType), ctx->hints.relative_err_finest_abs_tolerance, & a);
 
 		const scil_hints h = ctx->hints;
 		// check if tolerance level is met:

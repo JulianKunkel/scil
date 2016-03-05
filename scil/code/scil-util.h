@@ -33,6 +33,14 @@
  */
 #define _FILE_OFFSET_BITS 64
 
+#define max(a,b) \
+  (a > b ? a : b)
+
+#define min(a,b) \
+  (-max(-a, -b))
+
+
+
 /**
  * \brief Allocates a buffer with error checking.
  *

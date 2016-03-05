@@ -121,16 +121,24 @@ int main(){
 	}
 	printf("\n");
 	scil_hints accuracy;
-	int ret = scil_validate_compression(ctx, u_buf_size, u_buf, c_buf_size, c_buf, & accuracy);
 
-	printf("\nscil_validate_compression returned %s\n", ret == 0 ? "OK" : "ERROR");
-	printf("Accuracy: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits:%d\n",
-		accuracy.relative_tolerance_percent, accuracy.relative_err_finest_abs_tolerance, accuracy.absolute_tolerance, accuracy.significant_digits);
+	printf("Testing accuracy first\n");
 
 	DataType f1 = 10.0;
 	DataType f2 = 10.5;
 
-	scil_determine_accuracy(& f1, &f2, 1, & accuracy);
+	scil_determine_accuracy(& f1, &f2, 1, 0.01, & accuracy);
+	printf("Accuracy: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits:%d\n",
+		accuracy.relative_tolerance_percent, accuracy.relative_err_finest_abs_tolerance, accuracy.absolute_tolerance, accuracy.significant_digits);
+
+	scil_determine_accuracy(& f1, &f2, 1, 0.51, & accuracy);
+	printf("Accuracy: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits:%d\n",
+		accuracy.relative_tolerance_percent, accuracy.relative_err_finest_abs_tolerance, accuracy.absolute_tolerance, accuracy.significant_digits);
+
+
+	int ret = scil_validate_compression(ctx, u_buf_size, u_buf, c_buf_size, c_buf, & accuracy);
+
+	printf("\nscil_validate_compression returned %s\n", ret == 0 ? "OK" : "ERROR");
 	printf("Accuracy: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits:%d\n",
 		accuracy.relative_tolerance_percent, accuracy.relative_err_finest_abs_tolerance, accuracy.absolute_tolerance, accuracy.significant_digits);
 
