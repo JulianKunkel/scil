@@ -22,7 +22,6 @@
  * \author Armin Schaare <3schaare@informatik.uni-hamburg.de>
  */
 
-
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,8 +37,6 @@
 
 #define min(a,b) \
   (-max(-a, -b))
-
-
 
 /**
  * \brief Allocates a buffer with error checking.

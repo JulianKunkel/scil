@@ -37,7 +37,7 @@
 /*
  This amount of data may be needed for a block header.
  */
-#define SCIL_BLOCK_HEADER_MAX_SIZE 1024
+#define SCIL_BLOCK_HEADER_MAX_SIZE 256
 
 // These values define that the particular metrics is not of interest
 #define SCIL_ACCURACY_DBL_IGNORE 0.0

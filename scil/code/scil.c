@@ -23,13 +23,11 @@
 #include <algo/memcopy.h>
 #include <algo/algo-1.h>
 #include <algo/gzip.h>
-#include <algo/gzalgo-1.h>
 
 static scil_compression_algorithm * algo_array[] = {
 	& algo_memcopy,
 	& algo_algo1,
 	& algo_gzip,
-	& algo_gzalgo1,
 	NULL
 };
 
@@ -47,7 +45,7 @@ static int check_compress_lossless_needed(scil_context * ctx){
 	return 0;
 }
 
-// This function is useful as it changes the sensitivity o the maximum double value
+// This function is useful as it changes the sensitivity of the maximum double value
 static void fix_double_setting(double * dbl){
 	if(*dbl == SCIL_ACCURACY_DBL_IGNORE){
 		*dbl = DBL_MAX;
@@ -125,8 +123,6 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
 	const scil_hints * hints = & ctx->hints;
 
 	// pick the best algorithm for the settings given in ctx...
-	// now only one algorithm
-
 	scil_compression_algorithm * last_algorithm;
 
 	if (hints->force_compression_method >= 0){
@@ -142,9 +138,9 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
 
 	ctx->last_algorithm = last_algorithm;
 
-  //Set algorithm id
-  dest[0] = last_algorithm->magic_number;
-  dest++;
+	//Set algorithm id
+	dest[0] = last_algorithm->magic_number;
+	dest++;
 
 	int ret;
 

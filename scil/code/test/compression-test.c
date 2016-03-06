@@ -134,12 +134,10 @@ int main(){
 	scil_determine_accuracy(& f1, &f2, 1, 0.51, & accuracy);
 	scil_hints_print(& accuracy);
 
-
 	int ret = scil_validate_compression(ctx, u_buf_size, u_buf, c_buf_size, c_buf, & accuracy);
 
 	printf("\nscil_validate_compression returned %s\n", ret == 0 ? "OK" : "ERROR");
 	scil_hints_print(& accuracy);
-
 
 	free(c_buf);
 	free(data_out);
