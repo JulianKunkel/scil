@@ -23,13 +23,35 @@
 
 enum compressor_type{
   SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES,
-  SCIL_COMPRESSOR_TYPE_BASE_DATATYPE
+  SCIL_COMPRESSOR_TYPE_BASE_DATATYPE,
+  SCIL_COMPRESSOR_TYPE_N_DIMENSIONAL,
+  SCIL_COMPRESSOR_TYPE_ICOSAHEDRAL
 };
 
 
+
 typedef struct{
-    int (*compress)(const scil_context* ctx, byte* restrict compressed_buf_out, size_t* restrict out_size, const DataType*restrict data_in, const size_t in_size);
-    int (*decompress)(const scil_context* ctx, DataType*restrict data_out, size_t*restrict out_size, const byte*restrict compressed_buf_in, const size_t in_size);
+    union{
+      struct{
+        int (*compress)(const scil_context* ctx, byte* restrict compressed_buf_out, size_t* restrict out_size, const byte*restrict data_in, const size_t in_size);
+        int (*decompress)(const scil_context* ctx, byte*restrict data_out, size_t*restrict out_size, const byte*restrict compressed_buf_in, const size_t in_size);
+      } btype;
+
+      struct{
+        int (*compress)(const scil_context* ctx, byte* restrict compressed_buf_out, size_t* restrict out_size, const DataType*restrict data_in, const size_t in_size);
+        int (*decompress)(const scil_context* ctx, DataType*restrict data_out, size_t*restrict out_size, const byte*restrict compressed_buf_in, const size_t in_size);
+      } dtype;
+
+      struct{ // where to put the dimensionality of the stream? Should we put it into the context_create?
+        int (*compress)(const scil_context* ctx, byte* restrict compressed_buf_out, size_t* restrict out_size, const void*restrict nd_array, const size_t in_size);
+        int (*decompress)(const scil_context* ctx, byte*restrict data_out, size_t*restrict out_size, const byte*restrict compressed_buf_in, const size_t in_size);
+      } NDtype;
+
+      struct{
+        int (*compress)(const scil_context* ctx, byte* restrict compressed_buf_out, size_t* restrict out_size, const byte*restrict data_in, const size_t in_size);
+        int (*decompress)(const scil_context* ctx, byte*restrict data_out, size_t*restrict out_size, const byte*restrict compressed_buf_in, const size_t in_size);
+      } ICOtype;
+    } c;
     const char * name;
     byte magic_number;
 

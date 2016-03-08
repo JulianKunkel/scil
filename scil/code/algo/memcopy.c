@@ -16,14 +16,14 @@
 
 #include <string.h>
 
-int scil_memcopy_compress(const scil_context* ctx, byte* restrict dest, size_t*restrict dest_size, const DataType*restrict source, const size_t source_count){
+int scil_memcopy_compress(const scil_context* ctx, byte* restrict dest, size_t*restrict dest_size, const byte*restrict source, const size_t source_count){
     // TODO check if out_size is sufficently large
     *dest_size = source_count;
     memcpy(dest, source, source_count);
     return 0;
 }
 
-int scil_memcopy_decompress(const scil_context* ctx, DataType*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size){
+int scil_memcopy_decompress(const scil_context* ctx, byte*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size){
     // TODO check if buff is sufficiently large
     *dest_count = source_size;
     memcpy(dest, source, source_size);
@@ -31,8 +31,10 @@ int scil_memcopy_decompress(const scil_context* ctx, DataType*restrict dest, siz
 }
 
 scil_compression_algorithm algo_memcopy = {
-    scil_memcopy_compress,
-    scil_memcopy_decompress,
+    .c.btype = { 
+      scil_memcopy_compress,
+      scil_memcopy_decompress
+    },
     "memcopy",
     0,
     SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES

@@ -145,9 +145,9 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
 	int ret;
 
 	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_BASE_DATATYPE){
-		ret = last_algorithm->compress(ctx, dest, dest_size, source, source_count);
+		ret = last_algorithm->c.dtype.compress(ctx, dest, dest_size, source, source_count);
 	}else if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
-		ret = last_algorithm->compress(ctx, dest, dest_size, source, source_count * sizeof(DataType));
+		ret = last_algorithm->c.btype.compress(ctx, dest, dest_size, (byte *) source, source_count * sizeof(DataType));
 	}
 	(*dest_size)++;
 
@@ -174,10 +174,10 @@ int scil_decompress(DataType*restrict dest, size_t*restrict dest_count, const by
 	last_algorithm = algo_array[magic_number];
 
 	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_BASE_DATATYPE){
-		ret = last_algorithm->decompress(NULL, dest, dest_count, source + 1, source_size - 1);
+		ret = last_algorithm->c.dtype.decompress(NULL, dest, dest_count, source + 1, source_size - 1);
 	}else if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
 		*dest_count = (*dest_count)*sizeof(DataType);
-		ret = last_algorithm->decompress(NULL, dest, dest_count, source + 1, source_size - 1);
+		ret = last_algorithm->c.btype.decompress(NULL, (byte *) dest, dest_count, source + 1, source_size - 1);
 		assert((*dest_count) % sizeof(DataType) == 0);
 		*dest_count = (*dest_count) / sizeof(DataType);
 	}
