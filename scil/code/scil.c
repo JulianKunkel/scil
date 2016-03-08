@@ -12,6 +12,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
+
 #include <string.h>
 #include <float.h>
 #include <math.h>
@@ -28,6 +29,7 @@ static scil_compression_algorithm * algo_array[] = {
 	& algo_memcopy,
 	& algo_algo1,
 	& algo_gzip,
+	& algo_algo2,
 	NULL
 };
 
@@ -122,7 +124,6 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
 
 	const scil_hints * hints = & ctx->hints;
 
-	// pick the best algorithm for the settings given in ctx...
 	scil_compression_algorithm * last_algorithm;
 
 	if (hints->force_compression_method >= 0){
@@ -132,7 +133,8 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
 			// we cannot compress because data must be accurate!
 			last_algorithm = & algo_memcopy;
 		}else{
-			last_algorithm = & algo_algo1;
+			// TODO: pick the best algorithm for the settings given in ctx...
+			last_algorithm = pick_best_algorithm;
 		}
 	}
 
