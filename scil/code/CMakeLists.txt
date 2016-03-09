@@ -11,12 +11,12 @@ set (VERSION_MINOR 1)
 
 # compile flags
 set (CMAKE_C_FLAGS
-    "${CMAKE_C_FLAGS} -ggdb3 -std=gnu11 -pedantic -Wall -Wextra -Wconversion -Wdouble-promotion -Wfloat-equal"
+    "${CMAKE_C_FLAGS} -ggdb3 -std=gnu11 -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal"
 )
 # set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
 # set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2")
 
-set (CMAKE_C_FLAGS_DEBUG "-O0")
+set (CMAKE_C_FLAGS_DEBUG   "-O0")
 set (CMAKE_C_FLAGS_RELEASE "-O3")
 
 include_directories(.)
@@ -24,11 +24,21 @@ include_directories(.)
 FILE(GLOB ALGO algo/*.c)
 
 MESSAGE( STATUS "Available algorithms: " ${ALGO})
-
-add_library(scil SHARED scil.c scil-util.c ${ALGO})
+add_library(scil SHARED scil.c scil-util.c scil-dummy.cpp ${ALGO})
 target_link_libraries(scil m)
+
+
+# run during configure:
+execute_process(COMMAND ${CMAKE_SOURCE_DIR}/deps/build-dependencies.sh WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/deps/)
+
+# for specific algorithms
+include_directories(${CMAKE_SOURCE_DIR}/deps/include/fpzip)
+include_directories(${CMAKE_SOURCE_DIR}/deps/include/zfp)
 target_link_libraries(scil z)
-target_link_libraries(scil fpzip)
+target_link_libraries(scil
+  ${CMAKE_SOURCE_DIR}/deps/libfpzip.a
+  ${CMAKE_SOURCE_DIR}/deps/libzfp.a
+  "-Wl,--strip-all" )
 
 SUBDIRS (test)
 

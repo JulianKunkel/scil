@@ -178,6 +178,7 @@ static int double_repres_test(){
     return failed;
 }
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 int main(int argc, char ** argv){
 
     printf("get_needed_bit_count:\t%d of 25 tests failed\n", get_needed_bit_count_test());

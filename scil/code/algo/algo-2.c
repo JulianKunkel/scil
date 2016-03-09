@@ -15,6 +15,7 @@
 
 #include <algo/algo-2.h>
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_algo2_compress(const scil_context* ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
@@ -24,6 +25,7 @@ int scil_algo2_compress(const scil_context* ctx,
     return 0;
 }
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_algo2_decompress(  const scil_context* ctx,
                             DataType*restrict dest,
                             size_t*restrict dest_count,
