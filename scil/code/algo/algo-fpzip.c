@@ -36,9 +36,11 @@ int scil_fpzip_decompress(  const scil_context* ctx,
 }
 
 scil_compression_algorithm algo_fpzip = {
-    scil_fpzip_compress,
-    scil_fpzip_decompress,
+    .c.Dtype = {
+        scil_fpzip_compress,
+        scil_fpzip_decompress
+    },
     "fpzip",
     4,
-    SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES
+    SCIL_COMPRESSOR_TYPE_BASE_DATATYPE
 };

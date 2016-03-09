@@ -12,6 +12,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * \file
  * \brief Header containing algo1 of the Scientific Compression Interface Library

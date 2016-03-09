@@ -12,6 +12,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * \file
  * \brief Header containing gzip of the Scientific Compression Interface Library
@@ -19,8 +20,8 @@
  * \author Armin Schaare <3schaare@informatik.uni-hamburg.de>
  */
 
-#ifndef SCIL_GZIP_H_
-#define SCIL_GZIP_H_
+#ifndef SCIL_FPZIP_H_
+#define SCIL_FPZIP_H_
 
 #include <scil-internal.h>
 

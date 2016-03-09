@@ -233,8 +233,10 @@ int scil_algo1_decompress(  const scil_context* ctx,
 }
 
 scil_compression_algorithm algo_algo1 = {
-    scil_algo1_compress,
-    scil_algo1_decompress,
+    .c.Dtype = {
+        scil_algo1_compress,
+        scil_algo1_decompress
+    },
     "algo1",
     1,
     SCIL_COMPRESSOR_TYPE_BASE_DATATYPE
