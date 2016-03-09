@@ -12,6 +12,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
+
 #ifndef SCIL_INTERNAL_HEADER_
 #define SCIL_INTERNAL_HEADER_
 

@@ -70,7 +70,7 @@ static uint8_t get_bits(const uint64_t num, const uint8_t start, const uint8_t s
     assert(start <= 64);
     assert(size <= 8);
 
-    return (num << (64 - start)) >> (64 - size);
+    return (uint8_t)((num << (64 - start)) >> (64 - size));
 }
 
 int scil_algo1_compress(const scil_context* ctx,

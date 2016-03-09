@@ -1,15 +1,15 @@
 // This file is part of SCIL.
-// 
+//
 // SCIL is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // SCIL is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
@@ -28,7 +28,7 @@ static uint8_t get_needed_bit_count(const double min_value, const double max_val
 }
 
 static size_t round_up_byte(const size_t bits){
-    
+
     uint8_t a = bits % 8;
     if(a == 0)
         return bits / 8;
@@ -52,7 +52,7 @@ static double double_repres(const uint64_t num, const double min, const double a
 static int get_needed_bit_count_test(){
 
     int failed = 0;
-    
+
     failed += 1 != get_needed_bit_count(1, 2, 0.5);
     failed += 2 != get_needed_bit_count(1, 3, 0.5);
     failed += 2 != get_needed_bit_count(1, 4, 0.5);
@@ -83,9 +83,9 @@ static int get_needed_bit_count_test(){
 }
 
 static int round_up_byte_test(){
- 
+
     int failed = 0;
-    
+
     failed += 0 != round_up_byte(0);
     failed += 1 != round_up_byte(1);
     failed += 1 != round_up_byte(8);
@@ -111,10 +111,11 @@ static int round_up_byte_test(){
     return failed;
 }
 
+#pragma GCC diagnostic ignored "-Wfloat-equal"
 static int int_repres_test(){
-    
+
     int failed = 0;
-    
+
     for(int i = -500; i < 500; ++i){
 
     	srand(time(NULL));
@@ -143,10 +144,11 @@ static int int_repres_test(){
     return failed;
 }
 
+#pragma GCC diagnostic ignored "-Wfloat-equal"
 static int double_repres_test(){
-    
+
 	int failed = 0;
-    
+
     for(int i = -500; i < 500; ++i){
 
     	srand(time(NULL));
@@ -170,7 +172,7 @@ static int double_repres_test(){
 	    failed += 268435455.0+r*i != double_repres(0x0FFFFFFF, 0.0+r*i, 0.5);
 	    failed += 268435456.0+r*i != double_repres(0x10000000, 0.0+r*i, 0.5);
 	    failed += 4294967295.0+r*i != double_repres(0xFFFFFFFF, 0.0+r*i, 0.5);
-	    
+
     }
 
     return failed;

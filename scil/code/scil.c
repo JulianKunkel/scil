@@ -21,15 +21,18 @@
 #include <scil-util.h>
 
 // known algorithms:
-#include <algo/memcopy.h>
+#include <algo/algo-memcopy.h>
 #include <algo/algo-1.h>
-#include <algo/gzip.h>
+#include <algo/algo-gzip.h>
+#include <algo/algo-2.h>
+#include <algo/algo-fpzip.h>
 
 static scil_compression_algorithm * algo_array[] = {
 	& algo_memcopy,
 	& algo_algo1,
 	& algo_gzip,
 	& algo_algo2,
+	& algo_fpzip,
 	NULL
 };
 
@@ -52,6 +55,10 @@ static void fix_double_setting(double * dbl){
 	if(*dbl == SCIL_ACCURACY_DBL_IGNORE){
 		*dbl = DBL_MAX;
 	}
+}
+
+static scil_compression_algorithm* pick_best_algorithm(){
+	return NULL;
 }
 
 void scil_init_hints(scil_hints * hints){
@@ -134,7 +141,7 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
 			last_algorithm = & algo_memcopy;
 		}else{
 			// TODO: pick the best algorithm for the settings given in ctx...
-			last_algorithm = pick_best_algorithm;
+			last_algorithm = pick_best_algorithm();
 		}
 	}
 

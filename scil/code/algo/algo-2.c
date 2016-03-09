@@ -15,7 +15,7 @@
 
 #include <algo/algo-2.h>
 
-int scil_algo1_compress(const scil_context* ctx,
+int scil_algo2_compress(const scil_context* ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
                         const DataType*restrict source,
@@ -24,7 +24,7 @@ int scil_algo1_compress(const scil_context* ctx,
     return 0;
 }
 
-int scil_algo1_decompress(  const scil_context* ctx,
+int scil_algo2_decompress(  const scil_context* ctx,
                             DataType*restrict dest,
                             size_t*restrict dest_count,
                             const byte*restrict source,
@@ -34,8 +34,8 @@ int scil_algo1_decompress(  const scil_context* ctx,
 }
 
 scil_compression_algorithm algo_algo2 = {
-    scil_algo1_compress,
-    scil_algo1_decompress,
+    scil_algo2_compress,
+    scil_algo2_decompress,
     "algo2",
     3,
     SCIL_COMPRESSOR_TYPE_BASE_DATATYPE

@@ -181,7 +181,7 @@ static void compute_significant_bit_mapping(){
 				v = 3;
 			}
 			for(int b=c; b < c+v; b++){
-				sig_decimals[b] = i;
+				sig_decimals[b] = (char)i;
 			}
 			sig_bits[i] = (char) c;
 			c += v;
