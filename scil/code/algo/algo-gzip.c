@@ -17,11 +17,13 @@
 
 #include <zlib.h>
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_gzip_compress(const scil_context* ctx, byte* restrict dest, size_t* restrict dest_size, const byte*restrict source, const size_t source_size){
 
   return compress( (Bytef*)dest, dest_size, (Bytef*)source, (uLong)(source_size) ) == Z_OK ;
 }
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_gzip_decompress(const scil_context* ctx, byte*restrict dest, size_t*restrict dest_size, const byte*restrict source, const size_t source_size){
 
     uLongf dest_isize = *dest_size;

@@ -73,6 +73,7 @@ static uint8_t get_bits(const uint64_t num, const uint8_t start, const uint8_t s
     return (uint8_t)((num << (64 - start)) >> (64 - size));
 }
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_algo1_compress(const scil_context* ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
@@ -159,6 +160,7 @@ int scil_algo1_compress(const scil_context* ctx,
     return 0;
 }
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_algo1_decompress(  const scil_context* ctx,
                             DataType*restrict dest,
                             size_t*restrict dest_count,

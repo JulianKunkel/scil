@@ -24,12 +24,12 @@
 
 #include <stdio.h>
 
-#define DATA_TYPE 0
+#define SCIL_DATA_TYPE 0
 
 // The input data type to compress from/to
-#if (DATA_TYPE == 0)
+#if (SCIL_DATA_TYPE == 0)
 #define DataType double
-#elif (DATA_TYPE == 1)
+#elif (SCIL_DATA_TYPE == 1)
 #define DataType float
 #endif
 
@@ -37,7 +37,7 @@
 /*
  This amount of data may be needed for a block header.
  */
-#define SCIL_BLOCK_HEADER_MAX_SIZE 256
+#define SCIL_BLOCK_HEADER_MAX_SIZE 1024
 
 // These values define that the particular metrics is not of interest
 #define SCIL_ACCURACY_DBL_IGNORE 0.0
