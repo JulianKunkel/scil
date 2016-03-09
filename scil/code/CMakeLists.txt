@@ -28,6 +28,7 @@ MESSAGE( STATUS "Available algorithms: " ${ALGO})
 add_library(scil SHARED scil.c scil-util.c ${ALGO})
 target_link_libraries(scil m)
 target_link_libraries(scil z)
+target_link_libraries(scil fpzip)
 
 SUBDIRS (test)
 

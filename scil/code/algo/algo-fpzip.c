@@ -15,6 +15,8 @@
 
 #include <algo/algo-fpzip.h>
 
+#include <fpzip.h>
+
 int scil_fpzip_compress(const scil_context* ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
