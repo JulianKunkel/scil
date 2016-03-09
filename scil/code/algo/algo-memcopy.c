@@ -12,7 +12,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
-#include <algo/memcopy.h>
+#include <algo/algo-memcopy.h>
 
 #include <string.h>
 
@@ -31,7 +31,7 @@ int scil_memcopy_decompress(const scil_context* ctx, byte*restrict dest, size_t*
 }
 
 scil_compression_algorithm algo_memcopy = {
-    .c.btype = { 
+    .c.btype = {
       scil_memcopy_compress,
       scil_memcopy_decompress
     },
