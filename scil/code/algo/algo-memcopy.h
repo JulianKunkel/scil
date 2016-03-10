@@ -27,10 +27,10 @@
  * \param source_size Byte size of uncompressed buffer
  * \return Success state of the compression
  */
-int scil_memcopy_compress(const scil_context* ctx, byte* restrict dest, size_t*restrict dest_size, const byte*restrict source, const size_t source_size);
+int scil_memcopy_compress(const scil_context* ctx, byte* restrict dest, uint64_t * restrict out_size, const byte*restrict source, const size_t source_size);
 
 /**
- * \brief Trivial memcopy decompression function 
+ * \brief Trivial memcopy decompression function
  * \param ctx Compression context used for this compression
  * \param dest Pre allocated buffer which will hold the compressed data
  * \param dest_size Byte size the compressed buffer will have
@@ -38,7 +38,7 @@ int scil_memcopy_compress(const scil_context* ctx, byte* restrict dest, size_t*r
  * \param source_size Byte size of uncompressed buffer
  * \return Success state of the compression
  */
-int scil_memcopy_decompress(const scil_context* ctx, byte*restrict dest, size_t*restrict dest_size, const byte*restrict source, const size_t source_size);
+int scil_memcopy_decompress(const scil_context* ctx, byte*restrict dest, uint64_t exp_size, const byte*restrict source, const size_t source_size);
 
 extern scil_compression_algorithm algo_memcopy;
 

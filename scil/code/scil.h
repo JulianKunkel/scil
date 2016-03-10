@@ -24,14 +24,38 @@
 
 #include <stdio.h>
 
-#define SCIL_DATA_TYPE 0
+enum SCIL_Datatype{
+  SCIL_FLOAT,
+  SCIL_DOUBLE
+};
 
-// The input data type to compress from/to
-#if (SCIL_DATA_TYPE == 0)
-#define DataType double
-#elif (SCIL_DATA_TYPE == 1)
-#define DataType float
-#endif
+enum SCIL_dimension_specifier{
+  SCIL_1D,
+  SCIL_2D,
+  SCIL_3D,
+  SCIL_ND
+};
+
+struct SCIL_dims{
+  enum SCIL_dimension_specifier dims;
+
+  union {
+    uint64_t d1;
+    struct{
+      uint32_t x;
+      uint32_t y;
+    }d2;
+    struct{
+      uint32_t x;
+      uint32_t y;
+      uint32_t z;
+    }d3;
+    struct{
+      char dims; // number of dims
+      uint32_t * extension; // pointer to a array of dimensions, the caller is responsible to free it.
+    }dN;
+  }d;
+};
 
 
 /*
@@ -50,6 +74,7 @@
 
 
 typedef unsigned char byte;
+
 /**
  * \brief Struct containing information on the tolerable
  * precision loss on compression
@@ -128,7 +153,9 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
  * \pre source != NULL
  * \return Success state of the compression
  */
-int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_size, const DataType*restrict source, const size_t source_count);
+int scil_compress(enum SCIL_Datatype datatype, struct SCIL_dims dims, byte* restrict dest, size_t* restrict dest_size,
+  const void*restrict source, scil_context* ctx);
+
 
 /**
  * \brief Decompression method of a buffer of data
@@ -142,20 +169,21 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
  * \pre source != NULL
  * \return Success state of the decompression
  */
-int scil_decompress(DataType*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size);
+int scil_decompress(enum SCIL_Datatype datatype, struct SCIL_dims expected_dims, void*restrict dest,
+    const byte*restrict source, const size_t source_size);
 
-
-void scil_determine_accuracy(DataType *data_1, DataType *data_2, const size_t length, const double relative_err_finest_abs_tolerance, scil_hints * out_hints);
+void scil_determine_accuracy(enum SCIL_Datatype datatype, struct SCIL_dims dims,
+  const void * restrict  data_1, const void * restrict data_2, const double relative_err_finest_abs_tolerance, scil_hints * out_hints);
 
 /**
  \brief Test method: check if the conditions as specified by ctx are met by comparing compressed and decompressed data.
  out_accuracy contains a set of hints with the observed finest resolution/required precision to accept the data.
  */
-int scil_validate_compression(const scil_context* ctx,
-                             const size_t uncompressed_size,
-                             const DataType*restrict data_uncompressed,
+int scil_validate_compression(enum SCIL_Datatype datatype, struct SCIL_dims dims,
+                             const void*restrict data_uncompressed,
                              const size_t compressed_size,
                              const byte*restrict data_compressed,
-                             scil_hints * out_accuracy);
+                             scil_hints * out_accuracy,
+                             const scil_context* ctx);
 
 #endif

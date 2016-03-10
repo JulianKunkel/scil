@@ -22,9 +22,19 @@
 
 #include <scil.h>
 
+#define SCIL_TYPE_double 1
+#define SCIL_TYPE_float 0
+
+// use sizeof(<DATATYPE>) in auto created code
+static inline int datatype_length(enum SCIL_Datatype type){
+  return type == SCIL_FLOAT ? sizeof(float) : sizeof(double);
+}
+
 enum compressor_type{
   SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES,
-  SCIL_COMPRESSOR_TYPE_BASE_DATATYPE,
+  SCIL_COMPRESSOR_TYPE_1D,
+  SCIL_COMPRESSOR_TYPE_2D,
+  SCIL_COMPRESSOR_TYPE_3D,
   SCIL_COMPRESSOR_TYPE_N_DIMENSIONAL,
   SCIL_COMPRESSOR_TYPE_ICOSAHEDRAL
 };
@@ -32,25 +42,42 @@ enum compressor_type{
 typedef struct{
     union{
         struct{
-            int (*compress)(const scil_context* ctx, byte* restrict compressed_buf_out, size_t* restrict out_size, const byte*restrict data_in, const size_t in_size);
-            int (*decompress)(const scil_context* ctx, byte*restrict data_out, size_t*restrict out_size, const byte*restrict compressed_buf_in, const size_t in_size);
+            int (*compress)(const scil_context* ctx, byte* restrict compressed_buf_out, uint64_t* restrict out_size, const byte*restrict data_in, const uint64_t in_size);
+            int (*decompress)(const scil_context* ctx, byte*restrict data_out, uint64_t exp_size, const byte*restrict compressed_buf_in, const uint64_t in_size);
         } Btype;
 
         struct{
-            int (*compress)(const scil_context* ctx, byte* restrict compressed_buf_out, size_t* restrict out_size, const DataType*restrict data_in, const size_t in_size);
-            int (*decompress)(const scil_context* ctx, DataType*restrict data_out, size_t*restrict out_size, const byte*restrict compressed_buf_in, const size_t in_size);
-        } Dtype;
+            int (*compress_float)(const scil_context* ctx, byte* restrict compressed_buf_out,
+              uint64_t* restrict out_size, const float*restrict data_in, const uint64_t in_size);
+
+            int (*decompress_float)(const scil_context* ctx, float*restrict data_out,
+              uint64_t exp_count, const byte*restrict compressed_buf_in, const uint64_t in_size);
+
+            int (*compress_double)(const scil_context* ctx, byte* restrict compressed_buf_out,
+              uint64_t* restrict out_size, const double*restrict data_in, const uint64_t in_size);
+
+            int (*decompress_double)(const scil_context* ctx, double*restrict data_out,
+              uint64_t exp_count, const byte*restrict compressed_buf_in, const uint64_t in_size);
+        } D1type;
 
         // TODO: fix parameter types
         struct{ // where to put the dimensionality of the stream? Should we put it into the context_create?
-            int (*compress)(const scil_context* ctx, byte* restrict compressed_buf_out, size_t* restrict out_size, const void*restrict nd_array, const size_t in_size);
-            int (*decompress)(const scil_context* ctx, byte*restrict data_out, size_t*restrict out_size, const byte*restrict compressed_buf_in, const size_t in_size);
-        } NDtype;
+          int i;
+        } D2type;
+
+        // TODO: fix parameter types
+        struct{ // where to put the dimensionality of the stream? Should we put it into the context_create?
+          int i;
+        } D3type;
+
+        // TODO: fix parameter types
+        struct{ // where to put the dimensionality of the stream? Should we put it into the context_create?
+          int i;
+        } DNtype;
 
         // TODO: fix parameter types
         struct{
-            int (*compress)(const scil_context* ctx, byte* restrict compressed_buf_out, size_t* restrict out_size, const byte*restrict data_in, const size_t in_size);
-            int (*decompress)(const scil_context* ctx, byte*restrict data_out, size_t*restrict out_size, const byte*restrict compressed_buf_in, const size_t in_size);
+          int i;
         } ICOtype;
     } c;
     const char * name;
@@ -70,6 +97,34 @@ struct scil_context_t{
 
   // bla bla
 };
+
+int scil_convert_significant_decimals_to_bits(int decimals);
+int scil_convert_significant_bits_to_decimals(int bits);
+
+#define MANTISSA_MAX_LENGTH 52
+
+
+#define MANTISA_LENGTH_float 23
+
+typedef union {
+  struct {
+    uint32_t mantisa  : MANTISA_LENGTH_float;
+    uint32_t exponent : 8;
+    uint32_t sign     : 1;
+  } p;
+	float f;
+} datatype_cast_float;
+
+#define MANTISA_LENGTH_double 52
+
+typedef union {
+  struct {
+    uint64_t mantisa  : MANTISA_LENGTH_double;
+    uint32_t exponent : 11;
+    uint32_t sign     : 1;
+  } p;
+	double f;
+} datatype_cast_double;
 
 
 #endif

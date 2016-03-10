@@ -27,6 +27,9 @@
 #include <algo/algo-2.h>
 #include <algo/algo-fpzip.h>
 
+// this file is automatically created
+#include "scil-dtypes.h"
+
 static scil_compression_algorithm * algo_array[] = {
 	& algo_memcopy,
 	& algo_algo1,
@@ -118,8 +121,11 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 	return 0;
 }
 
-int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_size, const DataType*restrict source, const size_t source_count){
-	if (source_count == 0){
+int scil_compress(enum SCIL_Datatype datatype, struct SCIL_dims dims, byte* restrict dest, size_t* restrict dest_size,
+  const void*restrict source, scil_context* ctx){
+	assert(dims.dims == SCIL_1D);
+
+	if (dims.d.d1 == 0){
 		*dest_size = 0;
 		return 0;
 	}
@@ -153,24 +159,33 @@ int scil_compress(scil_context* ctx, byte* restrict dest, size_t* restrict dest_
 
 	int ret;
 
-	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_BASE_DATATYPE){
-		ret = last_algorithm->c.Dtype.compress(ctx, dest, dest_size, source, source_count);
+	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_1D){
+		switch(datatype){
+			case(SCIL_FLOAT):
+			ret = last_algorithm->c.D1type.compress_float(ctx, dest, dest_size, source, dims.d.d1);
+			break;
+			case(SCIL_DOUBLE):
+			ret = last_algorithm->c.D1type.compress_double(ctx, dest, dest_size, source, dims.d.d1);
+			break;
+		}
 	}else if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
-		ret = last_algorithm->c.Btype.compress(ctx, dest, dest_size, (byte *) source, source_count * sizeof(DataType));
+		ret = last_algorithm->c.Btype.compress(ctx, dest, dest_size, (byte *) source, dims.d.d1 * datatype_length(datatype));
 	}
 	(*dest_size)++;
 
 	return ret;
 }
 
-int scil_decompress(DataType*restrict dest, size_t*restrict dest_count, const byte*restrict source, const size_t source_size){
-	if (source_size == 0){
-		*dest_count = 0;
+int scil_decompress(enum SCIL_Datatype datatype, struct SCIL_dims dims, void*restrict dest,
+    const byte*restrict source, const size_t source_size){
+
+	assert(dims.dims == SCIL_1D);
+
+	if (dims.d.d1 == 0){
 		return 0;
 	}
 
 	assert(dest != NULL);
-	assert(dest_count != NULL);
 	assert(source != NULL);
 
 	scil_compression_algorithm * last_algorithm;
@@ -182,79 +197,40 @@ int scil_decompress(DataType*restrict dest, size_t*restrict dest_count, const by
 	int ret;
 	last_algorithm = algo_array[magic_number];
 
-	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_BASE_DATATYPE){
-		ret = last_algorithm->c.Dtype.decompress(NULL, dest, dest_count, source + 1, source_size - 1);
+	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_1D){
+		switch(datatype){
+		case(SCIL_FLOAT):
+			ret = last_algorithm->c.D1type.decompress_float(NULL, dest, dims.d.d1, source + 1, source_size - 1);
+			break;
+		case(SCIL_DOUBLE):
+			ret = last_algorithm->c.D1type.decompress_double(NULL, dest, dims.d.d1, source + 1, source_size - 1);
+			break;
+		}
+
 	}else if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
-		*dest_count = (*dest_count)*sizeof(DataType);
-		ret = last_algorithm->c.Btype.decompress(NULL, (byte *) dest, dest_count, source + 1, source_size - 1);
-		assert((*dest_count) % sizeof(DataType) == 0);
-		*dest_count = (*dest_count) / sizeof(DataType);
+		ret = last_algorithm->c.Btype.decompress(NULL, (byte *) dest, dims.d.d1, source + 1, source_size - 1);
 	}
 
 	return ret;
 }
 
-void scil_determine_accuracy(DataType *data_1, DataType *data_2, const size_t length, const double relative_err_finest_abs_tolerance, scil_hints * out_hints){
+void scil_determine_accuracy(enum SCIL_Datatype datatype, struct SCIL_dims dims,
+	const void * restrict  data_1, const void * restrict data_2,
+	const double relative_err_finest_abs_tolerance, scil_hints * out_hints){
 	scil_hints a;
 	a.absolute_tolerance = 0;
-	a.significant_bits = MANTISA_LENGTH; // in bits
 	a.relative_err_finest_abs_tolerance = 0;
 	a.relative_tolerance_percent = 0;
 
-	for(size_t i = 0; i < length; i++ ){
-		const DataType c1 = data_1[i];
-		const DataType c2 = data_2[i];
-		const DataType err = fabs(c2 - c1);
+	assert(dims.dims == SCIL_1D);
+	// TODO walk trough all dimensions ...
 
-		scil_hints cur;
-		cur.absolute_tolerance = err;
-
-		// determine significant digits
-		{
-			datatype_cast f1, f2;
-			f1.f = c1;
-			f2.f = c2;
-			if (f1.p.sign != f2.p.sign || f1.p.exponent != f2.p.exponent){
-				cur.significant_digits = 0;
-			}else{
-				// check mantisa, bit by bit
-				//printf("%lld %lld\n", f1.p.mantisa, f2.p.mantisa);
-				cur.significant_digits = MANTISA_LENGTH;
-				for(int m = MANTISA_LENGTH-1 ; m >= 0; m--){
-					int b1 = (f1.p.mantisa>>m) & (1);
-					int b2 = (f2.p.mantisa>>m) & (1);
-					// printf("%d %d\n", (int) b1, (int) b2);
-					if( b1 != b2){
-						cur.significant_digits = MANTISA_LENGTH - (int) m;
-						break;
-					}
-				}
-			}
-		}
-
-		// determine relative tolerance
-		cur.relative_tolerance_percent = 0;
-		cur.relative_err_finest_abs_tolerance = 0;
-		if (err >= relative_err_finest_abs_tolerance){
-			if (c1 == 0 && c2 != 0){
-				cur.relative_tolerance_percent = INFINITY;
-			}else{
-				// sign check not needed
-				//if (c2 < 0 && c1 > 0 || c2 > 0 && c1 < 0){
-					// signs are different
-					cur.relative_tolerance_percent = fabs(1 - c2 / c1);
-				//}else{
-				//	cur.relative_tolerance_percent = 1 - c2 / c1;
-				//}
-			}
-		}else{
-			cur.relative_err_finest_abs_tolerance = err;
-		}
-
-		a.absolute_tolerance = max(cur.absolute_tolerance, a.absolute_tolerance);
-		a.relative_err_finest_abs_tolerance = max(cur.relative_err_finest_abs_tolerance, a.relative_err_finest_abs_tolerance);
-		a.relative_tolerance_percent = max(cur.relative_tolerance_percent, a.relative_tolerance_percent);
-		a.significant_bits = min(cur.significant_digits, a.significant_bits);
+	if(datatype == SCIL_DOUBLE){
+		a.significant_bits = MANTISA_LENGTH_double; // in bits
+		scil_determine_accuracy_1d_double((double*) data_1, (double*) data_2, dims.d.d1, relative_err_finest_abs_tolerance, & a);
+	}else{
+		a.significant_bits = MANTISA_LENGTH_float; // in bits
+		scil_determine_accuracy_1d_float((float*) data_1, (float*) data_2, dims.d.d1, relative_err_finest_abs_tolerance, & a);
 	}
 
 	// convert significant_digits in bits to 10 decimals
@@ -268,42 +244,37 @@ void scil_determine_accuracy(DataType *data_1, DataType *data_2, const size_t le
 	*out_hints = a;
 }
 
-int scil_validate_compression(const scil_context* ctx,
-                             const size_t uncompressed_size,
-                             const DataType*restrict data_uncompressed,
+int scil_validate_compression(enum SCIL_Datatype datatype, struct SCIL_dims dims,
+                             const void*restrict data_uncompressed,
                              const size_t compressed_size,
                              const byte*restrict data_compressed,
-													 	 scil_hints * out_accuracy )
-{
-	byte * data_out = (byte*)SAFE_MALLOC(uncompressed_size);
-	size_t data_out_count = uncompressed_size;
+                             scil_hints * out_accuracy,
+                             const scil_context* ctx){
+  assert(dims.dims == SCIL_1D); // TODO, allocate uncompressed buffer...
+
+	const uint64_t length = dims.d.d1 * datatype_length(datatype);
+	byte * data_out = (byte*)SAFE_MALLOC(length);
 	scil_hints a;
 
-	int ret = scil_decompress((DataType*) data_out, &data_out_count, data_compressed, compressed_size);
+	int ret = scil_decompress(datatype, dims, data_out, data_compressed, compressed_size);
 	if (ret != 0){
 		goto end;
 	}
 
-	// check length
-	if (data_out_count*sizeof(DataType) != uncompressed_size){
-		ret = 1;
-		goto end;
-	}
-
-	if(uncompressed_size % sizeof(DataType) != 0 || ctx->lossless_compression_needed){
+	if(ctx->lossless_compression_needed){
 		// check bytes for identity
-		ret = memcmp(data_out, (byte*) data_uncompressed, uncompressed_size);
+		ret = memcmp(data_out, (byte*) data_uncompressed, length);
 		memset(&a, 0, sizeof(a));
 
 		if (! ctx->lossless_compression_needed){
 			printf("INFO: can check only for identical data as data is not a multiple of DataType\n");
 		}else{
-			scil_determine_accuracy((DataType*) data_out, (DataType*) data_uncompressed, uncompressed_size/sizeof(DataType), ctx->hints.relative_err_finest_abs_tolerance, & a);
+			scil_determine_accuracy(datatype, dims, data_out, data_uncompressed, ctx->hints.relative_err_finest_abs_tolerance, & a);
 		}
 		goto end;
 	}else{
 		// determine achieved accuracy
-		scil_determine_accuracy((DataType*) data_out, (DataType*) data_uncompressed, uncompressed_size/sizeof(DataType), ctx->hints.relative_err_finest_abs_tolerance, & a);
+		scil_determine_accuracy(datatype, dims, data_out, data_uncompressed, ctx->hints.relative_err_finest_abs_tolerance, & a);
 
 		const scil_hints h = ctx->hints;
 		// check if tolerance level is met:
@@ -326,4 +297,39 @@ end:
   free(data_out);
 	*out_accuracy = a;
 	return ret;
+}
+
+
+static char sig_bits[MANTISSA_MAX_LENGTH] = {0};
+static char sig_decimals[MANTISSA_MAX_LENGTH] = {0};
+
+static void compute_significant_bit_mapping(){
+	if(sig_bits[0] == 0){
+		int c = 0;
+		for(int i=0; i < MANTISSA_MAX_LENGTH; i++){
+			int v;
+			if (i%3 == 0){
+				v = 4;
+			}else{
+				v = 3;
+			}
+			for(int b=c; b < c+v; b++){
+				sig_decimals[b] = (char)i;
+			}
+			sig_bits[i] = (char) c;
+			c += v;
+		}
+	}
+}
+
+int scil_convert_significant_decimals_to_bits(int decimals){
+	compute_significant_bit_mapping();
+	return sig_bits[decimals];
+}
+
+int scil_convert_significant_bits_to_decimals(int bits){
+  assert(bits > 0);
+	// compute mapping between decimals and bits
+	compute_significant_bit_mapping();
+	return sig_decimals[bits];
 }

@@ -1,0 +1,54 @@
+#pragma GCC diagnostic ignored "-Wfloat-equal"
+static void scil_determine_accuracy_1d_<DATATYPE>(const <DATATYPE> *data_1, const <DATATYPE> *data_2, const size_t length, const double relative_err_finest_abs_tolerance, scil_hints * a){
+	for(size_t i = 0; i < length; i++ ){
+		const <DATATYPE> c1 = data_1[i];
+		const <DATATYPE> c2 = data_2[i];
+		const <DATATYPE> err = fabs(c2 - c1);
+		scil_hints cur;
+		cur.absolute_tolerance = err;
+		// determine significant digits
+		{
+			datatype_cast_<DATATYPE> f1, f2;
+			f1.f = c1;
+			f2.f = c2;
+			if (f1.p.sign != f2.p.sign || f1.p.exponent != f2.p.exponent){
+				cur.significant_digits = 0;
+			}else{
+				// check mantisa, bit by bit
+				//printf("%lld %lld\n", f1.p.mantisa, f2.p.mantisa);
+				cur.significant_digits = MANTISA_LENGTH_<DATATYPE>;
+				for(int m = MANTISA_LENGTH_<DATATYPE>-1 ; m >= 0; m--){
+					int b1 = (f1.p.mantisa>>m) & (1);
+					int b2 = (f2.p.mantisa>>m) & (1);
+					// printf("%d %d\n", (int) b1, (int) b2);
+					if( b1 != b2){
+						cur.significant_digits = MANTISA_LENGTH_<DATATYPE> - (int) m;
+						break;
+					}
+				}
+			}
+		}
+		// determine relative tolerance
+		cur.relative_tolerance_percent = 0;
+		cur.relative_err_finest_abs_tolerance = 0;
+		if (err >= (<DATATYPE>) relative_err_finest_abs_tolerance){
+			if (c1 == 0 && c2 != 0){
+				cur.relative_tolerance_percent = INFINITY;
+			}else{
+				// sign check not needed
+				//if (c2 < 0 && c1 > 0 || c2 > 0 && c1 < 0){
+					// signs are different
+					cur.relative_tolerance_percent = fabs(1 - c2 / c1);
+				//}else{
+				//	cur.relative_tolerance_percent = 1 - c2 / c1;
+				//}
+			}
+		}else{
+			cur.relative_err_finest_abs_tolerance = err;
+		}
+		a->absolute_tolerance = max(cur.absolute_tolerance, a->absolute_tolerance);
+		a->relative_err_finest_abs_tolerance = max(cur.relative_err_finest_abs_tolerance, a->relative_err_finest_abs_tolerance);
+		a->relative_tolerance_percent = max(cur.relative_tolerance_percent, a->relative_tolerance_percent);
+		a->significant_bits = min(cur.significant_digits, a->significant_bits);
+	}
+}
