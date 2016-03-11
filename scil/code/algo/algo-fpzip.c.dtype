@@ -18,7 +18,6 @@
 #include <algo/algo-fpzip.h>
 #include <algo/algo-fpzip-helperr.c.x>
 
-
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_fpzip_compress_<DATATYPE>(const scil_context* ctx,
                         byte * restrict dest,
@@ -48,9 +47,9 @@ int scil_fpzip_decompress_<DATATYPE>(  const scil_context* ctx,
                             const byte*restrict source,
                             const uint64_t source_size)
 {
-    FPZ* fpz = fpzip_read_from_buffer(dest);
+    FPZ* fpz = fpzip_read_from_buffer(source);
 
-    int ret = decompress(fpz, (void*)source, source_size);
+    int ret = decompress(fpz, (void*)dest, exp_count);
 
     fpzip_read_close(fpz);
 

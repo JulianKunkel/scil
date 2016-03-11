@@ -37,8 +37,8 @@ include_directories(${CMAKE_SOURCE_DIR}/deps/include/fpzip ${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/deps/include/zfp)
 target_link_libraries(scil z)
 target_link_libraries(scil
-  ${CMAKE_SOURCE_DIR}/deps/fpzip-1.1.0/lib/libfpzip.a
-  ${CMAKE_SOURCE_DIR}/deps/zfp-0.5.0/lib/libzfp.a
+  ${CMAKE_SOURCE_DIR}/deps/libfpzip.a
+  ${CMAKE_SOURCE_DIR}/deps/libzfp.a
   "-Wl,--strip-all" )
 
 SUBDIRS (test)

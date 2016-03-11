@@ -13,8 +13,6 @@ scil_compression_algorithm algo_fpzip = {
     SCIL_COMPRESSOR_TYPE_1D
 };
 
-
-
 // compress 'inbytes' bytes from 'data' to stream 'FPZ'
 static int
 compress(FPZ* fpz, void* data)
