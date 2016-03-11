@@ -32,7 +32,7 @@ if [[ ! -e libfpzip.a ]] ; then
 	BUILD=1
 fi
 
-if [[ BUILD == 1 ]] ; then
+if [[ $BUILD == 1 ]] ; then
   mkdir -p include/fpzip include/zfp
   cp $FPZIP/inc/* include/fpzip
   cp $ZFP/inc/* include/zfp
