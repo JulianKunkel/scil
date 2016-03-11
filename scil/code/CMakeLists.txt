@@ -21,7 +21,7 @@ set (CMAKE_C_FLAGS_RELEASE "-O3")
 
 include_directories(.)
 
-FILE(GLOB ALGO algo/*.c ${CMAKE_BINARY_DIR}/algo/*.c)
+FILE(GLOB ALGO ${CMAKE_SOURCE_DIR}/algo/*.c ${CMAKE_BINARY_DIR}/algo/*.c)
 
 MESSAGE( STATUS "Available algorithms: " ${ALGO})
 add_library(scil SHARED scil.c scil-util.c scil-dummy.cpp ${ALGO})
