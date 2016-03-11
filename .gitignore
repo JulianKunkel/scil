@@ -14,3 +14,4 @@ build/
 *.tar.gz
 deps/
 !build-dependencies.sh
+!Makefile-fpzip-1.1.0
