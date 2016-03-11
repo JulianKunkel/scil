@@ -12,5 +12,5 @@ build/
 *.toc
 *.vrb
 *.tar.gz
-fpzip-*/
-zfp-*/
+deps/
+!build-dependencies.sh
