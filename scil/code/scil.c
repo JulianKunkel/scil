@@ -123,12 +123,13 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 
 int scil_compress(enum SCIL_Datatype datatype, SCIL_dims_t dims, byte* restrict dest, size_t* restrict dest_size,
   const void*restrict source, scil_context* ctx){
-	assert(dims.dims == SCIL_1D);
 
-	if (dims.d.d1 == 0){
+	if (dims.dims == 0){
 		*dest_size = 0;
 		return 0;
 	}
+
+	assert(dims.length != NULL);
 
 	assert(ctx != NULL);
 	assert(dest != NULL);
