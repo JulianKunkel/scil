@@ -29,33 +29,10 @@ enum SCIL_Datatype{
   SCIL_DOUBLE
 };
 
-enum SCIL_dimension_specifier{
-  SCIL_1D,
-  SCIL_2D,
-  SCIL_3D,
-  SCIL_ND
-};
-
-struct SCIL_dims{
-  enum SCIL_dimension_specifier dims;
-
-  union {
-    uint64_t d1;
-    struct{
-      uint32_t x;
-      uint32_t y;
-    }d2;
-    struct{
-      uint32_t x;
-      uint32_t y;
-      uint32_t z;
-    }d3;
-    struct{
-      char dims; // number of dims
-      uint32_t * extension; // pointer to a array of dimensions, the caller is responsible to free it.
-    }dN;
-  }d;
-};
+typedef struct {
+    char dims; // number of dims
+    uint64_t * length; // pointer to a array of dimensions, the caller is responsible to free it.
+} SCIL_dims_t;
 
 
 /*
@@ -153,7 +130,7 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
  * \pre source != NULL
  * \return Success state of the compression
  */
-int scil_compress(enum SCIL_Datatype datatype, struct SCIL_dims dims, byte* restrict dest, size_t* restrict dest_size,
+int scil_compress(enum SCIL_Datatype datatype, SCIL_dims_t dims, byte* restrict dest, size_t* restrict dest_size,
   const void*restrict source, scil_context* ctx);
 
 
@@ -169,17 +146,17 @@ int scil_compress(enum SCIL_Datatype datatype, struct SCIL_dims dims, byte* rest
  * \pre source != NULL
  * \return Success state of the decompression
  */
-int scil_decompress(enum SCIL_Datatype datatype, struct SCIL_dims expected_dims, void*restrict dest,
+int scil_decompress(enum SCIL_Datatype datatype, SCIL_dims_t expected_dims, void*restrict dest,
     const byte*restrict source, const size_t source_size);
 
-void scil_determine_accuracy(enum SCIL_Datatype datatype, struct SCIL_dims dims,
+void scil_determine_accuracy(enum SCIL_Datatype datatype, SCIL_dims_t dims,
   const void * restrict  data_1, const void * restrict data_2, const double relative_err_finest_abs_tolerance, scil_hints * out_hints);
 
 /**
  \brief Test method: check if the conditions as specified by ctx are met by comparing compressed and decompressed data.
  out_accuracy contains a set of hints with the observed finest resolution/required precision to accept the data.
  */
-int scil_validate_compression(enum SCIL_Datatype datatype, struct SCIL_dims dims,
+int scil_validate_compression(enum SCIL_Datatype datatype, SCIL_dims_t dims,
                              const void*restrict data_uncompressed,
                              const size_t compressed_size,
                              const byte*restrict data_compressed,

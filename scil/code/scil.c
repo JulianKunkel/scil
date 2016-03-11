@@ -121,7 +121,7 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 	return 0;
 }
 
-int scil_compress(enum SCIL_Datatype datatype, struct SCIL_dims dims, byte* restrict dest, size_t* restrict dest_size,
+int scil_compress(enum SCIL_Datatype datatype, SCIL_dims_t dims, byte* restrict dest, size_t* restrict dest_size,
   const void*restrict source, scil_context* ctx){
 	assert(dims.dims == SCIL_1D);
 
@@ -176,7 +176,7 @@ int scil_compress(enum SCIL_Datatype datatype, struct SCIL_dims dims, byte* rest
 	return ret;
 }
 
-int scil_decompress(enum SCIL_Datatype datatype, struct SCIL_dims dims, void*restrict dest,
+int scil_decompress(enum SCIL_Datatype datatype, SCIL_dims_t dims, void*restrict dest,
     const byte*restrict source, const size_t source_size){
 
 	assert(dims.dims == SCIL_1D);
@@ -214,7 +214,7 @@ int scil_decompress(enum SCIL_Datatype datatype, struct SCIL_dims dims, void*res
 	return ret;
 }
 
-void scil_determine_accuracy(enum SCIL_Datatype datatype, struct SCIL_dims dims,
+void scil_determine_accuracy(enum SCIL_Datatype datatype, SCIL_dims_t dims,
 	const void * restrict  data_1, const void * restrict data_2,
 	const double relative_err_finest_abs_tolerance, scil_hints * out_hints){
 	scil_hints a;
@@ -244,7 +244,7 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype, struct SCIL_dims dims,
 	*out_hints = a;
 }
 
-int scil_validate_compression(enum SCIL_Datatype datatype, struct SCIL_dims dims,
+int scil_validate_compression(enum SCIL_Datatype datatype, SCIL_dims_t dims,
                              const void*restrict data_uncompressed,
                              const size_t compressed_size,
                              const byte*restrict data_compressed,
