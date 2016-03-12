@@ -30,10 +30,9 @@ enum SCIL_Datatype{
 };
 
 typedef struct {
-    char dims; // number of dims
-    uint64_t * length; // pointer to a array of dimensions, the caller is responsible to free it.
+    uint8_t dims; // number of dims
+    uint64_t * length; // pointer to an array of dimensions, the caller is responsible to free it.
 } SCIL_dims_t;
-
 
 /*
  This amount of data may be needed for a block header.
@@ -57,15 +56,17 @@ typedef unsigned char byte;
  * precision loss on compression
  */
 typedef struct{
+
   /** \brief relative tolerable error (1 means 1%) */
   double relative_tolerance_percent;
 
-  /** with a relative tolerance small numbers may be problematic, e.g. 1% for 0.01 becomes 0.01 +- 0.0001
-      the finest tolerance limits the smallest relative error
-      e.g. when compressing the value 0.01 with a finest absolute tolerance of 0.01 it becomes 0.01 +- 0.01
-      So this is the lower bound of the resolution and guaranteed error for relative errors,
-      where as the absolute tolerance is the guaranteed resolution for all data points.
-  **/
+  /**
+   * \brief With a relative tolerance small numbers may be problematic, e.g. 1% for 0.01 becomes 0.01 +- 0.0001
+   * the finest tolerance limits the smallest relative error
+   * e.g. when compressing the value 0.01 with a finest absolute tolerance of 0.01 it becomes 0.01 +- 0.01
+   * So this is the lower bound of the resolution and guaranteed error for relative errors,
+   * where as the absolute tolerance is the guaranteed resolution for all data points.
+   */
   double relative_err_finest_abs_tolerance;
 
   /** \brief absolute tolerable error (e.g. 1 means the value 2 can become 1-3) */
@@ -80,7 +81,6 @@ typedef struct{
   /** \brief */
   int force_compression_method;
 
-  //uint64_t force_block_size;
 } scil_hints;
 
 

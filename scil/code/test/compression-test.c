@@ -107,7 +107,7 @@ int main(){
 	size_t c_buf_size = u_buf_size + SCIL_BLOCK_HEADER_MAX_SIZE;
 	byte * c_buf = (byte*)SAFE_MALLOC(c_buf_size);
 
-	struct SCIL_dims dims = {.dims = SCIL_1D, .d.d1 = count };
+	SCIL_dims_t dims = {.dims = 1, .length = NULL };
 	ret = scil_compress(SCIL_DOUBLE, dims, c_buf, &c_buf_size, u_buf,ctx);
 
 	printf("C size: %lu\n", c_buf_size);
@@ -130,7 +130,7 @@ int main(){
 	double f1 = 10.0;
 	double f2 = 10.5;
 
-	struct SCIL_dims dims1 = {.dims = SCIL_1D, .d.d1 = 1 };
+	SCIL_dims_t dims1 = {.dims = 1, .length = NULL };
 	scil_determine_accuracy(SCIL_DOUBLE, dims1, & f1, &f2, 0.01, & accuracy);
 	scil_hints_print(& accuracy);
 

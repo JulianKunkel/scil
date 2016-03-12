@@ -160,17 +160,17 @@ int scil_compress(enum SCIL_Datatype datatype, SCIL_dims_t dims, byte* restrict 
 
 	int ret;
 
-	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_1D){
+	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_DATATYPES){
 		switch(datatype){
 			case(SCIL_FLOAT):
-			ret = last_algorithm->c.D1type.compress_float(ctx, dest, dest_size, source, dims.d.d1);
-			break;
+				ret = last_algorithm->c.DNtype.compress_float(ctx, dest, dest_size, dims, source);
+				break;
 			case(SCIL_DOUBLE):
-			ret = last_algorithm->c.D1type.compress_double(ctx, dest, dest_size, source, dims.d.d1);
-			break;
+				ret = last_algorithm->c.DNtype.compress_double(ctx, dest, dest_size, dims, source);
+				break;
 		}
 	}else if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
-		ret = last_algorithm->c.Btype.compress(ctx, dest, dest_size, (byte *) source, dims.d.d1 * datatype_length(datatype));
+		ret = last_algorithm->c.Btype.compress(ctx, dest, dest_size, (byte *) source, dims.dims * datatype_length(datatype));
 	}
 	(*dest_size)++;
 
@@ -180,9 +180,9 @@ int scil_compress(enum SCIL_Datatype datatype, SCIL_dims_t dims, byte* restrict 
 int scil_decompress(enum SCIL_Datatype datatype, SCIL_dims_t dims, void*restrict dest,
     const byte*restrict source, const size_t source_size){
 
-	assert(dims.dims == SCIL_1D);
+	//assert(dims.dims == 1);
 
-	if (dims.d.d1 == 0){
+	if (dims.dims == 0){
 		return 0;
 	}
 
@@ -198,18 +198,18 @@ int scil_decompress(enum SCIL_Datatype datatype, SCIL_dims_t dims, void*restrict
 	int ret;
 	last_algorithm = algo_array[magic_number];
 
-	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_1D){
+	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_DATATYPES){
 		switch(datatype){
 		case(SCIL_FLOAT):
-			ret = last_algorithm->c.D1type.decompress_float(NULL, dest, dims.d.d1, source + 1, source_size - 1);
+			ret = last_algorithm->c.DNtype.decompress_float(NULL, dest, dims, source + 1, source_size - 1);
 			break;
 		case(SCIL_DOUBLE):
-			ret = last_algorithm->c.D1type.decompress_double(NULL, dest, dims.d.d1, source + 1, source_size - 1);
+			ret = last_algorithm->c.DNtype.decompress_double(NULL, dest, dims, source + 1, source_size - 1);
 			break;
 		}
 
 	}else if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
-		ret = last_algorithm->c.Btype.decompress(NULL, (byte *) dest, dims.d.d1, source + 1, source_size - 1);
+		ret = last_algorithm->c.Btype.decompress(NULL, (byte *) dest, dims.dims * datatype_length(datatype), source + 1, source_size - 1);
 	}
 
 	return ret;
@@ -223,15 +223,15 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype, SCIL_dims_t dims,
 	a.relative_err_finest_abs_tolerance = 0;
 	a.relative_tolerance_percent = 0;
 
-	assert(dims.dims == SCIL_1D);
+	assert(dims.dims == 1);
 	// TODO walk trough all dimensions ...
 
 	if(datatype == SCIL_DOUBLE){
 		a.significant_bits = MANTISA_LENGTH_double; // in bits
-		scil_determine_accuracy_1d_double((double*) data_1, (double*) data_2, dims.d.d1, relative_err_finest_abs_tolerance, & a);
+		scil_determine_accuracy_1d_double((double*) data_1, (double*) data_2, dims.dims, relative_err_finest_abs_tolerance, & a);
 	}else{
 		a.significant_bits = MANTISA_LENGTH_float; // in bits
-		scil_determine_accuracy_1d_float((float*) data_1, (float*) data_2, dims.d.d1, relative_err_finest_abs_tolerance, & a);
+		scil_determine_accuracy_1d_float((float*) data_1, (float*) data_2, dims.dims, relative_err_finest_abs_tolerance, & a);
 	}
 
 	// convert significant_digits in bits to 10 decimals
@@ -251,9 +251,9 @@ int scil_validate_compression(enum SCIL_Datatype datatype, SCIL_dims_t dims,
                              const byte*restrict data_compressed,
                              scil_hints * out_accuracy,
                              const scil_context* ctx){
-  assert(dims.dims == SCIL_1D); // TODO, allocate uncompressed buffer...
+  assert(dims.dims == 1); // TODO, allocate uncompressed buffer...
 
-	const uint64_t length = dims.d.d1 * datatype_length(datatype);
+	const uint64_t length = dims.dims * datatype_length(datatype);
 	byte * data_out = (byte*)SAFE_MALLOC(length);
 	scil_hints a;
 
