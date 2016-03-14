@@ -124,6 +124,7 @@ int scil_algo1_compress_<DATATYPE>(const scil_context* ctx,
     uint8_t end_mask[9] = {0, 255-127, 255-63, 255-31, 255-15, 255-7, 255-3, 255-1, 255};
     // 00000000 10000000 11000000 11100000 11110000 11111000 11111100 11111110 11111111
 
+    // TODO: Multidimensional folding of data (Hilbert space filling curve?)
     uint64_t bit_index = 0;
     for(uint64_t i = 0; i < scil_get_data_count(dims); ++i){
 
