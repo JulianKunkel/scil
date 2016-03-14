@@ -131,6 +131,9 @@ int main(){
 	double f2 = 10.5;
 
 	SCIL_dims_t dims1 = {.dims = 1, .length = NULL };
+	dims1.length = (size_t*)SAFE_MALLOC(dims1.dims * sizeof(size_t));
+	*dims1.length = 100;
+
 	scil_determine_accuracy(SCIL_DOUBLE, & f1, &f2, dims1, 0.01, & accuracy);
 	scil_hints_print(& accuracy);
 
@@ -141,6 +144,8 @@ int main(){
 
 	printf("\nscil_validate_compression returned %s\n", ret == 0 ? "OK" : "ERROR");
 	scil_hints_print(& accuracy);
+
+	free(dims1.length);
 
 	free(c_buf);
 	free(data_out);
