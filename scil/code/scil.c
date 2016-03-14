@@ -121,8 +121,8 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 	return 0;
 }
 
-int scil_compress(enum SCIL_Datatype datatype, SCIL_dims_t dims, byte* restrict dest, size_t* restrict dest_size,
-  const void*restrict source, scil_context* ctx){
+int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t* restrict dest_size,
+  const void*restrict source, SCIL_dims_t dims, scil_context* ctx){
 
 	if (dims.dims == 0){
 		*dest_size = 0;
@@ -163,10 +163,10 @@ int scil_compress(enum SCIL_Datatype datatype, SCIL_dims_t dims, byte* restrict 
 	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_DATATYPES){
 		switch(datatype){
 			case(SCIL_FLOAT):
-				ret = last_algorithm->c.DNtype.compress_float(ctx, dest, dest_size, dims, source);
+				ret = last_algorithm->c.DNtype.compress_float(ctx, dest, dest_size, source, dims);
 				break;
 			case(SCIL_DOUBLE):
-				ret = last_algorithm->c.DNtype.compress_double(ctx, dest, dest_size, dims, source);
+				ret = last_algorithm->c.DNtype.compress_double(ctx, dest, dest_size, source, dims);
 				break;
 		}
 	}else if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
@@ -177,7 +177,7 @@ int scil_compress(enum SCIL_Datatype datatype, SCIL_dims_t dims, byte* restrict 
 	return ret;
 }
 
-int scil_decompress(enum SCIL_Datatype datatype, SCIL_dims_t dims, void*restrict dest,
+int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, SCIL_dims_t dims,
     const byte*restrict source, const size_t source_size){
 
 	//assert(dims.dims == 1);
@@ -215,8 +215,8 @@ int scil_decompress(enum SCIL_Datatype datatype, SCIL_dims_t dims, void*restrict
 	return ret;
 }
 
-void scil_determine_accuracy(enum SCIL_Datatype datatype, SCIL_dims_t dims,
-	const void * restrict  data_1, const void * restrict data_2,
+void scil_determine_accuracy(enum SCIL_Datatype datatype,
+	const void * restrict  data_1, const void * restrict data_2, SCIL_dims_t dims,
 	const double relative_err_finest_abs_tolerance, scil_hints * out_hints){
 	scil_hints a;
 	a.absolute_tolerance = 0;
@@ -245,19 +245,21 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype, SCIL_dims_t dims,
 	*out_hints = a;
 }
 
-int scil_validate_compression(enum SCIL_Datatype datatype, SCIL_dims_t dims,
+int scil_validate_compression(enum SCIL_Datatype datatype,
                              const void*restrict data_uncompressed,
-                             const size_t compressed_size,
-                             const byte*restrict data_compressed,
-                             scil_hints * out_accuracy,
-                             const scil_context* ctx){
-  assert(dims.dims == 1); // TODO, allocate uncompressed buffer...
+							 SCIL_dims_t dims,
+							 const byte*restrict data_compressed,
+							 const size_t compressed_size,
+							 const scil_context* ctx,
+							 scil_hints * out_accuracy){
+
+  	assert(dims.dims == 1); // TODO, allocate uncompressed buffer...
 
 	const uint64_t length = dims.dims * datatype_length(datatype);
 	byte * data_out = (byte*)SAFE_MALLOC(length);
 	scil_hints a;
 
-	int ret = scil_decompress(datatype, dims, data_out, data_compressed, compressed_size);
+	int ret = scil_decompress(datatype, data_out, dims, data_compressed, compressed_size);
 	if (ret != 0){
 		goto end;
 	}
@@ -270,12 +272,12 @@ int scil_validate_compression(enum SCIL_Datatype datatype, SCIL_dims_t dims,
 		if (! ctx->lossless_compression_needed){
 			printf("INFO: can check only for identical data as data is not a multiple of DataType\n");
 		}else{
-			scil_determine_accuracy(datatype, dims, data_out, data_uncompressed, ctx->hints.relative_err_finest_abs_tolerance, & a);
+			scil_determine_accuracy(datatype, data_out, data_uncompressed, dims, ctx->hints.relative_err_finest_abs_tolerance, & a);
 		}
 		goto end;
 	}else{
 		// determine achieved accuracy
-		scil_determine_accuracy(datatype, dims, data_out, data_uncompressed, ctx->hints.relative_err_finest_abs_tolerance, & a);
+		scil_determine_accuracy(datatype, data_out, data_uncompressed, dims, ctx->hints.relative_err_finest_abs_tolerance, & a);
 
 		const scil_hints h = ctx->hints;
 		// check if tolerance level is met:

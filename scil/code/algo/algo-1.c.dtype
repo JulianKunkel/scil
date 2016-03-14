@@ -45,7 +45,7 @@ static uint8_t get_needed_bit_count_<DATATYPE>(const <DATATYPE> min_value, const
     return (uint8_t)ceil(log2(1 + (max_value - min_value) / (2 * absolute_tolerance))); //TODO: Test this
 }
 
-static uint64_t round_up_byte_<DATATYPE>(const size_t bits){
+static uint64_t round_up_byte_<DATATYPE>(const uint64_t bits){
 
     uint8_t a = bits % 8;
     if(a == 0)
@@ -66,7 +66,7 @@ static <DATATYPE> DataType_repres_<DATATYPE>(const uint64_t num, const <DATATYPE
 }
 
 static uint8_t get_bits_<DATATYPE>(const uint64_t num, const uint8_t start, const uint8_t size){
-    // TODO: Test this
+
     assert(start <= 64);
     assert(size <= 8);
 
@@ -76,9 +76,9 @@ static uint8_t get_bits_<DATATYPE>(const uint64_t num, const uint8_t start, cons
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_algo1_compress_<DATATYPE>(const scil_context* ctx,
                         byte * restrict dest,
-                        uint64_t* restrict dest_size,
+                        size_t* restrict dest_size,
                         const <DATATYPE>*restrict source,
-                        const uint64_t source_count)
+                        const SCIL_dims_t dims )
 {
     //Finding minimum and maximum values in data
     <DATATYPE> min, max;
@@ -163,9 +163,9 @@ int scil_algo1_compress_<DATATYPE>(const scil_context* ctx,
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_algo1_decompress_<DATATYPE>(  const scil_context* ctx,
                             <DATATYPE>*restrict dest,
-                            uint64_t exp_count,
+                            SCIL_dims_t dims,
                             const byte*restrict source,
-                            const uint64_t source_size)
+                            const size_t source_size )
 {
     assert(source != NULL);
 
@@ -232,11 +232,8 @@ int scil_algo1_decompress_<DATATYPE>(  const scil_context* ctx,
     return 0;
 }
 
-#ifndef SCIL_ALGO_1_INITIALIZER_
-#define SCIL_ALGO_1_INITIALIZER_
-
 scil_compression_algorithm algo_algo1 = {
-    .c.D1type = {
+    .c.DNtype = {
         scil_algo1_compress_float,
         scil_algo1_decompress_float,
         scil_algo1_compress_double,
@@ -244,7 +241,5 @@ scil_compression_algorithm algo_algo1 = {
     },
     "algo1",
     1,
-    SCIL_COMPRESSOR_TYPE_1D
+    SCIL_COMPRESSOR_TYPE_DATATYPES
 };
-
-#endif

@@ -105,7 +105,7 @@ int scil_fpzip_decompress_<DATATYPE>(  const scil_context* ctx,
 #define SCIL_FPZIP_INITIALIZER_
 
 scil_compression_algorithm algo_fpzip = {
-    .c.D1type = {
+    .c.DNtype = {
         scil_fpzip_compress_float,
         scil_fpzip_decompress_float,
         scil_fpzip_compress_double,
@@ -113,7 +113,7 @@ scil_compression_algorithm algo_fpzip = {
     },
     "fpzip",
     4,
-    SCIL_COMPRESSOR_TYPE_1D
+    SCIL_COMPRESSOR_TYPE_DATATYPES
 };
 
 #endif

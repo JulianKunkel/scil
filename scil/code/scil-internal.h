@@ -38,25 +38,25 @@ enum compressor_type{
 typedef struct{
     union{
         struct{
-            int (*compress)(const scil_context* ctx, byte* restrict compressed_buf_in_out, uint64_t* restrict out_size, const byte*restrict data_in, const uint64_t in_size);
-            int (*decompress)(const scil_context* ctx, byte*restrict data_out, uint64_t exp_size, const byte*restrict compressed_buf_in, const uint64_t in_size);
+            int (*compress)(const scil_context* ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, const byte*restrict data_in, const size_t in_size);
+            int (*decompress)(const scil_context* ctx, byte*restrict data_out, size_t exp_size, const byte*restrict compressed_buf_in, const size_t in_size);
         } Btype;
 
         struct{
             int (*compress_float)(const scil_context* ctx, byte* restrict compressed_buf_in_out,
-              uint64_t* restrict out_size, SCIL_dims_t dims, const float*restrict data_in);
+              size_t* restrict out_size, const float*restrict data_in, const SCIL_dims_t dims);
 
             int (*decompress_float)(const scil_context* ctx, float*restrict data_out,
-              SCIL_dims_t dims, const byte*restrict compressed_buf_in, const uint64_t in_size);
+              SCIL_dims_t dims, const byte*restrict compressed_buf_in, const size_t in_size);
 
             int (*compress_double)(const scil_context* ctx, byte* restrict compressed_buf_in_out,
-              uint64_t* restrict out_size, SCIL_dims_t dims, const double*restrict data_in);
+              size_t* restrict out_size, const double*restrict data_in, const SCIL_dims_t dims);
 
             int (*decompress_double)(const scil_context* ctx, double*restrict data_out,
-              SCIL_dims_t dims, const byte*restrict compressed_buf_in, const uint64_t in_size);
+              SCIL_dims_t dims, const byte*restrict compressed_buf_in, const size_t in_size);
         } DNtype;
 
-        // TODO: fix parameter types
+        // TODO: Implement this
         struct{
           int i;
         } ICOtype;

@@ -31,7 +31,7 @@ enum SCIL_Datatype{
 
 typedef struct {
     uint8_t dims; // number of dims
-    uint64_t * length; // pointer to an array of dimensions, the caller is responsible to free it.
+    size_t * length; // pointer to an array of dimensions, the caller is responsible to free it.
 } SCIL_dims_t;
 
 /*
@@ -103,7 +103,7 @@ void scil_hints_print(scil_hints * hints);
 /*
  *
  */
-int scil_retrieve_compression_magic_number(const char * str);
+uint8_t scil_retrieve_compression_magic_number(const char * str);
 
 /**
  * \brief Creation of a compression context
@@ -118,49 +118,52 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 // scil_context_add_hint(ctx, char * key, char * value)
 
 /**
- * \brief Compression method of a buffer of data
- * \param ctx Reference to the compression context
+ * \brief Method to compress a data buffer
+ * \param datatype The datatype of the data (float, double, etc...)
  * \param dest Destination of the compressed buffer
  * \param dest_size Reference to the compressed buffer byte size, max size is given as argument
  * \param source Source buffer of the data to compress
- * \param source_count Count of elements in source buffer
- * \pre ctx != NULL
+ * \param dims struct containing information about dimension count and length of buffer in each dimension
+ * \param ctx Reference to the compression context
+ * \pre datatype == 0 || datatype == 1
  * \pre dest != NULL
  * \pre dest_size != NULL
  * \pre source != NULL
+ * \pre ctx != NULL
  * \return Success state of the compression
  */
-int scil_compress(enum SCIL_Datatype datatype, SCIL_dims_t dims, byte* restrict dest, size_t* restrict dest_size,
-  const void*restrict source, scil_context* ctx);
-
+int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t* restrict dest_size,
+  const void*restrict source, SCIL_dims_t dims, scil_context* ctx);
 
 /**
- * \brief Decompression method of a buffer of data
- * \param ctx Reference to the compression context
+ * \brief Method to decompress a data buffer
+ * \param datatype The datatype of the data (float, double, etc...)
  * \param dest Destination of the decompressed buffer
- * \param dest_count Reference to the decompressed buffer element count
+ * \param expected_dims Dimensional information about the decompressed buffer
  * \param source Source buffer of data to decompress
  * \param source_size Byte size of compressed data source buffer
+ * \pre datatype == 0 || datatype == 1
  * \pre dest != NULL
- * \pre dest_count != NULL
  * \pre source != NULL
  * \return Success state of the decompression
  */
-int scil_decompress(enum SCIL_Datatype datatype, SCIL_dims_t expected_dims, void*restrict dest,
+int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, SCIL_dims_t expected_dims,
     const byte*restrict source, const size_t source_size);
 
-void scil_determine_accuracy(enum SCIL_Datatype datatype, SCIL_dims_t dims,
-  const void * restrict  data_1, const void * restrict data_2, const double relative_err_finest_abs_tolerance, scil_hints * out_hints);
+void scil_determine_accuracy(enum SCIL_Datatype datatype, const void * restrict  data_1,
+    const void * restrict data_2, SCIL_dims_t dims,
+    const double relative_err_finest_abs_tolerance, scil_hints * out_hints);
 
 /**
  \brief Test method: check if the conditions as specified by ctx are met by comparing compressed and decompressed data.
  out_accuracy contains a set of hints with the observed finest resolution/required precision to accept the data.
  */
-int scil_validate_compression(enum SCIL_Datatype datatype, SCIL_dims_t dims,
+int scil_validate_compression(enum SCIL_Datatype datatype,
                              const void*restrict data_uncompressed,
-                             const size_t compressed_size,
+                             SCIL_dims_t dims,
                              const byte*restrict data_compressed,
-                             scil_hints * out_accuracy,
-                             const scil_context* ctx);
+                             const size_t compressed_size,
+                             const scil_context* ctx,
+                             scil_hints * out_accuracy);
 
 #endif
