@@ -95,6 +95,15 @@ struct scil_context_t{
 
 typedef struct scil_context_t scil_context;
 
+SCIL_dims_t scil_init_dims(const uint8_t dimensions_count, size_t* dimensions_length);
+
+/*
+ * \brief Method to get the number of actual data points in multidimensional
+ * data.
+ * \param dims Information about the dimensional configuration of the data
+ * \return Number of data points in the data
+ */
+size_t scil_get_data_count(const SCIL_dims_t dims);
 
 void scil_init_hints(scil_hints * hints);
 

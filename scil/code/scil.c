@@ -64,6 +64,21 @@ static scil_compression_algorithm* pick_best_algorithm(){
 	return NULL;
 }
 
+SCIL_dims_t scil_init_dims(const uint8_t dimensions_count, size_t* dimensions_length){
+
+	return (SCIL_dims_t){ .dims = dimensions_count, .length = dimensions_length };
+	//return dims;
+}
+
+size_t scil_get_data_count(const SCIL_dims_t dims){
+
+	size_t result = 0;
+	for(uint8_t i = 0; i < dims.dims; ++i){
+		result *= dims.length[i];
+	}
+	return result;
+}
+
 void scil_init_hints(scil_hints * hints){
 	memset(hints, 0, sizeof(scil_hints));
 	hints->relative_tolerance_percent = SCIL_ACCURACY_DBL_IGNORE;
