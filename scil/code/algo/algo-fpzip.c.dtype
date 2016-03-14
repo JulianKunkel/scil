@@ -104,6 +104,13 @@ int scil_fpzip_decompress_<DATATYPE>(  const scil_context* ctx,
 {
     FPZ* fpz = fpzip_read_from_buffer(source);
 
+    // Read dims out of fpz
+    dims.dims = 0;
+    if(fpz->nx != 1) dims.length[0] = fpz->nx; dims.dims++;
+    if(fpz->ny != 1) dims.length[1] = fpz->ny; dims.dims++;
+    if(fpz->nz != 1) dims.length[2] = fpz->nz; dims.dims++;
+    if(fpz->nf != 1) dims.length[3] = fpz->nf; dims.dims++;
+
     int ret = decompress(fpz, (void*)dest, exp_count);
 
     fpzip_read_close(fpz);
