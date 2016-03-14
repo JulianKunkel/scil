@@ -66,17 +66,27 @@ decompress(FPZ* fpz, void* data, uint64_t inbytes)
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_fpzip_compress_<DATATYPE>(const scil_context* ctx,
                         byte * restrict dest,
-                        uint64_t* restrict dest_size,
+                        size_t* restrict dest_size,
                         const <DATATYPE>*restrict source,
-                        const uint64_t source_count)
+                        const SCIL_dims_t dims)
 {
     FPZ* fpz = fpzip_write_to_buffer(dest, *dest_size);
     fpz->type = SCIL_TYPE_<DATATYPE>; // in fpzip float is 0 and double 1
     fpz->prec = 0; // lossless
-    fpz->nx = source_count; // one-dimensional
+
+    fpz->nx = scil_get_data_count(dims); // one-dimensional
     fpz->ny = 1; //
     fpz->nz = 1; //
     fpz->nf = 1; //
+
+    if(dims.dims < 5){
+        switch(dims.dims){
+            case 4: fpz->nf = dims.length[3];
+            case 3: fpz->nz = dims.length[2];
+            case 2: fpz->ny = dims.length[1];
+            case 1: fpz->nx = dims.length[0];
+        }
+    }
 
     int ret = compress(fpz, (void*)source);
 
@@ -88,9 +98,9 @@ int scil_fpzip_compress_<DATATYPE>(const scil_context* ctx,
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_fpzip_decompress_<DATATYPE>(  const scil_context* ctx,
                             <DATATYPE>*restrict dest,
-                            uint64_t exp_count,
+                            SCIL_dims_t dims,
                             const byte*restrict source,
-                            const uint64_t source_size)
+                            const size_t source_size)
 {
     FPZ* fpz = fpzip_read_from_buffer(source);
 
