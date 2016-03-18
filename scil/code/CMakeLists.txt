@@ -21,16 +21,15 @@ set (CMAKE_C_FLAGS_RELEASE "-O3")
 
 include_directories(.)
 
+# run during configure:
+execute_process(COMMAND ${CMAKE_SOURCE_DIR}/deps/build-dependencies.sh WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/deps/)
+execute_process(COMMAND ${CMAKE_SOURCE_DIR}/create-datatype-variants.sh ${CMAKE_SOURCE_DIR} WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/)
+
 FILE(GLOB ALGO ${CMAKE_SOURCE_DIR}/algo/*.c ${CMAKE_BINARY_DIR}/algo/*.c)
 
 MESSAGE( STATUS "Available algorithms: " ${ALGO})
 add_library(scil SHARED scil.c scil-util.c scil-dummy.cpp ${ALGO})
 target_link_libraries(scil m)
-
-
-# run during configure:
-execute_process(COMMAND ${CMAKE_SOURCE_DIR}/deps/build-dependencies.sh WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/deps/)
-execute_process(COMMAND ${CMAKE_SOURCE_DIR}/create-datatype-variants.sh ${CMAKE_SOURCE_DIR} WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/)
 
 # for specific algorithms
 include_directories(${CMAKE_SOURCE_DIR}/deps/include/fpzip ${CMAKE_BINARY_DIR})

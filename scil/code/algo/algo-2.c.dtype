@@ -35,8 +35,7 @@ int scil_algo2_decompress_<DATATYPE>(  const scil_context* ctx,
     return 0;
 }
 
-#ifndef SCIL_ALGO_2_INITIALIZER_
-#define SCIL_ALGO_2_INITIALIZER_
+#ifdef SCIL_ALGO_2_INITIALIZER
 
 scil_compression_algorithm algo_algo2 = {
     .c.DNtype = {
@@ -50,4 +49,5 @@ scil_compression_algorithm algo_algo2 = {
     SCIL_COMPRESSOR_TYPE_DATATYPES
 };
 
+#define SCIL_ALGO_2_INITIALIZER
 #endif

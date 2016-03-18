@@ -15,6 +15,7 @@
 
 #include <algo/algo-1.h>
 
+#include <string.h>
 #include <math.h>
 
 #include <scil-util.h>
@@ -82,7 +83,7 @@ int scil_algo1_compress_<DATATYPE>(const scil_context* ctx,
 {
     //Finding minimum and maximum values in data
     <DATATYPE> min, max;
-    find_min_max_<DATATYPE>(&min, &max, source, source_count);
+    find_min_max_<DATATYPE>(&min, &max, source, scil_get_data_count(dims));
 
     //Locally assigning absolute tolerance
     <DATATYPE> abs_tol = ctx->hints.absolute_tolerance;
@@ -119,7 +120,7 @@ int scil_algo1_compress_<DATATYPE>(const scil_context* ctx,
     }
 
     //Get number of needed bytes for the whole compressed buffer
-    *dest_size = round_up_byte_<DATATYPE>(bits_per_num * source_count) + head_size;
+    *dest_size = round_up_byte_<DATATYPE>(bits_per_num * scil_get_data_count(dims)) + head_size;
 
     uint8_t end_mask[9] = {0, 255-127, 255-63, 255-31, 255-15, 255-7, 255-3, 255-1, 255};
     // 00000000 10000000 11000000 11100000 11110000 11111000 11111100 11111110 11111111
@@ -182,7 +183,6 @@ int scil_algo1_decompress_<DATATYPE>(  const scil_context* ctx,
 
     double min, abs_tol;
     uint8_t bits_per_num, dim_count;
-    size_t* dim_length;
     size_t in_size = source_size;
 
     // parse Header
@@ -206,7 +206,6 @@ int scil_algo1_decompress_<DATATYPE>(  const scil_context* ctx,
     dims.dims = dim_count;
     memcpy(dims.length, source, dim_count * sizeof(size_t));
 
-    dim_length = source;
     source += dim_count * sizeof(size_t);
     in_size -= dim_count * sizeof(size_t);
 
@@ -258,6 +257,8 @@ int scil_algo1_decompress_<DATATYPE>(  const scil_context* ctx,
     return 0;
 }
 
+#ifdef SCIL_ALGO1_INITIALZIER
+
 scil_compression_algorithm algo_algo1 = {
     .c.DNtype = {
         scil_algo1_compress_float,
@@ -269,3 +270,6 @@ scil_compression_algorithm algo_algo1 = {
     1,
     SCIL_COMPRESSOR_TYPE_DATATYPES
 };
+
+#define SCIL_ALGO1_INITIALZIER
+#endif
