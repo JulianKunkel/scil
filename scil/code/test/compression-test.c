@@ -108,6 +108,8 @@ int main(){
 	byte * c_buf = (byte*)SAFE_MALLOC(c_buf_size);
 
 	SCIL_dims_t dims = {.dims = 1, .length = NULL };
+	dims.length = (uint64_t*)SAFE_MALLOC(sizeof(uint64_t));
+	dims.length[0] = count;
 	ret = scil_compress(SCIL_DOUBLE, c_buf, &c_buf_size, u_buf, dims, ctx);
 
 	printf("C size: %lu\n", c_buf_size);
@@ -145,6 +147,7 @@ int main(){
 	printf("\nscil_validate_compression returned %s\n", ret == 0 ? "OK" : "ERROR");
 	scil_hints_print(& accuracy);
 
+	free(dims.length);
 	free(dims1.length);
 
 	free(c_buf);

@@ -72,7 +72,7 @@ SCIL_dims_t scil_init_dims(const uint8_t dimensions_count, size_t* dimensions_le
 
 size_t scil_get_data_count(const SCIL_dims_t dims){
 
-	size_t result = 0;
+	size_t result = 1;
 	for(uint8_t i = 0; i < dims.dims; ++i){
 		result *= dims.length[i];
 	}
@@ -268,9 +268,9 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
 							 const scil_context* ctx,
 							 scil_hints * out_accuracy){
 
-  	assert(dims.dims == 1); // TODO, allocate uncompressed buffer...
+  	assert(dims.length != NULL); // TODO, allocate uncompressed buffer...
 
-	const uint64_t length = dims.dims * datatype_length(datatype);
+	const uint64_t length = scil_get_data_count(dims) * datatype_length(datatype);
 	byte * data_out = (byte*)SAFE_MALLOC(length);
 	scil_hints a;
 
