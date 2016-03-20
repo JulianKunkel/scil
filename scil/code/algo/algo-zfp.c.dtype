@@ -1,0 +1,39 @@
+// This file is part of SCIL.
+//
+// SCIL is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SCIL is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
+
+#include <algo/algo-zfp.h>
+#include <algo/algo-zfp-init.c.x>
+
+#include <zfp.h>
+
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+int scil_zfp_compress_<DATATYPE>(const scil_context* ctx,
+                        byte * restrict dest,
+                        size_t* restrict dest_size,
+                        const <DATATYPE>*restrict source,
+                        const SCIL_dims_t dims)
+{
+    return 0;
+}
+
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+int scil_zfp_decompress_<DATATYPE>(  const scil_context* ctx,
+                            <DATATYPE>*restrict dest,
+                            SCIL_dims_t exp_count,
+                            const byte*restrict source,
+                            const size_t source_size)
+{
+    return 0;
+}

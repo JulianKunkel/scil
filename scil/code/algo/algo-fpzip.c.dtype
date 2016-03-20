@@ -13,10 +13,10 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <fpzip.h>
-
 #include <algo/algo-fpzip.h>
 #include <algo/algo-fpzip-init.c.x>
+
+#include <fpzip.h>
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_fpzip_compress_<DATATYPE>(const scil_context* ctx,
