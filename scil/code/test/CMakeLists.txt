@@ -11,3 +11,7 @@ target_link_libraries(algo-1-test m)
 # zlib-test
 add_executable(zlib-test zlib-test.c ../scil-util.c)
 target_link_libraries(zlib-test z)
+
+# performance
+add_executable(performance-test performance-test.c)
+target_link_libraries(performance-test scil)

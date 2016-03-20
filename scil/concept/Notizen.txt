@@ -1,1 +1,2 @@
 - Dims bei byte-algos?
+- zfp aufteilen in rate/precision/tolerance?

@@ -19,9 +19,9 @@
 
 #include <scil-util.h>
 
-
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 int main(int argc, char** argv){
-    uLong count = 100;
+    int count = 100;
 
     Bytef* buf = (Bytef*)SAFE_MALLOC(count * sizeof(Bytef));
 
@@ -32,10 +32,10 @@ int main(int argc, char** argv){
     printf("\n\n");
 
     uLongf c_size = compressBound(count);
-    Bytef* c_buf = (char*)SAFE_MALLOC(c_size);
+    Bytef* c_buf = (Bytef*)SAFE_MALLOC(c_size);
 
     int ret = compress(c_buf, &c_size, buf, count);
-    printf("%d\n", c_size);
+    printf("%lu\n", c_size);
     printf("%d\n\n", ret);
 
     uLongf u_size = count;

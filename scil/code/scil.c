@@ -26,6 +26,7 @@
 #include <algo/algo-gzip.h>
 #include <algo/algo-2.h>
 #include <algo/algo-fpzip.h>
+#include <algo/algo-zfp.h>
 
 // this file is automatically created
 #include "scil-dtypes.h"
@@ -36,6 +37,7 @@ static scil_compression_algorithm * algo_array[] = {
 	& algo_gzip,
 	& algo_algo2,
 	& algo_fpzip,
+	& algo_zfp,
 	NULL
 };
 

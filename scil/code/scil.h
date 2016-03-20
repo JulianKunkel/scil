@@ -23,6 +23,7 @@
 #define SCIL_HEADER_
 
 #include <stdio.h>
+#include <stdint.h>
 
 enum SCIL_Datatype{
   SCIL_FLOAT,

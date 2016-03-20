@@ -43,11 +43,20 @@ int scil_fpzip_compress_<DATATYPE>(const scil_context* ctx,
         }
     }
 
-    int ret = compress(fpz, (void*)source);
+    if (!fpzip_write_header(fpz)) {
+      fprintf(stderr, "Cannot write header in algo-fpzip compression: %s\n", fpzip_errstr[fpzip_errno]);
+      return 1;
+    }
+
+    uint64_t outbytes = fpzip_write(fpz, (void*)source);
+    if (!outbytes) {
+      fprintf(stderr, "Compression failed in algo-fpzip compression: %s\n", fpzip_errstr[fpzip_errno]);
+      return 1;
+    }
 
     fpzip_write_close(fpz);
 
-    return ret;
+    return 0;
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -66,9 +75,17 @@ int scil_fpzip_decompress_<DATATYPE>(  const scil_context* ctx,
     if(fpz->nz != 1) dims.length[2] = fpz->nz; dims.dims++;
     if(fpz->nf != 1) dims.length[3] = fpz->nf; dims.dims++;
 
-    int ret = decompress(fpz, (void*)dest);
+    if (!fpzip_read_header(fpz)) {
+      fprintf(stderr, "Cannot read header in algo-fpzip decompression: %s\n", fpzip_errstr[fpzip_errno]);
+      return 1;
+    }
+
+    if (!fpzip_read(fpz, (void*)dest)) {
+      fprintf(stderr, "Algo-fpzip decompression failed: %s\n", fpzip_errstr[fpzip_errno]);
+      return 1;
+    }
 
     fpzip_read_close(fpz);
 
-    return ret;
+    return 0;
 }

@@ -16,6 +16,10 @@
 #include <algo/algo-zfp.h>
 #include <algo/algo-zfp-init.c.x>
 
+#include <string.h>
+
+#include <scil-util.h>
+
 #include <zfp.h>
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -25,7 +29,44 @@ int scil_zfp_compress_<DATATYPE>(const scil_context* ctx,
                         const <DATATYPE>*restrict source,
                         const SCIL_dims_t dims)
 {
-    return 0;
+    int ret = 0;
+
+    scil_write_dim_to_header(dest, dims);
+
+    <DATATYPE>* source_i = (<DATATYPE>*)SAFE_MALLOC(scil_get_data_count(dims));
+    memcpy(source_i, source, scil_get_data_count(dims));
+
+    zfp_field* field;
+
+    switch(dims.dims){
+        case 1: field = zfp_field_1d(source_i, zfp_type_<DATATYPE>, dims.length[0]); break;
+        case 2: field = zfp_field_2d(source_i, zfp_type_<DATATYPE>, dims.length[0], dims.length[1]); break;
+        case 3: field = zfp_field_3d(source_i, zfp_type_<DATATYPE>, dims.length[0], dims.length[1], dims.length[2]); break;
+        default: field = zfp_field_1d(source_i, zfp_type_<DATATYPE>, scil_get_data_count(dims));
+    }
+
+    zfp_stream* zfp = zfp_stream_open(NULL);
+
+    /*  zfp_stream_set_rate(zfp, rate, type, 3, 0); */
+    /*  zfp_stream_set_precision(zfp, precision, type); */
+    zfp_stream_set_accuracy(zfp, ctx->hints.absolute_tolerance, zfp_type_<DATATYPE>);
+
+    bitstream* stream = stream_open(dest, *dest_size);
+    zfp_stream_set_bit_stream(zfp, stream);
+    zfp_stream_rewind(zfp);
+
+    *dest_size = zfp_compress(zfp, field);
+    if(*dest_size == 0){
+        fprintf(stderr, "ZPF compression failed\n");
+        ret = 1;
+    }
+
+    zfp_field_free(field);
+    zfp_stream_close(zfp);
+    stream_close(stream);
+    free(source_i);
+
+    return ret;
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"

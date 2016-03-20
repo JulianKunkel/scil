@@ -104,7 +104,7 @@ void* safe_realloc (void* ptr, size_t size, const char* file,
 
 
 /**
- * \brief Shortcut for safe_calloc().
+ * \brief Shortcut for safe_realloc().
  * \param ptr  Pointer to an allocated buffer.
  * \param size Length of requested memory in bytes.
  */
@@ -131,27 +131,13 @@ FILE* safe_fopen(const char* path, const char* args, const char* src, unsigned l
 #define SAFE_FOPEN(path, args) safe_fopen(path, args, __FILE__, __LINE__)
 
 /**
- * \brief TODO: documentation
- * \param buf1
- * \param buf2
+ * \brief Writes dimensional information into buffer
+ * \param dest The destination buffer
+ * \param dim The dimensional information
+ * \pre dest != NULL
+ * \return Byte size consumed of destination buffer
  */
-void swap_int_buffer(int** buf1, int** buf2);
-
-/**
- * \brief TODO: documentation
- * \param buf1
- * \param buf2
- */
-void swap_float_buffer(float** buf1, float** buf2);
-
-/**
- * \brief Maximum size over array of sizes.
- * \param array Buffer to work on.
- * \param n Length of buffer.
- * \return Value of maximum element.
- * \pre array != NULL
- */
-size_t max_size (const size_t* array, size_t n);
+size_t scil_write_dim_to_buffer(void* dest, const SCIL_dims_t dims);
 
 /**
  * \brief Calculates the difference between two timestamps.
