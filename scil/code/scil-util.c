@@ -85,17 +85,19 @@ FILE* safe_fopen(const char* path, const char* args, const char* src, unsigned l
     return file;
 }
 
-size_t scil_write_dim_to_buffer(void* dest, const SCIL_dims_t dims){
+size_t scil_write_dims_to_buffer(void* dest, const SCIL_dims_t dims){
 
     assert(dest != NULL);
 
     size_t header_size = 0;
 
-    *((uint8_t*)dest++) = dims.dims;
+    *((uint8_t*)dest) = dims.dims;
+    dest = (char*)dest + 1;
     header_size++;
 
     for(uint8_t i = 0; i < dims.dims; ++i){
-        *((size_t*)dest++) = dims.length[i];
+        *((size_t*)dest) = dims.length[i];
+        dest = (char*)dest + 8;
         header_size += 8;
     }
 

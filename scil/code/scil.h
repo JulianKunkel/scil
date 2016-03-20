@@ -25,15 +25,12 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include <scil-util.h>
+
 enum SCIL_Datatype{
   SCIL_FLOAT,
   SCIL_DOUBLE
 };
-
-typedef struct {
-    uint8_t dims; // number of dims
-    size_t * length; // pointer to an array of dimensions, the caller is responsible to free it.
-} SCIL_dims_t;
 
 /*
  This amount of data may be needed for a block header.

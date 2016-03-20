@@ -92,8 +92,9 @@ int scil_algo1_compress_<DATATYPE>(const scil_context* ctx,
     //Get needed bits per compressed number in data
     uint8_t bits_per_num = get_needed_bit_count_<DATATYPE>(min, max, abs_tol);
 
-    //Header byte size (currently sizes of magic number + min + abs_tol)
-    uint8_t head_size = 0;
+    //Header byte size
+    // (sizes of magic number + min + abs_tol + bits_per_num + dimensional configuration)
+    uint16_t head_size = 1; // magic number
 
     //Set compression information
     //Minimum value
@@ -109,16 +110,7 @@ int scil_algo1_compress_<DATATYPE>(const scil_context* ctx,
     dest++;
     head_size += 1;
 
-    // Storing dimensional configuration in Header
-    *dest = dims.dims;
-    dest++;
-    head_size += 1;
-
-    for(uint8_t i = 0; i < dims.dims; ++i){
-        *((size_t*)dest) = dims.length[i];
-        dest += sizeof(size_t);
-        head_size += sizeof(size_t);
-    }
+    head_size += scil_write_dims_to_buffer(dest, dims);
 
     //Get number of needed bytes for the whole compressed buffer
     *dest_size = round_up_byte_<DATATYPE>(bits_per_num * scil_get_data_count(dims)) + head_size;

@@ -31,7 +31,7 @@ int scil_zfp_compress_<DATATYPE>(const scil_context* ctx,
 {
     int ret = 0;
 
-    scil_write_dim_to_header(dest, dims);
+    scil_write_dims_to_buffer(dest, dims);
 
     <DATATYPE>* source_i = (<DATATYPE>*)SAFE_MALLOC(scil_get_data_count(dims));
     memcpy(source_i, source, scil_get_data_count(dims));

@@ -130,6 +130,20 @@ FILE* safe_fopen(const char* path, const char* args, const char* src, unsigned l
  */
 #define SAFE_FOPEN(path, args) safe_fopen(path, args, __FILE__, __LINE__)
 
+
+/** \brief Struct to contain the dimensional configuration of data. */
+typedef struct {
+    /** \brief Number of dimensions. */
+    uint8_t dims;
+
+    /**
+     * \brief Lengths of each dimension.
+     * The caller is responsible to free it.
+     */
+    size_t * length;
+} SCIL_dims_t;
+
+
 /**
  * \brief Writes dimensional information into buffer
  * \param dest The destination buffer
@@ -137,7 +151,7 @@ FILE* safe_fopen(const char* path, const char* args, const char* src, unsigned l
  * \pre dest != NULL
  * \return Byte size consumed of destination buffer
  */
-size_t scil_write_dim_to_buffer(void* dest, const SCIL_dims_t dims);
+size_t scil_write_dims_to_buffer(void* dest, const SCIL_dims_t dims);
 
 /**
  * \brief Calculates the difference between two timestamps.

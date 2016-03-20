@@ -18,7 +18,6 @@
 #include <math.h>
 
 #include <scil-internal.h>
-#include <scil-util.h>
 
 // known algorithms:
 #include <algo/algo-memcopy.h>
