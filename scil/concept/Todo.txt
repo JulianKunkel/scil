@@ -1,0 +1,7 @@
+- Algo-2
+- ZFP
+- Automatische Algorithmenwahl
+- benchmarking
+- Konfiguration
+- Präsentation
+- Ausarbeitung

@@ -185,7 +185,7 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t* rest
 				break;
 		}
 	}else if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
-		ret = last_algorithm->c.Btype.compress(ctx, dest, dest_size, (byte *) source, dims.dims * datatype_length(datatype));
+		ret = last_algorithm->c.Btype.compress(ctx, dest, dest_size, (byte *) source, scil_get_data_count(dims) * datatype_length(datatype));
 	}
 	(*dest_size)++;
 
@@ -224,7 +224,7 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, SCIL_dims_t
 		}
 
 	}else if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
-		ret = last_algorithm->c.Btype.decompress(NULL, (byte *) dest, dims.dims * datatype_length(datatype), source + 1, source_size - 1);
+		ret = last_algorithm->c.Btype.decompress(NULL, (byte *) dest, scil_get_data_count(dims) * datatype_length(datatype), source + 1, source_size - 1);
 	}
 
 	return ret;
