@@ -138,7 +138,7 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 }
 
 int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t* restrict dest_size,
-  const void*restrict source, SCIL_dims_t dims, scil_context* ctx){
+  void*restrict source, SCIL_dims_t dims, scil_context* ctx){
 
 	if (dims.dims == 0){
 		*dest_size = 0;
@@ -194,7 +194,7 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t* rest
 }
 
 int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, SCIL_dims_t dims,
-    const byte*restrict source, const size_t source_size){
+    byte*restrict source, const size_t source_size){
 
 	//assert(dims.dims == 1);
 
@@ -264,7 +264,7 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
 int scil_validate_compression(enum SCIL_Datatype datatype,
                              const void*restrict data_uncompressed,
 							 SCIL_dims_t dims,
-							 const byte*restrict data_compressed,
+							 byte*restrict data_compressed,
 							 const size_t compressed_size,
 							 const scil_context* ctx,
 							 scil_hints * out_accuracy){

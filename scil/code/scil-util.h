@@ -146,12 +146,21 @@ typedef struct {
 
 /**
  * \brief Writes dimensional information into buffer
- * \param dest The destination buffer
+ * \param dest Pointer to write location
  * \param dim The dimensional information
  * \pre dest != NULL
  * \return Byte size consumed of destination buffer
  */
 size_t scil_write_dims_to_buffer(void* dest, const SCIL_dims_t dims);
+
+/**
+ * \brief Reads dimensional information from buffer. Allocates memory for
+ * dims.length!
+ * \param dest Pointer to read location
+ * \pre dest != NULL
+ * \return Dimensional configuration of compressed data
+ */
+SCIL_dims_t scil_read_dims_from_buffer(void* dest);
 
 /**
  * \brief Calculates the difference between two timestamps.

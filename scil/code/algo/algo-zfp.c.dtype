@@ -26,7 +26,7 @@
 int scil_zfp_compress_<DATATYPE>(const scil_context* ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
-                        const <DATATYPE>*restrict source,
+                        <DATATYPE>*restrict source,
                         const SCIL_dims_t dims)
 {
     int ret = 0;
@@ -73,8 +73,45 @@ int scil_zfp_compress_<DATATYPE>(const scil_context* ctx,
 int scil_zfp_decompress_<DATATYPE>(  const scil_context* ctx,
                             <DATATYPE>*restrict dest,
                             SCIL_dims_t exp_count,
-                            const byte*restrict source,
+                            byte*restrict source,
                             const size_t source_size)
 {
-    return 0;
+    int ret = 0;
+
+    <DATATYPE>* source_i = (<DATATYPE>*)SAFE_MALLOC(source_size);
+    memcpy(source_i, source, source_size);
+
+    exp_count = scil_read_dims_from_buffer(source_i);
+
+    zfp_field* field;
+
+    switch(exp_count.dims){
+        case 1: field = zfp_field_1d(source_i, zfp_type_<DATATYPE>, exp_count.length[0]); break;
+        case 2: field = zfp_field_2d(source_i, zfp_type_<DATATYPE>, exp_count.length[0], exp_count.length[1]); break;
+        case 3: field = zfp_field_3d(source_i, zfp_type_<DATATYPE>, exp_count.length[0], exp_count.length[1], exp_count.length[2]); break;
+        default: field = zfp_field_1d(source_i, zfp_type_<DATATYPE>, scil_get_data_count(exp_count));
+    }
+
+    zfp_stream* zfp = zfp_stream_open(NULL);
+
+    /*  zfp_stream_set_rate(zfp, rate, type, 3, 0); */
+    /*  zfp_stream_set_precision(zfp, precision, type); */
+    zfp_stream_set_accuracy(zfp, ctx->hints.absolute_tolerance, zfp_type_<DATATYPE>);
+
+    bitstream* stream = stream_open(dest, scil_get_data_count(exp_count));
+    zfp_stream_set_bit_stream(zfp, stream);
+    zfp_stream_rewind(zfp);
+
+    size_t s = zfp_decompress(zfp, field);
+    if(s == 0){
+        fprintf(stderr, "ZPF compression failed\n");
+        ret = 1;
+    }
+
+    zfp_field_free(field);
+    zfp_stream_close(zfp);
+    stream_close(stream);
+    free(source_i);
+
+    return ret;
 }

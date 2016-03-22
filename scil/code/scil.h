@@ -140,7 +140,7 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
  * \return Success state of the compression
  */
 int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t* restrict dest_size,
-  const void*restrict source, SCIL_dims_t dims, scil_context* ctx);
+  void*restrict source, SCIL_dims_t dims, scil_context* ctx);
 
 /**
  * \brief Method to decompress a data buffer
@@ -155,7 +155,7 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t* rest
  * \return Success state of the decompression
  */
 int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, SCIL_dims_t expected_dims,
-    const byte*restrict source, const size_t source_size);
+    byte*restrict source, const size_t source_size);
 
 void scil_determine_accuracy(enum SCIL_Datatype datatype, const void * restrict  data_1,
     const void * restrict data_2, SCIL_dims_t dims,
@@ -168,7 +168,7 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype, const void * restrict 
 int scil_validate_compression(enum SCIL_Datatype datatype,
                              const void*restrict data_uncompressed,
                              SCIL_dims_t dims,
-                             const byte*restrict data_compressed,
+                             byte*restrict data_compressed,
                              const size_t compressed_size,
                              const scil_context* ctx,
                              scil_hints * out_accuracy);

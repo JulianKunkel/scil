@@ -44,16 +44,16 @@ typedef struct{
 
         struct{
             int (*compress_float)(const scil_context* ctx, byte* restrict compressed_buf_in_out,
-              size_t* restrict out_size, const float*restrict data_in, const SCIL_dims_t dims);
+              size_t* restrict out_size, float*restrict data_in, const SCIL_dims_t dims);
 
             int (*decompress_float)(const scil_context* ctx, float*restrict data_out,
-              SCIL_dims_t dims, const byte*restrict compressed_buf_in, const size_t in_size);
+              SCIL_dims_t dims, byte*restrict compressed_buf_in, const size_t in_size);
 
             int (*compress_double)(const scil_context* ctx, byte* restrict compressed_buf_in_out,
-              size_t* restrict out_size, const double*restrict data_in, const SCIL_dims_t dims);
+              size_t* restrict out_size, double*restrict data_in, const SCIL_dims_t dims);
 
             int (*decompress_double)(const scil_context* ctx, double*restrict data_out,
-              SCIL_dims_t dims, const byte*restrict compressed_buf_in, const size_t in_size);
+              SCIL_dims_t dims, byte*restrict compressed_buf_in, const size_t in_size);
         } DNtype;
 
         // TODO: Implement this
