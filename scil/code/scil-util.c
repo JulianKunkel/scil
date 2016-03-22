@@ -109,8 +109,6 @@ void scil_read_dims_from_buffer(SCIL_dims_t dims, void* dest){
     dims.dims = *((uint8_t*)dest);
     dest = (char*)dest + 1;
 
-    printf("Dims: %d\n", dims.dims);
-
     for(uint8_t i = 0; i < dims.dims; ++i){
         dims.length[i] = *((uint64_t*)dest);
         dest = (char*)dest + 8;

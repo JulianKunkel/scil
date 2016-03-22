@@ -31,9 +31,19 @@ int scil_zfp_compress_<DATATYPE>(const scil_context* ctx,
 {
     int ret = 0;
 
-    scil_write_dims_to_buffer(dest, dims);
+    *dest_size = 0;
 
-    zfp_field* field;
+    // Write header
+    size_t dims_size = scil_write_dims_to_buffer(dest, dims);
+    dest += dims_size;
+    *dest_size += dims_size;
+
+    *((double*)dest) = ctx->hints.absolute_tolerance;
+    dest += 8;
+    *dest_size += 8;
+
+    // Compress
+    zfp_field* field = NULL;
 
     switch(dims.dims){
         case 1: field = zfp_field_1d(source, zfp_type_<DATATYPE>, dims.length[0]); break;
@@ -47,12 +57,14 @@ int scil_zfp_compress_<DATATYPE>(const scil_context* ctx,
     /*  zfp_stream_set_rate(zfp, rate, type, 3, 0); */
     /*  zfp_stream_set_precision(zfp, precision, type); */
     zfp_stream_set_accuracy(zfp, ctx->hints.absolute_tolerance, zfp_type_<DATATYPE>);
+    // TODO: for each metric another algo
 
-    bitstream* stream = stream_open(dest, *dest_size);
+    size_t bufsize = zfp_stream_maximum_size(zfp, field);
+    bitstream* stream = stream_open(dest, bufsize);
     zfp_stream_set_bit_stream(zfp, stream);
     zfp_stream_rewind(zfp);
 
-    *dest_size = zfp_compress(zfp, field);
+    *dest_size += zfp_compress(zfp, field);
     if(*dest_size == 0){
         fprintf(stderr, "ZPF compression failed\n");
         ret = 1;
@@ -74,29 +86,36 @@ int scil_zfp_decompress_<DATATYPE>(  const scil_context* ctx,
 {
     int ret = 0;
 
+    // Read header
     scil_read_dims_from_buffer(exp_count, source);
+    source += 1 + exp_count.dims * sizeof(size_t);
 
-    zfp_field* field;
+    double tolerance = *((double*)source);
+    source += 8;
+
+    // Decompress
+    zfp_field* field = NULL;
 
     switch(exp_count.dims){
-        case 1: field = zfp_field_1d(source, zfp_type_<DATATYPE>, exp_count.length[0]); break;
-        case 2: field = zfp_field_2d(source, zfp_type_<DATATYPE>, exp_count.length[0], exp_count.length[1]); break;
-        case 3: field = zfp_field_3d(source, zfp_type_<DATATYPE>, exp_count.length[0], exp_count.length[1], exp_count.length[2]); break;
-        default: field = zfp_field_1d(source, zfp_type_<DATATYPE>, scil_get_data_count(exp_count));
+        case 1: field = zfp_field_1d(dest, zfp_type_<DATATYPE>, exp_count.length[0]); break;
+        case 2: field = zfp_field_2d(dest, zfp_type_<DATATYPE>, exp_count.length[0], exp_count.length[1]); break;
+        case 3: field = zfp_field_3d(dest, zfp_type_<DATATYPE>, exp_count.length[0], exp_count.length[1], exp_count.length[2]); break;
+        default: field = zfp_field_1d(dest, zfp_type_<DATATYPE>, scil_get_data_count(exp_count));
     }
 
     zfp_stream* zfp = zfp_stream_open(NULL);
 
     /*  zfp_stream_set_rate(zfp, rate, type, 3, 0); */
     /*  zfp_stream_set_precision(zfp, precision, type); */
-    zfp_stream_set_accuracy(zfp, ctx->hints.absolute_tolerance, zfp_type_<DATATYPE>);
+    zfp_stream_set_accuracy(zfp, tolerance, zfp_type_<DATATYPE>);
+    // TODO: for each metric another algo
 
-    bitstream* stream = stream_open(dest, scil_get_data_count(exp_count));
+    size_t bufsize = zfp_stream_maximum_size(zfp, field);
+    bitstream* stream = stream_open(source, bufsize);
     zfp_stream_set_bit_stream(zfp, stream);
     zfp_stream_rewind(zfp);
 
-    size_t s = zfp_decompress(zfp, field);
-    if(s == 0){
+    if(!zfp_decompress(zfp, field)){
         fprintf(stderr, "ZPF compression failed\n");
         ret = 1;
     }
