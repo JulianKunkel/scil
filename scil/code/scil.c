@@ -68,7 +68,6 @@ static scil_compression_algorithm* pick_best_algorithm(){
 SCIL_dims_t scil_init_dims(const uint8_t dimensions_count, size_t* dimensions_length){
 
 	return (SCIL_dims_t){ .dims = dimensions_count, .length = dimensions_length };
-	//return dims;
 }
 
 size_t scil_get_data_count(const SCIL_dims_t dims){
@@ -271,7 +270,7 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
 
   	assert(dims.length != NULL); // TODO, allocate uncompressed buffer...
 
-	const uint64_t length = scil_get_data_count(dims) * datatype_length(datatype);
+	const uint64_t length = scil_get_data_count(dims) * datatype_length(datatype) + SCIL_BLOCK_HEADER_MAX_SIZE;
 	byte * data_out = (byte*)SAFE_MALLOC(length);
 	scil_hints a;
 
@@ -313,7 +312,7 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
 	}
 
 end:
-  free(data_out);
+  	free(data_out);
 	*out_accuracy = a;
 	return ret;
 }

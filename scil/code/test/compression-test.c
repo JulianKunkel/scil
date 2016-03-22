@@ -85,7 +85,7 @@ int main(){
 	int ret;
 
 	scil_init_hints(& hints);
-	hints.force_compression_method = 5;
+	hints.force_compression_method = 1;
 	hints.absolute_tolerance = 0.5;
 	hints.significant_bits = 2;
 	scil_create_compression_context(&ctx, &hints);
@@ -111,6 +111,8 @@ int main(){
 	dims.length = (uint64_t*)SAFE_MALLOC(sizeof(uint64_t));
 	dims.length[0] = count;
 	ret = scil_compress(SCIL_DOUBLE, c_buf, &c_buf_size, u_buf, dims, ctx);
+
+	free(dims.length);
 
 	printf("C size: %lu\n", c_buf_size);
 
