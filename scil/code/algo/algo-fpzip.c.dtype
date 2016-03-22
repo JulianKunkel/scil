@@ -27,7 +27,7 @@ int scil_fpzip_compress_<DATATYPE>(const scil_context* ctx,
 {
     FPZ* fpz = fpzip_write_to_buffer(dest, *dest_size);
     fpz->type = SCIL_TYPE_<DATATYPE>; // in fpzip float is 0 and double 1
-    fpz->prec = 0; // lossless
+    fpz->prec = 0; // lossless TODO: implement precision functionality
 
     fpz->nx = scil_get_data_count(dims); // one-dimensional
     fpz->ny = 1; //
@@ -55,6 +55,8 @@ int scil_fpzip_compress_<DATATYPE>(const scil_context* ctx,
     }
 
     fpzip_write_close(fpz);
+
+    *dest_size = outbytes;
 
     return 0;
 }
