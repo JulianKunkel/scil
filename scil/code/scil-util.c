@@ -104,23 +104,17 @@ size_t scil_write_dims_to_buffer(void* dest, const SCIL_dims_t dims){
     return header_size;
 }
 
-SCIL_dims_t scil_read_dims_from_buffer(void* dest){
-
-    SCIL_dims_t dims;
+void scil_read_dims_from_buffer(SCIL_dims_t dims, void* dest){
 
     dims.dims = *((uint8_t*)dest);
     dest = (char*)dest + 1;
 
     printf("Dims: %d\n", dims.dims);
 
-    dims.length = (uint64_t*)SAFE_MALLOC(dims.dims * sizeof(uint64_t));
-
     for(uint8_t i = 0; i < dims.dims; ++i){
         dims.length[i] = *((uint64_t*)dest);
         dest = (char*)dest + 8;
     }
-
-    return dims;
 }
 
 struct timespec diff_timespec (struct timespec start, struct timespec end)

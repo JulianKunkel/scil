@@ -160,7 +160,7 @@ size_t scil_write_dims_to_buffer(void* dest, const SCIL_dims_t dims);
  * \pre dest != NULL
  * \return Dimensional configuration of compressed data
  */
-SCIL_dims_t scil_read_dims_from_buffer(void* dest);
+void scil_read_dims_from_buffer(SCIL_dims_t dims, void* dest);
 
 /**
  * \brief Calculates the difference between two timestamps.

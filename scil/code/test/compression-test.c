@@ -91,7 +91,7 @@ int main(){
 	scil_create_compression_context(&ctx, &hints);
 
 	const size_t count = 100;
-	size_t u_buf_size = count * sizeof(double);
+	size_t u_buf_size = count * sizeof(double) + SCIL_BLOCK_HEADER_MAX_SIZE;
 
 	double * u_buf = (double *)SAFE_MALLOC(u_buf_size);
 	printf("U ");
@@ -112,12 +112,12 @@ int main(){
 	dims.length[0] = count;
 	ret = scil_compress(SCIL_DOUBLE, c_buf, &c_buf_size, u_buf, dims, ctx);
 
-	free(dims.length);
-
 	printf("C size: %lu\n", c_buf_size);
 
 	double * data_out = (double*)SAFE_MALLOC(u_buf_size);
 	ret = scil_decompress(SCIL_DOUBLE, data_out, dims, c_buf, c_buf_size);
+
+	free(dims.length);
 
 	printf("Decompression %d\n", ret);
 
@@ -144,12 +144,11 @@ int main(){
 	scil_determine_accuracy(SCIL_DOUBLE, & f1, &f2, dims1, 0.51, & accuracy);
 	scil_hints_print(& accuracy);
 
-	ret = scil_validate_compression(SCIL_DOUBLE, u_buf, dims, c_buf, c_buf_size, ctx, & accuracy);
+	ret = scil_validate_compression(SCIL_DOUBLE, u_buf, dims1, c_buf, c_buf_size, ctx, & accuracy);
 
 	printf("\nscil_validate_compression returned %s\n", ret == 0 ? "OK" : "ERROR");
 	scil_hints_print(& accuracy);
 
-	free(dims.length);
 	free(dims1.length);
 
 	free(c_buf);

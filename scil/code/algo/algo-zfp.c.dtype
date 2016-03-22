@@ -74,7 +74,7 @@ int scil_zfp_decompress_<DATATYPE>(  const scil_context* ctx,
 {
     int ret = 0;
 
-    exp_count = scil_read_dims_from_buffer(source);
+    scil_read_dims_from_buffer(exp_count, source);
 
     zfp_field* field;
 

@@ -192,7 +192,7 @@ int scil_algo1_decompress_<DATATYPE>(  const scil_context* ctx,
     source++;
     in_size--;
 
-    dims = scil_read_dims_from_buffer(source);
+    scil_read_dims_from_buffer(dims, source);
     in_size -= 1 + dims.dims * sizeof(size_t);
 
     uint64_t index = 0;
