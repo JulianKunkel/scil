@@ -109,7 +109,9 @@ int scil_algo1_compress_<DATATYPE>(const scil_context* ctx,
     dest++;
     head_size += 1;
 
-    head_size += scil_write_dims_to_buffer(dest, dims);
+    size_t dim_size = scil_write_dims_to_buffer(dest, dims);
+    dest += dim_size; // Weird but has to be? I thought the last method incremented the dest pointer.
+    head_size += dim_size;
 
     //Get number of needed bytes for the whole compressed buffer
     *dest_size = round_up_byte_<DATATYPE>(bits_per_num * scil_get_data_count(dims)) + head_size;
@@ -193,10 +195,12 @@ int scil_algo1_decompress_<DATATYPE>(  const scil_context* ctx,
     in_size--;
 
     scil_read_dims_from_buffer(dims, source);
+    source += 1 + dims.dims * sizeof(size_t); // Weird again.
     in_size -= 1 + dims.dims * sizeof(size_t);
 
+    uint64_t max_index = scil_get_data_count(dims);
     uint64_t index = 0;
-    for(uint64_t i = 0; i < in_size*8; i+=bits_per_num){
+    for(uint64_t i = 0; index < max_index; i+=bits_per_num){
 
         // Get index of start and end byte
         uint64_t start_byte = i / 8;

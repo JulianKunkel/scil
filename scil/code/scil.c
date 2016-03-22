@@ -62,6 +62,7 @@ static void fix_double_setting(double * dbl){
 }
 
 static scil_compression_algorithm* pick_best_algorithm(){
+	// TODO: implement this
 	return NULL;
 }
 

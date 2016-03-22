@@ -154,8 +154,7 @@ typedef struct {
 size_t scil_write_dims_to_buffer(void* dest, const SCIL_dims_t dims);
 
 /**
- * \brief Reads dimensional information from buffer. Allocates memory for
- * dims.length!
+ * \brief Reads dimensional information from buffer.
  * \param dest Pointer to read location
  * \pre dest != NULL
  * \return Dimensional configuration of compressed data

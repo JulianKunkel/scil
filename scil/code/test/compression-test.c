@@ -12,6 +12,7 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -91,7 +92,7 @@ int main(){
 	scil_create_compression_context(&ctx, &hints);
 
 	const size_t count = 100;
-	size_t u_buf_size = count * sizeof(double) + SCIL_BLOCK_HEADER_MAX_SIZE;
+	size_t u_buf_size = count * sizeof(double);
 
 	double * u_buf = (double *)SAFE_MALLOC(u_buf_size);
 	printf("U ");
@@ -107,17 +108,17 @@ int main(){
 	size_t c_buf_size = u_buf_size + SCIL_BLOCK_HEADER_MAX_SIZE;
 	byte * c_buf = (byte*)SAFE_MALLOC(c_buf_size);
 
-	SCIL_dims_t dims = {.dims = 1, .length = NULL };
-	dims.length = (uint64_t*)SAFE_MALLOC(sizeof(uint64_t));
-	dims.length[0] = count;
+	size_t* length = (uint64_t*)SAFE_MALLOC(sizeof(size_t));
+	length[0] = count;
+
+	SCIL_dims_t dims = scil_init_dims(1, length);
+
 	ret = scil_compress(SCIL_DOUBLE, c_buf, &c_buf_size, u_buf, dims, ctx);
 
 	printf("C size: %lu\n", c_buf_size);
 
 	double * data_out = (double*)SAFE_MALLOC(u_buf_size);
 	ret = scil_decompress(SCIL_DOUBLE, data_out, dims, c_buf, c_buf_size);
-
-	free(dims.length);
 
 	printf("Decompression %d\n", ret);
 
@@ -134,9 +135,7 @@ int main(){
 	double f1 = 10.0;
 	double f2 = 10.5;
 
-	SCIL_dims_t dims1 = {.dims = 1, .length = NULL };
-	dims1.length = (size_t*)SAFE_MALLOC(dims1.dims * sizeof(size_t));
-	*dims1.length = 100;
+	SCIL_dims_t dims1 = scil_init_dims(1, length);
 
 	scil_determine_accuracy(SCIL_DOUBLE, & f1, &f2, dims1, 0.01, & accuracy);
 	scil_hints_print(& accuracy);
@@ -144,12 +143,12 @@ int main(){
 	scil_determine_accuracy(SCIL_DOUBLE, & f1, &f2, dims1, 0.51, & accuracy);
 	scil_hints_print(& accuracy);
 
-	ret = scil_validate_compression(SCIL_DOUBLE, u_buf, dims1, c_buf, c_buf_size, ctx, & accuracy);
+	ret = scil_validate_compression(SCIL_DOUBLE, u_buf, dims, c_buf, c_buf_size, ctx, & accuracy);
 
 	printf("\nscil_validate_compression returned %s\n", ret == 0 ? "OK" : "ERROR");
 	scil_hints_print(& accuracy);
 
-	free(dims1.length);
+	free(length);
 
 	free(c_buf);
 	free(data_out);
