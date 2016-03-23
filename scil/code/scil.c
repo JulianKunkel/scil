@@ -61,6 +61,16 @@ static void fix_double_setting(double * dbl){
 	}
 }
 
+static uint8_t relative_tolerance_to_significant_bits(double rel_tol){
+
+	return (uint8_t)ceil(log2(100.0 / rel_tol));
+}
+
+static double significant_bits_to_relative_tolerance(uint8_t sig_bits){
+
+	return 100.0 / exp2(sig_bits);
+}
+
 static scil_compression_algorithm* pick_best_algorithm(){
 	// TODO: implement this
 	return NULL;
@@ -101,20 +111,25 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 
 	// convert between significant digits and bits
 	if (ohints->significant_digits != SCIL_ACCURACY_INT_IGNORE){
-		if (ohints->significant_bits == SCIL_ACCURACY_INT_IGNORE){
-			ohints->significant_bits = scil_convert_significant_decimals_to_bits(ohints->significant_digits);
-		}else{
-			// fix significant bits to finest resolution
-			ohints->significant_bits = max(ohints->significant_bits, scil_convert_significant_decimals_to_bits(ohints->significant_digits) );
-		}
+		ohints->significant_bits = max(ohints->significant_bits, scil_convert_significant_decimals_to_bits(ohints->significant_digits) );
 	}
-	if (ohints->significant_bits != SCIL_ACCURACY_INT_IGNORE && ohints->significant_digits == SCIL_ACCURACY_INT_IGNORE){
-		ohints->significant_digits = scil_convert_significant_bits_to_decimals(ohints->significant_bits);
 
-		// we need to round the bits properly to decimals, i.e., 1 bit precision in the mantisa requires 1 decimal digit.
-		const int newbits = scil_convert_significant_decimals_to_bits(ohints->significant_digits);
-		if ( newbits < ohints->significant_bits ){
-			ohints->significant_digits = scil_convert_significant_bits_to_decimals(ohints->significant_bits) + 1;
+	if(ohints->relative_tolerance_percent != SCIL_ACCURACY_DBL_IGNORE){
+		ohints->significant_bits = max(ohints->significant_bits, relative_tolerance_to_significant_bits(ohints->relative_tolerance_percent));
+	}
+
+	if (ohints->significant_bits != SCIL_ACCURACY_INT_IGNORE){
+	 	if(ohints->significant_digits == SCIL_ACCURACY_INT_IGNORE){
+			ohints->significant_digits = scil_convert_significant_bits_to_decimals(ohints->significant_bits);
+
+			// we need to round the bits properly to decimals, i.e., 1 bit precision in the mantisa requires 1 decimal digit.
+			const int newbits = scil_convert_significant_decimals_to_bits(ohints->significant_digits);
+			if ( newbits < ohints->significant_bits ){
+				ohints->significant_digits = scil_convert_significant_bits_to_decimals(ohints->significant_bits) + 1;
+			}
+		}
+		if(ohints->relative_tolerance_percent == SCIL_ACCURACY_DBL_IGNORE){
+			ohints->relative_tolerance_percent = significant_bits_to_relative_tolerance(ohints->significant_bits);
 		}
 	}
 
@@ -247,7 +262,7 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
 		scil_determine_accuracy_1d_double((double*) data_1, (double*) data_2, dims.dims, relative_err_finest_abs_tolerance, & a);
 	}else{
 		a.significant_bits = MANTISA_LENGTH_float; // in bits
-		scil_determine_accuracy_1d_float((float*) data_1, (float*) data_2, dims.dims, relative_err_finest_abs_tolerance, & a);
+		scil_determine_accuracy_1d_float((float*) data_1, (float*) data_2, scil_get_data_count(dims), relative_err_finest_abs_tolerance, & a);
 	}
 
 	// convert significant_digits in bits to 10 decimals

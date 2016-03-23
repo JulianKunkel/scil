@@ -1,7 +1,7 @@
-- ZFP
 - Algo-2
 - Automatische Algorithmenwahl
 - Benchmarking
 - Konfiguration
 - Präsentation
 - Ausarbeitung
+- ZFP reparieren

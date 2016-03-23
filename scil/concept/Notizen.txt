@@ -1,2 +1,3 @@
 - Dims bei byte-algos?
 - zfp aufteilen in rate/precision/tolerance?
+- zfp: Fehler in scil_convert_significant_bits_to_decimals
