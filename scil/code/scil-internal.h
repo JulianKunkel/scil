@@ -84,7 +84,6 @@ int scil_convert_significant_bits_to_decimals(int bits);
 
 #define MANTISSA_MAX_LENGTH 52
 
-
 #define MANTISA_LENGTH_float 23
 
 typedef union {
