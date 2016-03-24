@@ -74,11 +74,11 @@ static int16_t get_exponent(uint64_t value, uint8_t exp_bits, uint8_t mant_bits,
     return min_exponent + ((value & mask) >> mant_bits);
 }
 
-static uint64_t get_mantisa(uint64_t value, uint8_t mant_bits){
+static uint64_t get_mantisa(uint64_t value, uint8_t bits_per_num, uint8_t mant_bits){
 
     uint64_t mask = (1 << mant_bits) - 1;
 
-    return value & mask;
+    return (value & mask) << (bits_per_num - mant_bits);
 }
 
 static double decompress_double(uint64_t value, uint8_t bits_per_num, uint8_t signs_id, uint8_t exp_bits, uint8_t mant_bits, int16_t min_exponent){
@@ -87,7 +87,9 @@ static double decompress_double(uint64_t value, uint8_t bits_per_num, uint8_t si
 
     cur.p.sign = get_sign(value, bits_per_num, signs_id);
     cur.p.exponent = get_exponent(value, exp_bits, mant_bits, min_exponent);
-    cur.p.mantisa = get_mantisa(value, mant_bits);
+    cur.p.mantisa = get_mantisa(value, bits_per_num, mant_bits);
+
+    printf("Sign:\t\t%d\nExponent:\t%d\nMantisa:\t0x%08x\n\n", cur.p.sign, cur.p.exponent, cur.p.mantisa);
 
     return cur.f;
 }
@@ -98,7 +100,7 @@ static double decompress_float(uint64_t value, uint8_t bits_per_num, uint8_t sig
 
     cur.p.sign = get_sign(value, bits_per_num, signs_id);
     cur.p.exponent = get_exponent(value, exp_bits, mant_bits, min_exponent);
-    cur.p.mantisa = (uint32_t)get_mantisa(value, mant_bits);
+    cur.p.mantisa = (uint32_t)get_mantisa(value, bits_per_num, mant_bits);
 
     return cur.f;
 }

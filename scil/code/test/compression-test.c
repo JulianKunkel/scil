@@ -88,7 +88,7 @@ int main(){
 	scil_init_hints(& hints);
 	hints.force_compression_method = 3;
 	hints.absolute_tolerance = 0.5;
-	//hints.relative_tolerance_percent = 100.0;
+	//hints.relative_tolerance_percent = 1.0;
 	hints.significant_bits = 20;
 	scil_create_compression_context(&ctx, &hints);
 

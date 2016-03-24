@@ -76,6 +76,8 @@ int scil_algo2_compress_<DATATYPE>(const scil_context* ctx,
     uint8_t exp_bits = calc_exp_bits(min_exponent, max_exponent);
     uint8_t mant_bits = ctx->hints.significant_bits;
 
+    printf("%d\n", mant_bits);
+
     uint8_t header_size = 1; // magic_number
 
     // Write header
