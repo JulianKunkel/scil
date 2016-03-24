@@ -89,7 +89,7 @@ int main(){
 	hints.force_compression_method = 3;
 	hints.absolute_tolerance = 0.5;
 	//hints.relative_tolerance_percent = 1.0;
-	hints.significant_bits = 20;
+	hints.significant_bits = 5;
 	scil_create_compression_context(&ctx, &hints);
 
 	const size_t count = 100;

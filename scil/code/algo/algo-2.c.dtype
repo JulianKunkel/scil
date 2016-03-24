@@ -59,6 +59,17 @@ static uint64_t compress_<DATATYPE>(<DATATYPE> value, uint8_t signs_id, uint8_t 
     return result;
 }
 
+static <DATATYPE> decompress_<DATATYPE>(uint64_t value, uint8_t bits_per_num, uint8_t signs_id, uint8_t exp_bits, uint8_t mant_bits, int16_t min_exponent){
+
+    datatype_cast_<DATATYPE> cur;
+
+    cur.p.sign = get_sign(value, bits_per_num, signs_id);
+    cur.p.exponent = get_exponent(value, exp_bits, mant_bits, min_exponent);
+    cur.p.mantisa = get_mantisa_<DATATYPE>(value, mant_bits);
+
+    return cur.f;
+}
+
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_algo2_compress_<DATATYPE>(const scil_context* ctx,
                         byte * restrict dest,
@@ -75,8 +86,6 @@ int scil_algo2_compress_<DATATYPE>(const scil_context* ctx,
     uint8_t signs_id = calc_sign_bits(min_sign, max_sign);
     uint8_t exp_bits = calc_exp_bits(min_exponent, max_exponent);
     uint8_t mant_bits = ctx->hints.significant_bits;
-
-    printf("%d\n", mant_bits);
 
     uint8_t header_size = 1; // magic_number
 

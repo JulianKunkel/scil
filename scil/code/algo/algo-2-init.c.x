@@ -1,33 +1,65 @@
 #ifndef SCIL_ALGO_2_INITIALIZER
 #define SCIL_ALGO_2_INITIALIZER
 
+#include <scil-internal.h>
+
 #include <math.h>
 
-/*
-#define MANTISSA_MAX_LENGTH 52
-
-#define MANTISA_LENGTH_float 23
-
-typedef union {
-  struct {
-    uint32_t mantisa  : MANTISA_LENGTH_float;
-    uint32_t exponent : 8;
-    uint32_t sign     : 1;
-  } p;
-	float f;
-} datatype_cast_float;
-
-#define MANTISA_LENGTH_double 52
-
-typedef union {
-  struct {
-    uint64_t mantisa  : MANTISA_LENGTH_double;
-    uint32_t exponent : 11;
-    uint32_t sign     : 1;
-  } p;
-	double f;
-} datatype_cast_double;
-*/
+static uint64_t mask[] = {
+    0,
+    1,
+    3,
+    7,
+    15,
+    31,
+    63,
+    127,
+    255,
+    511,
+    1023,
+    2047,
+    4095,
+    8191,
+    16383,
+    32767,
+    65535,
+    131071,
+    262143,
+    524287,
+    1048575,
+    2097151,
+    4194303,
+    8388607,
+    16777215,
+    33554431,
+    67108863,
+    134217727,
+    268435455,
+    536870911,
+    1073741823,
+    2147483647,
+    4294967295,
+    8589934591,
+    17179869183,
+    34359738367,
+    68719476735,
+    137438953471,
+    274877906943,
+    549755813887,
+    1099511627775,
+    2199023255551,
+    4398046511103,
+    8796093022207,
+    17592186044415,
+    35184372088831,
+    70368744177663,
+    140737488355327,
+    281474976710655,
+    562949953421311,
+    1125899906842623,
+    2251799813685247,
+    4503599627370495,
+};
 
 static uint8_t calc_sign_bits(uint8_t min_sign, uint8_t max_sign){
 
@@ -59,50 +91,22 @@ static uint8_t get_sign(uint64_t value, uint8_t bits_per_num, uint8_t signs_id){
 
     if(signs_id != 2) return signs_id;
 
-    uint8_t pos = (bits_per_num - 1);
-    uint64_t mask = 1 << pos;
-    return (value & mask) >> pos;
+    return value >> (bits_per_num - 1);
 }
 
 static int16_t get_exponent(uint64_t value, uint8_t exp_bits, uint8_t mant_bits, int16_t min_exponent){
 
-    uint64_t mask = (1 << (mant_bits + exp_bits)) - 1; // i.e 00001111
-
-    uint64_t mask_mask = (1 << mant_bits) - 1;
-
-    mask ^= mask_mask;
-    return min_exponent + ((value & mask) >> mant_bits);
+    return min_exponent + ((value & (mask[mant_bits + exp_bits] ^ mask[mant_bits])) >> mant_bits);
 }
 
-static uint64_t get_mantisa(uint64_t value, uint8_t bits_per_num, uint8_t mant_bits){
+static uint32_t get_mantisa_float(uint64_t value, uint8_t mant_bits){
 
-    uint64_t mask = (1 << mant_bits) - 1;
-
-    return (value & mask) << (bits_per_num - mant_bits);
+    return (value & mask[mant_bits]) << (MANTISA_LENGTH_float - mant_bits);
 }
 
-static double decompress_double(uint64_t value, uint8_t bits_per_num, uint8_t signs_id, uint8_t exp_bits, uint8_t mant_bits, int16_t min_exponent){
+static uint64_t get_mantisa_double(uint64_t value, uint8_t mant_bits){
 
-    datatype_cast_double cur;
-
-    cur.p.sign = get_sign(value, bits_per_num, signs_id);
-    cur.p.exponent = get_exponent(value, exp_bits, mant_bits, min_exponent);
-    cur.p.mantisa = get_mantisa(value, bits_per_num, mant_bits);
-
-    printf("Sign:\t\t%d\nExponent:\t%d\nMantisa:\t0x%08x\n\n", cur.p.sign, cur.p.exponent, cur.p.mantisa);
-
-    return cur.f;
-}
-
-static double decompress_float(uint64_t value, uint8_t bits_per_num, uint8_t signs_id, uint8_t exp_bits, uint8_t mant_bits, int16_t min_exponent){
-
-    datatype_cast_double cur;
-
-    cur.p.sign = get_sign(value, bits_per_num, signs_id);
-    cur.p.exponent = get_exponent(value, exp_bits, mant_bits, min_exponent);
-    cur.p.mantisa = (uint32_t)get_mantisa(value, bits_per_num, mant_bits);
-
-    return cur.f;
+    return (value & mask[mant_bits]) << (MANTISA_LENGTH_double - mant_bits);
 }
 
 scil_compression_algorithm algo_algo2 = {
