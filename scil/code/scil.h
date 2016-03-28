@@ -46,7 +46,6 @@ enum SCIL_Datatype{
 #define SCIL_ACCURACY_INT_FINEST -1
 #define SCIL_ACCURACY_SIGNIFICANT_FINEST 16
 
-
 typedef unsigned char byte;
 
 /**

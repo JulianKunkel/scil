@@ -30,7 +30,7 @@
 // this file is automatically created
 #include "scil-dtypes.h"
 
-static scil_compression_algorithm * algo_array[] = {
+scil_compression_algorithm * algo_array[] = {
 	& algo_memcopy,
 	& algo_algo1,
 	& algo_gzip,

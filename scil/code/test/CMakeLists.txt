@@ -15,3 +15,4 @@ target_link_libraries(zlib-test z)
 # performance
 add_executable(performance-test performance-test.c)
 target_link_libraries(performance-test scil)
+target_link_libraries(performance-test netcdf)

@@ -1,7 +1,7 @@
-- Algo-2
 - Benchmarking
 - Konfiguration
 - Automatische Algorithmenwahl
 - Präsentation
 - Ausarbeitung
 - ZFP reparieren
+- multi-dimensionalität
