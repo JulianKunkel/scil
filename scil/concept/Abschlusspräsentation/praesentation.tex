@@ -15,6 +15,8 @@
 \usepackage{microtype}
 \usepackage{units}
 
+\renewcommand*{\thefootnote}{\fnsymbol{footnote}}
+
 \lstset{
 	basicstyle=\ttfamily\footnotesize,
 	frame=single,
@@ -29,10 +31,10 @@
 	morekeywords={gboolean,gpointer,gconstpointer,gchar,guchar,gint,guint,gshort,gushort,glong,gulong,gint8,guint8,gint16,guint16,gint32,guint32,gint64,guint64,gfloat,gdouble,gsize,gssize,goffset,gintptr,guintptr,int8_t,uint8_t,int16_t,uint16_t,int32_t,uint32_t,int64_t,uint64_t,size_t,ssize_t,off_t,intptr_t,uintptr_t,mode_t}
 }
 
-\title{Titel des Vortrags}
-\author{Name des Autors}
+\title{SCIL - Scientific Compression Interface Library}
+\author{Armin Schaare}
 \institute{Arbeitsbereich Wissenschaftliches Rechnen\\Fachbereich Informatik\\Fakultät für Mathematik, Informatik und Naturwissenschaften\\Universität Hamburg}
-\date{2015-01-01}
+\date{2016-03-28}
 
 \titlegraphic{\includegraphics[width=0.75\textwidth]{logo}}
 
@@ -43,60 +45,100 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Gliederung (Agenda)}
+	\frametitle{Outline}
 
 	\tableofcontents[hidesubsections]
 \end{frame}
 
-\section{Einleitung}
-\subsection{Untersektion}
-
-\begin{frame}
-	\frametitle{Einleitung}
-
-	\begin{itemize}
-		\item Hauptpunkt 1
-		\begin{itemize}
-			\item Unterpunkt 1
-			\item Unterpunkt 2
-		\end{itemize}
-	\end{itemize}
-
-	\begin{figure}
-		\begin{center}
-			\includegraphics[width=0.75\textwidth]{logo.jpg}
-		\end{center}
-		\caption{Beispielgrafik}
-	\end{figure}
-\end{frame}
-
-\section{Hauptteil}
-\subsection{Untersektion}
-
-\begin{frame}[fragile]
-	\frametitle{Hauptteil}
-
-	\begin{itemize}
-		\item Hauptpunkt 1
-		\begin{itemize}
-			\item Unterpunkt 1
-			\item Unterpunkt 2
-		\end{itemize}
-
-		\begin{lstlisting}[caption=Beispielquelltext]
-		int foo (void)
-		{
-		    return 0;
-		}
-		\end{lstlisting}
-	\end{itemize}
-\end{frame}
-
-\section{Zusammenfassung}
+\section{Introduction}
 \subsection*{}
 
 \begin{frame}
-	\frametitle{Zusammenfassung}
+	\frametitle{What is SCIL?}
+
+	\begin{itemize}
+		\item Lossy and lossless compression library
+		\item Uses many compression algorithms and can be extended
+		\item User provides parameters for compression
+		\item Determines best suited compression algorithm automatically
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{User provided compression parameters}
+
+	\begin{itemize}
+		\item Absolute/relative error tolerance
+		\item Minimum performance/throughput
+		\item Dimensional configuration of the data
+		\item etc...
+	\end{itemize}
+\end{frame}
+
+\section{Workflow \& Usage}
+\subsection*{}
+
+\begin{frame}
+	\frametitle{Compression Algorithms}
+
+	SCIL uses a repertoire of compression algorithms.\\
+	Currently:
+
+	\bigskip
+
+	\begin{itemize}
+		\item gzip
+		\item fpzip
+		\item zfp
+		\item algo1 \footnote{Own developement}
+		\item algo2 \footnotemark[\value{footnote}]
+	\end{itemize}
+
+	\setcounter{footnote}{0}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Algorithm selection}
+
+	Before using SCIL run ./scil-config
+
+	\bigskip
+
+	\begin{itemize}
+		\item Generates performance data for each algorithm
+		\item Platform dependent
+		\item SCIL uses data to determine best algorithm each compression
+	\end{itemize}
+
+	\footnote{Not implemented yet}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Usage}
+
+	\begin{itemize}
+		\item Initialize compression context
+		\item Provide compression parameters
+		\item Compress your data
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Example Code}
+
+\end{frame}
+
+\section{Conclusion}
+\subsection*{}
+
+\begin{frame}
+	\frametitle{Algorithm Benchmark}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Conclusion}
 
 	\begin{itemize}
 		\item Zusammenfassung 1
@@ -113,14 +155,104 @@
 	\end{itemize}
 \end{frame}
 
-\section{Literatur}
+\section{Literature}
 \subsection*{}
 
 \begin{frame}
-	\frametitle{Literatur}
+	\frametitle{Literature}
 
 	\bibliographystyle{alpha}
 	\bibliography{literatur}
+\end{frame}
+
+\appendix
+
+\begin{frame}
+	\frametitle{Algo1 - Needed Bit Count}
+
+	\begin{center}
+		$N_{bits}=\lceil\log_2{\left(1 + \frac{V_{max} - V_{min}}{2 * \Delta{e}}\right)}\rceil$
+	\end{center}
+
+	\bigskip
+
+	, where\\
+
+	\bigskip
+
+	\begin{tabular}{ll}
+		$V_{min}$ & Minimum value in data \\
+		$V_{max}$ & Maximum value in data \\
+		$\Delta{e}$ & Absolute error tolerance \\
+		$N_{bits}$ & Needed number of bits per value
+	\end{tabular}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Algo1 - Encoding}
+
+	\begin{center}
+		$V_e = R\left(\frac{V_i - V_{min}}{2 * \Delta{e}}\right)$
+	\end{center}
+
+	\bigskip
+
+	, where\\
+
+	\bigskip
+
+	\begin{tabular}{ll}
+		$V_i$ & Current value \\
+		$V_e$ & Encoded value \\
+		$R\left(x\right)$ & Round to nearest integer function
+	\end{tabular}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Algo2}
+
+	\begin{itemize}
+		\item Calculate significant bits, from ...
+		\begin{itemize}
+			\item ... significant digits and
+			\item ... relative error tolerance
+		\end{itemize}
+		\item Find minimum and maximum exponent and sign
+		\item Calculate needed bit count for both
+		\item Encode sign and exponent
+		\item Strip mantissa of dispensable bits
+		\item Pack buffer tightly (bitwise)
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Algo2 - Significant Bits Formula}
+
+	From significant digits:
+	\begin{center}
+		$S_{b} = \lceil S_d * \log_2{10}\rceil$
+	\end{center}
+
+	\bigskip
+
+	From relative error tolerance:
+	\begin{center}
+		$S_{b} = \lceil \log_2{\left(\frac{100}{\Delta{r}}\right)}\rceil$
+	\end{center}
+
+	, where\\
+
+	\bigskip
+
+	\begin{tabular}{ll}
+		$S_b$ & Significant bits \\
+		$S_d$ & Significant (decimal) digits \\
+		$\Delta{r}$ & Relative error tolerance (in percent)
+	\end{tabular}
+
 \end{frame}
 
 \end{document}
