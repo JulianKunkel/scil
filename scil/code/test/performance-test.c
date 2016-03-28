@@ -657,8 +657,8 @@ int main(int argc, char** argv){
 	hints.relative_tolerance_percent = 1.0;
 	hints.significant_bits = 5;
 
-    size_t c_size = (variableSize+32) * sizeof(double);
-    allocate(byte, buffer_out, variableSize+32);
+    size_t c_size = (variableSize * sizeof(double)+SCIL_BLOCK_HEADER_MAX_SIZE);
+    allocate(byte, buffer_out, c_size);
     if(!buffer_out) return kErrNoMem;
 
     allocate(size_t, length, 1);
