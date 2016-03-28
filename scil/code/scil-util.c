@@ -85,7 +85,7 @@ FILE* safe_fopen(const char* path, const char* args, const char* src, unsigned l
     return file;
 }
 
-size_t scil_write_dims_to_buffer(void* dest, const SCIL_dims_t dims){
+size_t scil_write_dims_to_buffer(void* dest, const scil_dims_t dims){
 
     assert(dest != NULL);
 
@@ -104,7 +104,7 @@ size_t scil_write_dims_to_buffer(void* dest, const SCIL_dims_t dims){
     return header_size;
 }
 
-void scil_read_dims_from_buffer(SCIL_dims_t dims, void* dest){
+void scil_read_dims_from_buffer(scil_dims_t dims, void* dest){
 
     dims.dims = *((uint8_t*)dest);
     dest = (char*)dest + 1;

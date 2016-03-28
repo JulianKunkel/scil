@@ -112,7 +112,7 @@ int main(){
 	size_t* length = (uint64_t*)SAFE_MALLOC(sizeof(size_t));
 	length[0] = count;
 
-	SCIL_dims_t dims = scil_init_dims(1, length);
+	scil_dims_t dims = scil_init_dims(1, length);
 
 	ret = scil_compress(SCIL_DOUBLE, c_buf, &c_buf_size, u_buf, dims, ctx);
 
@@ -136,7 +136,7 @@ int main(){
 	double f1 = 10.0;
 	double f2 = 10.5;
 
-	SCIL_dims_t dims1 = scil_init_dims(1, length);
+	scil_dims_t dims1 = scil_init_dims(1, length);
 
 	scil_determine_accuracy(SCIL_DOUBLE, & f1, &f2, dims1, 0.01, & accuracy);
 	scil_hints_print(& accuracy);

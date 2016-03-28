@@ -124,8 +124,37 @@
 	\end{itemize}
 \end{frame}
 
-\begin{frame}
-	\frametitle{Example Code}
+\begin{frame}[fragile]
+	\frametitle{Usage Example Code - 1}
+
+	\begin{lstlisting}[caption=SCIL usage example]
+	scil_hints hints;
+	hints.absolute_tolerance = 0.005;
+	hints.relative_tolerance_percent = 1.0;
+	hints.significant_bits = 5;
+
+	scil_context * ctx;
+	scil_create_compression_context(&ctx, &hints);
+
+	size_t* lengths = (size_t*)malloc(100 * sizeof(double));
+	scil_dims_t dims = scil_init_dims(1, lengths);
+	...
+	\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+	\frametitle{Usage Example Code - 2}
+
+	\begin{lstlisting}[caption=SCIL usage example]
+	...
+
+	double* buffer_in = (double*)malloc(100 * sizeof(double));
+	byte* buffer_out = (byte*)malloc(100 * sizeof(double) + SCIL_BLOCK_HEADER_MAX_SIZE);
+
+	size_t c_size;
+	scil_compress(SCIL_DOUBLE, buffer_out, &c_size, buffer_in, dims, ctx);
+	\end{lstlisting}
 
 \end{frame}
 

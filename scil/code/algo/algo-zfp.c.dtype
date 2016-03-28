@@ -27,7 +27,7 @@ int scil_zfp_compress_<DATATYPE>(const scil_context* ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
                         <DATATYPE>*restrict source,
-                        const SCIL_dims_t dims)
+                        const scil_dims_t dims)
 {
     int ret = 0;
 
@@ -80,7 +80,7 @@ int scil_zfp_compress_<DATATYPE>(const scil_context* ctx,
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_zfp_decompress_<DATATYPE>(  const scil_context* ctx,
                             <DATATYPE>*restrict dest,
-                            SCIL_dims_t exp_count,
+                            scil_dims_t exp_count,
                             byte*restrict source,
                             const size_t source_size)
 {

@@ -141,7 +141,7 @@ typedef struct {
      * The caller is responsible to free it.
      */
     size_t * length;
-} SCIL_dims_t;
+} scil_dims_t;
 
 
 /**
@@ -151,7 +151,7 @@ typedef struct {
  * \pre dest != NULL
  * \return Byte size consumed of destination buffer
  */
-size_t scil_write_dims_to_buffer(void* dest, const SCIL_dims_t dims);
+size_t scil_write_dims_to_buffer(void* dest, const scil_dims_t dims);
 
 /**
  * \brief Reads dimensional information from buffer.
@@ -159,7 +159,7 @@ size_t scil_write_dims_to_buffer(void* dest, const SCIL_dims_t dims);
  * \pre dest != NULL
  * \return Dimensional configuration of compressed data
  */
-void scil_read_dims_from_buffer(SCIL_dims_t dims, void* dest);
+void scil_read_dims_from_buffer(scil_dims_t dims, void* dest);
 
 /**
  * \brief Calculates the difference between two timestamps.

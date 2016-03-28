@@ -664,7 +664,7 @@ int main(int argc, char** argv){
     allocate(size_t, length, 1);
 	length[0] = variableSize;
 
-	SCIL_dims_t dims = scil_init_dims(1, length);
+	scil_dims_t dims = scil_init_dims(1, length);
 
     printf("Done\n");
     printf("Measuring compression times...\n");
@@ -684,7 +684,8 @@ int main(int argc, char** argv){
         printf("\tUncompressed buffer size:\t%lu\n", variableSize * sizeof(double));
         printf("\tCompressed buffer size:\t\t%lu\n", c_size);
         printf("\tRatio:\t\t\t\t%f\n", (float)c_size/(variableSize * sizeof(double)));
-        printf("\tTime:\t\t\t\t%f\n\n", seconds);
+        printf("\tTime:\t\t\t\t%f\n", seconds);
+        printf("\tThroughput:\t\t%f\n\n", (float)variableSize * sizeof(double) / seconds);
 
         hints.force_compression_method++;
     }

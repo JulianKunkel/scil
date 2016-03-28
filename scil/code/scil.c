@@ -76,12 +76,12 @@ static scil_compression_algorithm* pick_best_algorithm(){
 	return NULL;
 }
 
-SCIL_dims_t scil_init_dims(const uint8_t dimensions_count, size_t* dimensions_length){
+scil_dims_t scil_init_dims(const uint8_t dimensions_count, size_t* dimensions_length){
 
-	return (SCIL_dims_t){ .dims = dimensions_count, .length = dimensions_length };
+	return (scil_dims_t){ .dims = dimensions_count, .length = dimensions_length };
 }
 
-size_t scil_get_data_count(const SCIL_dims_t dims){
+size_t scil_get_data_count(const scil_dims_t dims){
 
 	size_t result = 1;
 	for(uint8_t i = 0; i < dims.dims; ++i){
@@ -153,7 +153,7 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 }
 
 int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t* restrict dest_size,
-  void*restrict source, SCIL_dims_t dims, scil_context* ctx){
+  void*restrict source, scil_dims_t dims, scil_context* ctx){
 
 	if (dims.dims == 0){
 		*dest_size = 0;
@@ -208,7 +208,7 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t* rest
 	return ret;
 }
 
-int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, SCIL_dims_t dims,
+int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims_t dims,
     byte*restrict source, const size_t source_size){
 
 	//assert(dims.dims == 1);
@@ -247,7 +247,7 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, SCIL_dims_t
 }
 
 void scil_determine_accuracy(enum SCIL_Datatype datatype,
-	const void * restrict  data_1, const void * restrict data_2, SCIL_dims_t dims,
+	const void * restrict  data_1, const void * restrict data_2, scil_dims_t dims,
 	const double relative_err_finest_abs_tolerance, scil_hints * out_hints){
 	scil_hints a;
 	a.absolute_tolerance = 0;
@@ -278,7 +278,7 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
 
 int scil_validate_compression(enum SCIL_Datatype datatype,
                              const void*restrict data_uncompressed,
-							 SCIL_dims_t dims,
+							 scil_dims_t dims,
 							 byte*restrict data_compressed,
 							 const size_t compressed_size,
 							 const scil_context* ctx,
