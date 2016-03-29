@@ -91,8 +91,8 @@
 		\item gzip
 		\item fpzip
 		\item zfp
-		\item algo1 \footnote{Own developement}
-		\item algo2 \footnotemark[\value{footnote}]
+		\item abstol \footnote{Own developement}
+		\item sigbits \footnotemark[\value{footnote}]
 	\end{itemize}
 
 	\setcounter{footnote}{0}
@@ -118,16 +118,17 @@
 	\frametitle{Usage}
 
 	\begin{itemize}
-		\item Initialize compression context
 		\item Provide compression parameters
-		\item Compress your data
+		\item Initialize compression context
+		\item Provide data
+		\item Compress data
 	\end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
 	\frametitle{Usage Example Code - 1}
 
-	\begin{lstlisting}[caption=SCIL usage example]
+	\begin{lstlisting}[caption=SCIL usage example - 1]
 	scil_hints hints;
 	hints.absolute_tolerance = 0.005;
 	hints.relative_tolerance_percent = 1.0;
@@ -146,7 +147,7 @@
 \begin{frame}[fragile]
 	\frametitle{Usage Example Code - 2}
 
-	\begin{lstlisting}[caption=SCIL usage example]
+	\begin{lstlisting}[caption=SCIL usage example - 2]
 	...
 
 	double* buffer_in = (double*)malloc(100 * sizeof(double));
@@ -197,7 +198,7 @@
 \appendix
 
 \begin{frame}
-	\frametitle{Algo1 - Needed Bit Count}
+	\frametitle{Abstol - Needed Bit Count}
 
 	\begin{center}
 		$N_{bits}=\lceil\log_2{\left(1 + \frac{V_{max} - V_{min}}{2 * \Delta{e}}\right)}\rceil$
@@ -219,7 +220,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Algo1 - Encoding}
+	\frametitle{Abstol - Encoding}
 
 	\begin{center}
 		$V_e = R\left(\frac{V_i - V_{min}}{2 * \Delta{e}}\right)$
@@ -240,7 +241,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Algo2}
+	\frametitle{Sigbits}
 
 	\begin{itemize}
 		\item Calculate significant bits, from ...
@@ -258,7 +259,7 @@
 \end{frame}
 
 \begin{frame}
-	\frametitle{Algo2 - Significant Bits Formula}
+	\frametitle{Sigbits - Significant Bits Formula}
 
 	From significant digits:
 	\begin{center}

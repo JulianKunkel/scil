@@ -28,7 +28,7 @@ def main():
     sp.set_yscale('log')
     sp.grid(True,linestyle='-',color='0.75')
 
-    labels = ['memcpy', 'algo1']
+    labels = ['memcpy', 'abstol']
 
     for g, l in zip(graphs, labels):
         sp.plot(g[0], g[1], label=l)

@@ -109,14 +109,14 @@ static uint64_t get_mantisa_double(uint64_t value, uint8_t mant_bits){
     return (value & mask[mant_bits]) << (MANTISA_LENGTH_double - mant_bits);
 }
 
-scil_compression_algorithm algo_algo2 = {
+scil_compression_algorithm algo_sigbits = {
     .c.DNtype = {
-        scil_algo2_compress_float,
-        scil_algo2_decompress_float,
-        scil_algo2_compress_double,
-        scil_algo2_decompress_double,
+        scil_sigbits_compress_float,
+        scil_sigbits_decompress_float,
+        scil_sigbits_compress_double,
+        scil_sigbits_decompress_double,
     },
-    "algo2",
+    "sigbits",
     3,
     SCIL_COMPRESSOR_TYPE_DATATYPES
 };

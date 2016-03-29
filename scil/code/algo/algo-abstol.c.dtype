@@ -18,8 +18,8 @@
 
 #include <scil-util.h>
 
-#include <algo/algo-1.h>
-#include <algo/algo-1-init.c.x>
+#include <algo/algo-abstol.h>
+#include <algo/algo-abstol-init.c.x>
 
 static int find_min_max_<DATATYPE>(<DATATYPE>*restrict min, <DATATYPE>*restrict max, const <DATATYPE>* buf, const uint64_t size){
 
@@ -60,7 +60,7 @@ static <DATATYPE> DataType_repres_<DATATYPE>(const uint64_t num, const <DATATYPE
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_algo1_compress_<DATATYPE>(const scil_context* ctx,
+int scil_abstol_compress_<DATATYPE>(const scil_context* ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
                         <DATATYPE>*restrict source,
@@ -152,7 +152,7 @@ int scil_algo1_compress_<DATATYPE>(const scil_context* ctx,
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_algo1_decompress_<DATATYPE>(  const scil_context* ctx,
+int scil_abstol_decompress_<DATATYPE>(  const scil_context* ctx,
                             <DATATYPE>*restrict dest,
                             scil_dims_t dims,
                             byte*restrict source,

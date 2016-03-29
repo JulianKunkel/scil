@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <algo/algo-2.h>
-#include <algo/algo-2-init.c.x>
+#include <algo/algo-sigbits.h>
+#include <algo/algo-sigbits-init.c.x>
 
 static void find_minimums_and_maximums_<DATATYPE>(const <DATATYPE>* buf,
                                                   const size_t size,
@@ -71,7 +71,7 @@ static <DATATYPE> decompress_<DATATYPE>(uint64_t value, uint8_t bits_per_num, ui
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_algo2_compress_<DATATYPE>(const scil_context* ctx,
+int scil_sigbits_compress_<DATATYPE>(const scil_context* ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
                         <DATATYPE>*restrict source,
@@ -169,7 +169,7 @@ int scil_algo2_compress_<DATATYPE>(const scil_context* ctx,
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_algo2_decompress_<DATATYPE>(  const scil_context* ctx,
+int scil_sigbits_decompress_<DATATYPE>(  const scil_context* ctx,
                             <DATATYPE>*restrict dest,
                             scil_dims_t exp_count,
                             byte*restrict source,

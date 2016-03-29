@@ -1,5 +1,5 @@
-#ifndef SCIL_ALGO1_INITIALZIER
-#define SCIL_ALGO1_INITIALZIER
+#ifndef SCIL_ABSTOL_INITIALZIER
+#define SCIL_ABSTOL_INITIALZIER
 
 static uint64_t round_up_byte(const uint64_t bits){
 
@@ -17,14 +17,14 @@ static uint8_t get_bits(const uint64_t num, const uint8_t start, const uint8_t s
     return (uint8_t)((num << (64 - start)) >> (64 - size));
 }
 
-scil_compression_algorithm algo_algo1 = {
+scil_compression_algorithm algo_abstol = {
     .c.DNtype = {
-        scil_algo1_compress_float,
-        scil_algo1_decompress_float,
-        scil_algo1_compress_double,
-        scil_algo1_decompress_double,
+        scil_abstol_compress_float,
+        scil_abstol_decompress_float,
+        scil_abstol_compress_double,
+        scil_abstol_decompress_double,
     },
-    "algo1",
+    "abstol",
     1,
     SCIL_COMPRESSOR_TYPE_DATATYPES
 };

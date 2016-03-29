@@ -21,9 +21,9 @@
 
 // known algorithms:
 #include <algo/algo-memcopy.h>
-#include <algo/algo-1.h>
+#include <algo/algo-abstol.h>
 #include <algo/algo-gzip.h>
-#include <algo/algo-2.h>
+#include <algo/algo-sigbits.h>
 #include <algo/algo-fpzip.h>
 #include <algo/algo-zfp.h>
 
@@ -32,9 +32,9 @@
 
 scil_compression_algorithm * algo_array[] = {
 	& algo_memcopy,
-	& algo_algo1,
+	& algo_abstol,
 	& algo_gzip,
-	& algo_algo2,
+	& algo_sigbits,
 	& algo_fpzip,
 	& algo_zfp,
 	NULL
