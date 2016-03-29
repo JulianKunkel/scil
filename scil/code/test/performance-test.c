@@ -624,25 +624,23 @@ int main_alt(int argc, char** argv) {
 	return 0;
 }
 
+write_to_csv(const uint8_t algo, size_t uncompressed_size, size_t compressed_size, double timer){
+
+	FILE* csv = fopen("times.csv", "a");
+	fprintf(csv, "%d,%d,%d,%f\n", algo, uncompressed_size, compressed_size, timer);
+
+	return 0;
+}
+
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int main(int argc, char** argv){
 
     printf("Initializing data generation...\n");
 
-    size_t variableSize = 1;
-    for(uint8_t i = 0; i < kDimensionCount; i++) variableSize *= kDimensionSize;
-
-    allocate(double, buffer_in, variableSize);
-    if(!buffer_in) return kErrNoMem;
-
     allocate(size_t, dimSizes, kDimensionCount);
     if(!dimSizes) return kErrNoMem;
 
     for(uint8_t i = 0; i < kDimensionCount; i++) dimSizes[i] = kDimensionSize;
-
-    printf("Done\n");
-    printf("Generating data...\n");
-    if(makeUpData(kDimensionCount, dimSizes, buffer_in, 1, 0, 0.0, 0)) return kErrInternal;
 
     printf("Done\n");
     printf("Initializing compression...\n");
@@ -657,40 +655,68 @@ int main(int argc, char** argv){
 	hints.relative_tolerance_percent = 1.0;
 	hints.significant_bits = 5;
 
-    size_t c_size = (variableSize * sizeof(double)+SCIL_BLOCK_HEADER_MAX_SIZE);
-    allocate(byte, buffer_out, c_size);
-    if(!buffer_out) return kErrNoMem;
-
-    allocate(size_t, length, 1);
-	length[0] = variableSize;
-
-	scil_dims_t dims = scil_init_dims(1, length);
-
     printf("Done\n");
     printf("Measuring compression times...\n");
 
-    while(hints.force_compression_method < 6){
+	for(uint32_t r = 50; r < 501; r += 50){
 
-        scil_create_compression_context(&ctx, &hints);
+		size_t variableSize = 1;
+		for(uint8_t i = 0; i < kDimensionCount; i++){
+			dimSizes[i] = r;
+			variableSize *= r;
+		}
 
-        clock_t start = clock();
+		allocate(double, buffer_in, variableSize);
+		if(!buffer_in) return kErrNoMem;
 
-        scil_compress(SCIL_DOUBLE, buffer_out, &c_size, buffer_in, dims, ctx);
+		if(makeUpData(kDimensionCount, dimSizes, buffer_in, 1, 0, 0.0, 0)) return kErrInternal;
 
-        clock_t end = clock();
-        float seconds = (float)(end - start) / CLOCKS_PER_SEC;
+		size_t c_size = (variableSize * sizeof(double)+SCIL_BLOCK_HEADER_MAX_SIZE);
 
-        printf("Compressing with %d:\n", hints.force_compression_method);
-        printf("\tUncompressed buffer size:\t%lu\n", variableSize * sizeof(double));
-        printf("\tCompressed buffer size:\t\t%lu\n", c_size);
-        printf("\tRatio:\t\t\t\t%f\n", (float)c_size/(variableSize * sizeof(double)));
-        printf("\tTime:\t\t\t\t%f\n", seconds);
-        printf("\tThroughput:\t\t%f\n\n", (float)variableSize * sizeof(double) / seconds);
+		allocate(byte, buffer_out, c_size);
+		if(!buffer_out) return kErrNoMem;
 
-        hints.force_compression_method++;
+		allocate(size_t, length, 1);
+		if(!length) return kErrNoMem;
+		length[0] = variableSize;
+
+		scil_dims_t dims = scil_init_dims(1, length);
+
+		float seconds = 0.0f;
+
+		hints.force_compression_method = 0;
+		while(hints.force_compression_method < 6){
+
+			scil_create_compression_context(&ctx, &hints);
+
+			for(uint32_t i = 0; i < 10; ++i){
+
+				clock_t start = clock();
+				scil_compress(SCIL_DOUBLE, buffer_out, &c_size, buffer_in, dims, ctx);
+				clock_t end = clock();
+				seconds += (float)(end - start) / CLOCKS_PER_SEC;
+			}
+			seconds /= 10;
+
+			printf("Compressing with %d:\n", hints.force_compression_method);
+	        printf("\tUncompressed buffer size:\t%lu\n", variableSize * sizeof(double));
+	        printf("\tCompressed buffer size:\t\t%lu\n", c_size);
+	        printf("\tRatio:\t\t\t\t%f\n", (float)c_size/(variableSize * sizeof(double)));
+	        printf("\tTime:\t\t\t\t%f\n", seconds);
+	        printf("\tThroughput:\t\t\t%f\n\n", (float)variableSize * sizeof(double) / seconds);
+
+			write_to_csv(hints.force_compression_method, variableSize * sizeof(double), seconds, c_size);
+
+			hints.force_compression_method++;
+		}
+
+		free(buffer_in);
+		free(buffer_out);
+		free(length);
     }
 
     printf("Done\n");
+	free(dimSizes);
 
     return 0;
 }

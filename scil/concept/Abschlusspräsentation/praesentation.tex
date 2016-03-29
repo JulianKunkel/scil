@@ -88,11 +88,12 @@
 	\bigskip
 
 	\begin{itemize}
+		\item (memcopy)
+		\item abstol \footnote{Own developement}
 		\item gzip
+		\item sigbits \footnotemark[\value{footnote}]
 		\item fpzip
 		\item zfp
-		\item abstol \footnote{Own developement}
-		\item sigbits \footnotemark[\value{footnote}]
 	\end{itemize}
 
 	\setcounter{footnote}{0}
@@ -159,11 +160,29 @@
 
 \end{frame}
 
+\begin{frame}[fragile]
+	\frametitle{Decompression}
+
+	\begin{itemize}
+		\item Uses relevant information for decompressing data
+		\item Relevant information is stored in header of compressed buffer
+		\begin{itemize}
+			\item Which algorithm to use
+			\item Absolute/Relative error tolerance
+			\item Minimum value
+			\item Dimensional configuration of data
+			\item etc...
+		\end{itemize}
+		\item User only needs to provide compressed buffer and its size
+	\end{itemize}
+
+\end{frame}
+
 \section{Conclusion}
 \subsection*{}
 
 \begin{frame}
-	\frametitle{Algorithm Benchmark}
+	\frametitle{Algorithm Benchmarks}
 
 \end{frame}
 
