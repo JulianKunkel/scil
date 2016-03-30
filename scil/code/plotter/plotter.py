@@ -46,13 +46,32 @@ def main(args):
     index = np.arange(5)
     bar_width = 0.35
 
-    rects = plt.plot(index + bar_width/2, , bar_width, color='b')
+    plt.subplot(2, 1, 1)
+    plt.plot(sig_bits[3], ratios[3], color='b', label='Sigbits')
 
-    plt.xlabel('Algorithms')
+    plt.xlabel('Significant Bits')
     plt.ylabel('Compression factor')
-    plt.title('Compression factor by error tolerance by algorithm')
-    plt.xticks(index + bar_width, ('Abstol', 'GZIP', 'Sigbits', 'FPZip', 'ZFP'))
+    plt.title('Compression factor by relative error tolerance')
+
     plt.grid(True)
+    plt.legend()
+
+    plt.subplot(2, 1, 0)
+    plt.gca().invert_xaxis()
+    plt.semilogx(abs_tols[1], ratios[1], basex=2, color='b', label='Abstol')
+
+    #plt.plot(abs_tols[1], ratios[1], color='b')
+    plt.plot(abs_tols[2], ratios[2], color='g', label='GZip')
+    #plt.plot(abs_tols[3], ratios[3], color='b')
+    plt.plot(abs_tols[4], ratios[4], color='r', label='FPZip')
+    plt.plot(abs_tols[5], ratios[5], color='purple', label='ZFP')
+
+    plt.xlabel('Absolute error tolerance')
+    plt.ylabel('Compression factor')
+    plt.title('Compression factor by absolute error tolerance')
+    #plt.xticks(index + bar_width, ('Abstol', 'GZIP', 'Sigbits', 'FPZip', 'ZFP'))
+    plt.grid(True)
+    plt.legend()
 
     plt.tight_layout()
     plt.show()

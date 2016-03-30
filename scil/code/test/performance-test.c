@@ -707,7 +707,8 @@ int main(int argc, char** argv){
 		hints.force_compression_method++;
     }
 
-	free(buffer_in);
+	free(buffer_in);p
+
 	free(buffer_out);
 	free(length);
 
