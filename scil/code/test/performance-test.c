@@ -624,10 +624,10 @@ int main_alt(int argc, char** argv) {
 	return 0;
 }
 
-static int write_to_csv(const uint8_t algo, const double abstol, const double compression_ratio){
+static int write_to_csv(const uint8_t algo, const double abstol, const uint8_t sigbits, const double compression_ratio){
 
 	FILE* csv = fopen("ratios.csv", "a");
-	fprintf(csv, "%d,%.15lf,%lf\n", algo, abstol, compression_ratio);
+	fprintf(csv, "%d,%.15lf,%d,%lf\n", algo, abstol, sigbits, compression_ratio);
 	fclose(csv);
 
 	return 0;
@@ -672,24 +672,20 @@ int main(int argc, char** argv){
     scil_init_hints(&hints);
 
     hints.force_compression_method = 0;
-	hints.absolute_tolerance = 0.005;
-	hints.relative_tolerance_percent = 1.0;
-	hints.significant_bits = 5;
+	hints.absolute_tolerance = 0.5;
+	hints.significant_bits = 1;
 
     printf("Done\n");
     printf("Measuring compression ratios...\n");
 
 	while(hints.force_compression_method < 6){
 
-		if(hints.force_compression_method == 3){
-			hints.force_compression_method++;
-			continue;
-		}
-
-		double abs_tol = 0.5f;
+		double abs_tol = 0.5;
+		uint8_t sig_bits = 1;
 		for(uint32_t r = 0; r < 15; ++r){
 
 			hints.absolute_tolerance = abs_tol;
+			hints.significant_bits = sig_bits;
 
 			scil_create_compression_context(&ctx, &hints);
 
@@ -699,11 +695,13 @@ int main(int argc, char** argv){
 
 			printf("Compressing with %d:\n", hints.force_compression_method);
 			printf("\tAbsolute tolerance:\t%.15lf\n", abs_tol);
+			printf("\tSignificant Bits:\t%d\n", sig_bits);
 	        printf("\tCompression factor:\t%lf\n", c_fac);
 
-			write_to_csv(hints.force_compression_method, abs_tol, c_fac);
+			write_to_csv(hints.force_compression_method, abs_tol, sig_bits, c_fac);
 
-			abs_tol *= 0.1;
+			abs_tol *= 0.5;
+			sig_bits++;
 		}
 
 		hints.force_compression_method++;

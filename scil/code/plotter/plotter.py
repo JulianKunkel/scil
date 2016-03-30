@@ -17,13 +17,13 @@ def open_csv(path):
 
     return result
 
-def get_throughputs(csv):
-    inter = np.arange(6)
-    for c in csv:
-        inter[(int)(c[0])] += (int)(c[1]) / (float)(c[3])
-
+def get_columns(csv, column):
+    inter = []
     for i in range(6):
-        inter[i] /= 7000000
+        inter.append([])
+
+    for c in csv:
+        inter[(int)(c[0])].append([(float)(c[column])])
 
     return inter
 
@@ -35,17 +35,22 @@ def main(args):
 
     csv = open_csv(args[1])
 
-    throughs = get_throughputs(csv)
-    print(throughs)
+    abs_tols = get_columns(csv, 1)
+    sig_bits = get_columns(csv, 2)
+    ratios = get_columns(csv, 3)
+
+    print(abs_tols)
+    print(sig_bits)
+    print(ratios)
 
     index = np.arange(5)
     bar_width = 0.35
 
-    rects = plt.bar(index + bar_width/2, throughs[1:], bar_width, color='b')
+    rects = plt.plot(index + bar_width/2, , bar_width, color='b')
 
     plt.xlabel('Algorithms')
-    plt.ylabel('Throughput (MB/s)')
-    plt.title('Throughput by algorithm')
+    plt.ylabel('Compression factor')
+    plt.title('Compression factor by error tolerance by algorithm')
     plt.xticks(index + bar_width, ('Abstol', 'GZIP', 'Sigbits', 'FPZip', 'ZFP'))
     plt.grid(True)
 
