@@ -41,7 +41,7 @@
 
 const int kRandSeed = 6;
 const int kDimensionCount = 3;
-const int kDimensionSize = 10;
+const int kDimensionSize = 100;
 
 typedef enum {
 	kNoErr = 0,
@@ -624,10 +624,11 @@ int main_alt(int argc, char** argv) {
 	return 0;
 }
 
-write_to_csv(const uint8_t algo, size_t uncompressed_size, size_t compressed_size, double timer){
+static int write_to_csv(const uint8_t algo, const double abstol, const double compression_ratio){
 
-	FILE* csv = fopen("times.csv", "a");
-	fprintf(csv, "%d,%d,%d,%f\n", algo, uncompressed_size, compressed_size, timer);
+	FILE* csv = fopen("ratios.csv", "a");
+	fprintf(csv, "%d,%.15lf,%lf\n", algo, abstol, compression_ratio);
+	fclose(csv);
 
 	return 0;
 }
@@ -640,7 +641,27 @@ int main(int argc, char** argv){
     allocate(size_t, dimSizes, kDimensionCount);
     if(!dimSizes) return kErrNoMem;
 
-    for(uint8_t i = 0; i < kDimensionCount; i++) dimSizes[i] = kDimensionSize;
+	size_t variableSize = 1;
+	for(uint8_t i = 0; i < kDimensionCount; i++){
+		dimSizes[i] = kDimensionSize;
+		variableSize *= kDimensionSize;
+	}
+
+	allocate(double, buffer_in, variableSize);
+	if(!buffer_in) return kErrNoMem;
+
+	if(makeUpData(kDimensionCount, dimSizes, buffer_in, 1, 0, 0.0, 0)) return kErrInternal;
+
+	size_t c_size = (variableSize * sizeof(double)+SCIL_BLOCK_HEADER_MAX_SIZE);
+
+	allocate(byte, buffer_out, c_size);
+	if(!buffer_out) return kErrNoMem;
+
+	allocate(size_t, length, 1);
+	if(!length) return kErrNoMem;
+	length[0] = variableSize;
+
+	scil_dims_t dims = scil_init_dims(1, length);
 
     printf("Done\n");
     printf("Initializing compression...\n");
@@ -656,64 +677,41 @@ int main(int argc, char** argv){
 	hints.significant_bits = 5;
 
     printf("Done\n");
-    printf("Measuring compression times...\n");
+    printf("Measuring compression ratios...\n");
 
-	for(uint32_t r = 50; r < 501; r += 50){
+	while(hints.force_compression_method < 6){
 
-		size_t variableSize = 1;
-		for(uint8_t i = 0; i < kDimensionCount; i++){
-			dimSizes[i] = r;
-			variableSize *= r;
+		if(hints.force_compression_method == 3){
+			hints.force_compression_method++;
+			continue;
 		}
 
-		allocate(double, buffer_in, variableSize);
-		if(!buffer_in) return kErrNoMem;
+		double abs_tol = 0.5f;
+		for(uint32_t r = 0; r < 15; ++r){
 
-		if(makeUpData(kDimensionCount, dimSizes, buffer_in, 1, 0, 0.0, 0)) return kErrInternal;
-
-		size_t c_size = (variableSize * sizeof(double)+SCIL_BLOCK_HEADER_MAX_SIZE);
-
-		allocate(byte, buffer_out, c_size);
-		if(!buffer_out) return kErrNoMem;
-
-		allocate(size_t, length, 1);
-		if(!length) return kErrNoMem;
-		length[0] = variableSize;
-
-		scil_dims_t dims = scil_init_dims(1, length);
-
-		float seconds = 0.0f;
-
-		hints.force_compression_method = 0;
-		while(hints.force_compression_method < 6){
+			hints.absolute_tolerance = abs_tol;
 
 			scil_create_compression_context(&ctx, &hints);
 
-			for(uint32_t i = 0; i < 10; ++i){
+			scil_compress(SCIL_DOUBLE, buffer_out, &c_size, buffer_in, dims, ctx);
 
-				clock_t start = clock();
-				scil_compress(SCIL_DOUBLE, buffer_out, &c_size, buffer_in, dims, ctx);
-				clock_t end = clock();
-				seconds += (float)(end - start) / CLOCKS_PER_SEC;
-			}
-			seconds /= 10;
+			double c_fac = (double)(variableSize * sizeof(double)) / c_size;
 
 			printf("Compressing with %d:\n", hints.force_compression_method);
-	        printf("\tUncompressed buffer size:\t%lu\n", variableSize * sizeof(double));
-	        printf("\tCompressed buffer size:\t\t%lu\n", c_size);
-	        printf("\tRatio:\t\t\t\t%f\n", (float)c_size/(variableSize * sizeof(double)));
-	        printf("\tTime:\t\t\t\t%f\n", seconds);
-	        printf("\tThroughput:\t\t\t%f\n\n", (float)variableSize * sizeof(double) / seconds);
+			printf("\tAbsolute tolerance:\t%.15lf\n", abs_tol);
+	        printf("\tCompression factor:\t%lf\n", c_fac);
 
-			write_to_csv(hints.force_compression_method, variableSize * sizeof(double), seconds, c_size);
+			write_to_csv(hints.force_compression_method, abs_tol, c_fac);
 
-			hints.force_compression_method++;
+			abs_tol *= 0.1;
 		}
 
-		free(buffer_in);
-		free(buffer_out);
-		free(length);
+		hints.force_compression_method++;
     }
+
+	free(buffer_in);
+	free(buffer_out);
+	free(length);
 
     printf("Done\n");
 	free(dimSizes);
