@@ -1,0 +1,266 @@
+\documentclass[
+	12pt,
+	a4paper,
+	BCOR10mm,
+	%chapterprefix,
+	DIV14,
+	headsepline,
+	%twoside,
+	%openright
+]{scrreprt}
+
+\KOMAoptions{
+	listof=totoc,
+	bibliography=totoc,
+	index=totoc
+}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage{lmodern}
+
+\usepackage[ngerman,english]{babel}
+
+\usepackage[toc]{appendix}
+\usepackage{eurosym}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage[htt]{hyphenat}
+\usepackage{listings}
+\usepackage{microtype}
+\usepackage[list=true,hypcap=true]{subcaption}
+\usepackage{units}
+
+\usepackage{varioref}
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalise,noabbrev]{cleveref}
+
+\lstset{
+	basicstyle=\ttfamily,
+	frame=single,
+	numbers=left,
+	language=C,
+	breaklines=true,
+	breakatwhitespace=true,
+	postbreak=\hbox{$\hookrightarrow$ },
+	showstringspaces=false,
+	tabsize=4,
+	captionpos=b,
+	morekeywords={gboolean,gpointer,gconstpointer,gchar,guchar,gint,guint,gshort,gushort,glong,gulong,gint8,guint8,gint16,guint16,gint32,guint32,gint64,guint64,gfloat,gdouble,gsize,gssize,goffset,gintptr,guintptr,int8_t,uint8_t,int16_t,uint16_t,int32_t,uint32_t,int64_t,uint64_t,size_t,ssize_t,off_t,intptr_t,uintptr_t,mode_t}
+}
+
+\makeatletter
+\renewcommand*{\lstlistlistingname}{List of Listings}
+\makeatother
+
+\begin{document}
+
+\begin{titlepage}
+	\begin{center}
+		{\titlefont\huge Titel der Arbeit\par}
+
+		\bigskip
+		\bigskip
+
+		{\Large Art der Arbeit\par}
+
+		\bigskip
+		\bigskip
+
+		{\large Arbeitsbereich Wissenschaftliches Rechnen\\
+		Fachbereich Informatik\\
+		Fakultät für Mathematik, Informatik und Naturwissenschaften\\
+		Universität Hamburg\par}
+	\end{center}
+
+	\vfill
+
+	{\large\begin{tabular}{ll}
+		Vorgelegt von:  & Vorname Nachname \\
+		E-Mail-Adresse: & \href{mailto:adresse@email.de}{adresse@email.de} \\
+		Matrikelnummer: & 1234567 \\
+		Studiengang:    & Informatik \\
+		\\
+		Erstgutachter:  & Name des Erstgutachters \\
+		Zweitgutachter: & Name des Zweitgutachters\\ \\
+		Betreuer:       & Name des Betreuers \\
+		\\
+		Hamburg, den 01.01.2015
+	\end{tabular}\par}
+\end{titlepage}
+
+\chapter*{Abstract}
+
+\thispagestyle{empty}
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+At vero eos et accusam et justo duo dolores et ea rebum.
+Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+At vero eos et accusam et justo duo dolores et ea rebum.
+Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+
+\tableofcontents
+
+\chapter{Introduction}
+\label{Introduction}
+
+\textit{%
+In this chapter, ...
+}
+
+\bigskip
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+At vero eos et accusam et justo duo dolores et ea rebum.
+Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+At vero eos et accusam et justo duo dolores et ea rebum.
+Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.\footnote{I am a footnote.}
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+At vero eos et accusam et justo duo dolores et ea rebum.
+Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet:
+
+\begin{itemize}
+	\item Lorem
+	\item Ipsum
+\end{itemize}
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+At vero eos et accusam et justo duo dolores et ea rebum.
+“Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.”~\cite{Quelle2012}
+
+\medskip
+
+Reference example: For more information, see
+\begin{itemize}
+	\item Chapter~\ref{Assignment},
+	\item \cref{Assignment},
+	\item \vref{Assignment}.
+\end{itemize}
+
+\chapter{Assignment}
+\label{Assignment}
+
+\textit{%
+In this chapter, ...
+}
+
+\bigskip
+
+\section{Section}
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+At vero eos et accusam et justo duo dolores et ea rebum.
+Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+At vero eos et accusam et justo duo dolores et ea rebum.
+Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet (see \cref{fig:logo}).
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[height=0.2\textheight]{logo.jpg}
+	\caption{Example figure}
+	\label{fig:logo}
+\end{figure}
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+At vero eos et accusam et justo duo dolores et ea rebum.
+Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua (see \cref{table:table}).
+
+\begin{table}
+	\centering
+	\begin{tabular}{|c|c|c|}\hline
+		Column 1 & Column 2 & Column 3 \\
+		\hline
+		Row 1    &   -      & -        \\
+		Row 2    &  Row 2   & -        \\
+		Row 3    &  Row 3   & Row 3    \\
+		\hline
+	\end{tabular}
+	\caption{Example table}
+	\label{table:table}
+\end{table}
+
+\chapter{Design}
+\label{Design}
+
+\textit{%
+In this chapter, ...
+}
+
+\bigskip
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+At vero eos et accusam et justo duo dolores et ea rebum.
+Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet (see \cref{lst:listing}).
+
+\begin{lstlisting}[caption=Example listing, label={lst:listing}]
+void print (void)
+{
+	int i;
+
+	for (i = 0; i < 10; i++)
+	{
+		printf("Hello World!\n");
+	}
+}
+\end{lstlisting}
+
+\chapter{Conclusion}
+\label{Conclusion}
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+At vero eos et accusam et justo duo dolores et ea rebum.
+Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+
+\bibliographystyle{alpha}
+\bibliography{literatur}
+
+\appendix
+\appendixpage
+
+\chapter{Chapter}
+
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+At vero eos et accusam et justo duo dolores et ea rebum.
+Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+
+\listoffigures
+
+\lstlistoflistings
+
+\listoftables
+
+\chapter*{}
+
+\thispagestyle{empty}
+
+\section*{Eidesstattliche Versicherung}
+
+\begin{otherlanguage}{ngerman}
+Hiermit versichere ich an Eides statt, dass ich die vorliegende Arbeit im Studiengang XXX selbstständig verfasst und keine anderen als die angegebenen Hilfsmittel -- insbesondere keine im Quellenverzeichnis nicht benannten Internet-Quellen -- benutzt habe.
+Alle Stellen, die wörtlich oder sinngemäß aus Veröffentlichungen entnommen wurden, sind als solche kenntlich gemacht.
+Ich versichere weiterhin, dass ich die Arbeit vorher nicht in einem anderen Prüfungsverfahren eingereicht habe und die eingereichte schriftliche Fassung der auf dem elektronischen Speichermedium entspricht.
+
+\bigskip
+
+\noindent
+Ich bin damit einverstanden, dass meine Abschlussarbeit in den Bestand der Fachbereichsbibliothek eingestellt wird.
+\end{otherlanguage}
+
+\bigskip
+\bigskip
+\bigskip
+
+\begin{center}
+\begin{tabular}{ll}
+	\rule{0.35\textwidth}{0.4pt} & \rule{0.55\textwidth}{0.4pt} \\
+	Ort, Datum & Unterschrift
+\end{tabular}
+\end{center}
+
+\end{document}
