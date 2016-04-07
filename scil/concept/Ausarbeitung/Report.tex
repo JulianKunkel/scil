@@ -36,6 +36,10 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage[capitalise,noabbrev]{cleveref}
 
+\usepackage{wrapfig}
+
+\renewcommand*{\thefootnote}{\fnsymbol{footnote}}
+
 \lstset{
 	basicstyle=\ttfamily,
 	frame=single,
@@ -90,92 +94,77 @@
 
 \thispagestyle{empty}
 
-SCIL is a library for the programming language C supporting lossy as well as
-lossless compression. Users are able to provide parameters to restrict the
-performance of the compression, restricting throughput and/or error tolerance to
-a minimum. Given the current user specified context, SCIL will then be able to
-automatically choose the best compression algorithm out of an array of
-procedures.
+
+This report presents the developement process, design and current state of SCIL
+- the Scientific Compression Interface Library. After a short introduction to
+compression in general and a documentation on design and implementation
+of SCIL follows.
 
 \tableofcontents
 
 \chapter{Introduction}
 \label{Introduction}
 
-\bigskip
-
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-At vero eos et accusam et justo duo dolores et ea rebum.
-Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-At vero eos et accusam et justo duo dolores et ea rebum.
-Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.\footnote{I am a footnote.}
-
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-At vero eos et accusam et justo duo dolores et ea rebum.
-Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet:
-
-\begin{itemize}
-	\item Lorem
-	\item Ipsum
-\end{itemize}
-
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-At vero eos et accusam et justo duo dolores et ea rebum.
-“Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.”~\cite{Quelle2012}
-
-\medskip
-
-Reference example: For more information, see
-\begin{itemize}
-	\item Chapter~\ref{Assignment},
-	\item \cref{Assignment},
-	\item \vref{Assignment}.
-\end{itemize}
-
-\chapter{Assignment}
-\label{Assignment}
-
-\textit{%
-In this chapter, ...
-}
+\section{Data Compression}
 
 \bigskip
 
-\section{Section}
+Data compression is the encoding of information to reduce its bit size while
+still adequately representing the original information [citation needed].
+Thus data compression can be used to maximize effective storage capacities of
+given hardware as well as reducing the load on bandwidth limited networks.
+Large amounts of data generated in scientific as well as commercial research
+environments and limited budgets for data storage and processing give rise to
+the need of better and faster compression techniques. The Large Hadron Collider
+at CERN for example is generating 600 Terabyte of collision event data per
+second. Unable to process such volumes of data, scientists filter out the most
+promising data, generally leaving 100 - 200 Megabyte per second of 'interesting'
+information which needs to be stored [citation needed]. Another example where
+data compression is very applicable is climate research. In particle collision
+data few interesting events are of concern, whereas for climate research it is
+beneficial to record and process as much available data as possible
+[citation needed]. In any case, compression leads to more data being stored and
+processed, contibuting to better and faster research.
 
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-At vero eos et accusam et justo duo dolores et ea rebum.
-Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-At vero eos et accusam et justo duo dolores et ea rebum.
-Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet (see \cref{fig:logo}).
+\begin{wrapfigure}{l}{0.6\textwidth}
+	\includegraphics[width=0.9\linewidth]{DKRZ_data_growth.png}
+	\caption{DKRZ data growth redrawn\\ citation needed}
+	\label{fig:dkrz}
+\end{wrapfigure}
 
-\begin{figure}[h]
-	\centering
-	\includegraphics[height=0.2\textheight]{logo.jpg}
-	\caption{Example figure}
-	\label{fig:logo}
-\end{figure}
+\cref{fig:dkrz} illustrates the increasing data usage at the German Climate
+Computing Center in Hamburg (DKRZ). Until now data compression at the DKRZ
+already has been put to practise but "storage capacity does not grow as fast as
+computation power" [citation needed]. Therefore optimizations regarding data
+reduction are a reasonable method to minimize the need of upscaling existing
+data archives.
+\clearpage
 
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-At vero eos et accusam et justo duo dolores et ea rebum.
-Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua (see \cref{table:table}).
+\section{SCIL}
 
-\begin{table}
-	\centering
-	\begin{tabular}{|c|c|c|}\hline
-		Column 1 & Column 2 & Column 3 \\
-		\hline
-		Row 1    &   -      & -        \\
-		Row 2    &  Row 2   & -        \\
-		Row 3    &  Row 3   & Row 3    \\
-		\hline
-	\end{tabular}
-	\caption{Example table}
-	\label{table:table}
-\end{table}
+To further exploit the potential of lossy and lossless compression in research,
+SCIL is being developed. SCIL is the Scientific Compression Interface
+Library for the programming language C. Having conventional and specifically
+developed compression algorithms integrated, it is able to compress data in
+a variety of ways. After calling the program 'scil-config'\footnote{Not yet implemented}
+to configure SCIL for the running platform, each compression can be customized
+by providing parameters such as:
+
+\bigskip
+
+\begin{itemize}
+	\item Absolute/Relative error tolerance
+	\item Performance of compression in MB/s
+	\item Dimensional layout of the data
+\end{itemize}
+
+\bigskip
+
+Based on these parameters, the platform dependent configuration and the
+characteristics of the data itself, SCIL will automatically choose the best
+fitting compression algorithm at disposal\footnotemark[\value{footnote}].\par
+
+\setcounter{footnote}{0}
 
 \chapter{Design}
 \label{Design}

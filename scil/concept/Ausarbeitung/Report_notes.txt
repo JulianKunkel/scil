@@ -1,0 +1,26 @@
+Abstract:
+
+-
+
+Introduction:
+
+- What is data compression
+- Compression maximizes storage capacity
+- Needed in scientific and commercial contexts
+- Example of data peaking at Cern or archiving climate data
+- Difference between lossy and lossless
+- SCIL as a user friendly interface
+- User can provide parameters
+- Based on users input, SCIL will choose best compression method automatically
+- Decompressing as simple as a single function call
+
+Design:
+
+- Existing potential of scientific data reduction through combination of
+    compression methods in a single library
+- Technical review
+- Goal of implementing a compression interface that is
+    - simple to use
+    - extensible
+    - data adaptive
+    - dynamic
