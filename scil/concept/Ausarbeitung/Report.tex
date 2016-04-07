@@ -169,27 +169,88 @@ fitting compression algorithm at disposal\footnotemark[\value{footnote}].\par
 \chapter{Design}
 \label{Design}
 
-\textit{%
-In this chapter, ...
-}
+\section{Problem Definition}
 
 \bigskip
 
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-At vero eos et accusam et justo duo dolores et ea rebum.
-Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet (see \cref{lst:listing}).
+Many available compression algorithms perform different on distinct datasets.
+Choosing the best algorithm for a given dataset is an assignment requiring
+in depth knowledge of conventional compression methods. Furthermore it is
+apparent that users are settling for one algorithm of their choice with which
+they are compression various datasets. Algorithms performing better on some
+datasets will be ignored compromising data reduction rates for consistency.\par
+SCIL is a library which automates the task of algorithm choice while providing
+a clean interface for compression and decompression. Its main goals are:
 
-\begin{lstlisting}[caption=Example listing, label={lst:listing}]
-void print (void)
-{
-	int i;
+\bigskip
 
-	for (i = 0; i < 10; i++)
-	{
-		printf("Hello World!\n");
-	}
-}
-\end{lstlisting}
+\begin{itemize}
+	\item User friendliness
+	\item Data adaptability
+	\item Extensibility
+	\item Platform independence
+\end{itemize}
+
+\bigskip
+
+\clearpage
+
+\section{Design Description}
+
+\bigskip
+
+At the core of SCIL there are the two essential methods to compress and
+decompress data as well as a structure to hold the user specified compression
+information. Calling the compression method invokes SCILs internal workflow in
+which it chooses the best compression methods out of available algorithms.
+The decision on which algorithm to choose is not only based on the users
+parameter input but also on the data characteristics and the platform specific
+configuration of SCIL. After writing the compressed buffer it is possible to
+decompress again by simply calling the decompression method of SCIL.
+In the following subsections a more detailed explaination of SCILs workflow
+will be presented.
+
+\bigskip
+
+\subsection{Algorithm Decision}
+
+\bigskip
+
+After validating the parameters of the compress function call, it is determined
+if the user explicitly forced to compress with a certain algorithm. In that case
+the compression commences, providing relevant user specified parameters to the
+chosen method. Otherwise the compression parameters are checked to determine
+whether a lossless compression is needed (if the user provided no parameters on
+error tolerance) or if lossy compression suffices the users needs. \par
+In case of lossless compression the parameter restricting compression speed is
+the only one consulted. If none is given, SCIL will default to best compression
+rates regardless of compression speed. \par
+If the user provided arguments describing error tolerance, SCIL considers lossy
+algorithms, optinally with a subsequent lossless compression. \par
+In either case the platform specific configuration of SCIL [see subsec ...] and
+current data characteristics are of interest. Analizing the data for its
+characteristics is an optional feature as it is very time consuming. Yet it
+enables further customization of the compression by the user.
+
+\bigskip
+
+\subsection{Writing Data Header}
+
+\bigskip
+
+blablabla
+
+\bigskip
+
+\subsection{Compressing Data}
+
+\bigskip
+
+Running the program 'scil-config' overwrites
+the default configuration file for scil, adapting SCIL to the platform it will
+be used on.
+
+\clearpage
 
 \chapter{Conclusion}
 \label{Conclusion}
