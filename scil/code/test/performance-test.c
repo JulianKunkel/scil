@@ -652,7 +652,7 @@ int main(int argc, char** argv){
 
 	if(makeUpData(kDimensionCount, dimSizes, buffer_in, 1, 0, 0.0, 0)) return kErrInternal;
 
-	size_t c_size = (variableSize * sizeof(double)+SCIL_BLOCK_HEADER_MAX_SIZE);
+	const size_t c_size = (variableSize * sizeof(double)+SCIL_BLOCK_HEADER_MAX_SIZE);
 
 	allocate(byte, buffer_out, c_size);
 	if(!buffer_out) return kErrNoMem;
@@ -688,8 +688,9 @@ int main(int argc, char** argv){
 			hints.significant_bits = sig_bits;
 
 			scil_create_compression_context(&ctx, &hints);
+			size_t out_c_size = c_size;
 
-			scil_compress(SCIL_DOUBLE, buffer_out, &c_size, buffer_in, dims, ctx);
+			scil_compress(SCIL_DOUBLE, buffer_out, &out_c_size, buffer_in, dims, ctx);
 
 			double c_fac = (double)(variableSize * sizeof(double)) / c_size;
 
@@ -707,7 +708,7 @@ int main(int argc, char** argv){
 		hints.force_compression_method++;
     }
 
-	free(buffer_in);p
+	free(buffer_in);
 
 	free(buffer_out);
 	free(length);

@@ -70,7 +70,7 @@ int scil_fpzip_decompress_<DATATYPE>(  const scil_context* ctx,
 {
     FPZ* fpz = fpzip_read_from_buffer(source);
 
-    // Read dims out of fpz
+    // Read dims out of fpz, TODO: avoid storing dims as the app knows it.
     dims.dims = 0;
     if(fpz->nx != 1) dims.length[0] = fpz->nx; dims.dims++;
     if(fpz->ny != 1) dims.length[1] = fpz->ny; dims.dims++;
