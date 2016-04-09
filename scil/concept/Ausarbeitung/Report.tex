@@ -95,10 +95,10 @@
 \thispagestyle{empty}
 
 
-This report presents the developement process, design and current state of SCIL
-- the Scientific Compression Interface Library. After a short introduction to
-compression in general and a documentation on design and implementation
-of SCIL follows.
+Blablabla \par
+This project is still in early developement with much of the core functionality
+not yet implemented. Features which are still to be implemented are marked as
+such throughout the report.
 
 \tableofcontents
 
@@ -138,6 +138,7 @@ already has been put to practise but "storage capacity does not grow as fast as
 computation power" [citation needed]. Therefore optimizations regarding data
 reduction are a reasonable method to minimize the need of upscaling existing
 data archives.
+
 \clearpage
 
 \section{SCIL}
@@ -221,43 +222,95 @@ if the user explicitly forced to compress with a certain algorithm. In that case
 the compression commences, providing relevant user specified parameters to the
 chosen method. Otherwise the compression parameters are checked to determine
 whether a lossless compression is needed (if the user provided no parameters on
-error tolerance) or if lossy compression suffices the users needs. \par
-In case of lossless compression the parameter restricting compression speed is
-the only one consulted. If none is given, SCIL will default to best compression
-rates regardless of compression speed. \par
-If the user provided arguments describing error tolerance, SCIL considers lossy
-algorithms, optinally with a subsequent lossless compression. \par
-In either case the platform specific configuration of SCIL [see subsec ...] and
-current data characteristics are of interest. Analizing the data for its
-characteristics is an optional feature as it is very time consuming. Yet it
-enables further customization of the compression by the user.
+error tolerance) or if a lossy compression method suffices the users needs. In
+case of lossless compression the parameter restricting compression speed is
+the only one consulted\footnote{Not yet implemented}. If none is given, SCIL
+will default to best compression rates, regardless of compression speed. If the
+user provided arguments describing error tolerance, SCIL considers lossy
+algorithms, optionally with a subsequent lossless
+compression\footnotemark[\value{footnote}]. In either case the platform specific
+configuration of SCIL [see subsec ...] and current data characteristics are of
+interest. Analizing the data for its characteristics is an optional feature as
+it can be very time consuming. Yet it enables further customization of the
+compression by the user.
+
+\clearpage
+
+\subsection{Header Writing}
 
 \bigskip
 
-\subsection{Writing Data Header}
-
-\bigskip
-
-blablabla
+The intermediate step between algorithm choice and actual compression is the
+writing of meta data to the start of the compressed data buffer. This meta data
+is often called header. The first byte in the header represents the algorithm
+ID. Base on this number, SCIL is able to identify the correct decompression
+method later on. The ID is the only part of the header guaranteed to be present.
+Afterwards the datas dimensional layout will be written if the user chooses to
+do so. Generally users are aware of the dimensional configuration of their data,
+thus SCIL defaults to not storing it in the header. Nevertheless, storing the
+dimensional layout in the header can be beneficial, for example if the data is
+shared between users. At last, algorithm specific meta data is written. This
+data is different from algorithm to algorithm and will be discussed in detail
+in \cref{comp_data}.
 
 \bigskip
 
 \subsection{Compressing Data}
+\label{comp_data}
 
 \bigskip
 
-Running the program 'scil-config' overwrites
-the default configuration file for scil, adapting SCIL to the platform it will
-be used on.
+At last, the actual compression of the data commences. Depending on the chosen
+algorithm, compression rates and speeds can vary widely. Current Compression
+Algorithms at disposal include:
+
+\bigskip
+
+\begin{itemize}
+	\item memcpy \footnote{As the trivial compression for benchmarking puposes}
+	\item abstol
+	\item gzip
+	\item sigbits
+	\item fpzip
+	\item zfp, absolute tolerance
+\end{itemize}
+
+\setcounter{footnote}{0}
+
+\bigskip
+
+The abstol and sigbits algorithms are specifically developed for SCIL. A
+detailed description of their functionality can be found in \cref{abstol} and
+\cref{sigbits} respectively. All other compression methods are included from
+indepentent projects. A reference to those projects can be found in the
+bibliography of this report.
 
 \clearpage
+
+\subsection{Decompressing Data}
+
+\bigskip
+
+The decompression of data is invoked by calling the designated function. Since
+compression relevant data was stored in the header of the compressed buffer, the
+user does not need to provide further information for decompression. Providing a
+structure to hold dimensional data however is optional. If the user decided to
+store the datas dimensional configuration at compression, this provided
+structure will hold the dimensional configuration after decompression. If no
+dimensional configuration was stored in the header of the compressed data, a
+null pointer will be returned\footnote{Not yet implemented}.
+
+\setcounter{footnote}{0}
 
 \chapter{Conclusion}
 \label{Conclusion}
 
+\section{Benchmarking}
 Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
 At vero eos et accusam et justo duo dolores et ea rebum.
 Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+
+\section{Final Words}
 
 \bibliographystyle{alpha}
 \bibliography{literatur}
@@ -265,11 +318,15 @@ Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit ame
 \appendix
 \appendixpage
 
-\chapter{Chapter}
+\chapter{abstol}
+\label{abstol}
 
 Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
 At vero eos et accusam et justo duo dolores et ea rebum.
 Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+
+\chapter{sigbits}
+\label{sigbits}
 
 \listoffigures
 
