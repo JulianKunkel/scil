@@ -414,9 +414,11 @@ calculates how many bits are needed to represent all numbers in the
 minimum-maximum-range, given the absolute error tolerance. The headers of
 abstol-compressed data buffers contain the minimum value found in the data, the
 absolute tolerance and the bit size of compressed values. While compressing the
-data, abstol packs the buffer tightly as described in \cref{}
-The bit count is
-calculated as follows:
+data, abstol packs the buffer tightly as described in \cref{bit_perf}. \\
+
+\bigskip
+
+Calculation of needed bit count for every compressed value:
 
 \bigskip
 
@@ -435,7 +437,7 @@ calculated as follows:
 
 \bigskip
 
-Encoding of numbers can then be done by using the following function:
+Value encoding function:
 
 \bigskip
 
@@ -453,7 +455,7 @@ Encoding of numbers can then be done by using the following function:
 
 \bigskip
 
-Decoding:
+Value decoding function:
 
 \bigskip
 
@@ -520,67 +522,74 @@ Decoding:
 \bigskip
 
 The sigbits compression algorithm uses the provided relative error tolerance.
+The relative error tolerance currently can be provided by three different
+metrics. Percentage, Significant decimal places and significant bits (in the
+mantissa). Those metrics are converted into another at the compression context
+creation, upholding the most restrictive value. At this point only the
+significant bits information is of relevance to the sigbits algorithm. \par
+For the sigbits compression with relative error tolerance, it is essential to
+segmentate floating point values by sign, exponent and mantissa. After scanning
+for the minimum and maximum signs and exponents in the data, sigbits calculates
+how many bits are needed to represent all occurring signs and exponents in the
+data. The provided significant bits information determines how many bits in the
+mantissa are kept. Adding those three values together, the overall bit count of
+one compressed number is determined.\par
+The algorithm then commences to write the header. Stored information include
 
-  by projecting uncompressed values to their
-nearest representating value, based on the user provided relative error
-tolerance. After determining the minimum and maximum values of the data, abstol
-calculates how many bits are needed to represent all numbers in the
-minimum-maximum-range, given the absolute error tolerance. The bit count is
-calculated as follows:
+\begin{itemize}
+	\item a sign id, specifying whether all values are positive, negative or if the data
+			contains negative and positive numbers
+	\item how many bits each values exponent requires
+	\item how many bits each values mantissa requires
+	\item the minimum exponent
+\end{itemize}
+
+After writing the header, the actual compression begins, packing compressed
+values tightly as seen in \cref{bit_perf}.
+
+\bigskip
+
+Converting significant decimal places to significant bits:
 
 \bigskip
 
 \begin{center}
-	$N_{bits}=\ceil[\big]{\log_2{\left(1 + \frac{V_{max} - V_{min}}{2 * \Delta{e}}\right)}}$, with
+	$S_{bit}=\ceil{S_{dec} * \log_{2}{10}}$, with
 
 	\bigskip
 
 	\begin{tabular}{ll}
-		$V_{min}$ & Minimum value in data \\
-		$V_{max}$ & Maximum value in data \\
-		$\Delta{e}$ & Absolute error tolerance \\
-		$N_{bits}$ & Needed number of bits per value
-	\end{tabular}
-\end{center}
-
-\bigskip
-
-Encoding of numbers can then be done by using the following function:
-
-\bigskip
-
-\begin{center}
-	$E\left(x\right) = R\left(\frac{x - V_{min}}{2 * \Delta{e}}\right)$, with
-
-	\bigskip
-
-	\begin{tabular}{ll}
-		$x$ & The Value to be encoded \\
-		$E\left(x\right)$ & Encoded value \\
-		$R\left(x\right)$ & Round to nearest integer function
-	\end{tabular}
-\end{center}
-
-\bigskip
-
-Decoding:
-
-\bigskip
-
-\begin{center}
-	$D\left(x\right) = V_{min} + x * 2 * \Delta{e}$, with
-
-	\bigskip
-
-	\begin{tabular}{ll}
-		$x$ & The Value to be decoded \\
-		$D\left(x\right)$ & Decoded value
+		$S_{bit}$ & Significant bits \\
+		$S_{dec}$ & Significant decimal places
 	\end{tabular}
 \end{center}
 
 \clearpage
 
+Converting relative error tolerance to significant bits:
+
+\bigskip
+
+\begin{center}
+	$S_{bit}=\ceil[\big]{log_2{\left(\frac{100.0}{\rho_{e}}\right)}}$, with
+
+	\bigskip
+
+	\begin{tabular}{ll}
+		$\rho_{e}$ & The relative error (in percent)
+	\end{tabular}
+\end{center}
+
+\bigskip
+
 \section{Proof of Concept}
+
+\bigskip
+
+As the signs and exponents of each value are just minimized and stored
+losslessly, the relative error happening at the compression is inherent to the
+mantissa. Therefore it suffices to prove that the mantissas value resides in
+the tolerated error margin.
 
 \bigskip
 
@@ -624,39 +633,5 @@ Decoding:
 
 \chapter{Bit Perfect Packing of Data}
 \label{bit_perf}
-
-\listoffigures
-
-\lstlistoflistings
-
-\listoftables
-
-\chapter*{}
-
-\thispagestyle{empty}
-
-\section*{Eidesstattliche Versicherung}
-
-\begin{otherlanguage}{ngerman}
-Hiermit versichere ich an Eides statt, dass ich die vorliegende Arbeit im Studiengang XXX selbstständig verfasst und keine anderen als die angegebenen Hilfsmittel -- insbesondere keine im Quellenverzeichnis nicht benannten Internet-Quellen -- benutzt habe.
-Alle Stellen, die wörtlich oder sinngemäß aus Veröffentlichungen entnommen wurden, sind als solche kenntlich gemacht.
-Ich versichere weiterhin, dass ich die Arbeit vorher nicht in einem anderen Prüfungsverfahren eingereicht habe und die eingereichte schriftliche Fassung der auf dem elektronischen Speichermedium entspricht.
-
-\bigskip
-
-\noindent
-Ich bin damit einverstanden, dass meine Abschlussarbeit in den Bestand der Fachbereichsbibliothek eingestellt wird.
-\end{otherlanguage}
-
-\bigskip
-\bigskip
-\bigskip
-
-\begin{center}
-\begin{tabular}{ll}
-	\rule{0.35\textwidth}{0.4pt} & \rule{0.55\textwidth}{0.4pt} \\
-	Ort, Datum & Unterschrift
-\end{tabular}
-\end{center}
 
 \end{document}

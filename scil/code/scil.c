@@ -333,7 +333,6 @@ end:
 	return ret;
 }
 
-
 static unsigned char sig_bits[MANTISSA_MAX_LENGTH] = {255};
 static unsigned char sig_decimals[MANTISSA_MAX_LENGTH] = {255};
 
