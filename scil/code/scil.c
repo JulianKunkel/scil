@@ -334,25 +334,19 @@ end:
 }
 
 
-static char sig_bits[MANTISSA_MAX_LENGTH] = {0};
-static char sig_decimals[MANTISSA_MAX_LENGTH] = {0};
+static unsigned char sig_bits[MANTISSA_MAX_LENGTH] = {-1};
+static unsigned char sig_decimals[MANTISSA_MAX_LENGTH] = {-1};
+
+#define LOG10B2 3.3219280948873626
+#define LOG2B10 0.30102999566398114
 
 static void compute_significant_bit_mapping(){
-	if(sig_bits[0] == 0){
-		int c = 0;
-		for(int i=0; i < MANTISSA_MAX_LENGTH; i++){
-			int v;
-			if (i%3 == 0){
-				v = 4;
-			}else{
-				v = 3;
-			}
-			for(int b=c; b < c+v; b++){
-				sig_decimals[b] = (char)i;
-			}
-			sig_bits[i] = (char) c;
-			c += v;
-		}
+
+	if(sig_bits[0] != -1) return;
+
+	for(int i = 0; i < MANTISA_MAX_LENGTH; ++i){
+		sig_bits[i] = (unsigned char)ceil(i * LOG10B2);
+		sig_decimals[i] = (unsigned char)ceil(i * LOG2B10);
 	}
 }
 
