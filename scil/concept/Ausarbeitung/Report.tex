@@ -37,6 +37,16 @@
 \usepackage[capitalise,noabbrev]{cleveref}
 
 \usepackage{wrapfig}
+\usepackage{amsmath}
+
+\usepackage{amsthm}
+\newtheorem{theorem}{Theorem}
+%\newproof{proof}{Proof}
+
+\usepackage{mathtools}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
 
 \renewcommand*{\thefootnote}{\fnsymbol{footnote}}
 
@@ -308,7 +318,7 @@ zero\footnote{Not yet implemented}.
 
 \setcounter{footnote}{0}
 
-\chapter{Examples}
+\chapter{Example Code}
 
 %In the following sections, example code is presented to illustrate the usage
 %of SCIL. The example code is written in the programming language C and not in
@@ -393,12 +403,227 @@ Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit ame
 \chapter{abstol}
 \label{abstol}
 
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-At vero eos et accusam et justo duo dolores et ea rebum.
-Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+\section{Algorithm Description}
+
+\bigskip
+
+The abstol compression method works by projecting uncompressed values to their
+nearest representating value, based on the user provided absolute error
+tolerance. After determining the minimum and maximum values of the data, abstol
+calculates how many bits are needed to represent all numbers in the
+minimum-maximum-range, given the absolute error tolerance. The headers of
+abstol-compressed data buffers contain the minimum value found in the data, the
+absolute tolerance and the bit size of compressed values. While compressing the
+data, abstol packs the buffer tightly as described in \cref{}
+The bit count is
+calculated as follows:
+
+\bigskip
+
+\begin{center}
+	$N_{bits}=\ceil[\big]{\log_2{\left(1 + \frac{V_{max} - V_{min}}{2 * \Delta{e}}\right)}}$, with
+
+	\bigskip
+
+	\begin{tabular}{ll}
+		$V_{min}$ & Minimum value in data \\
+		$V_{max}$ & Maximum value in data \\
+		$\Delta{e}$ & Absolute error tolerance \\
+		$N_{bits}$ & Needed number of bits per value
+	\end{tabular}
+\end{center}
+
+\bigskip
+
+Encoding of numbers can then be done by using the following function:
+
+\bigskip
+
+\begin{center}
+	$E\left(x\right) = R\left(\frac{x - V_{min}}{2 * \Delta{e}}\right)$, with
+
+	\bigskip
+
+	\begin{tabular}{ll}
+		$x$ & The Value to be encoded \\
+		$E\left(x\right)$ & Encoded value \\
+		$R\left(x\right)$ & Round to nearest integer function
+	\end{tabular}
+\end{center}
+
+\bigskip
+
+Decoding:
+
+\bigskip
+
+\begin{center}
+	$D\left(x\right) = V_{min} + x * 2 * \Delta{e}$, with
+
+	\bigskip
+
+	\begin{tabular}{ll}
+		$x$ & The Value to be decoded \\
+		$D\left(x\right)$ & Decoded value
+	\end{tabular}
+\end{center}
+
+\clearpage
+
+\section{Proof of Concept}
+
+\bigskip
+
+\begin{theorem}
+
+	\mbox{} \bigskip
+
+	\begin{center}
+		$\lvert D\left(E\left(V_i\right)\right) - V_i\rvert \leq \Delta{e}$, for all $V_{min} \leq V_i \leq V_{max}$ and $\Delta{e} > 0$, with \\
+
+		\bigskip
+
+		\begin{tabular}{lll}
+ 			$V_i$ & The exact initial value \\
+			$D\left(E\left(V_i\right)\right)$ & $V_i$ after a compression-decompression cycle \\
+		\end{tabular}
+
+	\end{center}
+
+\end{theorem}
+
+\begin{proof}
+	\begin{align*}
+	  \lvert D\left(E\left(V_i\right)\right) - V_i\rvert
+	  &=\abs[\big]{V_{min} + R\left(\frac{V_i - V_{min}}{2\Delta{e}}\right) * 2\Delta{e} - V_i} \\
+	  &\\
+	  &\stackrel{*}{=}\abs[\big]{V_{min} + \floor[\Big]{\frac{V_i - V_{min}}{2\Delta{e}} + 0.5} * 2\Delta{e} - V_i} \\
+	  &\\
+	  &\le\abs[\big]{V_{min} + \left(\frac{V_i - V_{min}}{2\Delta{e}} + 0.5\right) * 2\Delta{e} - V_i} \\
+	  &\\
+	  &=\abs[\big]{V_{min} + \left(V_i - V_{min}\right) + \Delta{e} - V_i} \\
+	  &\\
+	  &=\abs{\Delta{e}} = \Delta{e} \qedhere
+	\end{align*}
+
+	\vfill
+
+	\scriptsize{*$\Delta{e}\ge 0$ and $V_i\ge V_{min}$}
+
+\end{proof}
 
 \chapter{sigbits}
 \label{sigbits}
+
+\section{Algorithm Description}
+
+\bigskip
+
+The sigbits compression algorithm uses the provided relative error tolerance.
+
+  by projecting uncompressed values to their
+nearest representating value, based on the user provided relative error
+tolerance. After determining the minimum and maximum values of the data, abstol
+calculates how many bits are needed to represent all numbers in the
+minimum-maximum-range, given the absolute error tolerance. The bit count is
+calculated as follows:
+
+\bigskip
+
+\begin{center}
+	$N_{bits}=\ceil[\big]{\log_2{\left(1 + \frac{V_{max} - V_{min}}{2 * \Delta{e}}\right)}}$, with
+
+	\bigskip
+
+	\begin{tabular}{ll}
+		$V_{min}$ & Minimum value in data \\
+		$V_{max}$ & Maximum value in data \\
+		$\Delta{e}$ & Absolute error tolerance \\
+		$N_{bits}$ & Needed number of bits per value
+	\end{tabular}
+\end{center}
+
+\bigskip
+
+Encoding of numbers can then be done by using the following function:
+
+\bigskip
+
+\begin{center}
+	$E\left(x\right) = R\left(\frac{x - V_{min}}{2 * \Delta{e}}\right)$, with
+
+	\bigskip
+
+	\begin{tabular}{ll}
+		$x$ & The Value to be encoded \\
+		$E\left(x\right)$ & Encoded value \\
+		$R\left(x\right)$ & Round to nearest integer function
+	\end{tabular}
+\end{center}
+
+\bigskip
+
+Decoding:
+
+\bigskip
+
+\begin{center}
+	$D\left(x\right) = V_{min} + x * 2 * \Delta{e}$, with
+
+	\bigskip
+
+	\begin{tabular}{ll}
+		$x$ & The Value to be decoded \\
+		$D\left(x\right)$ & Decoded value
+	\end{tabular}
+\end{center}
+
+\clearpage
+
+\section{Proof of Concept}
+
+\bigskip
+
+\begin{theorem}
+
+	\mbox{} \bigskip
+
+	\begin{center}
+		$\lvert D\left(E\left(V_i\right)\right) - V_i\rvert \leq \Delta{e}$, for all $V_{min} \leq V_i \leq V_{max}$ and $\Delta{e} > 0$, with \\
+
+		\bigskip
+
+		\begin{tabular}{lll}
+ 			$V_i$ & The exact initial value \\
+			$D\left(E\left(V_i\right)\right)$ & $V_i$ after a compression-decompression cycle \\
+		\end{tabular}
+
+	\end{center}
+
+\end{theorem}
+
+\begin{proof}
+	\begin{align*}
+	  \lvert D\left(E\left(V_i\right)\right) - V_i\rvert
+	  &=\abs[\big]{V_{min} + R\left(\frac{V_i - V_{min}}{2\Delta{e}}\right) * 2\Delta{e} - V_i} \\
+	  &\\
+	  &\stackrel{*}{=}\abs[\big]{V_{min} + \floor[\Big]{\frac{V_i - V_{min}}{2\Delta{e}} + 0.5} * 2\Delta{e} - V_i} \\
+	  &\\
+	  &\le\abs[\big]{V_{min} + \left(\frac{V_i - V_{min}}{2\Delta{e}} + 0.5\right) * 2\Delta{e} - V_i} \\
+	  &\\
+	  &=\abs[\big]{V_{min} + \left(V_i - V_{min}\right) + \Delta{e} - V_i} \\
+	  &\\
+	  &=\abs{\Delta{e}} = \Delta{e} \qedhere
+	\end{align*}
+
+	\vfill
+
+	\scriptsize{*$\Delta{e}\ge 0$ and $V_i\ge V_{min}$}
+
+\end{proof}
+
+\chapter{Bit Perfect Packing of Data}
+\label{bit_perf}
 
 \listoffigures
 
