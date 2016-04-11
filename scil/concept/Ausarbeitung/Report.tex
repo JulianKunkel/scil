@@ -602,6 +602,29 @@ values tightly as seen in \cref{bit_perf}.
 \chapter{Bit Perfect Packing of Data}
 \label{bit_perf}
 
+\bigskip
 
+Compressing buffers with the abstol or sigbits algorithm often leads to
+compressed values not taking up multiples of eight bits space. Storing such
+values per byte would waste compression potential, as there would be lots of
+bits unused by the buffer. Packing values tightly together, such that every bit
+is written, is a more resonable approach. \par
+The bit perfect writing of compressed data happens in the compression loop,
+right after values are encoded. It is first determined what the starting and
+ending byte indices are, where the value is written. If they are the same, the
+value will be written entirely in the current byte, only being potentially
+shifted to accomodate already written bits. Else, the value spans multiple
+bytes needing to be segmented via the help of bitmasks. With the segmentation
+and bitshifting of parts of the value, it can be stored densely inside the
+buffer. After all values have been written, the compression concludes. \par
+Reading compressed values for buffers, which uses bit perfect packing is very
+similar to writing. The decompression works by having an iterator variable in
+the decompression loop, being incremented by the bit size of a compressed value.
+Thus, when divideing by eight, it points to the current byte. The modulo with
+eigth indicates the starting bit of the compressed value inside the current
+byte. After determining start and end byte again, the value is being read and
+shifted accordingly. In the case of a multiple byte spanning value, the seperate
+parts are read and shifted, using a bitwise and-operator to reconstruct the
+original value.
 
 \end{document}
