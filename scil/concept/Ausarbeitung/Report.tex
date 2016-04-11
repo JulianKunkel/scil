@@ -37,11 +37,13 @@
 \usepackage[capitalise,noabbrev]{cleveref}
 
 \usepackage{wrapfig}
-\usepackage{amsmath}
+\usepackage{amssymb,amsmath,amsthm,amsfonts}
 
-\usepackage{amsthm}
 \newtheorem{theorem}{Theorem}
-%\newproof{proof}{Proof}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+\newtheorem{notation}{Notation}
+%\newtheorem{proof}{Proof}
 
 \usepackage{mathtools}
 \DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
@@ -403,8 +405,6 @@ Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit ame
 \chapter{abstol}
 \label{abstol}
 
-\section{Algorithm Description}
-
 \bigskip
 
 The abstol compression method works by projecting uncompressed values to their
@@ -414,110 +414,79 @@ calculates how many bits are needed to represent all numbers in the
 minimum-maximum-range, given the absolute error tolerance. The headers of
 abstol-compressed data buffers contain the minimum value found in the data, the
 absolute tolerance and the bit size of compressed values. While compressing the
-data, abstol packs the buffer tightly as described in \cref{bit_perf}. \\
+data, abstol packs the buffer tightly as described in \cref{bit_perf}.
 
 \bigskip
 
-Calculation of needed bit count for every compressed value:
+\begin{definition} \label{D:abstol_nbits}
+	Let $V_{min}$ be the minimum value in the data, $V_{max}$ the maximum value
+	in the data, $\Delta{e} > 0$ the user provided absolute error tolerance and
+	$N_{bit}$ the number of bits needed to represent a compressed value. For
+	$\Delta{e}>0$, $N_{bit}$ can then be calculated as follows:
+	\[
+		N_{bit} =
+			\ceil[\big]{
+				\log_2{
+					\left(
+						1 + \frac{V_{max} - V_{min}}{2 * \Delta{e}}
+					\right)
+				}
+			}
+	\]
+\end{definition}
 
 \bigskip
 
-\begin{center}
-	$N_{bits}=\ceil[\big]{\log_2{\left(1 + \frac{V_{max} - V_{min}}{2 * \Delta{e}}\right)}}$, with
-
-	\bigskip
-
-	\begin{tabular}{ll}
-		$V_{min}$ & Minimum value in data \\
-		$V_{max}$ & Maximum value in data \\
-		$\Delta{e}$ & Absolute error tolerance \\
-		$N_{bits}$ & Needed number of bits per value
-	\end{tabular}
-\end{center}
-
-\bigskip
-
-Value encoding function:
+\begin{definition} \label{D:abstol_enc}
+	Let $E:\mathbb{R}\rightarrow\mathbb{N}$ be the function to encode values to
+	their compressed representation and $R$ the round to nearest integer
+	function. For $\Delta{e}>0$, $E$ is defined as follows:
+	\[
+		E\left(x\right) =
+			R
+				\left(
+					\frac{x - V_{min}}{2 * \Delta{e}}
+				\right)
+	\]
+\end{definition}
 
 \bigskip
 
-\begin{center}
-	$E\left(x\right) = R\left(\frac{x - V_{min}}{2 * \Delta{e}}\right)$, with
-
-	\bigskip
-
-	\begin{tabular}{ll}
-		$x$ & The Value to be encoded \\
-		$E\left(x\right)$ & Encoded value \\
-		$R\left(x\right)$ & Round to nearest integer function
-	\end{tabular}
-\end{center}
-
-\bigskip
-
-Value decoding function:
-
-\bigskip
-
-\begin{center}
-	$D\left(x\right) = V_{min} + x * 2 * \Delta{e}$, with
-
-	\bigskip
-
-	\begin{tabular}{ll}
-		$x$ & The Value to be decoded \\
-		$D\left(x\right)$ & Decoded value
-	\end{tabular}
-\end{center}
+\begin{definition} \label{D:abstol_dec}
+	Let $D:\mathbb{N}\rightarrow\mathbb{R}$ be the function to decode values to
+	their compressed representation. For $\Delta{e}>0$, $D$ is defined as
+	follows:
+	\[
+		D\left(x\right) = V_{min} + x * 2 * \Delta{e}
+	\]
+\end{definition}
 
 \clearpage
 
-\section{Proof of Concept}
-
-\bigskip
-
-\begin{theorem}
-
-	\mbox{} \bigskip
-
-	\begin{center}
-		$\lvert D\left(E\left(V_i\right)\right) - V_i\rvert \leq \Delta{e}$, for all $V_{min} \leq V_i \leq V_{max}$ and $\Delta{e} > 0$, with \\
-
-		\bigskip
-
-		\begin{tabular}{lll}
- 			$V_i$ & The exact initial value \\
-			$D\left(E\left(V_i\right)\right)$ & $V_i$ after a compression-decompression cycle \\
-		\end{tabular}
-
-	\end{center}
-
+\begin{theorem} \label{T:abstol}
+	Let $V_i$ be the original value. For all $V_i \ge V_{min}$,
+	$V_i \le V_{max}$ and $\Delta{e} > 0$, the absolute error of a value after
+	a compression-decompression-cycle using the abstol algorithm is smaller or
+	equal $\Delta{e}$.
 \end{theorem}
 
 \begin{proof}
+	\begingroup
+	\addtolength{\jot}{1em}
 	\begin{align*}
 	  \lvert D\left(E\left(V_i\right)\right) - V_i\rvert
-	  &=\abs[\big]{V_{min} + R\left(\frac{V_i - V_{min}}{2\Delta{e}}\right) * 2\Delta{e} - V_i} \\
-	  &\\
-	  &\stackrel{*}{=}\abs[\big]{V_{min} + \floor[\Big]{\frac{V_i - V_{min}}{2\Delta{e}} + 0.5} * 2\Delta{e} - V_i} \\
-	  &\\
+	  &\stackrel{\ref{D:abstol_enc}\ref{D:abstol_dec}}{=}\abs[\big]{V_{min} + R\left(\frac{V_i - V_{min}}{2\Delta{e}}\right) * 2\Delta{e} - V_i} \\
+	  &=\abs[\big]{V_{min} + \floor[\Big]{\frac{V_i - V_{min}}{2\Delta{e}} + 0.5} * 2\Delta{e} - V_i} \\
 	  &\le\abs[\big]{V_{min} + \left(\frac{V_i - V_{min}}{2\Delta{e}} + 0.5\right) * 2\Delta{e} - V_i} \\
-	  &\\
 	  &=\abs[\big]{V_{min} + \left(V_i - V_{min}\right) + \Delta{e} - V_i} \\
-	  &\\
-	  &=\abs{\Delta{e}} = \Delta{e} \qedhere
+	  &=\abs{\Delta{e}} \\
+	  &=\Delta{e} \qedhere
 	\end{align*}
-
-	\vfill
-
-	\scriptsize{*$\Delta{e}\ge 0$ and $V_i\ge V_{min}$}
-
+	\endgroup
 \end{proof}
 
 \chapter{sigbits}
 \label{sigbits}
-
-\section{Algorithm Description}
 
 \bigskip
 
@@ -547,91 +516,92 @@ The algorithm then commences to write the header. Stored information include
 After writing the header, the actual compression begins, packing compressed
 values tightly as seen in \cref{bit_perf}.
 
+\clearpage
+
+\begin{definition} \label{D:sigbits_sdec}
+	Let $S_{dec}$ be the number of significant decimal places and $S_{bit}$
+	the number of significant bits. $S_{bit}$ can then be calculated as follows:
+	\[
+		S_{bit}=\ceil{S_{dec} * \log_{2}{10}}
+	\]
+\end{definition}
+
 \bigskip
 
-Converting significant decimal places to significant bits:
+\begin{definition} \label{D:sigbits_rtol}
+	Let $\rho_{e}$ be the relative error tolerance in percent and $S_{bit}$
+	the number of significant bits. For $\rho_{e} > 0$ and $\rho_{e} \le 100$,
+	$S_{bit}$ can then be calculated as follows:
+	\[
+		S_{bit}=\ceil[\Big]{
+			log_2{
+				\left(
+					\frac{100}{\rho_{e}}
+				\right)
+			}
+		}
+	\]
+\end{definition}
 
 \bigskip
 
-\begin{center}
-	$S_{bit}=\ceil{S_{dec} * \log_{2}{10}}$, with
+\begin{notation} \label{N:sigbits}
+	As the signs and exponents of each value are just minimized and stored
+	losslessly, the relative error happening at the compression is inherent to the
+	mantissa. Therefore it suffices to prove that the mantissas value resides in
+	the tolerated error margin.
+\end{notation}
 
-	\bigskip
+\bigskip
 
-	\begin{tabular}{ll}
-		$S_{bit}$ & Significant bits \\
-		$S_{dec}$ & Significant decimal places
-	\end{tabular}
-\end{center}
+\begin{lemma} \label{L:sigbits}
+	Let $m$ be the original mantissa, $m_c$ the mantissa after a
+	compression-desompression-cycle of the sigbits algorithm and $S_{bit}$ the
+	number of significant bits. The sigbits algorithm effectively replaces each
+	binary digit bit with zero, upkeeping only the first $S_{bit}$ bits.
+	Therefore following inequality holds:
+	\[
+		m_c > m - 2^{-S_{bit}}
+	\]
+\end{lemma}
 
 \clearpage
 
-Converting relative error tolerance to significant bits:
-
-\bigskip
-
-\begin{center}
-	$S_{bit}=\ceil[\big]{log_2{\left(\frac{100.0}{\rho_{e}}\right)}}$, with
-
-	\bigskip
-
-	\begin{tabular}{ll}
-		$\rho_{e}$ & The relative error (in percent)
-	\end{tabular}
-\end{center}
-
-\bigskip
-
-\section{Proof of Concept}
-
-\bigskip
-
-As the signs and exponents of each value are just minimized and stored
-losslessly, the relative error happening at the compression is inherent to the
-mantissa. Therefore it suffices to prove that the mantissas value resides in
-the tolerated error margin.
-
-\bigskip
-
-\begin{theorem}
-
-	\mbox{} \bigskip
-
-	\begin{center}
-		$\lvert D\left(E\left(V_i\right)\right) - V_i\rvert \leq \Delta{e}$, for all $V_{min} \leq V_i \leq V_{max}$ and $\Delta{e} > 0$, with \\
-
-		\bigskip
-
-		\begin{tabular}{lll}
- 			$V_i$ & The exact initial value \\
-			$D\left(E\left(V_i\right)\right)$ & $V_i$ after a compression-decompression cycle \\
-		\end{tabular}
-
-	\end{center}
-
+\begin{theorem} \label{T:sigbits}
+	Let $m$ be the original mantissa, $m_c$ the mantissa after a
+	compression-desompression-cycle of the sigbits algorithm, $S_{bit}$ the
+	number of significant bits and $\rho_e$ the relative error tolerance in
+	percent. The relative error of the values mantissa after a
+	compression-decompression-cycle of the sigbits algorithm is smaller than
+	the provided relative error margin for $m\ge 1$ and $m_c\ge 1$.
 \end{theorem}
 
 \begin{proof}
+	\begingroup
+	\addtolength{\jot}{1em}
 	\begin{align*}
-	  \lvert D\left(E\left(V_i\right)\right) - V_i\rvert
-	  &=\abs[\big]{V_{min} + R\left(\frac{V_i - V_{min}}{2\Delta{e}}\right) * 2\Delta{e} - V_i} \\
-	  &\\
-	  &\stackrel{*}{=}\abs[\big]{V_{min} + \floor[\Big]{\frac{V_i - V_{min}}{2\Delta{e}} + 0.5} * 2\Delta{e} - V_i} \\
-	  &\\
-	  &\le\abs[\big]{V_{min} + \left(\frac{V_i - V_{min}}{2\Delta{e}} + 0.5\right) * 2\Delta{e} - V_i} \\
-	  &\\
-	  &=\abs[\big]{V_{min} + \left(V_i - V_{min}\right) + \Delta{e} - V_i} \\
-	  &\\
-	  &=\abs{\Delta{e}} = \Delta{e} \qedhere
+		1 - \frac{m_c}{m}
+		&\stackrel{\ref{L:sigbits}}{\le}1 - \frac{m-2^{-S_{bit}}}{m} \\
+	  	&=\frac{2^{-S_{bit}}}{m} \\
+		&=\frac{1}{m * 2^{S_{bit}}} \\
+	  	&\stackrel{\ref{D:sigbits_rtol}}{=}\frac{1}{m * 2^{
+				\ceil{
+					\log_2{\frac{100}{\rho_{e}}}
+				}
+			}} \\
+	  	&\le \frac{1}{m * 2^{
+				\log_2{\frac{100}{\rho_{e}}}
+			}} \\
+	  	&=\frac{1}{m * \frac{100}{\rho_{e}}} \\
+		&=\frac{\rho_e}{100 * m} \\
+	  	&\le \frac{\rho_e}{100} \qedhere
 	\end{align*}
-
-	\vfill
-
-	\scriptsize{*$\Delta{e}\ge 0$ and $V_i\ge V_{min}$}
-
+	\endgroup
 \end{proof}
 
 \chapter{Bit Perfect Packing of Data}
 \label{bit_perf}
+
+
 
 \end{document}
