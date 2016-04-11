@@ -14,15 +14,15 @@ static void scil_determine_accuracy_1d_<DATATYPE>(const <DATATYPE> *data_1, cons
 			if (f1.p.sign != f2.p.sign || f1.p.exponent != f2.p.exponent){
 				cur.significant_digits = 0;
 			}else{
-				// check mantisa, bit by bit
-				//printf("%lld %lld\n", f1.p.mantisa, f2.p.mantisa);
-				cur.significant_digits = MANTISA_LENGTH_<DATATYPE>;
-				for(int m = MANTISA_LENGTH_<DATATYPE>-1 ; m >= 0; m--){
-					int b1 = (f1.p.mantisa>>m) & (1);
-					int b2 = (f2.p.mantisa>>m) & (1);
+				// check mantissa, bit by bit
+				//printf("%lld %lld\n", f1.p.mantissa, f2.p.mantissa);
+				cur.significant_digits = MANTISSA_LENGTH_<DATATYPE>;
+				for(int m = MANTISSA_LENGTH_<DATATYPE>-1 ; m >= 0; m--){
+					int b1 = (f1.p.mantissa>>m) & (1);
+					int b2 = (f2.p.mantissa>>m) & (1);
 					// printf("%d %d\n", (int) b1, (int) b2);
 					if( b1 != b2){
-						cur.significant_digits = MANTISA_LENGTH_<DATATYPE> - (int) m;
+						cur.significant_digits = MANTISSA_LENGTH_<DATATYPE> - (int) m;
 						break;
 					}
 				}

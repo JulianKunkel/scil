@@ -98,7 +98,7 @@ void scil_init_hints(scil_hints * hints){
 }
 
 void scil_hints_print(scil_hints * h){
-	printf("Hints: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits (after 1. so in the mantisa):%d \n\tsignificant_bits (in the mantisa):%d\n",
+	printf("Hints: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits (after 1. so in the mantissa):%d \n\tsignificant_bits (in the mantissa):%d\n",
 		h->relative_tolerance_percent, h->relative_err_finest_abs_tolerance, h->absolute_tolerance, h->significant_digits, h->significant_bits);
 }
 
@@ -122,7 +122,7 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 	 	if(ohints->significant_digits == SCIL_ACCURACY_INT_IGNORE){
 			ohints->significant_digits = scil_convert_significant_bits_to_decimals(ohints->significant_bits);
 
-			// we need to round the bits properly to decimals, i.e., 1 bit precision in the mantisa requires 1 decimal digit.
+			// we need to round the bits properly to decimals, i.e., 1 bit precision in the mantissa requires 1 decimal digit.
 			const int newbits = scil_convert_significant_decimals_to_bits(ohints->significant_digits);
 			if ( newbits < ohints->significant_bits ){
 				ohints->significant_digits = scil_convert_significant_bits_to_decimals(ohints->significant_bits) + 1;
@@ -258,10 +258,10 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
 	// TODO walk trough all dimensions ...
 
 	if(datatype == SCIL_DOUBLE){
-		a.significant_bits = MANTISA_LENGTH_double; // in bits
+		a.significant_bits = MANTISSA_LENGTH_double; // in bits
 		scil_determine_accuracy_1d_double((double*) data_1, (double*) data_2, dims.dims, relative_err_finest_abs_tolerance, & a);
 	}else{
-		a.significant_bits = MANTISA_LENGTH_float; // in bits
+		a.significant_bits = MANTISSA_LENGTH_float; // in bits
 		scil_determine_accuracy_1d_float((float*) data_1, (float*) data_2, scil_get_data_count(dims), relative_err_finest_abs_tolerance, & a);
 	}
 
@@ -343,7 +343,7 @@ static void compute_significant_bit_mapping(){
 
 	if(sig_bits[0] != 255) return;
 
-	for(int i = 0; i < MANTISA_MAX_LENGTH; ++i){
+	for(int i = 0; i < MANTISSA_MAX_LENGTH; ++i){
 		sig_bits[i] = (unsigned char)ceil(i * LOG10B2);
 		sig_decimals[i] = (unsigned char)ceil(i * LOG2B10);
 	}

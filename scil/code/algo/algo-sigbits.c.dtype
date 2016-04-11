@@ -54,7 +54,7 @@ static uint64_t compress_<DATATYPE>(<DATATYPE> value, uint8_t signs_id, uint8_t 
     }
     result |= (uint64_t)(cur.p.exponent - min_exponent);
     result <<= mant_bits;
-    result |= ((uint64_t)cur.p.mantisa) >> (MANTISA_LENGTH_<DATATYPE> - mant_bits);
+    result |= ((uint64_t)cur.p.mantissa) >> (MANTISSA_LENGTH_<DATATYPE> - mant_bits);
 
     return result;
 }
@@ -65,7 +65,7 @@ static <DATATYPE> decompress_<DATATYPE>(uint64_t value, uint8_t bits_per_num, ui
 
     cur.p.sign = get_sign(value, bits_per_num, signs_id);
     cur.p.exponent = get_exponent(value, exp_bits, mant_bits, min_exponent);
-    cur.p.mantisa = get_mantisa_<DATATYPE>(value, mant_bits);
+    cur.p.mantissa = get_mantissa_<DATATYPE>(value, mant_bits);
 
     return cur.f;
 }
