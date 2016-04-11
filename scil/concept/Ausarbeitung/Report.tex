@@ -108,7 +108,7 @@
 
 
 Blablabla \par
-This project is still in early developement with much of the core functionality
+This project is still in early development with much of the core functionality
 not yet implemented. Features which are still to be implemented are marked as
 such throughout the report.
 
@@ -128,14 +128,14 @@ given hardware as well as reducing the load on bandwidth limited networks.
 Large amounts of data generated in scientific as well as commercial research
 environments and limited budgets for data storage and processing give rise to
 the need of better and faster compression techniques. The Large Hadron Collider
-at CERN for example is generating 600 Terabyte of collision event data per
+at CERN for example is generating 600 terabytes of collision event data per
 second. Unable to process such volumes of data, scientists filter out the most
-promising data, generally leaving 100 - 200 Megabyte per second of 'interesting'
+promising data, generally leaving 100 - 200 megabytes per second of 'interesting'
 information which needs to be stored [citation needed]. Another example where
 data compression is very applicable is climate research. In particle collision
-data few interesting events are of concern, whereas for climate research it is
+data not many interesting events are of concern, whereas for climate research it is
 beneficial to record and process as much available data as possible
-[citation needed]. In any case, compression leads to more data being stored and
+[citation needed]. In any case, compression allows more data to be stored and
 processed, contibuting to better and faster research.
 
 \begin{wrapfigure}{l}{0.6\textwidth}
@@ -148,20 +148,20 @@ processed, contibuting to better and faster research.
 Computing Center in Hamburg (DKRZ). Until now data compression at the DKRZ
 already has been put to practise but "storage capacity does not grow as fast as
 computation power" [citation needed]. Therefore optimizations regarding data
-reduction are a reasonable method to minimize the need of upscaling existing
+reduction are an effective method to minimize the need of upscaling existing
 data archives.
 
 \clearpage
 
 \section{SCIL}
 
-To further exploit the potential of lossy and lossless compression in research,
-SCIL is being developed. SCIL is the Scientific Compression Interface
-Library for the programming language C. Having conventional and specifically
-developed compression algorithms integrated, it is able to compress data in
-a variety of ways. After calling the program 'scil-config'\footnote{Not yet implemented}
-to configure SCIL for the running platform, each compression can be customized
-by providing parameters such as:
+To further exploit the potential of both lossy and lossless compression in
+research, SCIL is being developed. SCIL is the Scientific Compression Interface
+Library for the programming language C. Having not only conventional but also
+specifically developed compression algorithms integrated, it is able to compress
+data in a variety of ways. After calling the program
+'scil-config'\footnote{Not yet implemented} to configure SCIL for the running
+platform, each compression can be customized by providing parameters such as:
 
 \bigskip
 
@@ -198,7 +198,7 @@ a clean interface for compression and decompression. Its main goals are:
 \bigskip
 
 \begin{itemize}
-	\item User friendliness
+	\item User-friendliness
 	\item Data adaptability
 	\item Extensibility
 	\item Platform independence
@@ -213,14 +213,14 @@ a clean interface for compression and decompression. Its main goals are:
 \bigskip
 
 At the core of SCIL there are the two essential methods to compress and
-decompress data as well as a structure to hold the user specified compression
-information. Calling the compression method invokes SCILs internal workflow in
+decompress data, as well as a structure to hold the user specified compression
+information. Calling the compression method invokes SCIL's internal workflow in
 which it chooses the best compression methods out of available algorithms.
 The decision on which algorithm to choose is not only based on the users
 parameter input but also on the data characteristics and the platform specific
 configuration of SCIL. After writing the compressed buffer it is possible to
 decompress again by simply calling the decompression method of SCIL.
-In the following subsections a more detailed explaination of SCILs workflow
+In the following subsections a more detailed explanation of SCILs workflow
 will be presented.
 
 \bigskip
@@ -242,8 +242,8 @@ user provided arguments describing error tolerance, SCIL considers lossy
 algorithms, optionally with a subsequent lossless
 compression\footnotemark[\value{footnote}]. In either case the platform specific
 configuration of SCIL [see subsec ...] and current data characteristics are of
-interest. Analizing the data for its characteristics is an optional
-feature\footnotemark[\value{footnote}] as it can be very time consuming. Yet it
+interest. Analyzing the data for its characteristics is an optional
+feature\footnotemark[\value{footnote}] as it can be very time-consuming - yet it
 enables further customization of the compression by the user.
 
 \setcounter{footnote}{0}
@@ -257,11 +257,11 @@ enables further customization of the compression by the user.
 \renewcommand*{\thefootnote}{\arabic{footnote}}
 
 The intermediate step between algorithm choice and actual compression is the
-writing of meta data to the start of the compressed data buffer. This meta data
-is often called header. The first byte in the header represents the algorithm
-ID. Base on this number, SCIL is able to identify the correct decompression
+writing of meta data to the beginning of the compressed data buffer. This meta
+data is often called header. The first byte in the header represents the
+algorithm ID. Based on this number, SCIL is able to identify the correct decompression
 method later on. The ID is the only part of the header guaranteed to be present.
-Afterwards the datas dimensional layout will be written if the user chooses to
+Afterwards the data's dimensional layout will be written if the user chooses to
 do so. Generally users are aware of the dimensional configuration of their data,
 thus SCIL defaults to not storing it in the header\footnote{Currently always stores the dimensional configuration of the data}.
 Nevertheless, storing the
@@ -277,7 +277,7 @@ in \cref{comp_data}.
 
 \bigskip
 
-At last, the actual compression of the data commences. Depending on the chosen
+Finally, the actual compression of the data commences. Depending on the chosen
 algorithm, compression rates and speeds can vary widely. Current Compression
 Algorithms at disposal include:
 
@@ -299,7 +299,7 @@ Algorithms at disposal include:
 The abstol and sigbits algorithms are specifically developed for SCIL. A
 detailed description of their functionality can be found in \cref{abstol} and
 \cref{sigbits} respectively. All other compression methods are included from
-indepentent projects. A reference to those projects can be found in the
+independent projects. A reference to those projects can be found in the
 bibliography of this report.
 
 \clearpage
@@ -309,13 +309,13 @@ bibliography of this report.
 \bigskip
 
 The decompression of data is invoked by calling the designated function. Since
-compression relevant data was stored in the header of the compressed buffer, the
-user does not need to provide further information for decompression. Providing a
-structure to hold dimensional data however is optional. If the user decided to
-store the datas dimensional configuration at compression, this provided
-structure will hold the dimensional configuration after decompression. If no
-dimensional configuration was stored in the header of the compressed data, the
-number of dimensions in the provided structure will be set to
+compression relevant data has been stored in the header of the compressed
+buffer, the user does not need to provide further information for decompression.
+Defining a structure to hold dimensional data, however, is optional. If the user
+decided to store the data's dimensional configuration at compression, this
+provided structure will hold the dimensional configuration after decompression.
+If no dimensional configuration has been stored in the header of the compressed
+data, the number of dimensions in the provided structure will be set to
 zero\footnote{Not yet implemented}.
 
 \setcounter{footnote}{0}
@@ -408,7 +408,7 @@ Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit ame
 \bigskip
 
 The abstol compression method works by projecting uncompressed values to their
-nearest representating value, based on the user provided absolute error
+nearest representating value, based on the user-provided absolute error
 tolerance. After determining the minimum and maximum values of the data, abstol
 calculates how many bits are needed to represent all numbers in the
 minimum-maximum-range, given the absolute error tolerance. The headers of
@@ -493,12 +493,12 @@ data, abstol packs the buffer tightly as described in \cref{bit_perf}.
 The sigbits compression algorithm uses the provided relative error tolerance.
 The relative error tolerance currently can be provided by three different
 metrics. Percentage, Significant decimal places and significant bits (in the
-mantissa). Those metrics are converted into another at the compression context
-creation, upholding the most restrictive value. At this point only the
+mantissa). These metrics are converted into each other at the compression
+context creation, upholding the most restrictive value. At this point only the
 significant bits information is of relevance to the sigbits algorithm. \par
-For the sigbits compression with relative error tolerance, it is essential to
-segmentate floating point values by sign, exponent and mantissa. After scanning
-for the minimum and maximum signs and exponents in the data, sigbits calculates
+For the sigbits compression with relative error tolerance, it is crucial to
+separate floating point values by sign, exponent and mantissa. After scanning
+for the minimum and maximum signs as well as exponents in the data, sigbits calculates
 how many bits are needed to represent all occurring signs and exponents in the
 data. The provided significant bits information determines how many bits in the
 mantissa are kept. Adding those three values together, the overall bit count of
@@ -606,24 +606,24 @@ values tightly as seen in \cref{bit_perf}.
 
 Compressing buffers with the abstol or sigbits algorithm often leads to
 compressed values not taking up multiples of eight bits space. Storing such
-values per byte would waste compression potential, as there would be lots of
-bits unused by the buffer. Packing values tightly together, such that every bit
-is written, is a more resonable approach. \par
+values bytewise would waste compression potential as there would be lots of
+bits unused by the buffer. Packing values tightly together so that every bit
+is written is a more reasonable approach. \par
 The bit perfect writing of compressed data happens in the compression loop,
-right after values are encoded. It is first determined what the starting and
-ending byte indices are, where the value is written. If they are the same, the
-value will be written entirely in the current byte, only being potentially
-shifted to accomodate already written bits. Else, the value spans multiple
+right after values are encoded. First the indices of the starting and ending
+bytes are determined between which the value is written. If they are the same, the
+value will be written entirely into the current byte, only being potentially
+shifted to accomodate already written bits. Else the value spans multiple
 bytes needing to be segmented via the help of bitmasks. With the segmentation
-and bitshifting of parts of the value, it can be stored densely inside the
-buffer. After all values have been written, the compression concludes. \par
-Reading compressed values for buffers, which uses bit perfect packing is very
+and bit-shifting of parts of the value it can be stored densely inside the
+buffer. After all values have been written the compression concludes. \par
+Reading compressed values for buffers using bit perfect packing is very
 similar to writing. The decompression works by having an iterator variable in
 the decompression loop, being incremented by the bit size of a compressed value.
-Thus, when divideing by eight, it points to the current byte. The modulo with
+Thus when dividing by eight it points to the current byte. The modulo with
 eigth indicates the starting bit of the compressed value inside the current
 byte. After determining start and end byte again, the value is being read and
-shifted accordingly. In the case of a multiple byte spanning value, the seperate
+shifted accordingly. In the case of a multiple byte spanning value, the separate
 parts are read and shifted, using a bitwise and-operator to reconstruct the
 original value.
 
