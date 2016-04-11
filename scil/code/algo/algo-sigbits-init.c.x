@@ -99,14 +99,14 @@ static int16_t get_exponent(uint64_t value, uint8_t exp_bits, uint8_t mant_bits,
     return min_exponent + ((value & (mask[mant_bits + exp_bits] ^ mask[mant_bits])) >> mant_bits);
 }
 
-static uint32_t get_mantisa_float(uint64_t value, uint8_t mant_bits){
+static uint32_t get_mantissa_float(uint64_t value, uint8_t mant_bits){
 
-    return (value & mask[mant_bits]) << (MANTISA_LENGTH_float - mant_bits);
+    return (value & mask[mant_bits]) << (MANTISSA_LENGTH_float - mant_bits);
 }
 
-static uint64_t get_mantisa_double(uint64_t value, uint8_t mant_bits){
+static uint64_t get_mantissa_double(uint64_t value, uint8_t mant_bits){
 
-    return (value & mask[mant_bits]) << (MANTISA_LENGTH_double - mant_bits);
+    return (value & mask[mant_bits]) << (MANTISSA_LENGTH_double - mant_bits);
 }
 
 scil_compression_algorithm algo_sigbits = {

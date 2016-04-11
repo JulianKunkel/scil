@@ -84,22 +84,22 @@ int scil_convert_significant_bits_to_decimals(int bits);
 
 #define MANTISSA_MAX_LENGTH 52
 
-#define MANTISA_LENGTH_float 23
+#define MANTISSA_LENGTH_float 23
 
 typedef union {
   struct {
-    uint32_t mantisa  : MANTISA_LENGTH_float;
+    uint32_t mantissa  : MANTISSA_LENGTH_float;
     uint32_t exponent : 8;
     uint32_t sign     : 1;
   } p;
 	float f;
 } datatype_cast_float;
 
-#define MANTISA_LENGTH_double 52
+#define MANTISSA_LENGTH_double 52
 
 typedef union {
   struct {
-    uint64_t mantisa  : MANTISA_LENGTH_double;
+    uint64_t mantissa  : MANTISSA_LENGTH_double;
     uint32_t exponent : 11;
     uint32_t sign     : 1;
   } p;
