@@ -12,6 +12,7 @@ build/
 *.toc
 *.vrb
 *.tar.gz
+testFileGenerator/
 deps/
 !build-dependencies.sh
 !Makefile-fpzip-1.1.0
