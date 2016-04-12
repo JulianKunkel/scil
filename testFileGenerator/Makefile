@@ -27,20 +27,28 @@
 
 #Basic selection of generation modes.
 #See the comment before the main() function for a description of all the modes and their parameters.
-data_files := 
-data_files += data_0_1_0_0_0.nc
-data_files += data_0_1_1_0.9_-1.nc
-data_files += data_0_1_1_0_0.nc
-data_files += data_11_1_0.5__.nc
-data_files += data_22_1_0__.nc
-data_files += data_40____.nc
-data_files += data_41_1_100__.nc
+data_files :=
+# data_files += data_0_1_0_0_0.nc
+# data_files += data_0_1_0_0.5_-1.nc
+# data_files += data_0_1_0_1_-1.nc
+# data_files += data_0_1_0_0_0.nc
+
+# data_files += data_0_1_1_0.9_-1.nc
+# data_files += data_0_1_1_0_0.nc
+# data_files += data_11_1_0.5__.nc
+# data_files += data_22_1_0__.nc
+# data_files += data_40____.nc
+# data_files += data_41_1_100__.nc
 
 #Some more modes.
 # data_files += data_0_1_0_0.9_2.nc
 # data_files += data_0_1_2_0.9_2.nc
 # data_files += data_0_1_0_0.9_-1.nc
-# data_files += data_11_0_0.5.nc
+data_files += data_11_1_0.nc
+data_files += data_11_1_0.25.nc
+data_files += data_11_1_0.5.nc
+data_files += data_11_1_0.75.nc
+data_files += data_11_1_1.nc
 
 file_to_params = $(subst _, ,$(subst data_,,$(subst .nc,,$(1))))
 
@@ -69,4 +77,3 @@ testFileGen: main.c
 
 clean:
 	rm -f $(data_files) $(addsuffix .pov,$(data_files)) $(addsuffix .png,$(data_files)) testFileGen
-

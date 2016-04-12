@@ -678,7 +678,7 @@ int main(int argc, char** argv){
     printf("Done\n");
     printf("Measuring compression ratios...\n");
 
-	while(hints.force_compression_method < 6){
+	while(hints.force_compression_method < 7){
 
 		double abs_tol = 0.5;
 		uint8_t sig_bits = 1;
@@ -692,7 +692,7 @@ int main(int argc, char** argv){
 
 			scil_compress(SCIL_DOUBLE, buffer_out, &out_c_size, buffer_in, dims, ctx);
 
-			double c_fac = (double)(variableSize * sizeof(double)) / c_size;
+			double c_fac = (double)(variableSize * sizeof(double)) / out_c_size;
 
 			printf("Compressing with %d:\n", hints.force_compression_method);
 			printf("\tAbsolute tolerance:\t%.15lf\n", abs_tol);

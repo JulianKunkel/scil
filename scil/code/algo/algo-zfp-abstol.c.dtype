@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <algo/algo-zfp.h>
-#include <algo/algo-zfp-init.c.x>
+#include <algo/algo-zfp-abstol.h>
+#include <algo/algo-zfp-abstol-init.c.x>
 
 #include <string.h>
 
@@ -23,7 +23,7 @@
 #include <zfp.h>
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_zfp_compress_<DATATYPE>(const scil_context* ctx,
+int scil_zfp_abstol_compress_<DATATYPE>(const scil_context* ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
                         <DATATYPE>*restrict source,
@@ -57,7 +57,6 @@ int scil_zfp_compress_<DATATYPE>(const scil_context* ctx,
     /*  zfp_stream_set_rate(zfp, rate, type, 3, 0); */
     /*  zfp_stream_set_precision(zfp, precision, type); */
     zfp_stream_set_accuracy(zfp, ctx->hints.absolute_tolerance, zfp_type_<DATATYPE>);
-    // TODO: for each metric another algo
 
     size_t bufsize = zfp_stream_maximum_size(zfp, field);
     bitstream* stream = stream_open(dest, bufsize);
@@ -78,7 +77,7 @@ int scil_zfp_compress_<DATATYPE>(const scil_context* ctx,
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_zfp_decompress_<DATATYPE>(  const scil_context* ctx,
+int scil_zfp_abstol_decompress_<DATATYPE>(  const scil_context* ctx,
                             <DATATYPE>*restrict dest,
                             scil_dims_t exp_count,
                             byte*restrict source,
@@ -108,7 +107,6 @@ int scil_zfp_decompress_<DATATYPE>(  const scil_context* ctx,
     /*  zfp_stream_set_rate(zfp, rate, type, 3, 0); */
     /*  zfp_stream_set_precision(zfp, precision, type); */
     zfp_stream_set_accuracy(zfp, tolerance, zfp_type_<DATATYPE>);
-    // TODO: for each metric another algo
 
     size_t bufsize = zfp_stream_maximum_size(zfp, field);
     bitstream* stream = stream_open(source, bufsize);
