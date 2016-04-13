@@ -41,7 +41,7 @@
 
 const int kRandSeed = 6;
 const int kDimensionCount = 3;
-const int kDimensionSize = 100;
+const int kDimensionSize = 129;
 
 typedef enum {
 	kNoErr = 0,
@@ -55,7 +55,7 @@ typedef enum {
 
 typedef int32_t dataType;
 
-#define allocate(type, name, count) type* name = (type*)malloc(sizeof(type)*count)
+#define allocate(type, name, count) type* name = (type*)malloc(count * sizeof(type))
 
 /**
 * Produce a random number in the range ]-1, 1[ or [+0, 1[ where all the mantissa bits are random, even for small numbers and even though the distribution is flat.
@@ -624,33 +624,84 @@ int main_alt(int argc, char** argv) {
 	return 0;
 }
 
-static int write_to_csv(const uint8_t algo, const double abstol, const uint8_t sigbits, const double compression_ratio){
+static int write_to_csv(const double bias, const double discountFactor, const scil_hints hints, const size_t uncompressed_size, const size_t compressed_size, const double compression_ratio, const double seconds){
 
-	FILE* csv = fopen("ratios.csv", "a");
-	fprintf(csv, "%d,%.15lf,%d,%lf\n", algo, abstol, sigbits, compression_ratio);
+	char path[128];
+	sprintf(path, "performance_data_%.2f_%.2f.csv", bias, discountFactor);
+
+	FILE* csv = fopen(path, "a");
+	fprintf(csv, "%d,%.15lf,%.15lf,%d,%d,%lu,%lu,%lf,%lf\n",
+		hints.force_compression_method,
+		hints.absolute_tolerance,
+		hints.relative_tolerance_percent,
+		hints.significant_digits,
+		hints.significant_bits,
+		uncompressed_size,
+		compressed_size,
+		compression_ratio,
+		seconds);
 	fclose(csv);
 
 	return 0;
 }
 
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-int main(int argc, char** argv){
+int test_performance(double bias, double discountFactor){
 
-    printf("Initializing data generation...\n");
+	int result = 0;
 
-    allocate(size_t, dimSizes, kDimensionCount);
-    if(!dimSizes) return kErrNoMem;
-
+	//get some mem
 	size_t variableSize = 1;
-	for(uint8_t i = 0; i < kDimensionCount; i++){
+	for(uint8_t i = 0; i < kDimensionCount; i++) variableSize *= kDimensionSize;
+
+	printf("Initializing data generation.\n");
+
+	allocate(double, buffer, variableSize);
+	if(!buffer) return kErrNoMem;
+	allocate(double, buffer2, variableSize);
+	if(!buffer2) return kErrNoMem;
+	allocate(void, oBuffer, 4*variableSize);
+	if(!oBuffer) return kErrNoMem;
+
+	// long oBufferIsFloat = 1;	//Set to false if the oBuffer contains ints.
+
+	allocate(size_t, startCoords, kDimensionCount);
+	if(!startCoords) return kErrNoMem;
+	allocate(size_t, dimSizes, kDimensionCount);
+	if(!dimSizes) return kErrNoMem;
+	allocate(size_t, dimSizes2, kDimensionCount);
+	if(!dimSizes2) return kErrNoMem;
+
+	for(uint8_t i = 0; i < kDimensionCount; i++) {
+		startCoords[i] = 0;
 		dimSizes[i] = kDimensionSize;
-		variableSize *= kDimensionSize;
 	}
 
-	allocate(double, buffer_in, variableSize);
-	if(!buffer_in) return kErrNoMem;
+	printf("Done.\nGenerating data.\n");
 
-	if(makeUpData(kDimensionCount, dimSizes, buffer_in, 1, 0, 0.0, 0)) return kErrInternal;
+	// Mode 11 -----------------------------------------
+	if(!(kDimensionSize & 1)) return kErrParam;
+
+	long interpolationSteps = 0;
+	double curRandomFactor = 1.0;
+	for(; (1 << interpolationSteps) + 1 < kDimensionSize; interpolationSteps++) ;
+	if((1 << interpolationSteps) + 1 != kDimensionSize) return kErrParam;
+	for(uint8_t i = 0; i < kDimensionCount; i++) dimSizes[i] = 2;
+	if((result = makeUpData(kDimensionCount, dimSizes, buffer, 1, bias, 0.0, 0))) return result;
+	for(; interpolationSteps > 0; interpolationSteps--) {
+		for(uint8_t i = 0; i < kDimensionCount; i++) dimSizes2[i] = (dimSizes[i] << 1) - 1;
+		if((result = multilinearInterpolation(kDimensionCount, dimSizes, dimSizes2, buffer, buffer2, curRandomFactor))) return result;
+		size_t* temp1 = dimSizes;
+		double* temp2 = buffer;
+		dimSizes = dimSizes2;
+		buffer = buffer2;
+		dimSizes2 = temp1;
+		buffer2 = temp2;
+		curRandomFactor *= discountFactor;
+	}
+	doubleArrayToFloatArray(variableSize, buffer, oBuffer);
+	// -----------------------------------------------------
+
+	printf("Done.\nTesting algorithm performances.\n");
 
 	const size_t c_size = (variableSize * sizeof(double)+SCIL_BLOCK_HEADER_MAX_SIZE);
 
@@ -663,9 +714,6 @@ int main(int argc, char** argv){
 
 	scil_dims_t dims = scil_init_dims(1, length);
 
-    printf("Done\n");
-    printf("Initializing compression...\n");
-
     struct scil_context_t* ctx;
     scil_hints hints;
 
@@ -675,46 +723,72 @@ int main(int argc, char** argv){
 	hints.absolute_tolerance = 0.5;
 	hints.significant_bits = 1;
 
-    printf("Done\n");
-    printf("Measuring compression ratios...\n");
-
 	while(hints.force_compression_method < 7){
 
 		double abs_tol = 0.5;
-		uint8_t sig_bits = 1;
-		for(uint32_t r = 0; r < 15; ++r){
+		for(uint32_t r = 1; r < 16; ++r){
+
+			if((hints.force_compression_method == 0 || hints.force_compression_method == 2 || hints.force_compression_method == 4) && r > 1) break;
 
 			hints.absolute_tolerance = abs_tol;
-			hints.significant_bits = sig_bits;
+			hints.significant_bits = r;
 
 			scil_create_compression_context(&ctx, &hints);
 			size_t out_c_size = c_size;
 
-			scil_compress(SCIL_DOUBLE, buffer_out, &out_c_size, buffer_in, dims, ctx);
+			double seconds = 0;
 
-			double c_fac = (double)(variableSize * sizeof(double)) / out_c_size;
+			uint8_t loops = 10;
+			for(uint8_t i = 0; i < loops; ++i){
+
+				clock_t start, end;
+				start = clock();
+				scil_compress(SCIL_DOUBLE, buffer_out, &out_c_size, oBuffer, dims, ctx);
+				end = clock();
+
+				seconds += (double)(end - start);
+			}
+			seconds /= (loops * CLOCKS_PER_SEC);
+
+			size_t u_size = variableSize * sizeof(double);
+			double c_fac = (double)(u_size) / out_c_size;
 
 			printf("Compressing with %d:\n", hints.force_compression_method);
-			printf("\tAbsolute tolerance:\t%.15lf\n", abs_tol);
-			printf("\tSignificant Bits:\t%d\n", sig_bits);
+			printf("\tAbsolute tolerance:\t%.15lf\n", hints.absolute_tolerance);
+			printf("\tRelative tolerance:\t%lf%%\n", hints.relative_tolerance_percent);
+			printf("\tSignificant digits:\t%d\n", hints.significant_digits);
+			printf("\tSignificant bits:\t%d\n", hints.significant_bits);
+	        printf("\tUncompressed size:\t%lu\n", u_size);
+	        printf("\tCompressed size:\t%lu\n", out_c_size);
 	        printf("\tCompression factor:\t%lf\n", c_fac);
+	        printf("\tCompression time:\t%lf\n\n", seconds);
 
-			write_to_csv(hints.force_compression_method, abs_tol, sig_bits, c_fac);
+			write_to_csv(bias, discountFactor, hints, u_size, out_c_size, c_fac, seconds);
 
 			abs_tol *= 0.5;
-			sig_bits++;
 		}
 
 		hints.force_compression_method++;
     }
 
-	free(buffer_in);
+	printf("Done.\n");
 
+	free(buffer);
+	free(buffer2);
+	free(oBuffer);
+	free(startCoords);
+	free(dimSizes);
+	free(dimSizes2);
 	free(buffer_out);
 	free(length);
 
-    printf("Done\n");
-	free(dimSizes);
+	return 0;
+}
+
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+int main(int argc, char** argv){
+
+	test_performance(0.0f, strtod(argv[1], NULL));
 
     return 0;
 }

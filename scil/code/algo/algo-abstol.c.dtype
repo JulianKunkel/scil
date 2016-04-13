@@ -49,6 +49,7 @@ static uint8_t get_needed_bit_count_<DATATYPE>(const <DATATYPE> min_value, const
 
 static uint64_t int_repres_<DATATYPE>(const <DATATYPE> num, const <DATATYPE> min, const double absolute_tolerance){
 
+    //printf("num %f, min %f\n", num, min);
     assert(num >= min);
 
     return (uint64_t)round((double)(num - min) / (2 * absolute_tolerance));
