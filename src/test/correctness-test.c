@@ -39,11 +39,9 @@ int test_correctness(double * buffer_in, const int variableSize){
 
   scil_init_hints(&hints);
 	printf("C Error, D Error, Validation, Uncompressed size, Compressed size, Compression factor, CSpeed MiB/s, DSpeed MiB/s, Algo\n");
-	char pipeline[100];
 
-	hints.force_compression_methods = pipeline;
 	for(int i=0; i < scil_compressors_available(); i++ ){
-		sprintf(pipeline, "%d", i);
+		hints.force_compression_methods = scil_compressor_name(i);
 
 		scil_create_compression_context(&ctx, &hints);
 		int ret_c;
