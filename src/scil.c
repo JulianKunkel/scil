@@ -32,6 +32,7 @@
 // this file is automatically created
 #include "scil-dtypes.h"
 
+
 scil_compression_algorithm * algo_array[] = {
 	& algo_memcopy,
 	& algo_abstol,
@@ -59,6 +60,11 @@ int scil_compressors_available(){
 	}
 
 	return count;
+}
+
+const char * scil_compressor_name(int num){
+	assert(num < scil_compressors_available());
+	return algo_array[num]->name;
 }
 
 #pragma GCC diagnostic ignored "-Wfloat-equal"

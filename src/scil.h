@@ -96,6 +96,7 @@ typedef struct scil_context_t scil_context;
  \brief Returns the number of available compression schemes.
  */
 int scil_compressors_available();
+const char * scil_compressor_name(int num);
 
 scil_dims_t scil_init_dims(const uint8_t dimensions_count, size_t* dimensions_length);
 

@@ -38,7 +38,7 @@ int test_correctness(double * buffer_in, const int variableSize){
 	scil_hints out_accuracy;
 
   scil_init_hints(&hints);
-	printf("Algo, C Error, D Error, Validation, Uncompressed size, Compressed size, Compression factor, CSpeed MiB/s, DSpeed MiB/s\n");
+	printf("C Error, D Error, Validation, Uncompressed size, Compressed size, Compression factor, CSpeed MiB/s, DSpeed MiB/s, Algo\n");
 	hints.force_compression_method = 0;
 
 	while(hints.force_compression_method < scil_compressors_available()){
@@ -74,7 +74,11 @@ int test_correctness(double * buffer_in, const int variableSize){
 		size_t u_size = variableSize * sizeof(double);
 		double c_fac = (double)(u_size) / out_c_size;
 
-		printf("%d, %d, %d, %d, %lu, %lu, %.1lf, %.1lf, %.1lf \n", hints.force_compression_method, ret_c, ret_d, ret_v, u_size, out_c_size, c_fac, u_size/seconds_compress/1024 /1024, u_size/seconds_decompress/1024 /1024 );
+		printf("%d, %d, %d, %lu, %lu, %.1lf, %.1lf, %.1lf, %s \n",
+			ret_c, ret_d, ret_v,
+			u_size, out_c_size, c_fac,
+			u_size/seconds_compress/1024 /1024, u_size/seconds_decompress/1024 /1024, scil_compressor_name(hints.force_compression_method) );
+
 		hints.force_compression_method++;
   }
 

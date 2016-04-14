@@ -20,7 +20,7 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_gzip_compress(const scil_context* ctx, byte* restrict dest, size_t* restrict dest_size, const byte*restrict source, const size_t source_size){
 
-  return compress( (Bytef*)dest, dest_size, (Bytef*)source, (uLong)(source_size) ) == Z_OK ;
+  return compress( (Bytef*)dest, dest_size, (Bytef*)source, (uLong)(source_size) ) != Z_OK ;
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -32,6 +32,7 @@ int scil_gzip_decompress(const scil_context* ctx, byte*restrict dest, size_t exp
     if(ret != Z_OK){
         fprintf(stderr, "Error in gzip decompression. (Buf error: %d mem error: %d data_error: %d size: %lld)\n",
         ret == Z_BUF_ERROR , ret == Z_MEM_ERROR, ret == Z_DATA_ERROR, (long long) exp_size);
+        ret = -1;
     }
 
     return ret;
