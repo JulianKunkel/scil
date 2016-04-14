@@ -714,18 +714,19 @@ int test_performance(double bias, double discountFactor){
 
 	scil_dims_t dims = scil_init_dims(1, length);
 
-    struct scil_context_t* ctx;
-    scil_hints hints;
+  struct scil_context_t* ctx;
+  scil_hints hints;
 
-    scil_init_hints(&hints);
+  scil_init_hints(&hints);
 
-    hints.force_compression_method = 0;
+  hints.force_compression_method = 0;
 	hints.absolute_tolerance = 0.5;
 	hints.significant_bits = 1;
 
-	while(hints.force_compression_method < 7){
+	while(hints.force_compression_method < scil_compressors_available()){
 
 		double abs_tol = 0.5;
+		int ret;
 		for(uint32_t r = 1; r < 16; ++r){
 
 			if((hints.force_compression_method == 0 || hints.force_compression_method == 2 || hints.force_compression_method == 4) && r > 1) break;
@@ -743,7 +744,7 @@ int test_performance(double bias, double discountFactor){
 
 				clock_t start, end;
 				start = clock();
-				scil_compress(SCIL_DOUBLE, buffer_out, &out_c_size, oBuffer, dims, ctx);
+				ret = scil_compress(SCIL_DOUBLE, buffer_out, c_size, oBuffer, dims,&out_c_size, ctx);
 				end = clock();
 
 				seconds += (double)(end - start);
@@ -787,8 +788,6 @@ int test_performance(double bias, double discountFactor){
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int main(int argc, char** argv){
-
 	test_performance(0.0f, strtod(argv[1], NULL));
-
-    return 0;
+  return 0;
 }

@@ -27,6 +27,7 @@
 #include <algo/algo-fpzip.h>
 #include <algo/algo-zfp-abstol.h>
 #include <algo/algo-zfp-precision.h>
+#include <algo/lz4fast.h>
 
 // this file is automatically created
 #include "scil-dtypes.h"
@@ -39,8 +40,26 @@ scil_compression_algorithm * algo_array[] = {
 	& algo_fpzip,
 	& algo_zfp_abstol,
 	& algo_zfp_precision,
+	& algo_lz4fast,
 	NULL
 };
+
+int scil_compressors_available(){
+	static int count = -1;
+	if (count > 0){
+		return count;
+	}
+
+	scil_compression_algorithm ** cur = algo_array;
+	count = 0;
+	// count
+	while(*cur != NULL){
+		count++;
+		cur++;
+	}
+
+	return count;
+}
 
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 static int check_compress_lossless_needed(scil_context * ctx){
@@ -154,11 +173,11 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 	return 0;
 }
 
-int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t* restrict dest_size,
-  void*restrict source, scil_dims_t dims, scil_context* ctx){
+int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t in_dest_size,
+	void*restrict source, scil_dims_t dims, size_t* restrict out_size, scil_context* ctx){
 
 	if (dims.dims == 0){
-		*dest_size = 0;
+		*out_size = 0;
 		return 0;
 	}
 
@@ -166,8 +185,10 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t* rest
 
 	assert(ctx != NULL);
 	assert(dest != NULL);
-	assert(dest_size != NULL);
+	assert(out_size != NULL);
 	assert(source != NULL);
+
+	*out_size = in_dest_size; // maximum output size
 
 	const scil_hints * hints = & ctx->hints;
 
@@ -196,16 +217,16 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t* rest
 	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_DATATYPES){
 		switch(datatype){
 			case(SCIL_FLOAT):
-				ret = last_algorithm->c.DNtype.compress_float(ctx, dest, dest_size, source, dims);
+				ret = last_algorithm->c.DNtype.compress_float(ctx, dest, out_size, source, dims);
 				break;
 			case(SCIL_DOUBLE):
-				ret = last_algorithm->c.DNtype.compress_double(ctx, dest, dest_size, source, dims);
+				ret = last_algorithm->c.DNtype.compress_double(ctx, dest, out_size, source, dims);
 				break;
 		}
 	}else if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
-		ret = last_algorithm->c.Btype.compress(ctx, dest, dest_size, (byte *) source, scil_get_data_count(dims) * datatype_length(datatype));
+		ret = last_algorithm->c.Btype.compress(ctx, dest, out_size, (byte *) source, scil_get_data_count(dims) * datatype_length(datatype));
 	}
-	(*dest_size)++;
+	(*out_size)++;
 
 	return ret;
 }
@@ -357,7 +378,9 @@ int scil_convert_significant_decimals_to_bits(int decimals){
 }
 
 int scil_convert_significant_bits_to_decimals(int bits){
-  assert(bits > 0);
+  if(bits == 0){
+		return 0;
+	}
 	// compute mapping between decimals and bits
 	compute_significant_bit_mapping();
 	return sig_decimals[bits];

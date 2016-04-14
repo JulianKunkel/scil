@@ -92,6 +92,11 @@ struct scil_context_t{
 
 typedef struct scil_context_t scil_context;
 
+/*
+ \brief Returns the number of available compression schemes.
+ */
+int scil_compressors_available();
+
 scil_dims_t scil_init_dims(const uint8_t dimensions_count, size_t* dimensions_length);
 
 /*
@@ -138,8 +143,8 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
  * \pre ctx != NULL
  * \return Success state of the compression
  */
-int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t* restrict dest_size,
-  void*restrict source, scil_dims_t dims, scil_context* ctx);
+int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t dest_size,
+  void*restrict source, scil_dims_t dims, size_t* restrict out_size, scil_context* ctx);
 
 /**
  * \brief Method to decompress a data buffer

@@ -114,7 +114,7 @@ int main(){
 
 	scil_dims_t dims = scil_init_dims(1, length);
 
-	ret = scil_compress(SCIL_DOUBLE, c_buf, &c_buf_size, u_buf, dims, ctx);
+	ret = scil_compress(SCIL_DOUBLE, c_buf, c_buf_size, u_buf, dims, &c_buf_size, ctx);
 
 	printf("C size: %lu\n", c_buf_size);
 

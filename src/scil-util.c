@@ -172,5 +172,6 @@ void print_time (struct timespec time, FILE* file)
 
 void critical_error(const char * msg){
   printf("Critical error: %s\n", msg);
+  printf("%d", 1/0);
   exit(1);
 }
