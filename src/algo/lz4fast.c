@@ -36,7 +36,7 @@ int scil_lz4fast_decompress(const scil_context* ctx, byte*restrict dest, size_t 
     int size;
     size = LZ4_decompress_fast((const char *) source, (char *)  dest, exp_size); // LZ4_decompress_safe (source, dest, source_size, exp_size);
 
-    if (size != (int) exp_size){
+    if (size != (int) source_size){
       return -1;
     }
 

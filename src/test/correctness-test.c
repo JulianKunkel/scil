@@ -21,12 +21,12 @@
 #define allocate(type, name, count) type* name = (type*)malloc(count * sizeof(type))
 
 int test_correctness(double * buffer_in, const int variableSize){
-	const size_t c_size = (variableSize * sizeof(double)+SCIL_BLOCK_HEADER_MAX_SIZE);
 	size_t out_c_size;
-
-	allocate(byte, buffer_uncompressed, c_size);
+	// accept a suboptimal compression ratio of 0.5
+	const size_t c_size = 2 * variableSize * sizeof(double)+SCIL_BLOCK_HEADER_MAX_SIZE;
 
 	allocate(byte, buffer_out, c_size);
+	allocate(double, buffer_uncompressed, variableSize);
 	allocate(size_t, length, 1);
 	length[0] = variableSize;
 
