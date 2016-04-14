@@ -39,9 +39,12 @@ int test_correctness(double * buffer_in, const int variableSize){
 
   scil_init_hints(&hints);
 	printf("C Error, D Error, Validation, Uncompressed size, Compressed size, Compression factor, CSpeed MiB/s, DSpeed MiB/s, Algo\n");
-	hints.force_compression_method = 0;
+	char pipeline[100];
 
-	while(hints.force_compression_method < scil_compressors_available()){
+	hints.force_compression_methods = pipeline;
+	for(int i=0; i < scil_compressors_available(); i++ ){
+		sprintf(pipeline, "%d", i);
+
 		scil_create_compression_context(&ctx, &hints);
 		int ret_c;
 		int ret_d;
@@ -57,18 +60,24 @@ int test_correctness(double * buffer_in, const int variableSize){
 			seconds += (double)(end - start);
 		}
 		double seconds_compress = seconds / (loops * CLOCKS_PER_SEC);
+		ret_d = -1;
+		ret_v = -1;
 
 		seconds = 0;
-		for(uint8_t i = 0; i < loops; ++i){
-			clock_t start, end;
-			start = clock();
-			ret_d = scil_decompress(SCIL_DOUBLE, buffer_uncompressed, dims, buffer_out, out_c_size);
-			end = clock();
-			seconds += (double)(end - start);
+		if(ret_c == 0){
+			for(uint8_t i = 0; i < loops; ++i){
+				clock_t start, end;
+				start = clock();
+				ret_d = scil_decompress(SCIL_DOUBLE, buffer_uncompressed, dims, buffer_out, out_c_size);
+				end = clock();
+				seconds += (double)(end - start);
+			}
 		}
 		double seconds_decompress = seconds / (loops * CLOCKS_PER_SEC);
 
-		ret_v = scil_validate_compression(SCIL_DOUBLE, buffer_in, dims, buffer_out, out_c_size, ctx, & out_accuracy);
+		if(ret_d == 0){
+			ret_v = scil_validate_compression(SCIL_DOUBLE, buffer_in, dims, buffer_out, out_c_size, ctx, & out_accuracy);
+		}
 
 
 		size_t u_size = variableSize * sizeof(double);
@@ -77,9 +86,7 @@ int test_correctness(double * buffer_in, const int variableSize){
 		printf("%d, %d, %d, %lu, %lu, %.1lf, %.1lf, %.1lf, %s \n",
 			ret_c, ret_d, ret_v,
 			u_size, out_c_size, c_fac,
-			u_size/seconds_compress/1024 /1024, u_size/seconds_decompress/1024 /1024, scil_compressor_name(hints.force_compression_method) );
-
-		hints.force_compression_method++;
+			u_size/seconds_compress/1024 /1024, u_size/seconds_decompress/1024 /1024, hints.force_compression_methods );
   }
 
 	printf("Done.\n");

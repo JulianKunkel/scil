@@ -68,15 +68,19 @@ typedef struct{
     enum compressor_type type;
 } scil_compression_algorithm;
 
+// at most we support chaining of 10 compression algorithms
+typedef struct {
+  scil_compression_algorithm * algo[10];
+  int size;
+} scil_compression_chain_t;
+
 
 struct scil_context_t{
   int lossless_compression_needed;
   scil_hints hints;
 
   // the last compressor used, could be used for debugging
-  scil_compression_algorithm * last_algorithm;
-
-  // bla bla
+  scil_compression_chain_t last_chain;
 };
 
 int scil_convert_significant_decimals_to_bits(int decimals);

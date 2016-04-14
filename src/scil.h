@@ -76,7 +76,7 @@ typedef struct{
   int significant_bits;
 
   /** \brief */
-  int force_compression_method;
+  char * force_compression_methods;
 
 } scil_hints;
 
@@ -133,7 +133,7 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
  * \brief Method to compress a data buffer
  * \param datatype The datatype of the data (float, double, etc...)
  * \param dest Destination of the compressed buffer
- * \param dest_size Reference to the compressed buffer byte size, max size is given as argument
+ * \param dest_size Reference to the compressed buffer byte size, max size is given as argument, if a pipeline is processed it should be 3x the memory size of the input size + the HEADER.
  * \param source Source buffer of the data to compress
  * \param dims struct containing information about dimension count and length of buffer in each dimension
  * \param ctx Reference to the compression context

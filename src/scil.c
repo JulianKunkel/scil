@@ -16,6 +16,7 @@
 #include <string.h>
 #include <float.h>
 #include <math.h>
+#include <ctype.h>
 
 #include <scil-internal.h>
 
@@ -67,6 +68,44 @@ const char * scil_compressor_name(int num){
 	return algo_array[num]->name;
 }
 
+static int get_compressor_num_by_name(const char * name){
+	scil_compression_algorithm ** cur = algo_array;
+	int count = 0;
+
+	// check if this is a number
+	int num = 1;
+	for(int i=0; i < strlen(name); i++){
+		if (! isdigit(name[i])){
+			num = 0;
+			break;
+		}
+	}
+	if (num){
+		return atoi(name);
+	}
+
+	// count
+	while(*cur != NULL){
+		if (strcmp((*cur)->name, name) == 0 ){
+			return count;
+		}
+		count++;
+		cur++;
+	}
+
+	return -1;
+}
+
+static scil_compression_algorithm * find_compressor_by_name(const char * name){
+	int num = get_compressor_num_by_name(name);
+	if (num < 0 || num >= scil_compressors_available()){
+		return NULL;
+	}else{
+		return algo_array[num];
+	}
+}
+
+
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 static int check_compress_lossless_needed(scil_context * ctx){
 	const scil_hints hints = ctx->hints;
@@ -89,19 +128,34 @@ static void fix_double_setting(double * dbl){
 }
 
 static uint8_t relative_tolerance_to_significant_bits(double rel_tol){
-
 	return (uint8_t)ceil(log2(100.0 / rel_tol));
 }
 
 static double significant_bits_to_relative_tolerance(uint8_t sig_bits){
-
 	return 100.0 / exp2(sig_bits);
 }
 
-static scil_compression_algorithm* pick_best_algorithm(){
-	// TODO: implement this
-	return NULL;
+
+static void parse_compression_algorithms(scil_compression_chain_t * chain, char * str_in){
+	char * saveptr, * token;
+	char str[4096];
+	strncpy(str, str_in, 4096);
+	token = strtok_r(str, ",", & saveptr);
+	chain->algo[0] = find_compressor_by_name(token);
+
+	for( int i = 1; ; i++){
+		token = strtok_r(NULL, ",", & saveptr);
+
+		if (token == NULL){
+			chain->size = i;
+			return;
+		}else{
+			chain->algo[i] = find_compressor_by_name(token);
+		}
+	}
+	chain->size = 0;
 }
+
 
 scil_dims_t scil_init_dims(const uint8_t dimensions_count, size_t* dimensions_length){
 
@@ -176,7 +230,17 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 	}
 	}
 
+	if (hints->force_compression_methods != NULL){
+		// now we can prefill the compression pipeline
+		parse_compression_algorithms(& ctx->last_chain, hints->force_compression_methods);
+	}
+
 	return 0;
+}
+
+static void set_one_algo_in_chain(scil_compression_chain_t * chain, scil_compression_algorithm * algorithm){
+	chain->algo[0] = algorithm;
+	chain->size = 1;
 }
 
 int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t in_dest_size,
@@ -197,42 +261,58 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t in_de
 	*out_size = in_dest_size; // maximum output size
 
 	const scil_hints * hints = & ctx->hints;
+	scil_compression_chain_t * chain = & ctx->last_chain;
 
-	scil_compression_algorithm * last_algorithm;
-
-	if (hints->force_compression_method >= 0){
-			last_algorithm = algo_array[hints->force_compression_method];
+	if (hints->force_compression_methods != NULL){
+			// do nothing as we have parsed the pipeline already
 	}else{
 		if (ctx->lossless_compression_needed){
 			// we cannot compress because data must be accurate!
-			last_algorithm = & algo_memcopy;
+			set_one_algo_in_chain (chain, & algo_memcopy);
 		}else{
 			// TODO: pick the best algorithm for the settings given in ctx...
-			last_algorithm = pick_best_algorithm();
+			assert("No algorithm chooser available, yet");
 		}
 	}
 
-	ctx->last_algorithm = last_algorithm;
-
-	//Set algorithm id
-	dest[0] = last_algorithm->magic_number;
+	//Add the length of the algo chain
+	dest[0] = chain->size;
 	dest++;
+	//Set algorithm ids
+	for(int i=0; i < chain->size; i++){
+		dest[0] = chain->algo[i]->magic_number;
+		dest++;
+	}
 
 	int ret;
 
-	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_DATATYPES){
-		switch(datatype){
-			case(SCIL_FLOAT):
-				ret = last_algorithm->c.DNtype.compress_float(ctx, dest, out_size, source, dims);
-				break;
-			case(SCIL_DOUBLE):
-				ret = last_algorithm->c.DNtype.compress_double(ctx, dest, out_size, source, dims);
-				break;
+	// now process the pipeline
+	byte* restrict src = (byte* restrict) source;
+ 	byte* restrict dst;
+
+	for(int i=0; i < chain->size; i++){
+		scil_compression_algorithm * algo = chain->algo[i];
+
+		if (i == chain->size - 1){
+			dst = dest;
+			// TODO FIXME
 		}
-	}else if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
-		ret = last_algorithm->c.Btype.compress(ctx, dest, out_size, (byte *) source, scil_get_data_count(dims) * datatype_length(datatype));
+
+		if (algo->type == SCIL_COMPRESSOR_TYPE_DATATYPES){
+			switch(datatype){
+				case(SCIL_FLOAT):
+					ret = algo->c.DNtype.compress_float(ctx, dst, out_size, src, dims);
+					break;
+				case(SCIL_DOUBLE):
+					ret = algo->c.DNtype.compress_double(ctx, dst, out_size, src, dims);
+					break;
+			}
+		}else if (algo->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
+			ret = algo->c.Btype.compress(ctx, dst, out_size, (byte *) src, scil_get_data_count(dims) * datatype_length(datatype));
+		}
 	}
-	(*out_size)++;
+
+	(*out_size) += 1 + chain->size;
 
 	return ret;
 }
@@ -249,29 +329,38 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims_t
 	assert(dest != NULL);
 	assert(source != NULL);
 
-	scil_compression_algorithm * last_algorithm;
+	scil_compression_algorithm * algo;
+	int ret;
 
 	// Read magic number (algorithm id) from header
-	const uint8_t magic_number = source[0];
+	const uint8_t chain_size = source[0];
 
-	// Use decompression algorithm based on algo id
-	int ret;
-	last_algorithm = algo_array[magic_number];
+	byte*restrict src = source + 1;
+	size_t src_size = source_size - 1;
 
-	if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_DATATYPES){
-		switch(datatype){
-		case(SCIL_FLOAT):
-			ret = last_algorithm->c.DNtype.decompress_float(NULL, dest, dims, source + 1, source_size - 1);
-			break;
-		case(SCIL_DOUBLE):
-			ret = last_algorithm->c.DNtype.decompress_double(NULL, dest, dims, source + 1, source_size - 1);
-			break;
+	for(int i=0; i < chain_size; i++){
+		const uint8_t magic_number = *src;
+		src++;
+		src_size -= 1;
+		// TODO FIXME for longer chains
+
+		// Use decompression algorithm based on algo id
+		algo = algo_array[magic_number];
+
+		if (algo->type == SCIL_COMPRESSOR_TYPE_DATATYPES){
+			switch(datatype){
+			case(SCIL_FLOAT):
+				ret = algo->c.DNtype.decompress_float(NULL, dest, dims, src, src_size);
+				break;
+			case(SCIL_DOUBLE):
+				ret = algo->c.DNtype.decompress_double(NULL, dest, dims, src, src_size);
+				break;
+			}
+
+		}else if (algo->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
+			ret = algo->c.Btype.decompress(NULL, (byte *) dest, scil_get_data_count(dims) * datatype_length(datatype), src, src_size);
 		}
-
-	}else if (last_algorithm->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
-		ret = last_algorithm->c.Btype.decompress(NULL, (byte *) dest, scil_get_data_count(dims) * datatype_length(datatype), source + 1, source_size - 1);
 	}
-
 	return ret;
 }
 

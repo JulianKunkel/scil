@@ -630,8 +630,8 @@ static int write_to_csv(const double bias, const double discountFactor, const sc
 	sprintf(path, "performance_data_%.2f_%.2f.csv", bias, discountFactor);
 
 	FILE* csv = fopen(path, "a");
-	fprintf(csv, "%d,%.15lf,%.15lf,%d,%d,%lu,%lu,%lf,%lf\n",
-		hints.force_compression_method,
+	fprintf(csv, "%s,%.15lf,%.15lf,%d,%d,%lu,%lu,%lf,%lf\n",
+		hints.force_compression_methods,
 		hints.absolute_tolerance,
 		hints.relative_tolerance_percent,
 		hints.significant_digits,
@@ -659,7 +659,7 @@ int test_performance(double bias, double discountFactor){
 	if(!buffer) return kErrNoMem;
 	allocate(double, buffer2, variableSize);
 	if(!buffer2) return kErrNoMem;
-	allocate(void, oBuffer, 4*variableSize);
+	allocate(char, oBuffer, 4*variableSize);
 	if(!oBuffer) return kErrNoMem;
 
 	// long oBufferIsFloat = 1;	//Set to false if the oBuffer contains ints.
@@ -719,17 +719,21 @@ int test_performance(double bias, double discountFactor){
 
   scil_init_hints(&hints);
 
-  hints.force_compression_method = 0;
+  hints.force_compression_methods = "0";
 	hints.absolute_tolerance = 0.5;
 	hints.significant_bits = 1;
 
-	while(hints.force_compression_method < scil_compressors_available()){
+	char pipeline[100];
+
+	hints.force_compression_methods = pipeline;
+	for(int i=0; i < scil_compressors_available(); i++ ){
+		sprintf(pipeline, "%d", i);
 
 		double abs_tol = 0.5;
 		int ret;
 		for(uint32_t r = 1; r < 16; ++r){
 
-			if((hints.force_compression_method == 0 || hints.force_compression_method == 2 || hints.force_compression_method == 4) && r > 1) break;
+			//if((hints.force_compression_method == 0 || hints.force_compression_method == 2 || hints.force_compression_method == 4) && r > 1) break;
 
 			hints.absolute_tolerance = abs_tol;
 			hints.significant_bits = r;
@@ -754,7 +758,7 @@ int test_performance(double bias, double discountFactor){
 			size_t u_size = variableSize * sizeof(double);
 			double c_fac = (double)(u_size) / out_c_size;
 
-			printf("Compressing with %d:\n", hints.force_compression_method);
+			printf("Compressing with %s:\n", hints.force_compression_methods);
 			printf("\tAbsolute tolerance:\t%.15lf\n", hints.absolute_tolerance);
 			printf("\tRelative tolerance:\t%lf%%\n", hints.relative_tolerance_percent);
 			printf("\tSignificant digits:\t%d\n", hints.significant_digits);
@@ -768,8 +772,6 @@ int test_performance(double bias, double discountFactor){
 
 			abs_tol *= 0.5;
 		}
-
-		hints.force_compression_method++;
     }
 
 	printf("Done.\n");
