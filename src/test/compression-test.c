@@ -86,7 +86,7 @@ int main(){
 	int ret;
 
 	scil_init_hints(& hints);
-	hints.force_compression_methods = "6";
+	hints.force_compression_methods = "1";
 	hints.absolute_tolerance = 0.5;
 	//hints.relative_tolerance_percent = 1.0;
 	hints.significant_bits = 5;
@@ -118,7 +118,7 @@ int main(){
 
 	printf("C size: %lu\n", c_buf_size);
 
-	double * data_out = (double*)SAFE_MALLOC(u_buf_size);	
+	double * data_out = (double*)SAFE_MALLOC(u_buf_size);
 	ret = scil_decompress(SCIL_DOUBLE, data_out, dims, c_buf, c_buf_size);
 
 	printf("Decompression %d\n", ret);

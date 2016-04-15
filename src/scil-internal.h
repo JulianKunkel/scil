@@ -22,6 +22,16 @@
 
 #include <scil.h>
 
+// Error codes
+#define SCIL_NO_ERR         0
+#define SCIL_BUFFER_ERR     1
+#define SCIL_MEMORY_ERR     2
+
+extern const char* scil_error_messages[];
+
+void scil_print_error(const uint8_t error_code);
+
+
 #define SCIL_TYPE_double 1
 #define SCIL_TYPE_float 0
 

@@ -310,6 +310,9 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t in_de
 		}else if (algo->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES){
 			ret = algo->c.Btype.compress(ctx, dst, out_size, (byte *) src, scil_get_data_count(dims) * datatype_length(datatype));
 		}
+
+		fprintf(stderr, "Algorithm %d in chain:\t", i);
+		scil_print_error(ret);
 	}
 
 	(*out_size) += 1 + chain->size;
