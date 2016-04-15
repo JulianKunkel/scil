@@ -193,6 +193,9 @@ int scil_abstol_decompress_<DATATYPE>(  const scil_context* ctx,
     uint64_t index = 0;
     for(uint64_t i = 0; index < max_index; i+=bits_per_num){
 
+        // Test whether write to address after buffer
+        // if ...
+
         // Get index of start and end byte
         uint64_t start_byte = i / 8;
         uint64_t end_byte = (i + bits_per_num) / 8;
