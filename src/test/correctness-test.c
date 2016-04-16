@@ -23,9 +23,10 @@
 int test_correctness(double * buffer_in, const int variableSize){
 	size_t out_c_size;
 	// accept a suboptimal compression ratio of 0.5
-	const size_t c_size = 2 * variableSize * sizeof(double)+SCIL_BLOCK_HEADER_MAX_SIZE;
+	const size_t c_size = 2 * variableSize * sizeof(double) + SCIL_BLOCK_HEADER_MAX_SIZE;
 
 	allocate(byte, buffer_out, c_size);
+	allocate(byte, tmp_buff, c_size);
 	allocate(double, buffer_uncompressed, variableSize);
 	allocate(size_t, length, 1);
 	length[0] = variableSize;
@@ -34,28 +35,36 @@ int test_correctness(double * buffer_in, const int variableSize){
 
   struct scil_context_t* ctx;
   scil_hints hints;
-
 	scil_hints out_accuracy;
 
   scil_init_hints(&hints);
+	hints.absolute_tolerance = 0.01;
+
 	printf("C Error, D Error, Validation, Uncompressed size, Compressed size, Compression factor, CSpeed MiB/s, DSpeed MiB/s, Algo\n");
 
-	for(int i=0; i < scil_compressors_available(); i++ ){
-		hints.force_compression_methods = scil_compressor_name(i);
+	for(int i=0; i < 1; i++ ){ // scil_compressors_available()
+		char compression_name[1024];
+		sprintf(compression_name, "abstol,7", scil_compressor_name(i)); //%s
+		hints.force_compression_methods = compression_name;
 
-		scil_create_compression_context(&ctx, &hints);
+		int ret = scil_create_compression_context(&ctx, &hints);
+		if (ret != 0){
+			printf("Error creating the context\n");
+			continue;
+		}
 		int ret_c;
 		int ret_d;
 		int ret_v;
 
 		double seconds = 0;
-		const uint8_t loops = 10;
+		const uint8_t loops = 1;
 		for(uint8_t i = 0; i < loops; ++i){
 			clock_t start, end;
 			start = clock();
 			ret_c = scil_compress(SCIL_DOUBLE, buffer_out, c_size, buffer_in, dims,&out_c_size, ctx);
 			end = clock();
 			seconds += (double)(end - start);
+			if(ret_c != 0) break;
 		}
 		double seconds_compress = seconds / (loops * CLOCKS_PER_SEC);
 		ret_d = -1;
@@ -66,9 +75,11 @@ int test_correctness(double * buffer_in, const int variableSize){
 			for(uint8_t i = 0; i < loops; ++i){
 				clock_t start, end;
 				start = clock();
-				ret_d = scil_decompress(SCIL_DOUBLE, buffer_uncompressed, dims, buffer_out, out_c_size);
+				ret_d = scil_decompress(SCIL_DOUBLE, buffer_uncompressed, dims, buffer_out, out_c_size, tmp_buff);
 				end = clock();
 				seconds += (double)(end - start);
+
+				if(ret_d != 0) break;
 			}
 		}
 		double seconds_decompress = seconds / (loops * CLOCKS_PER_SEC);
@@ -76,7 +87,6 @@ int test_correctness(double * buffer_in, const int variableSize){
 		if(ret_d == 0){
 			ret_v = scil_validate_compression(SCIL_DOUBLE, buffer_in, dims, buffer_out, out_c_size, ctx, & out_accuracy);
 		}
-
 
 		size_t u_size = variableSize * sizeof(double);
 		double c_fac = (double)(u_size) / out_c_size;
@@ -110,6 +120,13 @@ void test_patternRND(double * buffer_in, const int variableSize){
 	test_correctness(buffer_in, variableSize);
 }
 
+void test_patternALT(double * buffer_in, const int variableSize){
+	printf("Pattern ALTERNATING\n");
+	for (int i=0; i < variableSize; i++){
+		buffer_in[i] = i % 100;
+	}
+	test_correctness(buffer_in, variableSize);
+}
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int main(int argc, char** argv){
@@ -117,8 +134,8 @@ int main(int argc, char** argv){
 	allocate(double, buffer_in, variableSize);
 
 	test_pattern0(buffer_in, variableSize);
-
 	test_patternRND(buffer_in, variableSize);
+	test_patternALT(buffer_in, variableSize);
 
 	free(buffer_in);
 	return 0;

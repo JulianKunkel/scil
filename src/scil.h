@@ -160,7 +160,7 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t dest_
  * \return Success state of the decompression
  */
 int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims_t expected_dims,
-    byte*restrict source, const size_t source_size);
+    byte*restrict source, const size_t source_size, byte*restrict tmp_buff);
 
 void scil_determine_accuracy(enum SCIL_Datatype datatype, const void * restrict  data_1,
     const void * restrict data_2, scil_dims_t dims,

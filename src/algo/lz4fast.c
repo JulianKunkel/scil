@@ -21,8 +21,10 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_lz4fast_compress(const scil_context* ctx, byte* restrict dest, size_t * restrict out_size, const byte*restrict source, const size_t source_size){
     int size;
-    size = LZ4_compress ((const char *) source, (char *) dest, source_size);
-    *out_size = size;
+    // store the size of the data
+    *((int*) dest) = source_size;
+    size = LZ4_compress ((const char *) (source), (char *) dest + 4, source_size);
+    *out_size = size + 4;
 
     if (size == 0){
       return -1;
@@ -32,13 +34,12 @@ int scil_lz4fast_compress(const scil_context* ctx, byte* restrict dest, size_t *
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_lz4fast_decompress(const scil_context* ctx, byte*restrict dest, size_t exp_size, const byte*restrict source, const size_t source_size){
+int scil_lz4fast_decompress(byte*restrict dest, const byte*restrict src, const size_t in_size, size_t * uncomp_size_out){
     int size;
-    size = LZ4_decompress_fast((const char *) source, (char *)  dest, exp_size); // LZ4_decompress_safe (source, dest, source_size, exp_size);
-
-    if (size != (int) source_size){
-      return -1;
-    }
+    // retrieve the size of the uncompressed data
+    size = *((int*) src);
+    *uncomp_size_out = size;
+    size = LZ4_decompress_fast((const char *) src + 4, (char *)  dest, size); // LZ4_decompress_safe (source, dest, source_size, exp_size);
 
     return 0;
 }

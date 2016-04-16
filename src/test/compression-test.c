@@ -107,7 +107,7 @@ int main(){
 	printf("U size: %lu\n", u_buf_size);
 
 	size_t c_buf_size = u_buf_size + SCIL_BLOCK_HEADER_MAX_SIZE;
-	byte * c_buf = (byte*)SAFE_MALLOC(c_buf_size);
+	byte * c_buf = (byte*)SAFE_MALLOC(c_buf_size*4);
 
 	size_t* length = (uint64_t*)SAFE_MALLOC(sizeof(size_t));
 	length[0] = count;
@@ -119,7 +119,7 @@ int main(){
 	printf("C size: %lu\n", c_buf_size);
 
 	double * data_out = (double*)SAFE_MALLOC(u_buf_size);
-	ret = scil_decompress(SCIL_DOUBLE, data_out, dims, c_buf, c_buf_size);
+	ret = scil_decompress(SCIL_DOUBLE, data_out, dims, c_buf, c_buf_size, & c_buf[c_buf_size*2]);
 
 	printf("Decompression %d\n", ret);
 

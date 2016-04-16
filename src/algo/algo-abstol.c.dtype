@@ -160,8 +160,7 @@ int scil_abstol_compress_<DATATYPE>(const scil_context* ctx,
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_abstol_decompress_<DATATYPE>(  const scil_context* ctx,
-                            <DATATYPE>*restrict dest,
+int scil_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict dest,
                             scil_dims_t dims,
                             byte*restrict source,
                             const size_t source_size )

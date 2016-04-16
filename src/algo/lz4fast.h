@@ -38,7 +38,7 @@ int scil_lz4fast_compress(const scil_context* ctx, byte* restrict dest, size_t *
  * \param source_size Byte size of uncompressed buffer
  * \return Success state of the compression
  */
-int scil_lz4fast_decompress(const scil_context* ctx, byte*restrict dest, size_t exp_size, const byte*restrict source, const size_t source_size);
+int scil_lz4fast_decompress(byte*restrict dest, const byte*restrict src, const size_t in_size, size_t * uncomp_size_out);
 
 extern scil_compression_algorithm algo_lz4fast;
 
