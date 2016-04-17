@@ -18,6 +18,7 @@ BUILD=0
 if [[ ! -e libzfp.a ]] ; then
 	echo "Building fpzip shared library"
 	pushd $ZFP
+	cp ../config-zfp Config
 	make shared
 	make
 	popd
