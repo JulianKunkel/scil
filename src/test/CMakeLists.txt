@@ -10,11 +10,11 @@ target_link_libraries(scil-correctness-test scil)
 
 # abstol-test
 add_executable(abstol-test abstol-test.c)
-target_link_libraries(abstol-test m)
+target_link_libraries(abstol-test scil)
 
 # zlib-test
 add_executable(zlib-test zlib-test.c ../scil-util.c)
-target_link_libraries(zlib-test z)
+target_link_libraries(zlib-test scil)
 
 # performance
 add_executable(performance-test performance-test.c)

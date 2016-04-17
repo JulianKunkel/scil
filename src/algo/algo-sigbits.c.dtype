@@ -54,7 +54,7 @@ static uint64_t compress_<DATATYPE>(<DATATYPE> value, uint8_t signs_id, uint8_t 
     }
     result |= (uint64_t)(cur.p.exponent - min_exponent);
     result <<= mant_bits;
-    result |= ((uint64_t)cur.p.mantissa) >> (MANTISSA_LENGTH_<DATATYPE> - mant_bits);
+    result |= ((uint64_t)cur.p.mantissa) >> (MANTISSA_LENGTH_<DATATYPE_UPPER> - mant_bits);
 
     return result;
 }
@@ -90,7 +90,7 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context* ctx,
     uint8_t header_size = 1; // magic_number
 
     // Write header
-    scil_write_dims_to_buffer(dest, dims);
+    scilU_write_dims_to_buffer(dest, dims);
     dest += 1 + dims.dims * sizeof(size_t); // Weird again.
     header_size += 1 + dims.dims * sizeof(size_t);
 
@@ -183,7 +183,7 @@ int scil_sigbits_decompress_<DATATYPE>(  const scil_context* ctx,
     size_t in_size = source_size;
 
     // Read header
-    scil_read_dims_from_buffer(exp_count, source);
+    scilU_read_dims_from_buffer(exp_count, source);
     source += 1 + exp_count.dims * sizeof(size_t); // Weird again.
     in_size -= 1 + exp_count.dims * sizeof(size_t);
 

@@ -1,11 +1,12 @@
-#include <scil-internal.h>
+#include <scil.h>
 
-const char* scil_error_messages[] = {
-   "Error code 0: No error.",
+static const char* scil_error_messages[] = {
+   "Error code 0: SUCCESS.",
    "Error code 1: Buffer overflow.",
    "Error code 2: Not enough memory.",
+   "Error code 3: Invalid argument."
 };
 
-void scil_print_error(const uint8_t error_code){
-    fprintf(stderr, "%s\n", scil_error_messages[error_code]);
+const char* scil_strerr(enum scil_error_code err){
+    return & scil_error_messages[err];
 }

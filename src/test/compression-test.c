@@ -114,12 +114,12 @@ int main(){
 
 	scil_dims_t dims = scil_init_dims(1, length);
 
-	ret = scil_compress(SCIL_DOUBLE, c_buf, c_buf_size, u_buf, dims, &c_buf_size, ctx);
+	ret = scil_compress(SCIL_TYPE_DOUBLE, c_buf, c_buf_size, u_buf, dims, &c_buf_size, ctx);
 
 	printf("C size: %lu\n", c_buf_size);
 
 	double * data_out = (double*)SAFE_MALLOC(u_buf_size);
-	ret = scil_decompress(SCIL_DOUBLE, data_out, dims, c_buf, c_buf_size, & c_buf[c_buf_size*2]);
+	ret = scil_decompress(SCIL_TYPE_DOUBLE, data_out, dims, c_buf, c_buf_size, & c_buf[c_buf_size*2]);
 
 	printf("Decompression %d\n", ret);
 
@@ -138,13 +138,13 @@ int main(){
 
 	scil_dims_t dims1 = scil_init_dims(1, length);
 
-	scil_determine_accuracy(SCIL_DOUBLE, & f1, &f2, dims1, 0.01, & accuracy);
+	scil_determine_accuracy(SCIL_TYPE_DOUBLE, & f1, &f2, dims1, 0.01, & accuracy);
 	scil_hints_print(& accuracy);
 
-	scil_determine_accuracy(SCIL_DOUBLE, & f1, &f2, dims1, 0.51, & accuracy);
+	scil_determine_accuracy(SCIL_TYPE_DOUBLE, & f1, &f2, dims1, 0.51, & accuracy);
 	scil_hints_print(& accuracy);
 
-	ret = scil_validate_compression(SCIL_DOUBLE, u_buf, dims, c_buf, c_buf_size, ctx, & accuracy);
+	ret = scil_validate_compression(SCIL_TYPE_DOUBLE, u_buf, dims, c_buf, c_buf_size, ctx, & accuracy);
 
 	printf("\nscil_validate_compression returned %s\n", ret == 0 ? "OK" : "ERROR");
 	scil_hints_print(& accuracy);

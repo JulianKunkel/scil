@@ -34,7 +34,7 @@ int scil_zfp_precision_compress_<DATATYPE>(const scil_context* ctx,
     *dest_size = 0;
 
     // Write header
-    size_t dims_size = scil_write_dims_to_buffer(dest, dims);
+    size_t dims_size = scilU_write_dims_to_buffer(dest, dims);
     dest += dims_size;
     *dest_size += dims_size;
 
@@ -86,7 +86,7 @@ int scil_zfp_precision_decompress_<DATATYPE>(  const scil_context* ctx,
     int ret = 0;
 
     // Read header
-    scil_read_dims_from_buffer(exp_count, source);
+    scilU_read_dims_from_buffer(exp_count, source);
     source += 1 + exp_count.dims * sizeof(size_t);
 
     double precision = *((double*)source);

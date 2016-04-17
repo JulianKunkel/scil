@@ -22,7 +22,8 @@ for f in $(find $DIR -name "*.dtype"); do
   mkdir -p $(dirname $target)
 
   for t in $DATATYPES; do
-    sed "s/<DATATYPE>/$t/g" $DIR/$f >> $TMP
+    DTYPE_UPPER=$(echo $t | tr [a-z] [A-Z])
+    sed "s/<DATATYPE>/$t/g" $DIR/$f | sed "s/<DATATYPE_UPPER>/$DTYPE_UPPER/g" >> $TMP
     echo >> $TMP
   done
   mv $TMP $target

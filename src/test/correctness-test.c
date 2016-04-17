@@ -57,35 +57,30 @@ int test_correctness(double * buffer_in, const int variableSize){
 		int ret_v;
 
 		double seconds = 0;
-		const uint8_t loops = 1;
+		const uint8_t loops = 10;
+		scil_timer timer;
+		scilU_start_timer(& timer);
+
 		for(uint8_t i = 0; i < loops; ++i){
-			clock_t start, end;
-			start = clock();
-			ret_c = scil_compress(SCIL_DOUBLE, buffer_out, c_size, buffer_in, dims,&out_c_size, ctx);
-			end = clock();
-			seconds += (double)(end - start);
+			ret_c = scil_compress(SCIL_TYPE_DOUBLE, buffer_out, c_size, buffer_in, dims,&out_c_size, ctx);
 			if(ret_c != 0) break;
 		}
-		double seconds_compress = seconds / (loops * CLOCKS_PER_SEC);
+		double seconds_compress = scilU_stop_timer(timer);
 		ret_d = -1;
 		ret_v = -1;
 
 		seconds = 0;
 		if(ret_c == 0){
+			scilU_start_timer(& timer);
 			for(uint8_t i = 0; i < loops; ++i){
-				clock_t start, end;
-				start = clock();
-				ret_d = scil_decompress(SCIL_DOUBLE, buffer_uncompressed, dims, buffer_out, out_c_size, tmp_buff);
-				end = clock();
-				seconds += (double)(end - start);
-
+				ret_d = scil_decompress(SCIL_TYPE_DOUBLE, buffer_uncompressed, dims, buffer_out, out_c_size, tmp_buff);
 				if(ret_d != 0) break;
 			}
 		}
-		double seconds_decompress = seconds / (loops * CLOCKS_PER_SEC);
+		double seconds_decompress = scilU_stop_timer(timer);
 
 		if(ret_d == 0){
-			ret_v = scil_validate_compression(SCIL_DOUBLE, buffer_in, dims, buffer_out, out_c_size, ctx, & out_accuracy);
+			ret_v = scil_validate_compression(SCIL_TYPE_DOUBLE, buffer_in, dims, buffer_out, out_c_size, ctx, & out_accuracy);
 		}
 
 		size_t u_size = variableSize * sizeof(double);

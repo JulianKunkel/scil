@@ -33,11 +33,18 @@
  */
 #define _FILE_OFFSET_BITS 64
 
+#define MANTISSA_MAX_LENGTH 52
+#define MANTISSA_LENGTH_FLOAT 23
+#define MANTISSA_LENGTH_DOUBLE 52
+
 #define max(a,b) \
   (a > b ? a : b)
 
 #define min(a,b) \
   (-max(-a, -b))
+
+#define DATATYPE_LENGTH(type) (type == SCIL_TYPE_FLOAT ? sizeof(float) : sizeof(double))
+
 
 /**
  * \brief Allocates a buffer with error checking.
@@ -145,6 +152,26 @@ typedef struct {
 } scil_dims_t;
 
 
+typedef union {
+  struct {
+    uint32_t mantissa  : MANTISSA_LENGTH_FLOAT;
+    uint32_t exponent : 8;
+    uint32_t sign     : 1;
+  } p;
+	float f;
+} datatype_cast_float;
+
+
+typedef union {
+  struct {
+    uint64_t mantissa  : MANTISSA_LENGTH_DOUBLE;
+    uint32_t exponent : 11;
+    uint32_t sign     : 1;
+  } p;
+	double f;
+} datatype_cast_double;
+
+
 /**
  * \brief Writes dimensional information into buffer
  * \param dest Pointer to write location
@@ -152,7 +179,7 @@ typedef struct {
  * \pre dest != NULL
  * \return Byte size consumed of destination buffer
  */
-size_t scil_write_dims_to_buffer(void* dest, const scil_dims_t dims);
+size_t scilU_write_dims_to_buffer(void* dest, const scil_dims_t dims);
 
 /**
  * \brief Reads dimensional information from buffer.
@@ -160,7 +187,11 @@ size_t scil_write_dims_to_buffer(void* dest, const scil_dims_t dims);
  * \pre dest != NULL
  * \return Dimensional configuration of compressed data
  */
-void scil_read_dims_from_buffer(scil_dims_t dims, void* dest);
+void scilU_read_dims_from_buffer(scil_dims_t dims, void* dest);
+
+////////////// TIMER MANAGEMENT /////////////////////
+
+typedef struct timespec scil_timer;
 
 /**
  * \brief Calculates the difference between two timestamps.
@@ -168,7 +199,7 @@ void scil_read_dims_from_buffer(scil_dims_t dims, void* dest);
  * \param end Second timestamp.
  * \return end - start
  */
-struct timespec diff_timespec (struct timespec start, struct timespec end);
+scil_timer scilU_time_diff (scil_timer end, scil_timer start);
 
 /**
  * \brief Calculates the sum between two timestamps.
@@ -176,15 +207,10 @@ struct timespec diff_timespec (struct timespec start, struct timespec end);
  * \param end Second timestamp.
  * \return t1 + t2
  */
-struct timespec sum_timespec (struct timespec t1, struct timespec t2);
+scil_timer scilU_time_sum (scil_timer t1, scil_timer t2);
 
-/**
- * \brief Calculates the quotient of a time and an integer
- * \param t First timestamp.
- * \param d divisor
- * \return t / d
- */
-struct timespec div_timespec (struct timespec t, int64_t d);
+void scilU_start_timer(scil_timer * t1);
+double scilU_stop_timer(scil_timer t1);
 
 /**
  * \brief Prints time to file.
@@ -194,13 +220,21 @@ struct timespec div_timespec (struct timespec t, int64_t d);
  * \param time Time to print.
  * \param file
  */
-void print_time (struct timespec time, FILE* file);
+void print_time (scil_timer time, FILE* file);
 
-double timespec_to_double (struct timespec t);
+double scilU_time_to_double (scil_timer t);
 
-uint64_t timespec_to_uint64 (struct timespec t);
 
-void critical_error(const char * msg);
+void scilU_critical_error(const char * msg);
+
+void scilU_print_buffer(char * dest, size_t out_size);
+uint8_t scilU_relative_tolerance_to_significant_bits(double rel_tol);
+double scilU_significant_bits_to_relative_tolerance(uint8_t sig_bits);
+
+int scilU_convert_significant_decimals_to_bits(int decimals);
+int scilU_convert_significant_bits_to_decimals(int bits);
+
+
 
 
 #endif /* UTIL_H */

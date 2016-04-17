@@ -22,14 +22,20 @@
 #ifndef SCIL_HEADER_
 #define SCIL_HEADER_
 
-#include <stdio.h>
 #include <stdint.h>
 
 #include <scil-util.h>
 
 enum SCIL_Datatype{
-  SCIL_FLOAT,
-  SCIL_DOUBLE
+  SCIL_TYPE_FLOAT,
+  SCIL_TYPE_DOUBLE
+};
+
+enum scil_error_code{
+  SCIL_NO_ERR   = 0 ,
+  SCIL_BUFFER_ERR,
+  SCIL_MEMORY_ERR,
+  SCIL_EINVAL
 };
 
 /*
@@ -92,11 +98,14 @@ struct scil_context_t{
 
 typedef struct scil_context_t scil_context;
 
+const char* scil_strerr(enum scil_error_code error);
+
 /*
  \brief Returns the number of available compression schemes.
  */
 int scil_compressors_available();
 const char * scil_compressor_name(int num);
+int scil_compressor_num_by_name(const char * name);
 
 scil_dims_t scil_init_dims(const uint8_t dimensions_count, size_t* dimensions_length);
 

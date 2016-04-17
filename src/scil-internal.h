@@ -22,24 +22,6 @@
 
 #include <scil.h>
 
-// Error codes
-#define SCIL_NO_ERR         0
-#define SCIL_BUFFER_ERR     1
-#define SCIL_MEMORY_ERR     2
-
-extern const char* scil_error_messages[];
-
-void scil_print_error(const uint8_t error_code);
-
-
-#define SCIL_TYPE_double 1
-#define SCIL_TYPE_float 0
-
-// use sizeof(<DATATYPE>) in auto created code
-static inline int datatype_length(enum SCIL_Datatype type){
-  return type == SCIL_FLOAT ? sizeof(float) : sizeof(double);
-}
-
 enum compressor_type{
   SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES,
   SCIL_COMPRESSOR_TYPE_DATATYPES,
@@ -107,32 +89,6 @@ struct scil_context_t{
   scil_compression_chain_t last_chain;
 };
 
-int scil_convert_significant_decimals_to_bits(int decimals);
-int scil_convert_significant_bits_to_decimals(int bits);
-
-#define MANTISSA_MAX_LENGTH 52
-
-#define MANTISSA_LENGTH_float 23
-
-typedef union {
-  struct {
-    uint32_t mantissa  : MANTISSA_LENGTH_float;
-    uint32_t exponent : 8;
-    uint32_t sign     : 1;
-  } p;
-	float f;
-} datatype_cast_float;
-
-#define MANTISSA_LENGTH_double 52
-
-typedef union {
-  struct {
-    uint64_t mantissa  : MANTISSA_LENGTH_double;
-    uint32_t exponent : 11;
-    uint32_t sign     : 1;
-  } p;
-	double f;
-} datatype_cast_double;
 
 
 #endif

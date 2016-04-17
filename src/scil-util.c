@@ -85,7 +85,7 @@ FILE* safe_fopen(const char* path, const char* args, const char* src, unsigned l
     return file;
 }
 
-size_t scil_write_dims_to_buffer(void* dest, const scil_dims_t dims){
+size_t scilU_write_dims_to_buffer(void* dest, const scil_dims_t dims){
 
     assert(dest != NULL);
 
@@ -104,7 +104,7 @@ size_t scil_write_dims_to_buffer(void* dest, const scil_dims_t dims){
     return header_size;
 }
 
-void scil_read_dims_from_buffer(scil_dims_t dims, void* dest){
+void scilU_read_dims_from_buffer(scil_dims_t dims, void* dest){
 
     dims.dims = *((uint8_t*)dest);
     dest = (char*)dest + 1;
@@ -115,7 +115,54 @@ void scil_read_dims_from_buffer(scil_dims_t dims, void* dest){
     }
 }
 
-struct timespec diff_timespec (struct timespec start, struct timespec end)
+void scilU_print_buffer(char * dest, size_t out_size){
+	for (size_t i=0; i < out_size ; i++){
+		printf("%x", dest[i]);
+	}
+	printf("\n");
+}
+
+
+static unsigned char sig_bits[MANTISSA_MAX_LENGTH] = {255};
+static unsigned char sig_decimals[MANTISSA_MAX_LENGTH] = {255};
+
+#define LOG10B2 3.3219280948873626
+#define LOG2B10 0.30102999566398114
+
+static void compute_significant_bit_mapping(){
+
+	if(sig_bits[0] != 255) return;
+
+	for(int i = 0; i < MANTISSA_MAX_LENGTH; ++i){
+		sig_bits[i] = (unsigned char)ceil(i * LOG10B2);
+		sig_decimals[i] = (unsigned char)ceil(i * LOG2B10);
+	}
+}
+
+int scilU_convert_significant_decimals_to_bits(int decimals){
+	compute_significant_bit_mapping();
+	return sig_bits[decimals];
+}
+
+int scilU_convert_significant_bits_to_decimals(int bits){
+  if(bits == 0){
+		return 0;
+	}
+	// compute mapping between decimals and bits
+	compute_significant_bit_mapping();
+	return sig_decimals[bits];
+}
+
+
+uint8_t scilU_relative_tolerance_to_significant_bits(double rel_tol){
+	return (uint8_t)ceil(log2(100.0 / rel_tol));
+}
+
+double scilU_significant_bits_to_relative_tolerance(uint8_t sig_bits){
+	return 100.0 / exp2(sig_bits);
+}
+
+struct timespec scilU_time_diff (struct timespec end, struct timespec start)
 {
     struct timespec diff;
     if (end.tv_nsec < start.tv_nsec)
@@ -131,7 +178,7 @@ struct timespec diff_timespec (struct timespec start, struct timespec end)
     return diff;
 }
 
-struct timespec sum_timespec (struct timespec t1, struct timespec t2)
+struct timespec scilU_time_sum (struct timespec t1, struct timespec t2)
 {
     struct timespec sum;
     sum.tv_nsec = t1.tv_nsec + t2.tv_nsec;
@@ -141,15 +188,7 @@ struct timespec sum_timespec (struct timespec t1, struct timespec t2)
     return sum;
 }
 
-struct timespec div_timespec (struct timespec t, int64_t d)
-{
-    t.tv_nsec = t.tv_nsec / d;
-    t.tv_nsec += (t.tv_sec % d) * 1000000000 / d;
-    t.tv_sec /= d;
-    return t;
-}
-
-double timespec_to_double (struct timespec t)
+double scilU_time_to_double (struct timespec t)
 {
     double d = (double)t.tv_nsec;
     d /= 1000000000.0;
@@ -157,20 +196,24 @@ double timespec_to_double (struct timespec t)
     return d;
 }
 
-uint64_t timespec_to_uint64 (struct timespec t)
-{
-    uint64_t u = (uint64_t)t.tv_sec;
-    u *= 1000000000;
-    u += (uint64_t)t.tv_nsec;
-    return u;
+void scilU_start_timer(scil_timer * t1){
+  clock_gettime(CLOCK_MONOTONIC, t1);
 }
+
+double scilU_stop_timer(scil_timer t1){
+  scil_timer end;
+  scilU_start_timer(& end);
+  return scilU_time_to_double(scilU_time_diff(end, t1));
+}
+
+
 
 void print_time (struct timespec time, FILE* file)
 {
     fprintf(file, "%lu.%09lu", time.tv_sec, time.tv_nsec);
 }
 
-void critical_error(const char * msg){
+void scilU_critical_error(const char * msg){
   printf("Critical error: %s\n", msg);
   printf("%d", 1/0);
   exit(1);

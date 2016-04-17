@@ -46,6 +46,8 @@ scil_compression_algorithm * algo_array[] = {
 	NULL
 };
 
+
+
 int scil_compressors_available(){
 	static int count = -1;
 	if (count > 0){
@@ -68,7 +70,7 @@ const char * scil_compressor_name(int num){
 	return algo_array[num]->name;
 }
 
-static int get_compressor_num_by_name(const char * name){
+int scil_compressor_num_by_name(const char * name){
 	scil_compression_algorithm ** cur = algo_array;
 	int count = 0;
 
@@ -96,16 +98,6 @@ static int get_compressor_num_by_name(const char * name){
 	return -1;
 }
 
-static scil_compression_algorithm * find_compressor_by_name(const char * name){
-	int num = get_compressor_num_by_name(name);
-	if (num < 0 || num >= scil_compressors_available()){
-		return NULL;
-	}else{
-		return algo_array[num];
-	}
-}
-
-
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 static int check_compress_lossless_needed(scil_context * ctx){
 	const scil_hints hints = ctx->hints;
@@ -127,14 +119,14 @@ static void fix_double_setting(double * dbl){
 	}
 }
 
-static uint8_t relative_tolerance_to_significant_bits(double rel_tol){
-	return (uint8_t)ceil(log2(100.0 / rel_tol));
+static scil_compression_algorithm * find_compressor_by_name(const char * name){
+	int num = scil_compressor_num_by_name(name);
+	if (num < 0 || num >= scil_compressors_available()){
+		return NULL;
+	}else{
+		return algo_array[num];
+	}
 }
-
-static double significant_bits_to_relative_tolerance(uint8_t sig_bits){
-	return 100.0 / exp2(sig_bits);
-}
-
 
 static int parse_compression_algorithms(scil_compression_chain_t * chain, char * str_in){
 	char * saveptr, * token;
@@ -183,7 +175,6 @@ static int parse_compression_algorithms(scil_compression_chain_t * chain, char *
 
 
 scil_dims_t scil_init_dims(const uint8_t dimensions_count, size_t* dimensions_length){
-
 	return (scil_dims_t){ .dims = dimensions_count, .length = dimensions_length };
 }
 
@@ -220,25 +211,25 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 
 	// convert between significant digits and bits
 	if (ohints->significant_digits != SCIL_ACCURACY_INT_IGNORE){
-		ohints->significant_bits = max(ohints->significant_bits, scil_convert_significant_decimals_to_bits(ohints->significant_digits) );
+		ohints->significant_bits = max(ohints->significant_bits, scilU_convert_significant_decimals_to_bits(ohints->significant_digits) );
 	}
 
 	if(ohints->relative_tolerance_percent != SCIL_ACCURACY_DBL_IGNORE){
-		ohints->significant_bits = max(ohints->significant_bits, relative_tolerance_to_significant_bits(ohints->relative_tolerance_percent));
+		ohints->significant_bits = max(ohints->significant_bits, scilU_relative_tolerance_to_significant_bits(ohints->relative_tolerance_percent));
 	}
 
 	if (ohints->significant_bits != SCIL_ACCURACY_INT_IGNORE){
 	 	if(ohints->significant_digits == SCIL_ACCURACY_INT_IGNORE){
-			ohints->significant_digits = scil_convert_significant_bits_to_decimals(ohints->significant_bits);
+			ohints->significant_digits = scilU_convert_significant_bits_to_decimals(ohints->significant_bits);
 
 			// we need to round the bits properly to decimals, i.e., 1 bit precision in the mantissa requires 1 decimal digit.
-			const int newbits = scil_convert_significant_decimals_to_bits(ohints->significant_digits);
+			const int newbits = scilU_convert_significant_decimals_to_bits(ohints->significant_digits);
 			if ( newbits < ohints->significant_bits ){
-				ohints->significant_digits = scil_convert_significant_bits_to_decimals(ohints->significant_bits) + 1;
+				ohints->significant_digits = scilU_convert_significant_bits_to_decimals(ohints->significant_bits) + 1;
 			}
 		}
 		if(ohints->relative_tolerance_percent == SCIL_ACCURACY_DBL_IGNORE){
-			ohints->relative_tolerance_percent = significant_bits_to_relative_tolerance(ohints->significant_bits);
+			ohints->relative_tolerance_percent = scilU_significant_bits_to_relative_tolerance(ohints->significant_bits);
 		}
 	}
 
@@ -253,7 +244,7 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
 	int i = 0;
 	for (scil_compression_algorithm ** algo = algo_array; *algo != NULL ; algo++, i++){
 		if ((*algo)->magic_number != i){
-			critical_error("Magic number does not match!");
+			scilU_critical_error("Magic number does not match!");
 		}
 	}
 	}
@@ -285,14 +276,6 @@ static inline void * pick_buffer(int is_src, int total, int remain, void*restric
 			return buff2;
 		}
 }
-
-static void print_buffer(char * dest, size_t out_size){
-	for (size_t i=0; i < out_size ; i++){
-		printf("%x", dest[i]);
-	}
-	printf("\n");
-}
-
 
 /*
 A compression chain compresses data in multiple phases, i.e., applying algo 1, then algo 2 ...
@@ -352,7 +335,7 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t in_de
 		*out_size_p = 0;
 		return 0;
 	}
-	size_t input_size = scil_get_data_count(dims) * datatype_length(datatype);
+	size_t input_size = scil_get_data_count(dims) * DATATYPE_LENGTH(datatype);
 	if (input_size == 0){
 		*out_size_p = 0;
 		return 0;
@@ -393,10 +376,10 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t in_de
 	// apply the pre-conditioners
 	for(int i=0; i < chain->size; i++){
 		switch(datatype){
-			case(SCIL_FLOAT):
+			case(SCIL_TYPE_FLOAT):
 				//ret = algo->c.DPrecond.compress_float(ctx, dest, header_size_out, source, dims);
 				break;
-			case(SCIL_DOUBLE):
+			case(SCIL_TYPE_DOUBLE):
 				//ret = algo->c.DPrecond.compress_double(ctx, dest, header_size_out, source, dims);
 				break;
 		}
@@ -411,10 +394,10 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t in_de
 
 		scil_compression_algorithm * algo = chain->data_compressor;
 		switch(datatype){
-			case(SCIL_FLOAT):
+			case(SCIL_TYPE_FLOAT):
 				ret = algo->c.DNtype.compress_float(ctx, dst, & out_size, src, dims);
 				break;
-			case(SCIL_DOUBLE):
+			case(SCIL_TYPE_DOUBLE):
 				ret = algo->c.DNtype.compress_double(ctx, dst, & out_size, src, dims);
 				break;
 		}
@@ -424,7 +407,7 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t in_de
 		out_size++;
 		input_size = out_size;
 
-		//print_buffer(dst, out_size);
+		//scilU_print_buffer(dst, out_size);
 	}
 
 	if(chain->byte_compressor){
@@ -436,7 +419,7 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t in_de
 		out_size++;
 
 		//printf("C %lld %d %d\n", out_size, chain->byte_compressor->magic_number, total_compressors);
-		//print_buffer(dest, out_size);
+		//scilU_print_buffer(dest, out_size);
 	}
 
 	*out_size_p = out_size + 1; // for the length of the processing chain
@@ -463,7 +446,7 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims_t
 	size_t src_size = source_size - 1;
 	int ret;
 
-	const size_t output_size = scil_get_data_count(dims) * datatype_length(datatype);
+	const size_t output_size = scil_get_data_count(dims) * DATATYPE_LENGTH(datatype);
 	byte*restrict buff_tmp2 = & buff_tmp1[(int)(output_size*1.5+10)];
 
 	//for(int i=0; i < chain_size; i++){
@@ -481,7 +464,7 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims_t
 		remaining_compressors--;
 
 		if(remaining_compressors > 0){
-			//print_buffer(dst, src_size);
+			//scilU_print_buffer(dst, src_size);
 
 			src_size--;
 			magic_number = ((char*) dst)[src_size];
@@ -494,14 +477,14 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims_t
 		void * dst = pick_buffer(0, total_compressors, remaining_compressors, src_adj, dest, buff_tmp1, buff_tmp2);
 
 		switch(datatype){
-			case(SCIL_FLOAT):
+			case(SCIL_TYPE_FLOAT):
 				ret = algo->c.DNtype.decompress_float(dst, dims, src, src_size);
 				break;
-			case(SCIL_DOUBLE):
+			case(SCIL_TYPE_DOUBLE):
 				ret = algo->c.DNtype.decompress_double(dst, dims, src, src_size);
 				break;
 		}
-		//print_buffer(dst, output_size);
+		//scilU_print_buffer(dst, output_size);
 
 		if (ret != 0) return ret;
 		remaining_compressors--;
@@ -521,16 +504,16 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
 	assert(dims.dims == 1);
 	// TODO walk trough all dimensions ...
 
-	if(datatype == SCIL_DOUBLE){
-		a.significant_bits = MANTISSA_LENGTH_double; // in bits
+	if(datatype == SCIL_TYPE_DOUBLE){
+		a.significant_bits = MANTISSA_LENGTH_DOUBLE; // in bits
 		scil_determine_accuracy_1d_double((double*) data_1, (double*) data_2, dims.dims, relative_err_finest_abs_tolerance, & a);
 	}else{
-		a.significant_bits = MANTISSA_LENGTH_float; // in bits
+		a.significant_bits = MANTISSA_LENGTH_FLOAT; // in bits
 		scil_determine_accuracy_1d_float((float*) data_1, (float*) data_2, scil_get_data_count(dims), relative_err_finest_abs_tolerance, & a);
 	}
 
 	// convert significant_digits in bits to 10 decimals
-	a.significant_digits = scil_convert_significant_bits_to_decimals(a.significant_bits);
+	a.significant_digits = scilU_convert_significant_bits_to_decimals(a.significant_bits);
 	a.relative_tolerance_percent *= 100.0;
 
 	if ( a.relative_err_finest_abs_tolerance == 0 ){
@@ -551,7 +534,7 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
   assert(dims.length != NULL);
 	// TODO, allocate uncompressed buffer...
 
-	const uint64_t length = scil_get_data_count(dims) * datatype_length(datatype) + SCIL_BLOCK_HEADER_MAX_SIZE;
+	const uint64_t length = scil_get_data_count(dims) * DATATYPE_LENGTH(datatype) + SCIL_BLOCK_HEADER_MAX_SIZE;
 	byte * data_out = (byte*)SAFE_MALLOC(4*length);
 	scil_hints a;
 
@@ -596,34 +579,4 @@ end:
   	free(data_out);
 	*out_accuracy = a;
 	return ret;
-}
-
-static unsigned char sig_bits[MANTISSA_MAX_LENGTH] = {255};
-static unsigned char sig_decimals[MANTISSA_MAX_LENGTH] = {255};
-
-#define LOG10B2 3.3219280948873626
-#define LOG2B10 0.30102999566398114
-
-static void compute_significant_bit_mapping(){
-
-	if(sig_bits[0] != 255) return;
-
-	for(int i = 0; i < MANTISSA_MAX_LENGTH; ++i){
-		sig_bits[i] = (unsigned char)ceil(i * LOG10B2);
-		sig_decimals[i] = (unsigned char)ceil(i * LOG2B10);
-	}
-}
-
-int scil_convert_significant_decimals_to_bits(int decimals){
-	compute_significant_bit_mapping();
-	return sig_bits[decimals];
-}
-
-int scil_convert_significant_bits_to_decimals(int bits){
-  if(bits == 0){
-		return 0;
-	}
-	// compute mapping between decimals and bits
-	compute_significant_bit_mapping();
-	return sig_decimals[bits];
 }
