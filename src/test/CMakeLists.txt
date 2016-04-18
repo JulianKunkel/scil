@@ -1,22 +1,13 @@
 project (${PROJECT_NAME})
 
-# add the executable
-add_executable(scil-test compression-test.c)
-target_link_libraries(scil-test scil)
+file(GLOB_RECURSE TESTFILES "${CMAKE_CURRENT_SOURCE_DIR}" "*.c")
+foreach(TESTFILE ${TESTFILES})
+  get_filename_component(TESTNAME ${TESTFILE} NAME)
+  add_executable(test-${TESTNAME} ${TESTFILE})
+  target_link_libraries(test-${TESTNAME} scil)
 
-add_executable(scil-correctness-test correctness-test.c)
-target_link_libraries(scil-correctness-test scil)
+  add_test(${TESTNAME} ./test-${TESTNAME})
+endforeach()
 
 
-# abstol-test
-add_executable(abstol-test abstol-test.c)
-target_link_libraries(abstol-test scil)
-
-# zlib-test
-add_executable(zlib-test zlib-test.c ../scil-util.c)
-target_link_libraries(zlib-test scil)
-
-# performance
-add_executable(performance-test performance-test.c)
-target_link_libraries(performance-test scil)
-target_link_libraries(performance-test netcdf)
+SUBDIRS (complex)
