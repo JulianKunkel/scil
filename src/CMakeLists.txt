@@ -9,6 +9,10 @@ project (${PROJECT_NAME})
 set (VERSION_MAJOR 0)
 set (VERSION_MINOR 1)
 
+include(CTest)
+include(FeatureSummary)
+include(CheckCSourceCompiles)
+
 # compile flags
 set (CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} -ggdb3 -std=gnu11 -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--print-gc-sections -Wl,--no-allow-shlib-undefined " # -fvisibility=hidden -fvisibility-inlines-hidden
