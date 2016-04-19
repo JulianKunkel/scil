@@ -9,6 +9,8 @@ project (${PROJECT_NAME})
 set (VERSION_MAJOR 0)
 set (VERSION_MINOR 1)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules")
+
 # compile flags
 set (CMAKE_C_FLAGS
     "${CMAKE_C_FLAGS} -ggdb3 -std=gnu11 -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal"
@@ -18,6 +20,9 @@ set (CMAKE_C_FLAGS
 
 set (CMAKE_C_FLAGS_DEBUG   "-O0")
 set (CMAKE_C_FLAGS_RELEASE "-O3")
+
+set (SCIL_ALGO_SOURCE ${CMAKE_SOURCE_DIR}/algo)
+set (SCIL_ALGO_BINARY ${CMAKE_BINARY_DIR}/algo)
 
 include_directories(.)
 
@@ -41,8 +46,8 @@ target_link_libraries(scil
   lz4
   )
 
-SUBDIRS (test)
-
 ## Installation
 install(TARGETS scil LIBRARY DESTINATION lib)
 install(FILES scil.h DESTINATION include)
+
+SUBDIRS (test)

@@ -31,7 +31,6 @@ extern const char* scil_error_messages[];
 
 void scil_print_error(const uint8_t error_code);
 
-
 #define SCIL_TYPE_double 1
 #define SCIL_TYPE_float 0
 
