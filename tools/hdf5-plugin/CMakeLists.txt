@@ -30,4 +30,4 @@ target_link_libraries(hdf5-filter-scil -L${HDF5_LIBRARY_DIRS} -L${SCIL_LIBRARY_D
 SUBDIRS (test)
 
 ## Installation
-# install(TARGETS xxx LIBRARY DESTINATION lib)
+install(TARGETS hdf5-filter-scil LIBRARY DESTINATION lib)

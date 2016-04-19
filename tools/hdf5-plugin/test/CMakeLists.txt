@@ -6,7 +6,7 @@ foreach(TESTFILE ${TESTFILES})
   STRING(REGEX REPLACE ".c$" "" TESTNAME ${TESTNAME_C})
 
   add_executable(test-${TESTNAME}.exe ${TESTFILE})
-  #target_link_libraries(test-${TESTNAME}.exe ..)
+  target_link_libraries(test-${TESTNAME}.exe hdf5-filter-scil)
 
   add_test(${TESTNAME} ./test-${TESTNAME}.exe)
 endforeach()

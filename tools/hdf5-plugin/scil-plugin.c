@@ -17,10 +17,17 @@
 
 #include <hdf5.h>
 
+#include <scil-hdf5-plugin.h>
+
 #include <scil.h>
 
-#define H5_HAVE_FILTER_SCIL
-#define SCIL_ID 32003
+#define DEBUG
+
+#ifdef DEBUG
+#define debug(...) printf(__VA_ARGS__)
+#else
+#define debug(...)
+#endif
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
@@ -86,11 +93,15 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type, hid_t space) {
 	int chunkRank = H5Pget_chunk(pList, rank, chunkSize);
 	if(chunkRank <= 0) return -1;
 	if(chunkRank > rank) return -2;
+
+  debug("compressorSetLocal called\n");
+
   return 0;
 }
 
 static size_t compressorFilter(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nBytes, size_t *buf_size, void **buf) {
   //if(flags & H5Z_FLAG_REVERSE) ;
   uint8_t v =  scil_compressor_num_by_name("memcpy");
+  debug("compressorFilter called\n");
   return (size_t) v;
 }
