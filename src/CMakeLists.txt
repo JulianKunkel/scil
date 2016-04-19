@@ -28,6 +28,9 @@ set (CMAKE_C_FLAGS_DEBUG   "-O0")
 set (CMAKE_C_FLAGS_RELEASE "-O3")
 set (CMAKE_INSTALL_DO_STRIP TRUE)
 
+set (SCIL_ALGO_SOURCE ${CMAKE_SOURCE_DIR}/algo)
+set (SCIL_ALGO_BINARY ${CMAKE_BINARY_DIR}/algo)
+
 include_directories(.)
 
 # run during configure:
@@ -50,8 +53,8 @@ target_link_libraries(scil
   lz4
   )
 
-SUBDIRS (test)
-
 ## Installation
 install(TARGETS scil LIBRARY DESTINATION lib)
 install(FILES scil.h DESTINATION include)
+
+SUBDIRS (test)

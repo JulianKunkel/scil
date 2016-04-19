@@ -9,5 +9,4 @@ foreach(TESTFILE ${TESTFILES})
   add_test(${TESTNAME} ./test-${TESTNAME})
 endforeach()
 
-
 SUBDIRS (complex)

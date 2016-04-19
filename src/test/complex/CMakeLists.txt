@@ -7,7 +7,6 @@ target_link_libraries(scil-test scil)
 add_executable(scil-correctness-test correctness-test.c)
 target_link_libraries(scil-correctness-test scil)
 
-
 # abstol-test
 add_executable(abstol-test abstol-test.c)
 target_link_libraries(abstol-test scil)
