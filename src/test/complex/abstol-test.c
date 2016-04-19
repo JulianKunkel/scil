@@ -20,7 +20,6 @@
 //#include "algo-abstol.h"
 #include "algo-abstol.c"
 
-
 static int get_needed_bit_count_float_test(){
 
     int failed = 0;

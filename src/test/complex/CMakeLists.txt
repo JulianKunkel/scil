@@ -1,5 +1,7 @@
 project (${PROJECT_NAME})
 
+include_directories(${CMAKE_BINARY_DIR}/algo)
+
 # add the executable
 add_executable(scil-test compression-test.c)
 target_link_libraries(scil-test scil)
