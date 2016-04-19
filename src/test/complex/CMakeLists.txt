@@ -16,6 +16,6 @@ add_executable(zlib-test zlib-test.c)
 target_link_libraries(zlib-test scil)
 
 # performance
-add_executable(performance-test performance-test.c)
-target_link_libraries(performance-test scil)
-target_link_libraries(performance-test netcdf)
+#add_executable(performance-test performance-test.c)
+#target_link_libraries(performance-test scil)
+#target_link_libraries(performance-test netcdf)

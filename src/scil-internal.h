@@ -21,6 +21,8 @@
 #include <assert.h>
 
 #include <scil.h>
+#include <scil-util.h>
+
 
 enum compressor_type{
   SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES,

@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <scil.h>
+#include <scil-util.h>
 
 #define allocate(type, name, count) type* name = (type*)malloc(count * sizeof(type))
 
