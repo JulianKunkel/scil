@@ -132,11 +132,6 @@ void scil_init_hints(scil_hints * hints);
 
 void scil_hints_print(scil_hints * hints);
 
-/*
- *
- */
-uint8_t scil_retrieve_compression_magic_number(const char * str);
-
 /**
  * \brief Creation of a compression context
  * \param out_ctx reference to the created context
