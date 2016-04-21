@@ -37,15 +37,14 @@
 int scil_fpzip_compress_<DATATYPE>(const scil_context_p ctx, byte* restrict dest, size_t* restrict dest_size, <DATATYPE>*restrict source, const scil_dims_t dims);
 
 /**
- * \brief Deompression function of fpzip
- * \param ctx Compression context used for this decompression
- * \param dest Pre allocated buffer which will hold the decompressed data
+ * \brief Decompression function of fpzip
+ * \param data_out Pre allocated buffer which will hold the decompressed data
  * \param dim Dimensional configuration decompressed buffer
- * \param source Compressed data which should be processed
- * \param source_size Byte size of compressed buffer
+ * \param compressed_buf_in Compressed data which should be processed
+ * \param in_size Byte size of compressed buffer
  * \return Success state of the compression
  */
-int scil_fpzip_decompress_<DATATYPE>(const scil_context_p ctx, <DATATYPE>*restrict dest, scil_dims_t dims, byte*restrict source, const size_t source_size);
+int scil_fpzip_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_dims_t dims, byte*restrict compressed_buf_in, const size_t in_size);
 
 extern scil_compression_algorithm algo_fpzip;
 

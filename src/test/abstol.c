@@ -20,7 +20,6 @@
 //#include "algo-abstol.h"
 #include <algo/algo-abstol.c>
 
-
 static int get_needed_bit_count_float_test(){
 
     int failed = 0;
@@ -191,25 +190,25 @@ static int DataType_repres_float_test(){
 
     	srand(time(NULL));
 
-    	double r = rand() / RAND_MAX;
+    	float r = rand() / RAND_MAX;
 
-	    failed += 0.0+r*i != DataType_repres_float(0x00000000, 0.0+r*i, 0.5);
-	    failed += 1.0+r*i != DataType_repres_float(0x00000001, 0.0+r*i, 0.5);
-	    failed += 15.0+r*i != DataType_repres_float(0x0000000F, 0.0+r*i, 0.5);
-	    failed += 16.0+r*i != DataType_repres_float(0x00000010, 0.0+r*i, 0.5);
-	    failed += 255.0+r*i != DataType_repres_float(0x000000FF, 0.0+r*i, 0.5);
-	    failed += 256.0+r*i != DataType_repres_float(0x00000100, 0.0+r*i, 0.5);
-	    failed += 4095.0+r*i != DataType_repres_float(0x00000FFF, 0.0+r*i, 0.5);
-	    failed += 4096.0+r*i != DataType_repres_float(0x00001000, 0.0+r*i, 0.5);
-	    failed += 65535.0+r*i != DataType_repres_float(0x0000FFFF, 0.0+r*i, 0.5);
-	    failed += 65536.0+r*i != DataType_repres_float(0x00010000, 0.0+r*i, 0.5);
-	    failed += 1048575.0+r*i != DataType_repres_float(0x000FFFFF, 0.0+r*i, 0.5);
-	    failed += 1048576.0+r*i != DataType_repres_float(0x00100000, 0.0+r*i, 0.5);
-	    failed += 16777215.0+r*i != DataType_repres_float(0x00FFFFFF, 0.0+r*i, 0.5);
-	    failed += 16777216.0+r*i != DataType_repres_float(0x01000000, 0.0+r*i, 0.5);
-	    failed += 268435455.0+r*i != DataType_repres_float(0x0FFFFFFF, 0.0+r*i, 0.5);
-	    failed += 268435456.0+r*i != DataType_repres_float(0x10000000, 0.0+r*i, 0.5);
-	    failed += 4294967295.0+r*i != DataType_repres_float(0xFFFFFFFF, 0.0+r*i, 0.5);
+	    failed += 0.0f+r*i != DataType_repres_float(0x00000000, 0.0f+r*i, 0.5);
+	    failed += 1.0f+r*i != DataType_repres_float(0x00000001, 0.0f+r*i, 0.5);
+	    failed += 15.0f+r*i != DataType_repres_float(0x0000000F, 0.0f+r*i, 0.5);
+	    failed += 16.0f+r*i != DataType_repres_float(0x00000010, 0.0f+r*i, 0.5);
+	    failed += 255.0f+r*i != DataType_repres_float(0x000000FF, 0.0f+r*i, 0.5);
+	    failed += 256.0f+r*i != DataType_repres_float(0x00000100, 0.0f+r*i, 0.5);
+	    failed += 4095.0f+r*i != DataType_repres_float(0x00000FFF, 0.0f+r*i, 0.5);
+	    failed += 4096.0f+r*i != DataType_repres_float(0x00001000, 0.0f+r*i, 0.5);
+	    failed += 65535.0f+r*i != DataType_repres_float(0x0000FFFF, 0.0f+r*i, 0.5);
+	    failed += 65536.0f+r*i != DataType_repres_float(0x00010000, 0.0f+r*i, 0.5);
+	    failed += 1048575.0f+r*i != DataType_repres_float(0x000FFFFF, 0.0f+r*i, 0.5);
+	    failed += 1048576.0f+r*i != DataType_repres_float(0x00100000, 0.0f+r*i, 0.5);
+	    failed += 16777215.0f+r*i != DataType_repres_float(0x00FFFFFF, 0.0f+r*i, 0.5);
+	    failed += 16777216.0f+r*i != DataType_repres_float(0x01000000, 0.0f+r*i, 0.5);
+	    failed += 268435455.0f+r*i != DataType_repres_float(0x0FFFFFFF, 0.0f+r*i, 0.5);
+	    failed += 268435456.0f+r*i != DataType_repres_float(0x10000000, 0.0f+r*i, 0.5);
+	    failed += 4294967295.0f+r*i != DataType_repres_float(0xFFFFFFFF, 0.0f+r*i, 0.5);
 
     }
 

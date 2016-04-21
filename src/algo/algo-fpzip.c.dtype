@@ -62,13 +62,12 @@ int scil_fpzip_compress_<DATATYPE>(const scil_context_p ctx,
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_fpzip_decompress_<DATATYPE>(  const scil_context_p ctx,
-                            <DATATYPE>*restrict dest,
+int  scil_fpzip_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
                             scil_dims_t dims,
-                            byte*restrict source,
-                            const size_t source_size)
+                            byte*restrict compressed_buf_in,
+                            const size_t in_size)
 {
-    FPZ* fpz = fpzip_read_from_buffer(source);
+    FPZ* fpz = fpzip_read_from_buffer(compressed_buf_in);
 
     // Read dims out of fpz, TODO: avoid storing dims as the app knows it.
     dims.dims = 0;
@@ -82,7 +81,7 @@ int scil_fpzip_decompress_<DATATYPE>(  const scil_context_p ctx,
       return 1;
     }
 
-    if (!fpzip_read(fpz, (void*)dest)) {
+    if (!fpzip_read(fpz, (void*)data_out)) {
       fprintf(stderr, "Algo-fpzip decompression failed: %s\n", fpzip_errstr[fpzip_errno]);
       return 1;
     }

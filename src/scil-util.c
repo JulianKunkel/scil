@@ -221,6 +221,6 @@ void print_time (struct timespec time, FILE* file)
 
 void scilU_critical_error(const char * msg){
   printf("Critical error: %s\n", msg);
-  printf("%d", 1/0);
+  // printf("%d", 1/0);
   exit(1);
 }

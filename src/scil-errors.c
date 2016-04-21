@@ -8,5 +8,5 @@ static const char* scil_error_messages[] = {
 };
 
 const char* scil_strerr(enum scil_error_code err){
-    return & scil_error_messages[err];
+    return scil_error_messages[err];
 }

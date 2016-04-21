@@ -38,14 +38,13 @@ int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_p ctx, byte* restrict
 
 /**
  * \brief Decompression function of zfp with absolute error tolerance
- * \param ctx Compression context used for this decompression
- * \param dest Pre allocated buffer which will hold the decompressed data
- * \param out_size Element count of decompressed buffer (not byte size!)
- * \param compressed_buf_in Compressed data which should be processed
- * \param in_size Byte size of compressed buffer
+ * \param data_out Pre allocated buffer which will hold the decompressed data
+ * \param dims Dimensional layout of decompressed buffer
+ * \param compressed_buf_in Buffer holding data to be decompressed
+ * \param in_size Byte size of compressed_buf_in
  * \return Success state of the compression
  */
-int scil_zfp_abstol_decompress_<DATATYPE>(const scil_context_p ctx, <DATATYPE>*restrict dest, scil_dims_t dims, byte*restrict compressed_buf_in, const size_t in_size);
+int scil_zfp_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_dims_t dims, byte*restrict compressed_buf_in, const size_t in_size);
 
 extern scil_compression_algorithm algo_zfp_abstol;
 
