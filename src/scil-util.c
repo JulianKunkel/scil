@@ -140,11 +140,17 @@ static void compute_significant_bit_mapping(){
 }
 
 int scilU_convert_significant_decimals_to_bits(int decimals){
+  if (decimals == SCIL_ACCURACY_INT_FINEST){
+    return SCIL_ACCURACY_INT_FINEST;
+  }
 	compute_significant_bit_mapping();
 	return sig_bits[decimals];
 }
 
 int scilU_convert_significant_bits_to_decimals(int bits){
+  if (bits == SCIL_ACCURACY_INT_FINEST){
+    return SCIL_ACCURACY_INT_FINEST;
+  }
   if(bits == 0){
 		return 0;
 	}

@@ -113,8 +113,8 @@ static int check_compress_lossless_needed(scil_context_p ctx){
 	if ( (hints.absolute_tolerance != SCIL_ACCURACY_DBL_IGNORE && hints.absolute_tolerance <= SCIL_ACCURACY_DBL_FINEST)
 		|| (hints.relative_err_finest_abs_tolerance <= SCIL_ACCURACY_DBL_FINEST && hints.relative_err_finest_abs_tolerance != SCIL_ACCURACY_DBL_IGNORE)
 		|| (hints.relative_tolerance_percent <= SCIL_ACCURACY_DBL_FINEST && hints.relative_tolerance_percent != SCIL_ACCURACY_DBL_IGNORE)
-		|| ( hints.significant_digits != SCIL_ACCURACY_INT_IGNORE &&
-			(hints.significant_digits >= SCIL_ACCURACY_SIGNIFICANT_FINEST || hints.significant_digits == SCIL_ACCURACY_INT_FINEST)) ){
+		|| (hints.significant_digits == SCIL_ACCURACY_INT_FINEST )
+	  || (hints.significant_bits == SCIL_ACCURACY_INT_FINEST ) ){
 		return 1;
 	}
 	return 0;
@@ -249,8 +249,18 @@ int scil_create_compression_context(scil_context_p * out_ctx, enum SCIL_Datatype
 	oh = & ctx->hints;
 	memcpy(oh, hints, sizeof(scil_hints));
 
-	oh->significant_digits = (oh->significant_digits == SCIL_ACCURACY_INT_FINEST) ? SCIL_ACCURACY_SIGNIFICANT_FINEST : oh->significant_digits;
-	oh->significant_bits = (oh->significant_bits == SCIL_ACCURACY_INT_FINEST) ? MANTISSA_MAX_LENGTH : oh->significant_bits;
+	// adjust accuracy needed
+	if (datatype == SCIL_TYPE_FLOAT ){
+		if ((oh->significant_digits > 6) || (oh->significant_bits > 23)){
+			oh->significant_digits =  SCIL_ACCURACY_INT_FINEST;
+			oh->significant_bits =  SCIL_ACCURACY_INT_FINEST;
+		}
+	}else{
+		if ((oh->significant_digits > 15) || (oh->significant_bits > 52)){
+			oh->significant_digits =  SCIL_ACCURACY_INT_FINEST;
+			oh->significant_bits =  SCIL_ACCURACY_INT_FINEST;
+		}
+	}
 
 	// We convert between significant digits and bits and take the finer granularity
 	// An algorithm can then choose which of those metrics to use.
@@ -274,7 +284,6 @@ int scil_create_compression_context(scil_context_p * out_ctx, enum SCIL_Datatype
 			}
 		}else{
 			oh->significant_digits = max(scilU_convert_significant_bits_to_decimals(oh->significant_bits), oh->significant_digits);
-			printf("HERE %d\n", oh->significant_digits);
 		}
 
 		// Why should this make any sense:

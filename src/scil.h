@@ -66,8 +66,6 @@ typedef struct{
 // These values define the limit for the accuracy
 #define SCIL_ACCURACY_DBL_FINEST 1e-307
 #define SCIL_ACCURACY_INT_FINEST -1
-#define SCIL_ACCURACY_SIGNIFICANT_FINEST 16
-
 
 /**
  * \brief Struct containing information on the tolerable

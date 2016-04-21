@@ -75,21 +75,14 @@ int main(){
         }else{
           // take the maximum
           int p_b = sig_bits[d];
-          if (p_b < b){
-            e_b = p_b;
-          }else{
-            e_b = b;
-          }
+          e_b = max(p_b, b);
           int p_d = sig_digits[b];
-          if (p_d < d){
-            e_d = p_d;
-          }else{
-            e_d = d;
-          }
+          e_d = max(p_d, d);
         }
       }
 
       test(SCIL_TYPE_DOUBLE, d, b, e_d, e_b);
+      test(SCIL_TYPE_FLOAT, d, b, (e_d > 6 || e_b > 23 ? -1 : e_d), e_b > 23 ? -1 : e_b);
     }
   }
 
