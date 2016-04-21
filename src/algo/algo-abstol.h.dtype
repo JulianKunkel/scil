@@ -39,7 +39,6 @@ int scil_abstol_compress_<DATATYPE>(const scil_context* ctx, byte* restrict dest
 
 /**
  * \brief Decompression function of abstol
- * \param ctx Compression context used for this decompression
  * \param dest Pre allocated buffer which will hold the decompressed data
  * \param out_size Element count of decompressed buffer (not byte size!)
  * \param compressed_buf_in Compressed data which should be processed

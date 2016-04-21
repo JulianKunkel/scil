@@ -77,29 +77,28 @@ int scil_zfp_precision_compress_<DATATYPE>(const scil_context* ctx,
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_zfp_precision_decompress_<DATATYPE>(  const scil_context* ctx,
-                            <DATATYPE>*restrict dest,
-                            scil_dims_t exp_count,
-                            byte*restrict source,
-                            const size_t source_size)
+int scil_zfp_precision_decompress_<DATATYPE>(   <DATATYPE>*restrict data_out,
+                                                scil_dims_t dims,
+                                                byte*restrict compressed_buf_in,
+                                                const size_t in_size)
 {
     int ret = 0;
 
     // Read header
-    scilU_read_dims_from_buffer(exp_count, source);
-    source += 1 + exp_count.dims * sizeof(size_t);
+    scilU_read_dims_from_buffer(dims, compressed_buf_in);
+    compressed_buf_in += 1 + dims.dims * sizeof(size_t);
 
-    double precision = *((double*)source);
-    source += 8;
+    double precision = *((double*)compressed_buf_in);
+    compressed_buf_in += 8;
 
     // Decompress
     zfp_field* field = NULL;
 
-    switch(exp_count.dims){
-        case 1: field = zfp_field_1d(dest, zfp_type_<DATATYPE>, exp_count.length[0]); break;
-        case 2: field = zfp_field_2d(dest, zfp_type_<DATATYPE>, exp_count.length[0], exp_count.length[1]); break;
-        case 3: field = zfp_field_3d(dest, zfp_type_<DATATYPE>, exp_count.length[0], exp_count.length[1], exp_count.length[2]); break;
-        default: field = zfp_field_1d(dest, zfp_type_<DATATYPE>, scil_get_data_count(exp_count));
+    switch(dims.dims){
+        case 1: field = zfp_field_1d(data_out, zfp_type_<DATATYPE>, dims.length[0]); break;
+        case 2: field = zfp_field_2d(data_out, zfp_type_<DATATYPE>, dims.length[0], dims.length[1]); break;
+        case 3: field = zfp_field_3d(data_out, zfp_type_<DATATYPE>, dims.length[0], dims.length[1], dims.length[2]); break;
+        default: field = zfp_field_1d(data_out, zfp_type_<DATATYPE>, scil_get_data_count(dims));
     }
 
     zfp_stream* zfp = zfp_stream_open(NULL);
@@ -109,7 +108,7 @@ int scil_zfp_precision_decompress_<DATATYPE>(  const scil_context* ctx,
     /* zfp_stream_set_accuracy(zfp, tolerance, zfp_type_<DATATYPE>); */
 
     size_t bufsize = zfp_stream_maximum_size(zfp, field);
-    bitstream* stream = stream_open(source, bufsize);
+    bitstream* stream = stream_open(compressed_buf_in, bufsize);
     zfp_stream_set_bit_stream(zfp, stream);
     zfp_stream_rewind(zfp);
 

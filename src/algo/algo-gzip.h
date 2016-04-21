@@ -38,14 +38,13 @@ int scil_gzip_compress(const scil_context* ctx, byte* restrict dest, size_t* res
 
 /**
  * \brief Deompression function of gzip
- * \param ctx Compression context used for this decompression
- * \param dest Pre allocated buffer which will hold the decompressed data
- * \param dest_size Byte size of decompressed buffer
- * \param source Compressed data which should be processed
- * \param source_size Byte size of compressed buffer
+ * \param data_out Buffer to hold the decompressed data
+ * \param compressed_buf_in Buffer holding the compressed data
+ * \param in_size Byte-size of the compressed buffer
+ * \param uncompressed_size_out Byte-size of the decompressed buffer
  * \return Success state of the compression
  */
-int scil_gzip_decompress(const scil_context* ctx, byte* restrict dest, size_t exp_size, const byte* restrict source, const size_t source_size);
+int scil_gzip_decompress(byte*restrict data_out, const byte*restrict compressed_buf_in, const size_t in_size, size_t * uncomp_size_out);
 
 extern scil_compression_algorithm algo_gzip;
 

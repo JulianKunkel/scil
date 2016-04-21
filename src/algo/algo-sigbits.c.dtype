@@ -169,42 +169,41 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context* ctx,
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_sigbits_decompress_<DATATYPE>(  const scil_context* ctx,
-                            <DATATYPE>*restrict dest,
-                            scil_dims_t exp_count,
-                            byte*restrict source,
-                            const size_t source_size)
+int scil_sigbits_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
+                            scil_dims_t dims,
+                            byte*restrict compressed_buf_in,
+                            const size_t in_size)
 {
-    assert(source != NULL);
+    assert(compressed_buf_in != NULL);
 
     uint8_t signs_id, exp_bits, mant_bits;
     int16_t min_exponent;
 
-    size_t in_size = source_size;
+    size_t in_size_cp = in_size;
 
     // Read header
-    scilU_read_dims_from_buffer(exp_count, source);
-    source += 1 + exp_count.dims * sizeof(size_t); // Weird again.
-    in_size -= 1 + exp_count.dims * sizeof(size_t);
+    scilU_read_dims_from_buffer(dims, compressed_buf_in);
+    compressed_buf_in += 1 + dims.dims * sizeof(size_t); // Weird again.
+    in_size_cp -= 1 + dims.dims * sizeof(size_t);
 
-    signs_id = *((uint8_t*)source);
-    source++;
-    in_size--;
+    signs_id = *((uint8_t*)compressed_buf_in);
+    compressed_buf_in++;
+    in_size_cp--;
 
-    exp_bits = *((uint8_t*)source);
-    source++;
-    in_size--;
+    exp_bits = *((uint8_t*)compressed_buf_in);
+    compressed_buf_in++;
+    in_size_cp--;
 
-    mant_bits = *((uint8_t*)source);
-    source++;
-    in_size--;
+    mant_bits = *((uint8_t*)compressed_buf_in);
+    compressed_buf_in++;
+    in_size_cp--;
 
-    min_exponent = *((int16_t*)source);
-    source += 2;
-    in_size -= 2;
+    min_exponent = *((int16_t*)compressed_buf_in);
+    compressed_buf_in += 2;
+    in_size_cp -= 2;
 
     // Decompress
-    uint64_t max_index = scil_get_data_count(exp_count);
+    uint64_t max_index = scil_get_data_count(dims);
     uint64_t index = 0;
     uint8_t bits_per_num = (signs_id == 2) + exp_bits + mant_bits;
     for(uint64_t i = 0; index < max_index; i+=bits_per_num){
@@ -221,18 +220,18 @@ int scil_sigbits_decompress_<DATATYPE>(  const scil_context* ctx,
         uint64_t value = 0;
         if(start_byte == end_byte){
 
-            value = get_bits(source[start_byte], first_byte_after, bits_per_num);
+            value = get_bits(compressed_buf_in[start_byte], first_byte_after, bits_per_num);
 
         }else{
 
             // Get start byte relevant bits
-            value = get_bits(source[start_byte], first_byte_after, first_byte_after);
+            value = get_bits(compressed_buf_in[start_byte], first_byte_after, first_byte_after);
 
             // Get intermediate bytes bits
             for(uint64_t j = start_byte + 1; j < end_byte; ++j){
 
                 value <<= 8;
-                value |= get_bits(source[j], 8, 8);
+                value |= get_bits(compressed_buf_in[j], 8, 8);
             }
 
             // Get last byte relevant bits
@@ -241,13 +240,13 @@ int scil_sigbits_decompress_<DATATYPE>(  const scil_context* ctx,
             if(remaining_bits != 0){
 
                 value <<= remaining_bits;
-                uint8_t bits = get_bits(source[end_byte], 8, remaining_bits);
+                uint8_t bits = get_bits(compressed_buf_in[end_byte], 8, remaining_bits);
                 value |= bits;
                 //printf("%lu\t%f\n", value, DataType_repres(value, min, abs_tol));
             }
         }
 
-        dest[index] = decompress_<DATATYPE>(value, bits_per_num, signs_id, exp_bits, mant_bits, min_exponent);
+        data_out[index] = decompress_<DATATYPE>(value, bits_per_num, signs_id, exp_bits, mant_bits, min_exponent);
         ++index;
     }
 

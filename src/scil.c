@@ -329,7 +329,8 @@ A datatype compressor terminates the chain of preconditioners.
  */
 int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t in_dest_size,
 	void*restrict source, scil_dims_t dims, size_t* restrict out_size_p, scil_context* ctx){
-	int ret;
+
+	int ret = 0;
 
 	if (dims.dims == 0){
 		*out_size_p = 0;
