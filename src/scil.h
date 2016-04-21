@@ -23,8 +23,7 @@
 #define SCIL_HEADER_
 
 #include <stdint.h>
-
-#include <scil-util.h>
+#include <stdlib.h>
 
 enum SCIL_Datatype{
   SCIL_TYPE_FLOAT,
@@ -86,6 +85,18 @@ typedef struct{
 
 } scil_hints;
 
+/** \brief Struct to contain the dimensional configuration of data. */
+typedef struct {
+    /** \brief Number of dimensions. */
+    uint8_t dims;
+
+    /**
+     * \brief Lengths of each dimension.
+     * The caller is responsible to free it.
+     */
+    size_t * length;
+} scil_dims_t;
+
 
 // The structure is hidden in the internal header
 #ifdef SCIL_INTERNAL_HEADER_
@@ -120,11 +131,6 @@ size_t scil_get_data_count(const scil_dims_t dims);
 void scil_init_hints(scil_hints * hints);
 
 void scil_hints_print(scil_hints * hints);
-
-/*
- *
- */
-uint8_t scil_retrieve_compression_magic_number(const char * str);
 
 /**
  * \brief Creation of a compression context

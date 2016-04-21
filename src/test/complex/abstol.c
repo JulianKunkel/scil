@@ -18,7 +18,7 @@
 #include <string.h>
 
 //#include "algo-abstol.h"
-#include "algo-abstol.c"
+#include <algo/algo-abstol.c>
 
 static int get_needed_bit_count_float_test(){
 

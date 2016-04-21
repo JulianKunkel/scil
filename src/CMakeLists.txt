@@ -9,6 +9,7 @@ project (${PROJECT_NAME})
 set (VERSION_MAJOR 0)
 set (VERSION_MINOR 1)
 
+
 include(CTest)
 include(FeatureSummary)
 include(CheckCSourceCompiles)
@@ -21,8 +22,6 @@ set (CMAKE_C_FLAGS
 set ( CMAKE_CXX_FLAGS
     "${CMAKE_CXX_FLAGS} -ggdb3 -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--print-gc-sections -Wl,--no-allow-shlib-undefined -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt" #-fvisibility=hidden -fvisibility-inlines-hidden
 )
-# set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0")
-# set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2")
 
 set (CMAKE_C_FLAGS_DEBUG   "-O0")
 set (CMAKE_C_FLAGS_RELEASE "-O3")
@@ -54,6 +53,9 @@ target_link_libraries(scil
   )
 
 ## Installation
+configure_file("../dev/scil.pc.in" "scil.pc" @ONLY)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/scil.pc"  DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
 install(TARGETS scil LIBRARY DESTINATION lib)
 install(FILES scil.h DESTINATION include)
 

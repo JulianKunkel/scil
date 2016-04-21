@@ -16,8 +16,6 @@
 #include <string.h>
 #include <math.h>
 
-#include <scil-util.h>
-
 #include <algo/algo-abstol.h>
 #include <algo/algo-abstol-init.c.x>
 

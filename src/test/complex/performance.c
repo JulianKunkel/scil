@@ -318,7 +318,7 @@ ErrorCode doubleArrayToIntArray(long count, double* input, int32_t* output, int 
 *
 * mode = 41 (int useDifferentFrequencies, int sineCount):
 * Superposition sineCount waves with random directions and random phase. If useDifferentFrequencies is specified, the angular frequencies are selected randomly from the interval [0,1[, otherwise all waves use an angular frequency of 1.
-*/
+*
 int main_alt(int argc, char** argv) {
 	int result;
 	int i, j;
@@ -622,7 +622,7 @@ int main_alt(int argc, char** argv) {
 	free(oBuffer);
 	if(nc_close(outputFile)) return kErrCantCloseFile;
 	return 0;
-}
+}*/
 
 static int write_to_csv(const double bias, const double discountFactor, const scil_hints hints, const size_t uncompressed_size, const size_t compressed_size, const double compression_ratio, const double seconds){
 

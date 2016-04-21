@@ -28,6 +28,9 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include <scil.h>
+
+
 /**
  * \brief Makro to make sure off_t is 64-bit unsigned integer
  */
@@ -138,18 +141,6 @@ FILE* safe_fopen(const char* path, const char* args, const char* src, unsigned l
  */
 #define SAFE_FOPEN(path, args) safe_fopen(path, args, __FILE__, __LINE__)
 
-
-/** \brief Struct to contain the dimensional configuration of data. */
-typedef struct {
-    /** \brief Number of dimensions. */
-    uint8_t dims;
-
-    /**
-     * \brief Lengths of each dimension.
-     * The caller is responsible to free it.
-     */
-    size_t * length;
-} scil_dims_t;
 
 
 typedef union {
