@@ -56,7 +56,6 @@ int test_correctness(double * buffer_in, const int variableSize){
 		int ret_d;
 		int ret_v;
 
-		double seconds = 0;
 		const uint8_t loops = 10;
 		scil_timer timer;
 		scilU_start_timer(& timer);
@@ -69,7 +68,6 @@ int test_correctness(double * buffer_in, const int variableSize){
 		ret_d = -1;
 		ret_v = -1;
 
-		seconds = 0;
 		if(ret_c == 0){
 			scilU_start_timer(& timer);
 			for(uint8_t i = 0; i < loops; ++i){
