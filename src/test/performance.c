@@ -83,7 +83,7 @@ ErrorCode makeUpData(long dimCount, size_t* dimSizes, double* data, int allowNeg
 	}
 
 	//make up some data
-	for(i = 0; i < variableSize; i++) {
+	for(i = 0; (size_t)i < variableSize; i++) {
 		double correlValue;
 		if(correlDim < 0 || correlDim >= dimCount) {
 			int j, neighbourCount = 0, offset = 1;
@@ -121,10 +121,10 @@ ErrorCode makeUpData(long dimCount, size_t* dimSizes, double* data, int allowNeg
 /**
 * Add a pure sine wave to the data array, if clearData is specified, the effect is as if the data had been zeroed before the call.
 */
-ErrorCode addSine(long dimCount, size_t* dimSizes, double* data, double* frequencyVector, double phase, bool clearData) {
+ErrorCode addSine(size_t dimCount, size_t* dimSizes, double* data, double* frequencyVector, double phase, bool clearData) {
 	allocate(size_t, curCoords, dimCount);
 	if(!curCoords) return kErrNoMem;
-	long i;
+	size_t i;
 	size_t variableSize = 1;
 	for(i = 0; i < dimCount; i++) {
 		curCoords[i] = 0;
@@ -133,7 +133,7 @@ ErrorCode addSine(long dimCount, size_t* dimSizes, double* data, double* frequen
 
 	//update the data
 	for(i = 0; i < variableSize; i++) {
-		long j;
+		size_t j;
 		double argument = phase;
 		for(j = 0; j < dimCount; j++) {
 			argument += frequencyVector[j]*curCoords[j];
@@ -153,9 +153,9 @@ ErrorCode addSine(long dimCount, size_t* dimSizes, double* data, double* frequen
 }
 
 //Increases the sampling frequency on all dimensions by a power of 2. Requires given values in all corners, i. e. the output dimension size must be (2*inputDimensionSize - 1) for all dimensions, otherwise kErrParam is returned.
-ErrorCode multilinearInterpolation(long dimCount, size_t* iDimSizes, size_t* oDimSizes, double* iData, double* oData, double noise) {
+ErrorCode multilinearInterpolation(size_t dimCount, size_t* iDimSizes, size_t* oDimSizes, double* iData, double* oData, double noise) {
 	//Check the precondition and calc the data sizes.
-	long i, j;
+	size_t i, j;
 	size_t iValueCount = 1, oValueCount = 1;
 	for(i = 0; i < dimCount; i++) {
 		if(oDimSizes[i] != 2*iDimSizes[i] - 1) return kErrParam;
@@ -215,8 +215,8 @@ ErrorCode multilinearInterpolation(long dimCount, size_t* iDimSizes, size_t* oDi
 }
 
 ErrorCode integrate(long dimCount, size_t* dimSizes, double* data) {
-	long i, j;
-	size_t offset = 1, valueCount = 1;
+	long i, j, valueCount = 1;
+	size_t offset = 1;
 	for(i = 0; i < dimCount; i++) valueCount *= dimSizes[i];
 	allocate(size_t, curCoords, dimCount);
 	if(!curCoords) return kErrNoMem;
@@ -698,7 +698,7 @@ int test_performance(double bias, double discountFactor){
 		buffer2 = temp2;
 		curRandomFactor *= discountFactor;
 	}
-	doubleArrayToFloatArray(variableSize, buffer, oBuffer);
+	doubleArrayToFloatArray(variableSize, buffer, (float*)oBuffer);
 	// -----------------------------------------------------
 
 	printf("Done.\nTesting algorithm performances.\n");
@@ -730,7 +730,6 @@ int test_performance(double bias, double discountFactor){
 		sprintf(pipeline, "%d", i);
 
 		double abs_tol = 0.5;
-		int ret;
 		for(uint32_t r = 1; r < 16; ++r){
 
 			//if((hints.force_compression_method == 0 || hints.force_compression_method == 2 || hints.force_compression_method == 4) && r > 1) break;
@@ -748,7 +747,7 @@ int test_performance(double bias, double discountFactor){
 
 				clock_t start, end;
 				start = clock();
-				ret = scil_compress(buffer_out, c_size, oBuffer, dims,&out_c_size, ctx);
+				scil_compress(SCIL_TYPE_DOUBLE, buffer_out, c_size, oBuffer, dims,&out_c_size, ctx);
 				end = clock();
 
 				seconds += (double)(end - start);
