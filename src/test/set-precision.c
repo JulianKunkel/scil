@@ -34,7 +34,7 @@ int main(){
   h.relative_err_finest_abs_tolerance = 0.1; // the finest granularity
 
   h.absolute_tolerance = 0.5;
-  h.significant_digits = 5;
+  h.significant_digits = 2;
   h.significant_bits = 18;
 
   // hints for the performance
@@ -46,7 +46,7 @@ int main(){
   h.decomp_speed.multiplier = 3.5;
 
   scil_context_p ctx;
-  ret = scil_create_compression_context(& ctx, & h);
+  ret = scil_create_compression_context(& ctx, SCIL_TYPE_DOUBLE, & h);
   assert(ret == SCIL_NO_ERR);
 
   // retrieve effectively set hints:

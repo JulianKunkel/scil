@@ -159,18 +159,18 @@ void scil_hints_print(scil_hints * hints);
 
 /**
  * \brief Creation of a compression context
+ * \param datatype The datatype of the data (float, double, etc...)
  * \param out_ctx reference to the created context
  * \param hints information on the tolerable error margin
  * \pre hints != NULL
  * \return success state of the creation
  */
-int scil_create_compression_context(scil_context_p  * out_ctx, const scil_hints * hints);
+int scil_create_compression_context(scil_context_p  * out_ctx, enum SCIL_Datatype datatype, const scil_hints * hints);
 
 int scil_destroy_compression_context(scil_context_p  * out_ctx);
 
 /**
  * \brief Method to compress a data buffer
- * \param datatype The datatype of the data (float, double, etc...)
  * \param dest Destination of the compressed buffer
  * \param dest_size Reference to the compressed buffer byte size, max size is given as argument, if a pipeline is processed it should be 3x the memory size of the input size + the HEADER.
  * \param source Source buffer of the data to compress
@@ -183,7 +183,7 @@ int scil_destroy_compression_context(scil_context_p  * out_ctx);
  * \pre ctx != NULL
  * \return Success state of the compression
  */
-int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t dest_size,
+int scil_compress(byte* restrict dest, size_t dest_size,
   void*restrict source, scil_dims_t dims, size_t* restrict out_size, scil_context_p  ctx);
 
 /**

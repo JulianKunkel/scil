@@ -738,7 +738,7 @@ int test_performance(double bias, double discountFactor){
 			hints.absolute_tolerance = abs_tol;
 			hints.significant_bits = r;
 
-			scil_create_compression_context(&ctx, &hints);
+			scil_create_compression_context(&ctx, SCIL_TYPE_DOUBLE, &hints);
 			size_t out_c_size = c_size;
 
 			double seconds = 0;
@@ -748,7 +748,7 @@ int test_performance(double bias, double discountFactor){
 
 				clock_t start, end;
 				start = clock();
-				ret = scil_compress(SCIL_TYPE_DOUBLE, buffer_out, c_size, oBuffer, dims,&out_c_size, ctx);
+				ret = scil_compress(buffer_out, c_size, oBuffer, dims,&out_c_size, ctx);
 				end = clock();
 
 				seconds += (double)(end - start);

@@ -123,8 +123,8 @@ void scilU_print_buffer(char * dest, size_t out_size){
 }
 
 
-static unsigned char sig_bits[MANTISSA_MAX_LENGTH] = {255};
-static unsigned char sig_decimals[MANTISSA_MAX_LENGTH] = {255};
+static unsigned char sig_bits[MANTISSA_MAX_LENGTH_P1] = {255};
+static unsigned char sig_decimals[MANTISSA_MAX_LENGTH_P1] = {255};
 
 #define LOG10B2 3.3219280948873626
 #define LOG2B10 0.30102999566398114
@@ -133,9 +133,9 @@ static void compute_significant_bit_mapping(){
 
 	if(sig_bits[0] != 255) return;
 
-	for(int i = 0; i < MANTISSA_MAX_LENGTH; ++i){
+	for(int i = 0; i < MANTISSA_MAX_LENGTH_P1; ++i){
 		sig_bits[i] = (unsigned char)ceil(i * LOG10B2);
-		sig_decimals[i] = (unsigned char)ceil(i * LOG2B10);
+		sig_decimals[i] = (unsigned char)floor(i * LOG2B10);
 	}
 }
 

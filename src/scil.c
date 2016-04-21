@@ -206,11 +206,11 @@ void scil_init_hints(scil_hints * hints){
 }
 
 static void print_performance_hint(const char * name, scil_performance_hint_t p){
-	printf("\t%s: %.4f * %s\n", name, p.multiplier, performance_units[p.unit]);
+	printf("\t%s: %g * %s\n", name, (double) p.multiplier, performance_units[p.unit]);
 }
 
 void scil_hints_print(scil_hints * h){
-	printf("Precision hints: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits (after 1. so in the mantissa):%d \n\tsignificant_bits (in the mantissa):%d\n",
+	printf("Precision hints: \n\trelative_tolerance_percent: %g \n\trelative_err_finest_abs_tolerance: %g\n\tabsolute_tolerance: %g \n\tsignificant_digits: %d \n\tsignificant_bits (in the mantissa): %d\n",
 		h->relative_tolerance_percent, h->relative_err_finest_abs_tolerance, h->absolute_tolerance, h->significant_digits, h->significant_bits);
 	printf("Performance hints:\n");
 	print_performance_hint("Compression", h->comp_speed);
@@ -218,6 +218,13 @@ void scil_hints_print(scil_hints * h){
 }
 
 int scil_destroy_compression_context(scil_context_p * out_ctx){
+	scil_hints h;
+	h = (*out_ctx)->hints;
+
+	if (h.force_compression_methods != NULL){
+		free(h.force_compression_methods);
+	}
+
 	free(*out_ctx);
 	*out_ctx = NULL;
 
@@ -228,62 +235,77 @@ scil_hints scil_retrieve_effective_hints(scil_context_p ctx){
 	return ctx->hints;
 }
 
-int scil_create_compression_context(scil_context_p * out_ctx, const scil_hints * hints){
-	int ret = 0;
-	scil_context_p ctx =(scil_context_p) SAFE_MALLOC(sizeof(struct scil_context_t));
-	memset(&ctx->last_chain, 0, sizeof(ctx->last_chain));
+int scil_create_compression_context(scil_context_p * out_ctx, enum SCIL_Datatype datatype, const scil_hints * hints){
+	int ret = SCIL_NO_ERR;
+	scil_context_p ctx;
+	scil_hints * oh;
 
 	*out_ctx = NULL;
-	scil_hints * ohints = & ctx->hints;
 
-	memcpy(ohints, hints, sizeof(scil_hints));
+	ctx = (scil_context_p) SAFE_MALLOC(sizeof(struct scil_context_t));
+	memset(&ctx->last_chain, 0, sizeof(ctx->last_chain));
+	ctx->datatype = datatype;
 
-	// convert between significant digits and bits
-	if (ohints->significant_digits != SCIL_ACCURACY_INT_IGNORE){
-		ohints->significant_bits = max(ohints->significant_bits, scilU_convert_significant_decimals_to_bits(ohints->significant_digits) );
+	oh = & ctx->hints;
+	memcpy(oh, hints, sizeof(scil_hints));
+
+	oh->significant_digits = (oh->significant_digits == SCIL_ACCURACY_INT_FINEST) ? SCIL_ACCURACY_SIGNIFICANT_FINEST : oh->significant_digits;
+	oh->significant_bits = (oh->significant_bits == SCIL_ACCURACY_INT_FINEST) ? MANTISSA_MAX_LENGTH : oh->significant_bits;
+
+	// We convert between significant digits and bits and take the finer granularity
+	// An algorithm can then choose which of those metrics to use.
+	if (oh->significant_digits != SCIL_ACCURACY_INT_IGNORE){
+		oh->significant_bits = max(oh->significant_bits, scilU_convert_significant_decimals_to_bits(oh->significant_digits) );
 	}
 
-	if(ohints->relative_tolerance_percent != SCIL_ACCURACY_DBL_IGNORE){
-		ohints->significant_bits = max(ohints->significant_bits, scilU_relative_tolerance_to_significant_bits(ohints->relative_tolerance_percent));
-	}
+	// Why should this make any sense:
+	//if(oh->relative_tolerance_percent != SCIL_ACCURACY_DBL_IGNORE){
+	//	oh->significant_bits = max(oh->significant_bits, scilU_relative_tolerance_to_significant_bits(oh->relative_tolerance_percent));
+	//}
 
-	if (ohints->significant_bits != SCIL_ACCURACY_INT_IGNORE){
-	 	if(ohints->significant_digits == SCIL_ACCURACY_INT_IGNORE){
-			ohints->significant_digits = scilU_convert_significant_bits_to_decimals(ohints->significant_bits);
+	if (oh->significant_bits != SCIL_ACCURACY_INT_IGNORE){
+	 	if(oh->significant_digits == SCIL_ACCURACY_INT_IGNORE){
+			oh->significant_digits = scilU_convert_significant_bits_to_decimals(oh->significant_bits);
 
 			// we need to round the bits properly to decimals, i.e., 1 bit precision in the mantissa requires 1 decimal digit.
-			const int newbits = scilU_convert_significant_decimals_to_bits(ohints->significant_digits);
-			if ( newbits < ohints->significant_bits ){
-				ohints->significant_digits = scilU_convert_significant_bits_to_decimals(ohints->significant_bits) + 1;
+			const int newbits = scilU_convert_significant_decimals_to_bits(oh->significant_digits);
+			if ( newbits < oh->significant_bits ){
+				oh->significant_digits = scilU_convert_significant_bits_to_decimals(oh->significant_bits);
 			}
+		}else{
+			oh->significant_digits = max(scilU_convert_significant_bits_to_decimals(oh->significant_bits), oh->significant_digits);
+			printf("HERE %d\n", oh->significant_digits);
 		}
-		if(ohints->relative_tolerance_percent == SCIL_ACCURACY_DBL_IGNORE){
-			ohints->relative_tolerance_percent = scilU_significant_bits_to_relative_tolerance(ohints->significant_bits);
-		}
+
+		// Why should this make any sense:
+		//if(oh->relative_tolerance_percent == SCIL_ACCURACY_DBL_IGNORE){
+		//	oh->relative_tolerance_percent = scilU_significant_bits_to_relative_tolerance(oh->significant_bits);
+		//}
 	}
 
 	ctx->lossless_compression_needed = check_compress_lossless_needed(ctx);
-	fix_double_setting(& ohints->relative_tolerance_percent);
-	fix_double_setting(& ohints->relative_err_finest_abs_tolerance);
-	fix_double_setting(& ohints->absolute_tolerance);
-	ohints->significant_digits = (ohints->significant_digits == SCIL_ACCURACY_INT_IGNORE) ? 0 : ohints->significant_digits;
+	fix_double_setting(& oh->relative_tolerance_percent);
+	fix_double_setting(& oh->relative_err_finest_abs_tolerance);
+	fix_double_setting(& oh->absolute_tolerance);
 
 	// verify correctness of algo_array
 	{
-	int i = 0;
-	for (scil_compression_algorithm ** algo = algo_array; *algo != NULL ; algo++, i++){
-		if ((*algo)->magic_number != i){
-			scilU_critical_error("Magic number does not match!");
+		int i = 0;
+		for (scil_compression_algorithm ** algo = algo_array; *algo != NULL ; algo++, i++){
+			if ((*algo)->magic_number != i){
+				scilU_critical_error("Magic number does not match!");
+			}
 		}
 	}
-	}
 
-	if (hints->force_compression_methods != NULL){
+	if (oh->force_compression_methods != NULL){
 		// now we can prefill the compression pipeline
 		ret = parse_compression_algorithms(& ctx->last_chain, hints->force_compression_methods);
+
+		oh->force_compression_methods = strdup(oh->force_compression_methods);
 	}
 
-	if (ret == 0){
+	if (ret == SCIL_NO_ERR){
 		*out_ctx = ctx;
 	}else{
 		free(ctx);
@@ -356,16 +378,11 @@ output: H'[D] ; M' is appended automatically.
 
 A datatype compressor terminates the chain of preconditioners.
  */
-int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t in_dest_size,
+int scil_compress(byte* restrict dest, size_t in_dest_size,
 	void*restrict source, scil_dims_t dims, size_t* restrict out_size_p, scil_context_p ctx){
-	int ret;
+	int ret = SCIL_NO_ERR;
 
 	if (dims.dims == 0){
-		*out_size_p = 0;
-		return 0;
-	}
-	size_t input_size = scil_get_data_count(dims) * DATATYPE_LENGTH(datatype);
-	if (input_size == 0){
 		*out_size_p = 0;
 		return 0;
 	}
@@ -376,6 +393,12 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t in_de
 	assert(dest != NULL);
 	assert(out_size_p != NULL);
 	assert(source != NULL);
+
+	size_t input_size = scil_get_data_count(dims) * DATATYPE_LENGTH(ctx->datatype);
+	if (input_size == 0){
+		*out_size_p = 0;
+		return 0;
+	}
 
 	const scil_hints * hints = & ctx->hints;
 	scil_compression_chain_t * chain = & ctx->last_chain;
@@ -404,7 +427,7 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t in_de
 	// process the compression chain
 	// apply the pre-conditioners
 	for(int i=0; i < chain->size; i++){
-		switch(datatype){
+		switch(ctx->datatype){
 			case(SCIL_TYPE_FLOAT):
 				//ret = algo->c.DPrecond.compress_float(ctx, dest, header_size_out, source, dims);
 				break;
@@ -422,7 +445,7 @@ int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t in_de
 		void * dst = pick_buffer(0, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
 
 		scil_compression_algorithm * algo = chain->data_compressor;
-		switch(datatype){
+		switch(ctx->datatype){
 			case(SCIL_TYPE_FLOAT):
 				ret = algo->c.DNtype.compress_float(ctx, dst, & out_size, src, dims);
 				break;

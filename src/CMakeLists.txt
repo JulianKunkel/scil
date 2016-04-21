@@ -16,11 +16,11 @@ include(CheckCSourceCompiles)
 
 # compile flags
 set (CMAKE_C_FLAGS
-    "${CMAKE_C_FLAGS} -ggdb3 -std=gnu11 -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--print-gc-sections -Wl,--no-allow-shlib-undefined " # -fvisibility=hidden -fvisibility-inlines-hidden
- #-pedantic-errors
+    "${CMAKE_C_FLAGS} -ggdb3 -std=gnu11 -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections  -Wl,--no-allow-shlib-undefined " # -fvisibility=hidden -fvisibility-inlines-hidden
+ #-pedantic-errors  -Wl,--print-gc-sections
 )
 set ( CMAKE_CXX_FLAGS
-    "${CMAKE_CXX_FLAGS} -ggdb3 -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--print-gc-sections -Wl,--no-allow-shlib-undefined -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt" #-fvisibility=hidden -fvisibility-inlines-hidden
+    "${CMAKE_CXX_FLAGS} -ggdb3 -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--no-allow-shlib-undefined -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt" #-fvisibility=hidden -fvisibility-inlines-hidden
 )
 
 set (CMAKE_C_FLAGS_DEBUG   "-O0")

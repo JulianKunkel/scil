@@ -47,7 +47,7 @@ int test_correctness(double * buffer_in, const int variableSize){
 		sprintf(compression_name, "abstol,7", scil_compressor_name(i)); //%s
 		hints.force_compression_methods = compression_name;
 
-		int ret = scil_create_compression_context(&ctx, &hints);
+		int ret = scil_create_compression_context(&ctx,SCIL_TYPE_DOUBLE, &hints);
 		if (ret != 0){
 			printf("Error creating the context\n");
 			continue;
@@ -62,7 +62,7 @@ int test_correctness(double * buffer_in, const int variableSize){
 		scilU_start_timer(& timer);
 
 		for(uint8_t i = 0; i < loops; ++i){
-			ret_c = scil_compress(SCIL_TYPE_DOUBLE, buffer_out, c_size, buffer_in, dims,&out_c_size, ctx);
+			ret_c = scil_compress(buffer_out, c_size, buffer_in, dims,&out_c_size, ctx);
 			if(ret_c != 0) break;
 		}
 		double seconds_compress = scilU_stop_timer(timer);
