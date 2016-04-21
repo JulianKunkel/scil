@@ -44,7 +44,7 @@ int test_correctness(double * buffer_in, const int variableSize){
 
 	for(int i=0; i < 1; i++ ){ // scil_compressors_available()
 		char compression_name[1024];
-		sprintf(compression_name, "abstol,7", scil_compressor_name(i)); //%s
+		sprintf(compression_name, "%s,%d", scil_compressor_name(i), i); //%s
 		hints.force_compression_methods = compression_name;
 
 		int ret = scil_create_compression_context(&ctx, &hints);
