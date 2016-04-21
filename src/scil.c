@@ -34,7 +34,7 @@
 #include "scil-dtypes.h"
 
 
-scil_compression_algorithm * algo_array[] = {
+static scil_compression_algorithm * algo_array[] = {
 	& algo_memcopy,
 	& algo_abstol,
 	& algo_gzip,
@@ -46,6 +46,14 @@ scil_compression_algorithm * algo_array[] = {
 	NULL
 };
 
+static char * performance_units[] = {
+	"IGNORE",
+	"MiB",
+	"GiB",
+	"NetworkSpeed",
+	"NodeLocalStorageSpeed",
+	"SingleStreamSharedStorageSpeed"
+};
 
 
 int scil_compressors_available(){
@@ -197,14 +205,27 @@ void scil_init_hints(scil_hints * hints){
 	hints->decomp_speed.unit = SCIL_PERFORMANCE_IGNORE;
 }
 
+static void print_performance_hint(const char * name, scil_performance_hint_t p){
+	printf("\t%s: %.4f * %s\n", name, p.multiplier, performance_units[p.unit]);
+}
+
 void scil_hints_print(scil_hints * h){
-	printf("Hints: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits (after 1. so in the mantissa):%d \n\tsignificant_bits (in the mantissa):%d\n",
+	printf("Precision hints: \n\trelative_tolerance_percent:%f \n\trelative_err_finest_abs_tolerance:%f \n\tabsolute_tolerance:%f \n\tsignificant_digits (after 1. so in the mantissa):%d \n\tsignificant_bits (in the mantissa):%d\n",
 		h->relative_tolerance_percent, h->relative_err_finest_abs_tolerance, h->absolute_tolerance, h->significant_digits, h->significant_bits);
+	printf("Performance hints:\n");
+	print_performance_hint("Compression", h->comp_speed);
+	print_performance_hint("Decompression", h->decomp_speed);
 }
 
 int scil_destroy_compression_context(scil_context_p * out_ctx){
 	free(*out_ctx);
 	*out_ctx = NULL;
+
+	return SCIL_NO_ERR;
+}
+
+scil_hints scil_retrieve_effective_hints(scil_context_p ctx){
+	return ctx->hints;
 }
 
 int scil_create_compression_context(scil_context_p * out_ctx, const scil_hints * hints){

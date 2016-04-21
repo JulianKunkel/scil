@@ -25,6 +25,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+typedef unsigned char byte;
+
 enum SCIL_Datatype{
   SCIL_TYPE_FLOAT,
   SCIL_TYPE_DOUBLE
@@ -66,7 +68,6 @@ typedef struct{
 #define SCIL_ACCURACY_INT_FINEST -1
 #define SCIL_ACCURACY_SIGNIFICANT_FINEST 16
 
-typedef unsigned char byte;
 
 /**
  * \brief Struct containing information on the tolerable
@@ -151,6 +152,8 @@ size_t scil_get_data_count(const scil_dims_t dims);
  * \brief Initialize the data structure with the valid hints that are relaxed
  */
 void scil_init_hints(scil_hints * hints);
+
+scil_hints scil_retrieve_effective_hints(scil_context_p ctx);
 
 void scil_hints_print(scil_hints * hints);
 

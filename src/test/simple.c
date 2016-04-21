@@ -15,12 +15,13 @@
 
 // This file is the skeleton for each simple test.
 #include <assert.h>
+#include <stdio.h>
 
 #include <scil.h>
 
-#define ERROR 1
 #define SUCCESS 0
 
 int main(){
+  printf("OK\n");
   return SUCCESS;
 }

@@ -14,25 +14,51 @@
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <assert.h>
+#include <stdio.h>
 
 #include <scil.h>
 
+#define SUCCESS 0
 
+/*
+ This example demonstrates how the precision of datatypes can be defined.
+ */
 int main(){
   int ret;
 
-  scil_hints hints;
-  scil_init_hints(& hints);
+  scil_hints h;
+  scil_init_hints(& h);
 
-  //hints.
+  // hints for the precision
+  h.relative_tolerance_percent = 10;
+  h.relative_err_finest_abs_tolerance = 0.1; // the finest granularity
+
+  h.absolute_tolerance = 0.5;
+  h.significant_digits = 5;
+  h.significant_bits = 18;
+
+  // hints for the performance
+  // we want to use it for improving network speed, therefore, unit is NETWORK
+  h.comp_speed = (scil_performance_hint_t) { .unit = SCIL_PERFORMANCE_NETWORK, .multiplier = 1.5 };
+
+  // for decompression we set a fixed performance
+  h.decomp_speed.unit = SCIL_PERFORMANCE_GIB;
+  h.decomp_speed.multiplier = 3.5;
 
   scil_context_p ctx;
-  ret = scil_create_compression_context(& ctx, & hints);
-  assert(ret);
+  ret = scil_create_compression_context(& ctx, & h);
+  assert(ret == SCIL_NO_ERR);
 
-  scil_hints_print(& hints);
+  // retrieve effectively set hints:
+  scil_hints e = scil_retrieve_effective_hints(ctx);
+  scil_hints_print(& e);
+
+  // now you can compress/decompress
 
   ret = scil_destroy_compression_context(& ctx);
+  assert(ret == SCIL_NO_ERR);
 
-  return ret;
+  printf("OK\n");
+
+  return SUCCESS;
 }
