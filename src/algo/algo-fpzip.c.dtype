@@ -19,7 +19,7 @@
 #include <fpzip.h>
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_fpzip_compress_<DATATYPE>(const scil_context* ctx,
+int scil_fpzip_compress_<DATATYPE>(const scil_context_p ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
                         <DATATYPE>*restrict source,
@@ -62,7 +62,7 @@ int scil_fpzip_compress_<DATATYPE>(const scil_context* ctx,
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_fpzip_decompress_<DATATYPE>(  const scil_context* ctx,
+int scil_fpzip_decompress_<DATATYPE>(  const scil_context_p ctx,
                             <DATATYPE>*restrict dest,
                             scil_dims_t dims,
                             byte*restrict source,

@@ -2,13 +2,16 @@ project (${PROJECT_NAME})
 
 file(GLOB TESTFILES "${CMAKE_CURRENT_SOURCE_DIR}" "*.c")
 foreach(TESTFILE ${TESTFILES})
-  get_filename_component(TESTNAME ${TESTFILE} NAME)
-  if ( NOT ${TESTNAME} MATCHES "test" )
-	  add_executable(test-${TESTNAME} ${TESTFILE})
-	  target_link_libraries(test-${TESTNAME} scil)
 
-	  add_test(${TESTNAME} ./test-${TESTNAME})
+  get_filename_component(TESTNAME_C ${TESTFILE} NAME)
+  STRING(REGEX REPLACE ".c$" "" TESTNAME ${TESTNAME_C})
+  if ( NOT ${TESTNAME} MATCHES "test" )
+
+    add_executable(test-${TESTNAME}.exe ${TESTFILE})
+    target_link_libraries(test-${TESTNAME}.exe scil)
+
+    add_test(${TESTNAME} ./test-${TESTNAME}.exe)
   endif()
 endforeach()
 
-SUBDIRS (complex)
+# SUBDIRS (complex)

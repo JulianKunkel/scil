@@ -33,29 +33,29 @@ enum compressor_type{
 typedef struct{
     union{
         struct{
-            int (*compress)(const scil_context* ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, const byte*restrict data_in, const size_t in_size);
+            int (*compress)(const scil_context_p ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, const byte*restrict data_in, const size_t in_size);
             int (*decompress)(byte*restrict data_out, const byte*restrict compressed_buf_in, const size_t in_size, size_t * uncomp_size_out);
         } Btype;
 
         struct{
           // for a preconditioner, we expect that the input buffer points only to the ND data, the output data contains
           // the header of the size as returned and then the preconditioned data.
-            int (*compress_float)(const scil_context* ctx, float* restrict data_out, int * header_size_out, float*restrict data_in, const scil_dims_t dims);
+            int (*compress_float)(const scil_context_p ctx, float* restrict data_out, int * header_size_out, float*restrict data_in, const scil_dims_t dims);
 
           // it is the responsiblity of the decompressor to strip the header that is part of compressed_buf_in
             int (*decompress_float)(float*restrict data_inout, scil_dims_t dims, float*restrict compressed_buf_in);
 
-            int (*compress_double)(const scil_context* ctx, double* restrict data_out, int * header_size_out, double*restrict data_in, const scil_dims_t dims);
+            int (*compress_double)(const scil_context_p ctx, double* restrict data_out, int * header_size_out, double*restrict data_in, const scil_dims_t dims);
 
             int (*decompress_double)(double*restrict data_inout, scil_dims_t dims, double*restrict compressed_buf_in);
         } DPrecond;
 
         struct{
-            int (*compress_float)(const scil_context* ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, float*restrict data_in, const scil_dims_t dims);
+            int (*compress_float)(const scil_context_p ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, float*restrict data_in, const scil_dims_t dims);
 
             int (*decompress_float)(float*restrict data_out, scil_dims_t dims, byte*restrict compressed_buf_in, const size_t in_size);
 
-            int (*compress_double)(const scil_context* ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, double*restrict data_in, const scil_dims_t dims);
+            int (*compress_double)(const scil_context_p ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, double*restrict data_in, const scil_dims_t dims);
 
             int (*decompress_double)( double*restrict data_out, scil_dims_t dims, byte*restrict compressed_buf_in, const size_t in_size);
         } DNtype;

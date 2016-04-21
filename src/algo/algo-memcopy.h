@@ -27,7 +27,7 @@
  * \param source_size Byte size of uncompressed buffer
  * \return Success state of the compression
  */
-int scil_memcopy_compress(const scil_context* ctx, byte* restrict dest, size_t * restrict out_size, const byte*restrict source, const size_t source_size);
+int scil_memcopy_compress(const scil_context_p ctx, byte* restrict dest, size_t * restrict out_size, const byte*restrict source, const size_t source_size);
 
 /**
  * \brief Trivial memcopy decompression function

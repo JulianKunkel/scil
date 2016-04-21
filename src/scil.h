@@ -37,6 +37,21 @@ enum scil_error_code{
   SCIL_EINVAL
 };
 
+enum scil_performance_unit{
+  SCIL_PERFORMANCE_IGNORE = 0,
+  SCIL_PERFORMANCE_MIB,
+  SCIL_PERFORMANCE_GIB,
+  SCIL_PERFORMANCE_NETWORK, // this unit indicates the performance of the network interconnect, e.g., Infiniband
+  SCIL_PERFORMANCE_NODELOCAL_STORAGE, // the performance of the local storage
+  SCIL_PERFORMANCE_SINGLESTREAM_SHARED_STORAGE  // this unit indicates the performance of one thread sending data to the shared storage, e.g., 1 GiB/s with Lustre
+};
+
+/* describes the required performance, it consists of a base unit and a multiplier, the result is "multiplier * unit" */
+typedef struct{
+  enum scil_performance_unit unit;
+  float multiplier;
+} scil_performance_hint_t;
+
 /*
  This amount of data may be needed for a block header.
  */
@@ -80,6 +95,10 @@ typedef struct{
   /** \brief Alternative to the decimal digits */
   int significant_bits;
 
+  /** Describes the performance requirements for the compressors */
+  scil_performance_hint_t comp_speed;
+  scil_performance_hint_t decomp_speed;
+
   /** \brief */
   char * force_compression_methods;
 
@@ -107,7 +126,7 @@ struct scil_context_t{
 };
 #endif
 
-typedef struct scil_context_t scil_context;
+typedef struct scil_context_t* scil_context_p;
 
 const char* scil_strerr(enum scil_error_code error);
 
@@ -128,6 +147,9 @@ scil_dims_t scil_init_dims(const uint8_t dimensions_count, size_t* dimensions_le
  */
 size_t scil_get_data_count(const scil_dims_t dims);
 
+/**
+ * \brief Initialize the data structure with the valid hints that are relaxed
+ */
 void scil_init_hints(scil_hints * hints);
 
 void scil_hints_print(scil_hints * hints);
@@ -139,10 +161,9 @@ void scil_hints_print(scil_hints * hints);
  * \pre hints != NULL
  * \return success state of the creation
  */
-int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints);
+int scil_create_compression_context(scil_context_p  * out_ctx, const scil_hints * hints);
 
-// scil_create_compression_context(scil_context ** out_ctx)
-// scil_context_add_hint(ctx, char * key, char * value)
+int scil_destroy_compression_context(scil_context_p  * out_ctx);
 
 /**
  * \brief Method to compress a data buffer
@@ -160,7 +181,7 @@ int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints)
  * \return Success state of the compression
  */
 int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t dest_size,
-  void*restrict source, scil_dims_t dims, size_t* restrict out_size, scil_context* ctx);
+  void*restrict source, scil_dims_t dims, size_t* restrict out_size, scil_context_p  ctx);
 
 /**
  * \brief Method to decompress a data buffer
@@ -190,7 +211,7 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
                              scil_dims_t dims,
                              byte*restrict data_compressed,
                              const size_t compressed_size,
-                             const scil_context* ctx,
+                             const scil_context_p  ctx,
                              scil_hints * out_accuracy);
 
 #endif

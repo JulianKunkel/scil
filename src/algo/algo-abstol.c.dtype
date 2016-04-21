@@ -59,7 +59,7 @@ static <DATATYPE> DataType_repres_<DATATYPE>(const uint64_t num, const <DATATYPE
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_abstol_compress_<DATATYPE>(const scil_context* ctx,
+int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
                         <DATATYPE>*restrict source,

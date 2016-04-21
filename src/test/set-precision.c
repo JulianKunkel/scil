@@ -13,14 +13,26 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-// This file is the skeleton for each simple test.
 #include <assert.h>
 
 #include <scil.h>
 
-#define ERROR 1
-#define SUCCESS 0
 
 int main(){
-  return SUCCESS;
+  int ret;
+
+  scil_hints hints;
+  scil_init_hints(& hints);
+
+  //hints.
+
+  scil_context_p ctx;
+  ret = scil_create_compression_context(& ctx, & hints);
+  assert(ret);
+
+  scil_hints_print(& hints);
+
+  ret = scil_destroy_compression_context(& ctx);
+
+  return ret;
 }

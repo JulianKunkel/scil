@@ -71,7 +71,7 @@ static <DATATYPE> decompress_<DATATYPE>(uint64_t value, uint8_t bits_per_num, ui
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_sigbits_compress_<DATATYPE>(const scil_context* ctx,
+int scil_sigbits_compress_<DATATYPE>(const scil_context_p ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
                         <DATATYPE>*restrict source,
@@ -169,7 +169,7 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context* ctx,
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_sigbits_decompress_<DATATYPE>(  const scil_context* ctx,
+int scil_sigbits_decompress_<DATATYPE>(  const scil_context_p ctx,
                             <DATATYPE>*restrict dest,
                             scil_dims_t exp_count,
                             byte*restrict source,

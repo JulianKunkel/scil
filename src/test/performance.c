@@ -714,7 +714,7 @@ int test_performance(double bias, double discountFactor){
 
 	scil_dims_t dims = scil_init_dims(1, length);
 
-  struct scil_context_t* ctx;
+  scil_context_p ctx;
   scil_hints hints;
 
   scil_init_hints(&hints);

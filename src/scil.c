@@ -99,7 +99,7 @@ int scil_compressor_num_by_name(const char * name){
 }
 
 #pragma GCC diagnostic ignored "-Wfloat-equal"
-static int check_compress_lossless_needed(scil_context * ctx){
+static int check_compress_lossless_needed(scil_context_p ctx){
 	const scil_hints hints = ctx->hints;
 
 	if ( (hints.absolute_tolerance != SCIL_ACCURACY_DBL_IGNORE && hints.absolute_tolerance <= SCIL_ACCURACY_DBL_FINEST)
@@ -192,6 +192,9 @@ void scil_init_hints(scil_hints * hints){
 	hints->relative_tolerance_percent = SCIL_ACCURACY_DBL_IGNORE;
   hints->relative_err_finest_abs_tolerance = SCIL_ACCURACY_DBL_IGNORE;
   hints->absolute_tolerance  = SCIL_ACCURACY_DBL_IGNORE;
+
+	hints->comp_speed.unit = SCIL_PERFORMANCE_IGNORE;
+	hints->decomp_speed.unit = SCIL_PERFORMANCE_IGNORE;
 }
 
 void scil_hints_print(scil_hints * h){
@@ -199,9 +202,14 @@ void scil_hints_print(scil_hints * h){
 		h->relative_tolerance_percent, h->relative_err_finest_abs_tolerance, h->absolute_tolerance, h->significant_digits, h->significant_bits);
 }
 
-int scil_create_compression_context(scil_context ** out_ctx, scil_hints * hints){
+int scil_destroy_compression_context(scil_context_p * out_ctx){
+	free(*out_ctx);
+	*out_ctx = NULL;
+}
+
+int scil_create_compression_context(scil_context_p * out_ctx, const scil_hints * hints){
 	int ret = 0;
-	scil_context * ctx =(scil_context*) SAFE_MALLOC(sizeof(scil_context));
+	scil_context_p ctx =(scil_context_p) SAFE_MALLOC(sizeof(struct scil_context_t));
 	memset(&ctx->last_chain, 0, sizeof(ctx->last_chain));
 
 	*out_ctx = NULL;
@@ -328,7 +336,7 @@ output: H'[D] ; M' is appended automatically.
 A datatype compressor terminates the chain of preconditioners.
  */
 int scil_compress(enum SCIL_Datatype datatype, byte* restrict dest, size_t in_dest_size,
-	void*restrict source, scil_dims_t dims, size_t* restrict out_size_p, scil_context* ctx){
+	void*restrict source, scil_dims_t dims, size_t* restrict out_size_p, scil_context_p ctx){
 	int ret;
 
 	if (dims.dims == 0){
@@ -528,7 +536,7 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
 							 scil_dims_t dims,
 							 byte*restrict data_compressed,
 							 const size_t compressed_size,
-							 const scil_context* ctx,
+							 const scil_context_p ctx,
 							 scil_hints * out_accuracy){
 
   assert(dims.length != NULL);
