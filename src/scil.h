@@ -153,7 +153,7 @@ void scil_init_hints(scil_hints * hints);
 
 scil_hints scil_retrieve_effective_hints(scil_context_p ctx);
 
-void scil_hints_print(scil_hints * hints);
+void scil_hints_print(const scil_hints * hints);
 
 /**
  * \brief Creation of a compression context

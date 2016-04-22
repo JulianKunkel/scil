@@ -205,11 +205,11 @@ void scil_init_hints(scil_hints * hints){
 	hints->decomp_speed.unit = SCIL_PERFORMANCE_IGNORE;
 }
 
-static void print_performance_hint(const char * name, scil_performance_hint_t p){
-	printf("\t%s: %g * %s\n", name, (double) p.multiplier, performance_units[p.unit]);
+static void print_performance_hint(const char * name, const scil_performance_hint_t p){
+	printf("\t%s: %f * %s\n", name, (double) p.multiplier, performance_units[p.unit]);
 }
 
-void scil_hints_print(scil_hints * h){
+void scil_hints_print(const scil_hints * h){
 	printf("Precision hints: \n\trelative_tolerance_percent: %g \n\trelative_err_finest_abs_tolerance: %g\n\tabsolute_tolerance: %g \n\tsignificant_digits: %d \n\tsignificant_bits (in the mantissa): %d\n",
 		h->relative_tolerance_percent, h->relative_err_finest_abs_tolerance, h->absolute_tolerance, h->significant_digits, h->significant_bits);
 	printf("Performance hints:\n");
@@ -642,6 +642,8 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
 
 end:
   	free(data_out);
+	a.comp_speed.multiplier = 1.0f;
+	a.decomp_speed.multiplier = 1.0f;
 	*out_accuracy = a;
 	return ret;
 }
