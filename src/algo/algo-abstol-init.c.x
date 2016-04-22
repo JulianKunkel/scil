@@ -1,6 +1,8 @@
 #ifndef SCIL_ABSTOL_INITIALZIER
 #define SCIL_ABSTOL_INITIALZIER
 
+#define SCIL_SMALL 0.00000000000000000000001
+
 static uint64_t round_up_byte(const uint64_t bits){
 
     uint8_t a = bits % 8;
