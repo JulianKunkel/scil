@@ -362,6 +362,10 @@ static inline void * pick_buffer(int is_src, int total, int remain, void*restric
 		}
 }
 
+size_t scil_compress_buffer_size_bound(enum SCIL_Datatype datatype, const scil_dims* dims){
+	return scil_get_data_count(dims)*DATATYPE_LENGTH(datatype)*4 + SCIL_BLOCK_HEADER_MAX_SIZE;
+}
+
 /*
 A compression chain compresses data in multiple phases, i.e., applying algo 1, then algo 2 ...
 The processing sequence may consist of the following steps:
@@ -438,13 +442,17 @@ int scil_compress(byte* restrict dest,
 		return 0;
 	}
 
+	if( in_dest_size < 4 * input_size){
+		return SCIL_MEMORY_ERR;
+	}
+
 	const scil_hints * hints = & ctx->hints;
 	scil_compression_chain_t * chain = & ctx->last_chain;
 
 	if (hints->force_compression_methods == NULL){ // if != NULL do nothing as we have parsed the pipeline already
 		if (ctx->lossless_compression_needed){
 			// we cannot compress because data must be accurate!
-			parse_compression_algorithms(chain, "memcpy");
+			parse_compression_algorithms(chain, "memcopy");
 		}else{
 			// TODO: pick the best algorithm for the settings given in ctx...
 			assert("No algorithm chooser available, yet");
@@ -525,6 +533,7 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims*c
 
 	assert(dest != NULL);
 	assert(source != NULL);
+	assert(buff_tmp1 != NULL);
 
 	// Read magic number (algorithm id) from header
 	const int total_compressors = (uint8_t) source[0];
@@ -547,7 +556,7 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims*c
 		void * src = pick_buffer(1, total_compressors, remaining_compressors, src_adj, dest, buff_tmp1, buff_tmp2);
 		void * dst = pick_buffer(0, total_compressors, remaining_compressors, src_adj, dest, buff_tmp1, buff_tmp2);
 
-		ret = algo->c.Btype.decompress(dst, (byte *) src, src_size, & src_size);
+		ret = algo->c.Btype.decompress(dst, output_size*1.5+10, (byte *) src, src_size, & src_size);
 		if (ret != 0) return ret;
 		remaining_compressors--;
 

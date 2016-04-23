@@ -141,6 +141,11 @@ void scil_init_dims_array(scil_dims* dims, uint8_t dimensions_count, const size_
  */
 size_t scil_get_data_count(const scil_dims* dims);
 
+/*
+ * \brief Return the minimum size of the compression buffer needed.
+ */
+size_t scil_compress_buffer_size_bound(enum SCIL_Datatype datatype, const scil_dims* dims);
+
 /**
  * \brief Initialize the data structure with the valid hints that are relaxed
  */
@@ -189,6 +194,7 @@ int scil_compress(byte* restrict dest, size_t dest_size,
  * \pre datatype == 0 || datatype == 1
  * \pre dest != NULL
  * \pre source != NULL
+ * \pre tmp_buff != NULL with a size of scil_compress_buffer_size_bound() / 2
  * \return Success state of the decompression
  */
 int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims * const expected_dims,

@@ -24,14 +24,15 @@
 int test_correctness(double * buffer_in, const int variableSize){
 	size_t out_c_size;
 	// accept a suboptimal compression ratio of 0.5
-	const size_t c_size = 2 * variableSize * sizeof(double) + SCIL_BLOCK_HEADER_MAX_SIZE;
-
-	allocate(byte, buffer_out, c_size);
-	allocate(byte, tmp_buff, c_size);
 	allocate(double, buffer_uncompressed, variableSize);
 
 	scil_dims dims;
 	scil_init_dims_1d(&dims, variableSize);
+
+	const size_t c_size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, &dims);
+
+	allocate(byte, buffer_out, c_size);
+	allocate(byte, tmp_buff, c_size);
 
   scil_context_p ctx;
   scil_hints hints;

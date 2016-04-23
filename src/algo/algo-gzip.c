@@ -19,30 +19,32 @@
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_gzip_compress(const scil_context_p ctx, byte* restrict dest, size_t* restrict dest_size, const byte*restrict source, const size_t source_size){
+  *dest_size = 2*source_size;
   int ret = compress( (Bytef*)dest, dest_size, (Bytef*)source, (uLong)(source_size) );
   if (ret == Z_OK){
     return SCIL_NO_ERR;
   }else{
-    fprintf(stderr, "Error in gzip compression. (Buf error: %d mem error: %d data_error: %d size: %lld)\n",
+    debug("Error in gzip compression. (Buf error: %d mem error: %d data_error: %d size: %lld)\n",
     ret == Z_BUF_ERROR , ret == Z_MEM_ERROR, ret == Z_DATA_ERROR, (long long) source_size);
-    
+
     return SCIL_UNKNOWN_ERR;
   }
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_gzip_decompress(byte*restrict data_out, const byte*restrict compressed_buf_in, const size_t in_size, size_t * uncomp_size_out)
+int scil_gzip_decompress(byte*restrict data_out, size_t buff_size,  const byte*restrict compressed_buf_in, const size_t in_size, size_t * uncomp_size_out)
 {
-    uLongf dest_isize = *uncomp_size_out;
-    int ret = uncompress( (Bytef*)data_out, & dest_isize, (Bytef*)compressed_buf_in, (uLong)in_size);
+  uLongf out_buffer_size = (uLongf) buff_size;
+  int ret = uncompress( (Bytef*)data_out, & out_buffer_size, (Bytef*)compressed_buf_in, (uLong)in_size);
 
-    if(ret != Z_OK){
-        fprintf(stderr, "Error in gzip decompression. (Buf error: %d mem error: %d data_error: %d size: %lld)\n",
-        ret == Z_BUF_ERROR , ret == Z_MEM_ERROR, ret == Z_DATA_ERROR, (long long) *uncomp_size_out);
-        ret = SCIL_UNKNOWN_ERR;
-    }
+  if(ret != Z_OK){
+      debug("Error in gzip decompression. (Buf error: %d mem error: %d data_error: %d size: %lld)\n",
+      ret == Z_BUF_ERROR , ret == Z_MEM_ERROR, ret == Z_DATA_ERROR, (long long) *uncomp_size_out);
+      ret = SCIL_UNKNOWN_ERR;
+  }
+  *uncomp_size_out = (size_t) out_buffer_size;
 
-    return ret;
+  return ret;
 }
 
 scil_compression_algorithm algo_gzip = {

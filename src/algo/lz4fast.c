@@ -34,7 +34,7 @@ int scil_lz4fast_compress(const scil_context_p ctx, byte* restrict dest, size_t 
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_lz4fast_decompress(byte*restrict dest, const byte*restrict src, const size_t in_size, size_t * uncomp_size_out){
+int scil_lz4fast_decompress(byte*restrict dest, size_t buff_size, const byte*restrict src, const size_t in_size, size_t * uncomp_size_out){
     int size;
     // retrieve the size of the uncompressed data
     size = *((int*) src);

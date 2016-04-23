@@ -38,7 +38,7 @@ int scil_memcopy_compress(const scil_context_p ctx, byte* restrict dest, size_t 
  * \param source_size Byte size of uncompressed buffer
  * \return Success state of the compression
  */
-int scil_memcopy_decompress(byte*restrict data_out, const byte*restrict compressed_buf_in, const size_t in_size, size_t * uncomp_size_out);
+int scil_memcopy_decompress(byte*restrict data_out, size_t buff_size, const byte*restrict compressed_buf_in, const size_t in_size, size_t * uncomp_size_out);
 
 extern scil_compression_algorithm algo_memcopy;
 

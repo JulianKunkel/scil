@@ -23,6 +23,13 @@
 #include <scil.h>
 #include <scil-util.h>
 
+#ifdef DEBUG
+  #define debug(...) fprintf(stderr, __VA_ARGS__);
+#else
+  #define debug(...)
+#endif
+
+#define FUNC_START debug("CALL %s\n", __PRETTY_FUNCTION__);
 
 enum compressor_type{
   SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES,
@@ -30,11 +37,14 @@ enum compressor_type{
   SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER
 };
 
+/*
+ An algorithm implementation can be sure that the compression output buffer is at least 2x the size of the input data.
+ */
 typedef struct{
     union{
         struct{
             int (*compress)(const scil_context_p ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, const byte*restrict data_in, const size_t in_size);
-            int (*decompress)(byte*restrict data_out, const byte*restrict compressed_buf_in, const size_t in_size, size_t * uncomp_size_out);
+            int (*decompress)(byte*restrict data_out, size_t buff_out_size,  const byte*restrict compressed_buf_in, const size_t in_size, size_t * uncomp_size_out);
         } Btype;
 
         struct{
