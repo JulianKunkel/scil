@@ -36,7 +36,8 @@ enum scil_error_code{
   SCIL_NO_ERR   = 0 ,
   SCIL_BUFFER_ERR,
   SCIL_MEMORY_ERR,
-  SCIL_EINVAL
+  SCIL_EINVAL,
+  SCIL_UNKNOWN_ERR
 };
 
 enum scil_performance_unit{

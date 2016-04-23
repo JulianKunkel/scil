@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -41,16 +42,17 @@ int test_correctness(double * buffer_in, const int variableSize){
 
 	printf("C Error, D Error, Validation, Uncompressed size, Compressed size, Compression factor, CSpeed MiB/s, DSpeed MiB/s, Algo\n");
 
-	for(int i=0; i < 1; i++ ){ // scil_compressors_available()
+	for(int i=0; i < scil_compressors_available(); i++ ){
 		char compression_name[1024];
-		sprintf(compression_name, "%s,%d", scil_compressor_name(i), i); //%s
+		sprintf(compression_name, "%s", scil_compressor_name(i));
 		hints.force_compression_methods = compression_name;
 
-		int ret = scil_create_compression_context(&ctx,SCIL_TYPE_DOUBLE, &hints);
+		int ret = scil_create_compression_context(& ctx, SCIL_TYPE_DOUBLE, &hints);
 		if (ret != 0){
-			printf("Error creating the context\n");
+			printf("Invalid combination %s\n", compression_name);
 			continue;
 		}
+		assert(ctx != NULL);
 		int ret_c;
 		int ret_d;
 		int ret_v;

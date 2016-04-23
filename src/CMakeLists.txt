@@ -15,17 +15,14 @@ include(FeatureSummary)
 include(CheckCSourceCompiles)
 
 # compile flags
-set (CMAKE_C_FLAGS
-    "${CMAKE_C_FLAGS} -ggdb3 -std=gnu11 -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections  -Wl,--no-allow-shlib-undefined " # -fvisibility=hidden -fvisibility-inlines-hidden
- #-pedantic-errors  -Wl,--print-gc-sections
-)
-set ( CMAKE_CXX_FLAGS
-    "${CMAKE_CXX_FLAGS} -ggdb3 -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--no-allow-shlib-undefined -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt" #-fvisibility=hidden -fvisibility-inlines-hidden
-)
+set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -pedantic-errors -std=gnu11 -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections  -Wl,--no-allow-shlib-undefined")
+# -fvisibility=hidden -fvisibility-inlines-hidden -Wl,--print-gc-sections
+set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--no-allow-shlib-undefined -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt") 
 
-set (CMAKE_C_FLAGS_DEBUG   "-O0")
+set (CMAKE_C_FLAGS_DEBUG   "-O0 -ggdb")
+set (CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb")
+
 set (CMAKE_C_FLAGS_RELEASE "-O3")
-set (CMAKE_INSTALL_DO_STRIP TRUE)
 
 set (SCIL_ALGO_SOURCE ${CMAKE_SOURCE_DIR}/algo)
 set (SCIL_ALGO_BINARY ${CMAKE_BINARY_DIR}/algo)

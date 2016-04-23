@@ -178,7 +178,7 @@ static int parse_compression_algorithms(scil_compression_chain_t * chain, char *
 	}
 	chain->size = 0;
 
-	return 0;
+	return SCIL_NO_ERR;
 }
 
 void scil_init_dims_1d(scil_dims* dims, size_t dim1){
@@ -320,6 +320,7 @@ int scil_create_compression_context(scil_context_p * out_ctx, enum SCIL_Datatype
 	fix_double_setting(& oh->relative_tolerance_percent);
 	fix_double_setting(& oh->relative_err_finest_abs_tolerance);
 	fix_double_setting(& oh->absolute_tolerance);
+	// TODO handle flaot differently.
 
 	// verify correctness of algo_array
 	{
