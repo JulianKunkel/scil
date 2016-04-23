@@ -29,6 +29,8 @@
   #define debug(...)
 #endif
 
+#define critical(...) { fprintf(stderr, __VA_ARGS__); exit(1); }
+
 #define FUNC_START debug("CALL %s\n", __PRETTY_FUNCTION__);
 
 #define PRECONDITIONER_LIMIT 10
@@ -91,7 +93,8 @@ typedef struct {
   scil_compression_algorithm * data_compressor; // datatype compressor
   scil_compression_algorithm * byte_compressor; // byte compressor
 
-  int size;
+  int precond_count;
+  int total_size; // includes data and byte compressors
 } scil_compression_chain_t;
 
 
@@ -101,9 +104,10 @@ struct scil_context_t{
   scil_hints hints;
 
   // the last compressor used, could be used for debugging
-  scil_compression_chain_t last_chain;
+  scil_compression_chain_t chain;
 };
 
-
+int scilI_parse_compression_algorithms(scil_compression_chain_t * chain, char * str_in);
+size_t scilI_get_data_size(enum SCIL_Datatype type, const scil_dims* dims);
 
 #endif

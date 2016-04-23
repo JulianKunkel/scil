@@ -19,6 +19,7 @@
 #include <ctype.h>
 
 #include <scil-internal.h>
+#include <scil-algo-chooser.h>
 
 // known algorithms:
 #include <algo/algo-memcopy.h>
@@ -80,7 +81,7 @@ const char * scil_compressor_name(int num){
 
 void scil_compression_sprint_last_algorithm_chain(scil_context_p ctx, char * out, int buff_length){
 	int ret = 0;
-	scil_compression_chain_t * lc = & ctx->last_chain;
+	scil_compression_chain_t * lc = & ctx->chain;
 	for(int i=0; i < PRECONDITIONER_LIMIT; i++){
 		if(lc->pre_cond[i] == NULL) break;
 		ret = snprintf(out, buff_length, "%s,", lc->pre_cond[i]->name);
@@ -159,27 +160,29 @@ static scil_compression_algorithm * find_compressor_by_name(const char * name){
 	}
 }
 
-static int parse_compression_algorithms(scil_compression_chain_t * chain, char * str_in){
+int scilI_parse_compression_algorithms(scil_compression_chain_t * chain, char * str_in){
 	char * saveptr, * token;
 	char str[4096];
 	strncpy(str, str_in, 4096);
 	token = strtok_r(str, ",", & saveptr);
-	chain->size = 0;
 
 	int stage = 1; // pre-conditioner
+	chain->precond_count = 0;
+	chain->total_size = 0;
 
 	for( int i = 0; token != NULL; i++){
 		scil_compression_algorithm * algo = find_compressor_by_name(token);
 		if (algo == NULL){
-			return -1; // INVALID ALGO
+			return SCIL_EINVAL;
 		}
+		chain->total_size ++;
 		switch(algo->type){
 			case(SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER):{
 				if (stage != 1){
 					return -1; // INVALID CHAIN
 				}
-				chain->pre_cond[chain->size] = algo;
-				chain->size++;
+				chain->pre_cond[chain->precond_count] = algo;
+				chain->precond_count++;
 				break;
 			}case (SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES):{
 				if (stage > 2){
@@ -199,7 +202,11 @@ static int parse_compression_algorithms(scil_compression_chain_t * chain, char *
 		}
 		token = strtok_r(NULL, ",", & saveptr);
 	}
-	chain->size = 0;
+
+	// at least one algo should be set
+	if(chain->pre_cond[0] == NULL && chain->data_compressor == NULL && chain->byte_compressor == NULL ){
+		return SCIL_EINVAL;
+	}
 
 	return SCIL_NO_ERR;
 }
@@ -240,6 +247,14 @@ size_t scil_get_data_count(const scil_dims* dims){
 		result *= dims->length[i];
 	}
 	return result;
+}
+
+size_t scilI_get_data_size(enum SCIL_Datatype datatype, const scil_dims* dims){
+	size_t result = 1;
+	for(uint8_t i = 0; i < dims->dims; ++i){
+		result *= dims->length[i];
+	}
+	return result*DATATYPE_LENGTH(datatype);
 }
 
 void scil_init_hints(scil_hints * hints){
@@ -290,7 +305,7 @@ int scil_create_compression_context(scil_context_p * out_ctx, enum SCIL_Datatype
 	*out_ctx = NULL;
 
 	ctx = (scil_context_p) SAFE_MALLOC(sizeof(struct scil_context_t));
-	memset(&ctx->last_chain, 0, sizeof(ctx->last_chain));
+	memset(&ctx->chain, 0, sizeof(ctx->chain));
 	ctx->datatype = datatype;
 
 	oh = & ctx->hints;
@@ -357,7 +372,7 @@ int scil_create_compression_context(scil_context_p * out_ctx, enum SCIL_Datatype
 
 	if (oh->force_compression_methods != NULL){
 		// now we can prefill the compression pipeline
-		ret = parse_compression_algorithms(& ctx->last_chain, hints->force_compression_methods);
+		ret = scilI_parse_compression_algorithms(& ctx->chain, hints->force_compression_methods);
 
 		oh->force_compression_methods = strdup(oh->force_compression_methods);
 	}
@@ -386,7 +401,7 @@ static inline void * pick_buffer(int is_src, int total, int remain, void*restric
 }
 
 size_t scil_compress_buffer_size_bound(enum SCIL_Datatype datatype, const scil_dims* dims){
-	return scil_get_data_count(dims)*DATATYPE_LENGTH(datatype)*4 + SCIL_BLOCK_HEADER_MAX_SIZE;
+	return scilI_get_data_size(datatype, dims)*4 + SCIL_BLOCK_HEADER_MAX_SIZE;
 }
 
 /*
@@ -459,7 +474,7 @@ int scil_compress(byte* restrict dest,
 	assert(out_size_p != NULL);
 	assert(source != NULL);
 
-	size_t input_size = scil_get_data_count(dims) * DATATYPE_LENGTH(ctx->datatype);
+	size_t input_size = scilI_get_data_size(ctx->datatype, dims);
 	if (input_size == 0){
 		*out_size_p = 0;
 		return 0;
@@ -470,20 +485,14 @@ int scil_compress(byte* restrict dest,
 	}
 
 	const scil_hints * hints = & ctx->hints;
-	scil_compression_chain_t * chain = & ctx->last_chain;
+	scil_compression_chain_t * chain = & ctx->chain;
 
 	if (hints->force_compression_methods == NULL){ // if != NULL do nothing as we have parsed the pipeline already
-		if (ctx->lossless_compression_needed){
-			// we cannot compress because data must be accurate!
-			parse_compression_algorithms(chain, "lz4");
-		}else{
-			// TODO: pick the best algorithm for the settings given in ctx...
-			parse_compression_algorithms(chain, "lz4");
-		}
+		scil_compression_algo_chooser(source, dims, ctx);
 	}
 
 	//Add the length of the algo chain to the output
-	int remaining_compressors = chain->size + (chain->data_compressor != NULL ? 1 : 0) + (chain->byte_compressor != NULL ? 1 : 0);
+	int remaining_compressors = chain->total_size;
 	const int total_compressors = remaining_compressors;
 	dest[0] = total_compressors;
 	dest++;
@@ -495,7 +504,7 @@ int scil_compress(byte* restrict dest,
 
 	// process the compression chain
 	// apply the pre-conditioners
-	for(int i=0; i < chain->size; i++){
+	for(int i=0; i < chain->precond_count; i++){
 		switch(ctx->datatype){
 			case(SCIL_TYPE_FLOAT):
 				//ret = algo->c.Dtype.compress_float(ctx, dest, header_size_out, source, dims);
@@ -566,7 +575,7 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims*c
 	size_t src_size = source_size - 1;
 	int ret;
 
-	const size_t output_size = scil_get_data_count(dims) * DATATYPE_LENGTH(datatype);
+	const size_t output_size = scilI_get_data_size(datatype, dims);
 	byte*restrict buff_tmp2 = & buff_tmp1[(int)(output_size*1.5+10)];
 
 	//for(int i=0; i < chain_size; i++){
