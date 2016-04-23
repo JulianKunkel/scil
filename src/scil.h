@@ -33,7 +33,7 @@ enum SCIL_Datatype{
 };
 
 enum scil_error_code{
-  SCIL_NO_ERR   = 0 ,
+  SCIL_NO_ERR   = 0,
   SCIL_BUFFER_ERR,
   SCIL_MEMORY_ERR,
   SCIL_EINVAL,
@@ -123,6 +123,8 @@ const char* scil_strerr(enum scil_error_code error);
 int scil_compressors_available();
 const char * scil_compressor_name(int num);
 int scil_compressor_num_by_name(const char * name);
+
+void scil_compression_sprint_last_algorithm_chain(scil_context_p ctx, char * out, int buff_length);
 
 void scil_init_dims_1d(scil_dims* dims, size_t dim1);
 void scil_init_dims_2d(scil_dims* dims, size_t dim1, size_t dim2);

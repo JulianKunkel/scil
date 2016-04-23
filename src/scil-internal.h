@@ -31,6 +31,8 @@
 
 #define FUNC_START debug("CALL %s\n", __PRETTY_FUNCTION__);
 
+#define PRECONDITIONER_LIMIT 10
+
 enum compressor_type{
   SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES,
   SCIL_COMPRESSOR_TYPE_DATATYPES,
@@ -85,7 +87,7 @@ typedef struct{
 
 // at most we support chaining of 10 preconditioners
 typedef struct {
-  scil_compression_algorithm * pre_cond[10]; // preconditioners
+  scil_compression_algorithm * pre_cond[PRECONDITIONER_LIMIT]; // preconditioners
   scil_compression_algorithm * data_compressor; // datatype compressor
   scil_compression_algorithm * byte_compressor; // byte compressor
 

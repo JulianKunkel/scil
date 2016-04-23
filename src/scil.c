@@ -78,6 +78,29 @@ const char * scil_compressor_name(int num){
 	return algo_array[num]->name;
 }
 
+void scil_compression_sprint_last_algorithm_chain(scil_context_p ctx, char * out, int buff_length){
+	int ret = 0;
+	scil_compression_chain_t * lc = & ctx->last_chain;
+	for(int i=0; i < PRECONDITIONER_LIMIT; i++){
+		if(lc->pre_cond[i] == NULL) break;
+		ret = snprintf(out, buff_length, "%s,", lc->pre_cond[i]->name);
+		buff_length -= ret;
+		out += ret;
+	}
+	if (lc->data_compressor != NULL){
+		ret = snprintf(out, buff_length, "%s,", lc->data_compressor->name);
+		buff_length -= ret;
+		out += ret;
+	}
+	if (lc->byte_compressor != NULL){
+		ret = snprintf(out, buff_length, "%s,", lc->byte_compressor->name);
+		buff_length -= ret;
+		out += ret;
+	}
+	// remove the last character
+	out[-1] = 0;
+}
+
 int scil_compressor_num_by_name(const char * name){
 	scil_compression_algorithm ** cur = algo_array;
 	int count = 0;
@@ -452,10 +475,10 @@ int scil_compress(byte* restrict dest,
 	if (hints->force_compression_methods == NULL){ // if != NULL do nothing as we have parsed the pipeline already
 		if (ctx->lossless_compression_needed){
 			// we cannot compress because data must be accurate!
-			parse_compression_algorithms(chain, "memcopy");
+			parse_compression_algorithms(chain, "lz4");
 		}else{
 			// TODO: pick the best algorithm for the settings given in ctx...
-			assert("No algorithm chooser available, yet");
+			parse_compression_algorithms(chain, "lz4");
 		}
 	}
 
@@ -624,13 +647,11 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
 							 const size_t compressed_size,
 							 const scil_context_p ctx,
 							 scil_hints * out_accuracy){
-	// TODO, allocate uncompressed buffer...
-
-	const uint64_t length = scil_get_data_count(dims) * DATATYPE_LENGTH(datatype) + SCIL_BLOCK_HEADER_MAX_SIZE;
-	byte * data_out = (byte*)SAFE_MALLOC(4*length);
+	const uint64_t length = scil_compress_buffer_size_bound(datatype, dims);
+	byte * data_out = (byte*)SAFE_MALLOC(length);
 	scil_hints a;
 
-	int ret = scil_decompress(datatype, data_out, dims, data_compressed, compressed_size, & data_out[length*2]);
+	int ret = scil_decompress(datatype, data_out, dims, data_compressed, compressed_size, & data_out[length/2]);
 	if (ret != 0){
 		goto end;
 	}
@@ -654,23 +675,32 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
 		// check if tolerance level is met:
 		ret = 0;
 		if (a.absolute_tolerance > h.absolute_tolerance){
+			debug("Validation error absolute_tolerance %f > %f\n", a.absolute_tolerance, h.absolute_tolerance);
 			ret = 1;
 		}
 		if (a.relative_tolerance_percent > h.relative_tolerance_percent){
+			debug("Validation error relative_tolerance_percent %f > %f\n", a.relative_tolerance_percent, h.relative_tolerance_percent);
 			ret = 1;
 		}
 		if (a.relative_err_finest_abs_tolerance > h.relative_err_finest_abs_tolerance){
+			debug("Validation error relative_err_finest_abs_tolerance %f < %f\n", a.relative_err_finest_abs_tolerance, h.relative_err_finest_abs_tolerance);
 			ret = 1;
 		}
 		if (a.significant_digits < h.significant_digits){
+			debug("Validation error significant_digits %d > %d\n", a.significant_digits, h.significant_digits);
+			ret = 1;
+		}
+		if (a.significant_bits < h.significant_bits){
+			debug("Validation error significant_bits %d > %d\n", a.significant_bits, h.significant_bits);
 			ret = 1;
 		}
 	}
 
 end:
-  	free(data_out);
+  free(data_out);
 	a.comp_speed.multiplier = 1.0f;
 	a.decomp_speed.multiplier = 1.0f;
 	*out_accuracy = a;
+
 	return ret;
 }

@@ -21,6 +21,8 @@
 
 #define allocate(type, name, count) type* name = (type*)malloc(count * sizeof(type))
 
+static int error_occured = 0;
+
 int test_correctness(double * buffer_in, const int variableSize){
 	size_t out_c_size;
 	// accept a suboptimal compression ratio of 0.5
@@ -41,12 +43,16 @@ int test_correctness(double * buffer_in, const int variableSize){
   scil_init_hints(&hints);
 	hints.absolute_tolerance = 0.01;
 
-	printf("C Error, D Error, Validation, Uncompressed size, Compressed size, Compression factor, CSpeed MiB/s, DSpeed MiB/s, Algo\n");
+	printf("Algorithm, C Error, D Error, Validation, Uncompressed size, Compressed size, Compression factor, CSpeed MiB/s, DSpeed MiB/s, Algo\n");
 
-	for(int i=0; i < scil_compressors_available(); i++ ){
+	for(int i=-1; i < scil_compressors_available(); i++ ){
 		char compression_name[1024];
-		sprintf(compression_name, "%s", scil_compressor_name(i));
-		hints.force_compression_methods = compression_name;
+		if (i == -1){
+			hints.force_compression_methods = NULL;
+		}else{
+			sprintf(compression_name, "%s", scil_compressor_name(i));
+			hints.force_compression_methods = compression_name;
+		}
 
 		int ret = scil_create_compression_context(& ctx, SCIL_TYPE_DOUBLE, &hints);
 		if (ret != 0){
@@ -86,10 +92,21 @@ int test_correctness(double * buffer_in, const int variableSize){
 		size_t u_size = variableSize * sizeof(double);
 		double c_fac = (double)(u_size) / out_c_size;
 
-		printf("%d, %d, %d, %lu, %lu, %.1lf, %.1lf, %.1lf, %s \n",
-			ret_c, ret_d, ret_v,
+		if (ret_c != 0 || ret_d != 0 ){ // Ignore validation errors here
+			error_occured = 1;
+		}
+		if( i == -1 && ret_v != 0){
+			error_occured = 1;
+		}
+		if ( i == -1){
+			hints.force_compression_methods = compression_name;
+			scil_compression_sprint_last_algorithm_chain(ctx, compression_name, 1024);
+		}
+
+		printf("%d, %d, %d, %d, %lu, %lu, %.1lf, %.1lf, %.1lf, %s \n",
+			i, ret_c, ret_d, ret_v,
 			u_size, out_c_size, c_fac,
-			u_size/seconds_compress/1024 /1024, u_size/seconds_decompress/1024 /1024, hints.force_compression_methods );
+			u_size/seconds_compress/1024 /1024, u_size/seconds_decompress/1024 /1024, hints.force_compression_methods);
   }
 
 	printf("Done.\n");
@@ -132,5 +149,5 @@ int main(int argc, char** argv){
 	test_patternALT(buffer_in, variableSize);
 
 	free(buffer_in);
-	return 0;
+	return error_occured;
 }
