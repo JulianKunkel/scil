@@ -85,18 +85,18 @@ FILE* safe_fopen(const char* path, const char* args, const char* src, unsigned l
     return file;
 }
 
-size_t scilU_write_dims_to_buffer(void* dest, const scil_dims_t dims){
+size_t scilU_write_dims_to_buffer(void* dest, const scil_dims* dims){
 
     assert(dest != NULL);
 
     size_t header_size = 0;
 
-    *((uint8_t*)dest) = dims.dims;
+    *((uint8_t*)dest) = dims->dims;
     dest = (char*)dest + 1;
     header_size++;
 
-    for(uint8_t i = 0; i < dims.dims; ++i){
-        *((size_t*)dest) = dims.length[i];
+    for(uint8_t i = 0; i < dims->dims; ++i){
+        *((size_t*)dest) = dims->length[i];
         dest = (char*)dest + 8;
         header_size += 8;
     }
@@ -104,13 +104,12 @@ size_t scilU_write_dims_to_buffer(void* dest, const scil_dims_t dims){
     return header_size;
 }
 
-void scilU_read_dims_from_buffer(scil_dims_t dims, void* dest){
-
-    dims.dims = *((uint8_t*)dest);
+void scilU_read_dims_from_buffer(scil_dims* dims, void* dest){
+    dims->dims = *((uint8_t*)dest);
     dest = (char*)dest + 1;
 
-    for(uint8_t i = 0; i < dims.dims; ++i){
-        dims.length[i] = *((uint64_t*)dest);
+    for(uint8_t i = 0; i < dims->dims; ++i){
+        dims->length[i] = *((uint64_t*)dest);
         dest = (char*)dest + 8;
     }
 }

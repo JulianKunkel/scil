@@ -7,12 +7,10 @@ foreach(TESTFILE ${TESTFILES})
   else()
     get_filename_component(TESTNAME_C ${TESTFILE} NAME)
     STRING(REGEX REPLACE ".c$" "" TESTNAME ${TESTNAME_C})
-      add_executable(test-${TESTNAME}.exe ${TESTFILE})
+    add_executable(test-${TESTNAME}.exe ${TESTFILE})
     target_link_libraries(test-${TESTNAME}.exe scil)
-
-    add_test(${TESTNAME} ./test-${TESTNAME}.exe)
   endif()
-
 endforeach()
 
-SUBDIRS (complex)
+
+#add_test(${TESTNAME} ./test-${TESTNAME}.exe)

@@ -23,7 +23,7 @@ int scil_fpzip_compress_<DATATYPE>(const scil_context_p ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
                         <DATATYPE>*restrict source,
-                        const scil_dims_t dims)
+                        const scil_dims* dims)
 {
     FPZ* fpz = fpzip_write_to_buffer(dest, *dest_size);
     fpz->type = SCIL_TYPE_<DATATYPE_UPPER>; // in fpzip float is 0 and double 1
@@ -34,12 +34,12 @@ int scil_fpzip_compress_<DATATYPE>(const scil_context_p ctx,
     fpz->nz = 1; //
     fpz->nf = 1; //
 
-    if(dims.dims < 5){
-        switch(dims.dims){
-            case 4: fpz->nf = dims.length[3];
-            case 3: fpz->nz = dims.length[2];
-            case 2: fpz->ny = dims.length[1];
-            case 1: fpz->nx = dims.length[0];
+    if(dims->dims < 5){
+        switch(dims->dims){
+            case 4: fpz->nf = dims->length[3];
+            case 3: fpz->nz = dims->length[2];
+            case 2: fpz->ny = dims->length[1];
+            case 1: fpz->nx = dims->length[0];
         }
     }
 
@@ -63,18 +63,18 @@ int scil_fpzip_compress_<DATATYPE>(const scil_context_p ctx,
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int  scil_fpzip_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
-                            scil_dims_t dims,
+                            scil_dims* dims,
                             byte*restrict compressed_buf_in,
                             const size_t in_size)
 {
     FPZ* fpz = fpzip_read_from_buffer(compressed_buf_in);
 
     // Read dims out of fpz, TODO: avoid storing dims as the app knows it.
-    dims.dims = 0;
-    if(fpz->nx != 1) dims.length[0] = fpz->nx; dims.dims++;
-    if(fpz->ny != 1) dims.length[1] = fpz->ny; dims.dims++;
-    if(fpz->nz != 1) dims.length[2] = fpz->nz; dims.dims++;
-    if(fpz->nf != 1) dims.length[3] = fpz->nf; dims.dims++;
+    dims->dims = 0;
+    if(fpz->nx != 1) dims->length[0] = fpz->nx; dims->dims++;
+    if(fpz->ny != 1) dims->length[1] = fpz->ny; dims->dims++;
+    if(fpz->nz != 1) dims->length[2] = fpz->nz; dims->dims++;
+    if(fpz->nf != 1) dims->length[3] = fpz->nf; dims->dims++;
 
     if (!fpzip_read_header(fpz)) {
       fprintf(stderr, "Cannot read header in algo-fpzip decompression: %s\n", fpzip_errstr[fpzip_errno]);

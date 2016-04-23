@@ -28,10 +28,9 @@ int test_correctness(double * buffer_in, const int variableSize){
 	allocate(byte, buffer_out, c_size);
 	allocate(byte, tmp_buff, c_size);
 	allocate(double, buffer_uncompressed, variableSize);
-	allocate(size_t, length, 1);
-	length[0] = variableSize;
 
-	scil_dims_t dims = scil_init_dims(1, length);
+	scil_dims dims;
+	scil_init_dims_1d(&dims, variableSize);
 
   scil_context_p ctx;
   scil_hints hints;
@@ -61,7 +60,7 @@ int test_correctness(double * buffer_in, const int variableSize){
 		scilU_start_timer(& timer);
 
 		for(uint8_t i = 0; i < loops; ++i){
-			ret_c = scil_compress(buffer_out, c_size, buffer_in, dims,&out_c_size, ctx);
+			ret_c = scil_compress(buffer_out, c_size, buffer_in, & dims,&out_c_size, ctx);
 			if(ret_c != 0) break;
 		}
 		double seconds_compress = scilU_stop_timer(timer);
@@ -71,14 +70,14 @@ int test_correctness(double * buffer_in, const int variableSize){
 		if(ret_c == 0){
 			scilU_start_timer(& timer);
 			for(uint8_t i = 0; i < loops; ++i){
-				ret_d = scil_decompress(SCIL_TYPE_DOUBLE, buffer_uncompressed, dims, buffer_out, out_c_size, tmp_buff);
+				ret_d = scil_decompress(SCIL_TYPE_DOUBLE, buffer_uncompressed, & dims, buffer_out, out_c_size, tmp_buff);
 				if(ret_d != 0) break;
 			}
 		}
 		double seconds_decompress = scilU_stop_timer(timer);
 
 		if(ret_d == 0){
-			ret_v = scil_validate_compression(SCIL_TYPE_DOUBLE, buffer_in, dims, buffer_out, out_c_size, ctx, & out_accuracy);
+			ret_v = scil_validate_compression(SCIL_TYPE_DOUBLE, buffer_in, & dims, buffer_out, out_c_size, ctx, & out_accuracy);
 		}
 
 		size_t u_size = variableSize * sizeof(double);
@@ -91,7 +90,6 @@ int test_correctness(double * buffer_in, const int variableSize){
   }
 
 	printf("Done.\n");
- 	free(length);
 	free(buffer_out);
 	free(buffer_uncompressed);
 	return 0;

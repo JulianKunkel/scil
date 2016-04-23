@@ -34,7 +34,7 @@
  * \param source_count Element count of uncompressed buffer
  * \return Success state of the compression
  */
-int scil_zfp_precision_compress_<DATATYPE>(const scil_context_p ctx, byte* restrict dest, size_t* restrict dest_size, <DATATYPE>*restrict source, const scil_dims_t dims);
+int scil_zfp_precision_compress_<DATATYPE>(const scil_context_p ctx, byte* restrict dest, size_t* restrict dest_size, <DATATYPE>*restrict source, const scil_dims* dims);
 
 /**
  * \brief Decompression function of zfp with relative error tolerance
@@ -44,7 +44,7 @@ int scil_zfp_precision_compress_<DATATYPE>(const scil_context_p ctx, byte* restr
  * \param in_size Byte size of compressed buffer
  * \return Success state of the compression
  */
-int scil_zfp_precision_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_dims_t dims, byte*restrict compressed_buf_in, const size_t in_size);
+int scil_zfp_precision_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_dims* dims, byte*restrict compressed_buf_in, const size_t in_size);
 
 extern scil_compression_algorithm algo_zfp_precision;
 

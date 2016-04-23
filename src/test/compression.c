@@ -109,17 +109,15 @@ int main(){
 	size_t c_buf_size = u_buf_size + SCIL_BLOCK_HEADER_MAX_SIZE;
 	byte * c_buf = (byte*)SAFE_MALLOC(c_buf_size*4);
 
-	size_t* length = (uint64_t*)SAFE_MALLOC(sizeof(size_t));
-	length[0] = count;
+	scil_dims dims;
+	scil_init_dims_1d(& dims, count);
 
-	scil_dims_t dims = scil_init_dims(1, length);
-
-	ret = scil_compress(c_buf, c_buf_size, u_buf, dims, &c_buf_size, ctx);
+	ret = scil_compress(c_buf, c_buf_size, u_buf, & dims, &c_buf_size, ctx);
 
 	printf("C size: %lu\n", c_buf_size);
 
 	double * data_out = (double*)SAFE_MALLOC(u_buf_size);
-	ret = scil_decompress(SCIL_TYPE_DOUBLE, data_out, dims, c_buf, c_buf_size, & c_buf[c_buf_size*2]);
+	ret = scil_decompress(SCIL_TYPE_DOUBLE, data_out, & dims, c_buf, c_buf_size, & c_buf[c_buf_size*2]);
 
 	printf("Decompression %d\n", ret);
 
@@ -136,20 +134,19 @@ int main(){
 	double f1 = 10.0;
 	double f2 = 10.5;
 
-	scil_dims_t dims1 = scil_init_dims(1, length);
+	scil_dims dims1;
+	scil_init_dims_1d(&dims1, 1);
 
-	scil_determine_accuracy(SCIL_TYPE_DOUBLE, & f1, &f2, dims1, 0.01, & accuracy);
+	scil_determine_accuracy(SCIL_TYPE_DOUBLE, & f1, &f2, & dims1, 0.01, & accuracy);
 	scil_hints_print(& accuracy);
 
-	scil_determine_accuracy(SCIL_TYPE_DOUBLE, & f1, &f2, dims1, 0.51, & accuracy);
+	scil_determine_accuracy(SCIL_TYPE_DOUBLE, & f1, &f2, & dims1, 0.51, & accuracy);
 	scil_hints_print(& accuracy);
 
-	ret = scil_validate_compression(SCIL_TYPE_DOUBLE, u_buf, dims, c_buf, c_buf_size, ctx, & accuracy);
+	ret = scil_validate_compression(SCIL_TYPE_DOUBLE, u_buf, & dims, c_buf, c_buf_size, ctx, & accuracy);
 
 	printf("\nscil_validate_compression returned %s\n", ret == 0 ? "OK" : "ERROR");
 	scil_hints_print(& accuracy);
-
-	free(length);
 
 	free(c_buf);
 	free(data_out);

@@ -181,16 +181,40 @@ static int parse_compression_algorithms(scil_compression_chain_t * chain, char *
 	return 0;
 }
 
-
-scil_dims_t scil_init_dims(const uint8_t dimensions_count, size_t* dimensions_length){
-	return (scil_dims_t){ .dims = dimensions_count, .length = dimensions_length };
+void scil_init_dims_1d(scil_dims* dims, size_t dim1){
+	dims->dims = 1;
+	dims->length[0] = dim1;
+}
+void scil_init_dims_2d(scil_dims* dims, size_t dim1, size_t dim2){
+	dims->dims = 2;
+	dims->length[0] = dim1;
+	dims->length[1] = dim2;
+}
+void scil_init_dims_3d(scil_dims* dims, size_t dim1, size_t dim2, size_t dim3){
+	dims->dims = 3;
+	dims->length[0] = dim1;
+	dims->length[1] = dim2;
+	dims->length[2] = dim3;
+}
+void scil_init_dims_4d(scil_dims* dims, size_t dim1, size_t dim2, size_t dim3, size_t dim4){
+	dims->dims = 4;
+	dims->length[0] = dim1;
+	dims->length[1] = dim2;
+	dims->length[2] = dim3;
+	dims->length[2] = dim4;
 }
 
-size_t scil_get_data_count(const scil_dims_t dims){
+void scil_init_dims_array(scil_dims* dims, uint8_t count, const size_t* length){
+	dims->dims = count;
+	assert(count <= 4);
+	memcpy(& dims->length, length, count * sizeof(size_t));
+}
 
+
+size_t scil_get_data_count(const scil_dims* dims){
 	size_t result = 1;
-	for(uint8_t i = 0; i < dims.dims; ++i){
-		result *= dims.length[i];
+	for(uint8_t i = 0; i < dims->dims; ++i){
+		result *= dims->length[i];
 	}
 	return result;
 }
@@ -390,12 +414,12 @@ A datatype compressor terminates the chain of preconditioners.
 int scil_compress(byte* restrict dest,
 					size_t in_dest_size,
 					void*restrict source,
-					scil_dims_t dims,
+					scil_dims* dims,
 					size_t* restrict out_size_p,
 					scil_context_p ctx)
 {
 	int ret = SCIL_NO_ERR;
-	if (dims.dims == 0){
+	if (dims->dims == 0){
 		*out_size_p = 0;
 		return 0;
 	}
@@ -442,10 +466,10 @@ int scil_compress(byte* restrict dest,
 	for(int i=0; i < chain->size; i++){
 		switch(ctx->datatype){
 			case(SCIL_TYPE_FLOAT):
-				//ret = algo->c.DPrecond.compress_float(ctx, dest, header_size_out, source, dims);
+				//ret = algo->c.Dtype.compress_float(ctx, dest, header_size_out, source, dims);
 				break;
 			case(SCIL_TYPE_DOUBLE):
-				//ret = algo->c.DPrecond.compress_double(ctx, dest, header_size_out, source, dims);
+				//ret = algo->c.Dtype.compress_double(ctx, dest, header_size_out, source, dims);
 				break;
 		}
 
@@ -491,12 +515,10 @@ int scil_compress(byte* restrict dest,
 	return 0;
 }
 
-int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims_t dims,
+int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims*const dims,
     byte*restrict source, const size_t source_size, byte*restrict buff_tmp1){
 
-	//assert(dims.dims == 1);
-
-	if (dims.dims == 0){
+	if (dims->dims == 0){
 		return 0;
 	}
 
@@ -559,19 +581,16 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims_t
 }
 
 void scil_determine_accuracy(enum SCIL_Datatype datatype,
-	const void * restrict  data_1, const void * restrict data_2, scil_dims_t dims,
+	const void * restrict  data_1, const void * restrict data_2, scil_dims* dims,
 	const double relative_err_finest_abs_tolerance, scil_hints * out_hints){
 	scil_hints a;
 	a.absolute_tolerance = 0;
 	a.relative_err_finest_abs_tolerance = 0;
 	a.relative_tolerance_percent = 0;
 
-	assert(dims.dims == 1);
-	// TODO walk trough all dimensions ...
-
 	if(datatype == SCIL_TYPE_DOUBLE){
 		a.significant_bits = MANTISSA_LENGTH_DOUBLE; // in bits
-		scil_determine_accuracy_1d_double((double*) data_1, (double*) data_2, dims.dims, relative_err_finest_abs_tolerance, & a);
+		scil_determine_accuracy_1d_double((double*) data_1, (double*) data_2, dims->dims, relative_err_finest_abs_tolerance, & a);
 	}else{
 		a.significant_bits = MANTISSA_LENGTH_FLOAT; // in bits
 		scil_determine_accuracy_1d_float((float*) data_1, (float*) data_2, scil_get_data_count(dims), relative_err_finest_abs_tolerance, & a);
@@ -590,13 +609,11 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
 
 int scil_validate_compression(enum SCIL_Datatype datatype,
                              const void*restrict data_uncompressed,
-							 scil_dims_t dims,
+							 scil_dims* dims,
 							 byte*restrict data_compressed,
 							 const size_t compressed_size,
 							 const scil_context_p ctx,
 							 scil_hints * out_accuracy){
-
-  assert(dims.length != NULL);
 	// TODO, allocate uncompressed buffer...
 
 	const uint64_t length = scil_get_data_count(dims) * DATATYPE_LENGTH(datatype) + SCIL_BLOCK_HEADER_MAX_SIZE;

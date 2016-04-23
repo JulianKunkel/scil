@@ -63,7 +63,7 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
                         <DATATYPE>*restrict source,
-                        const scil_dims_t dims )
+                        const scil_dims* dims )
 {
     //Finding minimum and maximum values in data
     <DATATYPE> min, max;
@@ -96,10 +96,6 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
     *dest = bits_per_num;
     dest++;
     head_size += 1;
-
-    size_t dim_size = scilU_write_dims_to_buffer(dest, dims);
-    dest += dim_size; // Weird but has to be? I thought the last method incremented the dest pointer.
-    head_size += dim_size;
 
     //Get number of needed bytes for the whole compressed buffer
     *dest_size = round_up_byte(bits_per_num * scil_get_data_count(dims)) + head_size;
@@ -159,7 +155,7 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict dest,
-                            scil_dims_t dims,
+                            scil_dims* dims,
                             byte*restrict source,
                             const size_t source_size )
 {
@@ -181,11 +177,7 @@ int scil_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict dest,
     bits_per_num = *source;
     source++;
     in_size--;
-
-    scilU_read_dims_from_buffer(dims, source);
-    source += 1 + dims.dims * sizeof(size_t); // Weird again.
-    in_size -= 1 + dims.dims * sizeof(size_t);
-
+    
     uint64_t max_index = scil_get_data_count(dims);
     uint64_t index = 0;
     for(uint64_t i = 0; index < max_index; i+=bits_per_num){

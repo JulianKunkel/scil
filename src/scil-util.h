@@ -19,6 +19,7 @@
 /**
  * \file
  * \brief Contains miscellanious useful functions.
+ * \author Julian Kunkel <juliankunkel@googlemail.com>
  * \author Lennart Braun <3braun@informatik.uni-hamburg.de>
  * \author Armin Schaare <3schaare@informatik.uni-hamburg.de>
  */
@@ -79,8 +80,7 @@ void* safe_malloc (size_t size, const char* file, unsigned long line);
  * \return Pointer to allocated buffer.
  * \post Allocation successfull or exit with error message.
  */
-void* safe_calloc (size_t nmemb, size_t size, const char* file,
-                   unsigned long line);
+void* safe_calloc (size_t nmemb, size_t size, const char* file, unsigned long line);
 
 
 /**
@@ -96,8 +96,7 @@ void* safe_calloc (size_t nmemb, size_t size, const char* file,
  * \return Pointer to allocated buffer.
  * \post Allocation successfull or exit with error message.
  */
-void* safe_realloc (void* ptr, size_t size, const char* file,
-                    unsigned long line);
+void* safe_realloc (void* ptr, size_t size, const char* file, unsigned long line);
 
 
 /**
@@ -171,7 +170,7 @@ typedef union {
  * \pre dest != NULL
  * \return Byte size consumed of destination buffer
  */
-size_t scilU_write_dims_to_buffer(void* dest, const scil_dims_t dims);
+size_t scilU_write_dims_to_buffer(void* dest, const scil_dims* dims);
 
 /**
  * \brief Reads dimensional information from buffer.
@@ -179,7 +178,7 @@ size_t scilU_write_dims_to_buffer(void* dest, const scil_dims_t dims);
  * \pre dest != NULL
  * \return Dimensional configuration of compressed data
  */
-void scilU_read_dims_from_buffer(scil_dims_t dims, void* dest);
+void scilU_read_dims_from_buffer(scil_dims* dims, void* dest);
 
 ////////////// TIMER MANAGEMENT /////////////////////
 

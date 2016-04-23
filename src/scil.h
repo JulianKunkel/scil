@@ -103,29 +103,16 @@ typedef struct{
 
 } scil_hints;
 
+typedef struct scil_context_t* scil_context_p;
+
 /** \brief Struct to contain the dimensional configuration of data. */
 typedef struct {
     /** \brief Number of dimensions. */
     uint8_t dims;
 
-    /**
-     * \brief Lengths of each dimension.
-     * The caller is responsible to free it.
-     */
-    size_t * length;
-} scil_dims_t;
-
-
-// The structure is hidden in the internal header
-#ifdef SCIL_INTERNAL_HEADER_
-//#warning USING INTERNAL HEADER
-#else
-struct scil_context_t{
-    void * tmp;
-};
-#endif
-
-typedef struct scil_context_t* scil_context_p;
+    // dimensions as long as they are <= 4
+    size_t length[4];
+} scil_dims;
 
 const char* scil_strerr(enum scil_error_code error);
 
@@ -136,7 +123,14 @@ int scil_compressors_available();
 const char * scil_compressor_name(int num);
 int scil_compressor_num_by_name(const char * name);
 
-scil_dims_t scil_init_dims(const uint8_t dimensions_count, size_t* dimensions_length);
+void scil_init_dims_1d(scil_dims* dims, size_t dim1);
+void scil_init_dims_2d(scil_dims* dims, size_t dim1, size_t dim2);
+void scil_init_dims_3d(scil_dims* dims, size_t dim1, size_t dim2, size_t dim3);
+void scil_init_dims_4d(scil_dims* dims, size_t dim1, size_t dim2, size_t dim3, size_t dim4);
+
+/*
+ */
+void scil_init_dims_array(scil_dims* dims, uint8_t dimensions_count, const size_t* dimensions_length);
 
 /*
  * \brief Method to get the number of actual data points in multidimensional
@@ -144,7 +138,7 @@ scil_dims_t scil_init_dims(const uint8_t dimensions_count, size_t* dimensions_le
  * \param dims Information about the dimensional configuration of the data
  * \return Number of data points in the data
  */
-size_t scil_get_data_count(const scil_dims_t dims);
+size_t scil_get_data_count(const scil_dims* dims);
 
 /**
  * \brief Initialize the data structure with the valid hints that are relaxed
@@ -182,7 +176,7 @@ int scil_destroy_compression_context(scil_context_p  * out_ctx);
  * \return Success state of the compression
  */
 int scil_compress(byte* restrict dest, size_t dest_size,
-  void*restrict source, scil_dims_t dims, size_t* restrict out_size, scil_context_p  ctx);
+  void*restrict source, scil_dims* dims, size_t* restrict out_size, scil_context_p  ctx);
 
 /**
  * \brief Method to decompress a data buffer
@@ -196,11 +190,11 @@ int scil_compress(byte* restrict dest, size_t dest_size,
  * \pre source != NULL
  * \return Success state of the decompression
  */
-int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims_t expected_dims,
+int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims * const expected_dims,
     byte*restrict source, const size_t source_size, byte*restrict tmp_buff);
 
 void scil_determine_accuracy(enum SCIL_Datatype datatype, const void * restrict  data_1,
-    const void * restrict data_2, scil_dims_t dims,
+    const void * restrict data_2, scil_dims* dims,
     const double relative_err_finest_abs_tolerance, scil_hints * out_hints);
 
 /**
@@ -209,7 +203,7 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype, const void * restrict 
  */
 int scil_validate_compression(enum SCIL_Datatype datatype,
                              const void*restrict data_uncompressed,
-                             scil_dims_t dims,
+                             scil_dims* dims,
                              byte*restrict data_compressed,
                              const size_t compressed_size,
                              const scil_context_p  ctx,

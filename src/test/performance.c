@@ -708,11 +708,8 @@ int test_performance(double bias, double discountFactor){
 	allocate(byte, buffer_out, c_size);
 	if(!buffer_out) return kErrNoMem;
 
-	allocate(size_t, length, 1);
-	if(!length) return kErrNoMem;
-	length[0] = variableSize;
-
-	scil_dims_t dims = scil_init_dims(1, length);
+	scil_dims dims;
+	scil_init_dims_1d(& dims, variableSize);
 
   scil_context_p ctx;
   scil_hints hints;
@@ -747,7 +744,7 @@ int test_performance(double bias, double discountFactor){
 
 				clock_t start, end;
 				start = clock();
-				scil_compress(buffer_out, c_size, oBuffer, dims, &out_c_size, ctx);
+				scil_compress(buffer_out, c_size, oBuffer, & dims, &out_c_size, ctx);
 				end = clock();
 
 				seconds += (double)(end - start);
@@ -782,7 +779,6 @@ int test_performance(double bias, double discountFactor){
 	free(dimSizes);
 	free(dimSizes2);
 	free(buffer_out);
-	free(length);
 
 	return 0;
 }

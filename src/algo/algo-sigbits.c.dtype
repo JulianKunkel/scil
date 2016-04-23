@@ -75,7 +75,7 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_p ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
                         <DATATYPE>*restrict source,
-                        const scil_dims_t dims)
+                        const scil_dims* dims)
 {
     size_t count = scil_get_data_count(dims);
 
@@ -87,12 +87,7 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_p ctx,
     uint8_t exp_bits = calc_exp_bits(min_exponent, max_exponent);
     uint8_t mant_bits = ctx->hints.significant_bits;
 
-    uint8_t header_size = 1; // magic_number
-
-    // Write header
-    scilU_write_dims_to_buffer(dest, dims);
-    dest += 1 + dims.dims * sizeof(size_t); // Weird again.
-    header_size += 1 + dims.dims * sizeof(size_t);
+    uint8_t header_size = 0;
 
     *dest = signs_id;
     dest++;
@@ -170,7 +165,7 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_p ctx,
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_sigbits_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
-                            scil_dims_t dims,
+                            scil_dims* dims,
                             byte*restrict compressed_buf_in,
                             const size_t in_size)
 {
@@ -180,11 +175,6 @@ int scil_sigbits_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
     int16_t min_exponent;
 
     size_t in_size_cp = in_size;
-
-    // Read header
-    scilU_read_dims_from_buffer(dims, compressed_buf_in);
-    compressed_buf_in += 1 + dims.dims * sizeof(size_t); // Weird again.
-    in_size_cp -= 1 + dims.dims * sizeof(size_t);
 
     signs_id = *((uint8_t*)compressed_buf_in);
     compressed_buf_in++;
