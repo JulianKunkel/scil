@@ -20,6 +20,7 @@
 
 #include <scil-internal.h>
 #include <scil-algo-chooser.h>
+#include <scil-hardware-limits.h>
 
 // known algorithms:
 #include <algo/algo-memcopy.h>
@@ -319,6 +320,7 @@ static void scil_check_if_initialized(){
 		}
 	}
 
+	scilI_init_hardware_limits();
 	scil_compression_algo_chooser_init();
 	scil_initialized = 1;
 }

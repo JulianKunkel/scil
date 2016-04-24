@@ -86,6 +86,7 @@ typedef struct{
     byte magic_number;
 
     enum compressor_type type;
+    char is_lossy; // byte compressors are expected to be lossless anyway
 } scil_compression_algorithm;
 
 // at most we support chaining of 10 preconditioners
@@ -94,8 +95,9 @@ typedef struct {
   scil_compression_algorithm * data_compressor; // datatype compressor
   scil_compression_algorithm * byte_compressor; // byte compressor
 
-  int precond_count;
-  int total_size; // includes data and byte compressors
+  char precond_count;
+  char total_size; // includes data and byte compressors
+  char is_lossy;
 } scil_compression_chain_t;
 
 
@@ -110,5 +112,6 @@ struct scil_context_t{
 
 int scilI_parse_compression_algorithms(scil_compression_chain_t * chain, char * str_in);
 size_t scilI_get_data_size(enum SCIL_Datatype type, const scil_dims* dims);
+scil_compression_algorithm * scilI_find_compressor_by_name(const char * name);
 
 #endif

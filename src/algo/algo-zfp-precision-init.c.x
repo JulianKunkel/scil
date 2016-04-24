@@ -10,7 +10,8 @@ scil_compression_algorithm algo_zfp_precision = {
     },
     "zfp-precision",
     6,
-    SCIL_COMPRESSOR_TYPE_DATATYPES
+    SCIL_COMPRESSOR_TYPE_DATATYPES,
+    1
 };
 
 #endif

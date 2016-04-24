@@ -28,7 +28,8 @@ scil_compression_algorithm algo_abstol = {
     },
     "abstol",
     1,
-    SCIL_COMPRESSOR_TYPE_DATATYPES
+    SCIL_COMPRESSOR_TYPE_DATATYPES,
+    1
 };
 
 #endif

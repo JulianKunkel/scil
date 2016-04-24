@@ -118,7 +118,8 @@ scil_compression_algorithm algo_sigbits = {
     },
     "sigbits",
     3,
-    SCIL_COMPRESSOR_TYPE_DATATYPES
+    SCIL_COMPRESSOR_TYPE_DATATYPES,
+    1
 };
 
 #endif
