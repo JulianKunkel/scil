@@ -151,7 +151,7 @@ static void fix_double_setting(double * dbl){
 	}
 }
 
-static scil_compression_algorithm * find_compressor_by_name(const char * name){
+scil_compression_algorithm * scilI_find_compressor_by_name(const char * name){
 	int num = scil_compressor_num_by_name(name);
 	if (num < 0 || num >= scil_compressors_available()){
 		return NULL;
@@ -170,18 +170,20 @@ int scilI_parse_compression_algorithms(scil_compression_chain_t * chain, char * 
 	chain->precond_count = 0;
 	chain->total_size = 0;
 
+	char lossy = 0;
 	for( int i = 0; token != NULL; i++){
-		scil_compression_algorithm * algo = find_compressor_by_name(token);
+		scil_compression_algorithm * algo = scilI_find_compressor_by_name(token);
 		if (algo == NULL){
 			return SCIL_EINVAL;
 		}
 		chain->total_size ++;
+		lossy += algo->is_lossy;
 		switch(algo->type){
 			case(SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER):{
 				if (stage != 1){
 					return -1; // INVALID CHAIN
 				}
-				chain->pre_cond[chain->precond_count] = algo;
+				chain->pre_cond[(int) chain->precond_count] = algo;
 				chain->precond_count++;
 				break;
 			}case (SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES):{
@@ -202,9 +204,10 @@ int scilI_parse_compression_algorithms(scil_compression_chain_t * chain, char * 
 		}
 		token = strtok_r(NULL, ",", & saveptr);
 	}
+	chain->is_lossy = lossy > 0 ? 1 : 0;
 
 	// at least one algo should be set
-	if(chain->pre_cond[0] == NULL && chain->data_compressor == NULL && chain->byte_compressor == NULL ){
+	if(chain->total_size == 0){
 		return SCIL_EINVAL;
 	}
 
@@ -309,6 +312,10 @@ static void scil_check_if_initialized(){
 	for (scil_compression_algorithm ** algo = algo_array; *algo != NULL ; algo++, i++){
 		if ((*algo)->magic_number != i){
 			scilU_critical_error("Magic number does not match!");
+		}
+		if( (*algo)->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES ){
+			// we expect that all byte compressors are lossless
+			(*algo)->is_lossy = 0;
 		}
 	}
 
@@ -591,6 +598,7 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims*c
 
 	//for(int i=0; i < chain_size; i++){
 	uint8_t magic_number = src_adj[src_size-1];
+	src_size--;
 	//printf("SCHUH %d %lld\n", magic_number, source_size);
 
 	scil_compression_algorithm * algo = algo_array[magic_number];
@@ -605,8 +613,6 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims*c
 
 		if(remaining_compressors > 0){
 			//scilU_print_buffer(dst, src_size);
-
-			src_size--;
 			magic_number = ((char*) dst)[src_size];
 			algo = algo_array[magic_number];
 		}
