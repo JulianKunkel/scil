@@ -132,9 +132,17 @@ void test_patternRND(double * buffer_in, const int variableSize){
 }
 
 void test_patternALT(double * buffer_in, const int variableSize){
-	printf("Pattern ALTERNATING\n");
+	printf("Pattern ALTERNATING 0-99\n");
 	for (int i=0; i < variableSize; i++){
 		buffer_in[i] = i % 100;
+	}
+	test_correctness(buffer_in, variableSize);
+}
+
+void test_patternALT2(double * buffer_in, const int variableSize){
+	printf("Pattern ALTERNATING 0-1\n");
+	for (int i=0; i < variableSize; i++){
+		buffer_in[i] = i % 2;
 	}
 	test_correctness(buffer_in, variableSize);
 }
@@ -147,6 +155,7 @@ int main(int argc, char** argv){
 	test_pattern0(buffer_in, variableSize);
 	test_patternRND(buffer_in, variableSize);
 	test_patternALT(buffer_in, variableSize);
+	test_patternALT2(buffer_in, variableSize);
 
 	free(buffer_in);
 	return error_occured;

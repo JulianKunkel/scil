@@ -13,12 +13,9 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SCIL_ALGO_CHOOSER_H__
-#define SCIL_ALGO_CHOOSER_H__
+#ifndef SCIL_CONFIG_H_
+#define SCIL_CONFIG_H_
 
-#include <scil.h>
-
-void scil_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_context_p ctx);
-void scil_compression_algo_chooser_init();
+#define SYSTEM_CONFIGURATION_FILE "@CMAKE_INSTALL_PREFIX@/etc/scil.conf"
 
 #endif

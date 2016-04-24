@@ -14,19 +14,50 @@
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <string.h>
+#include <float.h>
 
 #include <scil-internal.h>
 #include <scil-algo-chooser.h>
+#include <scil-config.h>
 
-static float determine_randomness_float(float* source, size_t count){
-  // do sth...
-  return 0;
+#include <algo/lz4fast.h>
+
+
+static float determine_randomness(void* source, size_t count){
+  // We may want to use https://en.wikipedia.org/wiki/Randomness_tests
+  byte buffer[15000];
+  size_t out_size = 15000;
+  size_t in_size = 10000;
+  if (count < in_size){
+    in_size = count;
+  }
+  int ret = scil_lz4fast_compress(NULL, buffer, &out_size, source, in_size);
+  if (ret == 0){
+    double rnd = out_size * 100.0 / in_size ;
+    return rnd;
+  }else{
+    critical("lz4fast error to determine_randomness %d\n", ret);
+  }
 }
 
-static float determine_randomness_double(double* source, size_t count){
-  return 0;
-}
+void scil_compression_algo_chooser_init(){
+  char * filename = getenv("SCIL_SYSTEM_CHARACTERISTICS_FILE");
+  if(filename == NULL){
+    filename = SYSTEM_CONFIGURATION_FILE;
+  }
+  FILE * data = fopen("scil.conf", "r");
+  if (data == NULL){
+    data = fopen(filename, "r");
+    if(data == NULL){
+      warn("Could not open configuration file %s\n", filename);
+      return;
+    }
+  }
 
+  
+
+  fclose(data);
+}
 
 void scil_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_context_p ctx){
   scil_compression_chain_t * chain = & ctx->chain;
@@ -43,7 +74,7 @@ void scil_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_c
     }else{
       ret = scilI_parse_compression_algorithms(chain, chainEnv);
       if (ret != SCIL_NO_ERR){
-        critical("[SCIL] The environment variable SCIL_FORCE_COMPRESSION_CHAIN is invalid with \"%s\"\n", chainEnv);
+        critical("The environment variable SCIL_FORCE_COMPRESSION_CHAIN is invalid with \"%s\"\n", chainEnv);
       }
       return;
     }
@@ -56,25 +87,38 @@ void scil_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_c
     return;
   }
 
-  float r;
-  switch(ctx->datatype){
-    case SCIL_TYPE_FLOAT:
-      r = determine_randomness_float((float*)source, count);
-      break;
-    case SCIL_TYPE_DOUBLE:
-      r = determine_randomness_double((double*)source, count);
-      break;
-  }
-
+  float r = determine_randomness(source, count);
   if (ctx->lossless_compression_needed){
       // we cannot compress because data must be accurate!
   }
   // TODO: pick the best algorithm for the settings given in ctx...
 
-  if (r > 99){
+  if (r > 95){
     ret = scilI_parse_compression_algorithms(chain, "memcopy");
   }else{
     ret = scilI_parse_compression_algorithms(chain, "lz4");
   }
   assert(ret == SCIL_NO_ERR);
 }
+
+
+/*
+// determine min, max, mean and stdev
+double mean = 0;
+double mn = DBL_MAX;
+double mx = DBL_MIN;
+for(int i=0; i < count; i++){
+  mean += source[i];
+  mx = max(mx, source[i]);
+  mn = min(mn, source[i]);
+}
+mean /= SAMPLES;
+
+double spread = mx - mn;
+
+double stddev = 0;
+for(int i=0; i < count; i++){
+  stddev += (source[i]-mean)*(source[i]-mean);
+}
+printf("%f %f stddev %f\n", mn, mx, stddev/spread/spread/count/count);
+*/

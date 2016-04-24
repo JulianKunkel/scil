@@ -297,7 +297,28 @@ scil_hints scil_retrieve_effective_hints(scil_context_p ctx){
 	return ctx->hints;
 }
 
+static int scil_initialized = 0;
+
+static void scil_check_if_initialized(){
+	if(scil_initialized ){
+		return;
+	}
+
+	// verify correctness of algo_array
+	int i = 0;
+	for (scil_compression_algorithm ** algo = algo_array; *algo != NULL ; algo++, i++){
+		if ((*algo)->magic_number != i){
+			scilU_critical_error("Magic number does not match!");
+		}
+	}
+
+	scil_compression_algo_chooser_init();
+	scil_initialized = 1;
+}
+
 int scil_create_compression_context(scil_context_p * out_ctx, enum SCIL_Datatype datatype, const scil_hints * hints){
+	scil_check_if_initialized();
+
 	int ret = SCIL_NO_ERR;
 	scil_context_p ctx;
 	scil_hints * oh;
@@ -358,17 +379,7 @@ int scil_create_compression_context(scil_context_p * out_ctx, enum SCIL_Datatype
 	fix_double_setting(& oh->relative_tolerance_percent);
 	fix_double_setting(& oh->relative_err_finest_abs_tolerance);
 	fix_double_setting(& oh->absolute_tolerance);
-	// TODO handle flaot differently.
-
-	// verify correctness of algo_array
-	{
-		int i = 0;
-		for (scil_compression_algorithm ** algo = algo_array; *algo != NULL ; algo++, i++){
-			if ((*algo)->magic_number != i){
-				scilU_critical_error("Magic number does not match!");
-			}
-		}
-	}
+	// TODO handle float differently.
 
 	if (oh->force_compression_methods != NULL){
 		// now we can prefill the compression pipeline

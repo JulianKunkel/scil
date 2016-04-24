@@ -17,7 +17,7 @@ include(CheckCSourceCompiles)
 # compile flags
 set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -pedantic-errors -std=gnu11 -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections  -Wl,--no-allow-shlib-undefined")
 # -fvisibility=hidden -fvisibility-inlines-hidden -Wl,--print-gc-sections
-set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--no-allow-shlib-undefined -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt") 
+set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--no-allow-shlib-undefined -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt")
 
 set (CMAKE_C_FLAGS_DEBUG   "-O0 -ggdb -DDEBUG")
 set (CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb")
@@ -49,8 +49,10 @@ target_link_libraries(scil
   lz4
   )
 
+configure_file("${CMAKE_SOURCE_DIR}/scil-config.h.in" "scil-config.h" @ONLY)
+
 ## Installation
-configure_file("../dev/scil.pc.in" "scil.pc" @ONLY)
+configure_file("${CMAKE_SOURCE_DIR}/../dev/scil.pc.in" "scil.pc" @ONLY)
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/scil.pc"  DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
 install(TARGETS scil LIBRARY DESTINATION lib)

@@ -24,12 +24,13 @@
 #include <scil-util.h>
 
 #ifdef DEBUG
-  #define debug(...) fprintf(stderr, __VA_ARGS__);
+  #define debug(...) fprintf(stderr, "[SCIL DEBUG] "__VA_ARGS__);
 #else
   #define debug(...)
 #endif
 
-#define critical(...) { fprintf(stderr, __VA_ARGS__); exit(1); }
+#define critical(...) { fprintf(stderr, "[SCIL CRITICAL] "__VA_ARGS__); exit(1); }
+#define warn(...) fprintf(stderr, "[SCIL WARN] "__VA_ARGS__);
 
 #define FUNC_START debug("CALL %s\n", __PRETTY_FUNCTION__);
 
