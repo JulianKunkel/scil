@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <assert.h>
 #include <algo/algo-fpzip.h>
 #include <algo/algo-fpzip-init.c.x>
 
@@ -27,13 +28,15 @@ int scil_fpzip_compress_<DATATYPE>(const scil_context_p ctx,
 {
     FPZ* fpz = fpzip_write_to_buffer(dest, *dest_size);
     fpz->type = SCIL_TYPE_<DATATYPE_UPPER>; // in fpzip float is 0 and double 1
-    fpz->prec = 0; // lossless TODO: implement precision functionality
 
-    fpz->nx = scil_get_data_count(dims); // one-dimensional
+    fpz->prec = ctx->hints.significant_bits;
+
+    fpz->nx = 1; //
     fpz->ny = 1; //
     fpz->nz = 1; //
     fpz->nf = 1; //
 
+    assert(dims->dims < 5);
     if(dims->dims < 5){
         switch(dims->dims){
             case 4: fpz->nf = dims->length[3];
@@ -43,7 +46,7 @@ int scil_fpzip_compress_<DATATYPE>(const scil_context_p ctx,
         }
     }
 
-    if (!fpzip_write_header(fpz)) {
+    if (! fpzip_write_header(fpz)) {
       fprintf(stderr, "Cannot write header in algo-fpzip compression: %s\n", fpzip_errstr[fpzip_errno]);
       return 1;
     }
@@ -68,13 +71,20 @@ int  scil_fpzip_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
                             const size_t in_size)
 {
     FPZ* fpz = fpzip_read_from_buffer(compressed_buf_in);
+    fpz->nx = 1; //
+    fpz->ny = 1; //
+    fpz->nz = 1; //
+    fpz->nf = 1; //
 
-    // Read dims out of fpz, TODO: avoid storing dims as the app knows it.
-    dims->dims = 0;
-    if(fpz->nx != 1) dims->length[0] = fpz->nx; dims->dims++;
-    if(fpz->ny != 1) dims->length[1] = fpz->ny; dims->dims++;
-    if(fpz->nz != 1) dims->length[2] = fpz->nz; dims->dims++;
-    if(fpz->nf != 1) dims->length[3] = fpz->nf; dims->dims++;
+    assert(dims->dims < 5);
+    if(dims->dims < 5){
+        switch(dims->dims){
+            case 4: fpz->nf = dims->length[3];
+            case 3: fpz->nz = dims->length[2];
+            case 2: fpz->ny = dims->length[1];
+            case 1: fpz->nx = dims->length[0];
+        }
+    }
 
     if (!fpzip_read_header(fpz)) {
       fprintf(stderr, "Cannot read header in algo-fpzip decompression: %s\n", fpzip_errstr[fpzip_errno]);

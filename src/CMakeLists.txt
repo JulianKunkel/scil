@@ -53,6 +53,11 @@ target_link_libraries(scil
 
 configure_file("${CMAKE_SOURCE_DIR}/scil-config.h.in" "scil-config.h" @ONLY)
 
+
+##
+
+feature_summary(WHAT ALL)
+
 ## Installation
 configure_file("${DEV_DIR}/scil.pc.in" "scil.pc" @ONLY)
 

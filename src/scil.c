@@ -542,6 +542,9 @@ int scil_compress(byte* restrict dest,
 		void * src = pick_buffer(1, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
 		void * dst = pick_buffer(0, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
 
+		// set the output size to the expected buffer size
+		out_size = (size_t) (input_size * 2);
+
 		scil_compression_algorithm * algo = chain->data_compressor;
 		switch(ctx->datatype){
 			case(SCIL_TYPE_FLOAT):
@@ -676,8 +679,13 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
 							 const scil_context_p ctx,
 							 scil_hints * out_accuracy){
 	const uint64_t length = scil_compress_buffer_size_bound(datatype, dims);
-	byte * data_out = (byte*)SAFE_MALLOC(length);
+	byte * data_out = (byte*) malloc(length);
+	if(data_out == NULL){
+		return SCIL_MEMORY_ERR;
+	}
 	scil_hints a;
+
+	memset(data_out, -1, length);
 
 	int ret = scil_decompress(datatype, data_out, dims, data_compressed, compressed_size, & data_out[length/2]);
 	if (ret != 0){
