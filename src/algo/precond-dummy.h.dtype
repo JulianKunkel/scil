@@ -12,15 +12,12 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
+// This file contains an example for a preconditioner
 
-#ifndef SCIL_ALGO_CHOOSER_H__
-#define SCIL_ALGO_CHOOSER_H__
+#ifndef SCIL_DUMMY_H_
+#define SCIL_DUMMY_H_
+#include <scil-internal.h>
 
-#include <scil.h>
-
-void scilI_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_context_p ctx);
-void scilI_compression_algo_chooser_init();
-
-float scilI_determine_randomness(void* source, size_t count);
+extern scil_compression_algorithm algo_precond_dummy;
 
 #endif

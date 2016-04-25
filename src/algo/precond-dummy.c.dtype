@@ -1,0 +1,38 @@
+// This file is part of SCIL.
+//
+// SCIL is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SCIL is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
+
+#include <string.h>
+
+#include <algo/precond-dummy.h>
+#include <algo/precond-dummy-init.c.x>
+
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+int scil_dummy_precond_compress_<DATATYPE>(const scil_context_p ctx, <DATATYPE>* restrict data_out, byte*restrict header, int * header_size_out, <DATATYPE>*restrict data_in, const scil_dims* dims){
+  size_t size = scilI_get_data_size(SCIL_TYPE_<DATATYPE_UPPER>, dims);
+  memcpy(data_out, data_in, size);
+  memcpy(header, "DUMMY", 5);
+  *header_size_out = 5;
+  return SCIL_NO_ERR;
+}
+
+int scil_dummy_precond_decompress_<DATATYPE>(<DATATYPE>*restrict data_out, scil_dims*const dims, <DATATYPE>*restrict compressed_buf_in, byte*restrict header, int * header_parsed_out){
+  size_t size = scilI_get_data_size(SCIL_TYPE_<DATATYPE_UPPER>, dims);
+  memcpy(data_out, compressed_buf_in, size);
+  if (memcmp(header-4, "DUMMY", 5) != 0){
+    return SCIL_BUFFER_ERR;
+  }
+  *header_parsed_out = 5;
+  return SCIL_NO_ERR;
+}

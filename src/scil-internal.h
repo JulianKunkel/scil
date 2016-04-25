@@ -46,47 +46,47 @@ enum compressor_type{
  An algorithm implementation can be sure that the compression output buffer is at least 2x the size of the input data.
  */
 typedef struct{
-    union{
-        struct{
-            int (*compress)(const scil_context_p ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, const byte*restrict data_in, const size_t in_size);
-            int (*decompress)(byte*restrict data_out, size_t buff_out_size,  const byte*restrict compressed_buf_in, const size_t in_size, size_t * uncomp_size_out);
-        } Btype;
+  union{
+    struct{
+      int (*compress)(const scil_context_p ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, const byte*restrict data_in, const size_t in_size);
+      int (*decompress)(byte*restrict data_out, size_t buff_out_size,  const byte*restrict compressed_buf_in, const size_t in_size, size_t * uncomp_size_out);
+    } Btype;
 
-        struct{
-          // for a preconditioner, we expect that the input buffer points only to the ND data, the output data contains
-          // the header of the size as returned and then the preconditioned data.
-            int (*compress_float)(const scil_context_p ctx, float* restrict data_out, int * header_size_out, float*restrict data_in, const scil_dims* dims);
+    struct{
+      // for a preconditioner, we expect that the input buffer points only to the ND data, the output data contains
+      // the header of the size as returned and then the preconditioned data.
+      int (*compress_float)(const scil_context_p ctx, float* restrict data_out, byte*restrict header, int * header_size_out, float*restrict data_in, const scil_dims* dims);
 
-          // it is the responsiblity of the decompressor to strip the header that is part of compressed_buf_in
-            int (*decompress_float)(float*restrict data_inout, scil_dims*const dims, float*restrict compressed_buf_in);
+      // it is the responsiblity of the decompressor to strip the header that is part of compressed_buf_in
+      int (*decompress_float)(float*restrict data_out, scil_dims*const dims, float*restrict compressed_buf_in, byte*restrict header_end, int * header_parsed_out);
 
-            int (*compress_double)(const scil_context_p ctx, double* restrict data_out, int * header_size_out, double*restrict data_in, const scil_dims* dims);
+      int (*compress_double)(const scil_context_p ctx, double* restrict data_out, byte*restrict header, int * header_size_out, double*restrict data_in, const scil_dims* dims);
 
-            int (*decompress_double)(double*restrict data_inout, scil_dims*const dims, double*restrict compressed_buf_in);
-        } Dtype;
+      int (*decompress_double)(double*restrict data_out, scil_dims*const dims, double*restrict compressed_buf_in, byte*restrict header_end, int * header_parsed_out);
+    } Ptype; // preconditioner
 
-        struct{
-            int (*compress_float)(const scil_context_p ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, float*restrict data_in, const scil_dims* dims);
+    struct{
+      int (*compress_float)(const scil_context_p ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, float*restrict data_in, const scil_dims* dims);
 
-            int (*decompress_float)(float*restrict data_out, scil_dims* dims, byte*restrict compressed_buf_in, const size_t in_size);
+      int (*decompress_float)(float*restrict data_out, scil_dims* dims, byte*restrict compressed_buf_in, const size_t in_size);
 
-            int (*compress_double)(const scil_context_p ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, double*restrict data_in, const scil_dims* dims);
+      int (*compress_double)(const scil_context_p ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, double*restrict data_in, const scil_dims* dims);
 
-            int (*decompress_double)( double*restrict data_out, scil_dims* dims, byte*restrict compressed_buf_in, const size_t in_size);
-        } DNtype;
+      int (*decompress_double)( double*restrict data_out, scil_dims* dims, byte*restrict compressed_buf_in, const size_t in_size);
+    } DNtype;
 
-        // TODO: Implement this
-        struct{
-          int i;
-        } ICOtype;
-    } c;
+    // TODO: Implement this
+    struct{
+      int i;
+    } ICOtype;
+  } c;
 
 
-    const char * name;
-    byte magic_number;
+  const char * name;
+  byte magic_number;
 
-    enum compressor_type type;
-    char is_lossy; // byte compressors are expected to be lossless anyway
+  enum compressor_type type;
+  char is_lossy; // byte compressors are expected to be lossless anyway
 } scil_compression_algorithm;
 
 // at most we support chaining of 10 preconditioners

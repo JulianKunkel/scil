@@ -5,6 +5,8 @@ set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 set (PROJECT_NAME scil)
 project (${PROJECT_NAME})
 
+MESSAGE( STATUS "Preparing makefiles for SCIL")
+
 # version numbers
 set (VERSION_MAJOR 0)
 set (VERSION_MINOR 1)

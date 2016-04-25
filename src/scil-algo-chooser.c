@@ -24,7 +24,7 @@
 #include <algo/lz4fast.h>
 
 
-static float determine_randomness(void* source, size_t count){
+float scilI_determine_randomness(void* source, size_t count){
   // We may want to use https://en.wikipedia.org/wiki/Randomness_tests
   byte buffer[15000];
   size_t out_size = 15000;
@@ -68,7 +68,7 @@ static void parse_losless_list(){
   config_list_lossless = (config_file_entry_t**) realloc(config_list_lossless, config_list_lossless_size * sizeof(void*));
 }
 
-void scil_compression_algo_chooser_init(){
+void scilI_compression_algo_chooser_init(){
   int ret;
   char * filename = getenv("SCIL_SYSTEM_CHARACTERISTICS_FILE");
   if(filename == NULL){
@@ -147,7 +147,7 @@ void scil_compression_algo_chooser_init(){
   parse_losless_list();
 }
 
-void scil_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_context_p ctx){
+void scilI_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_context_p ctx){
   scil_compression_chain_t * chain = & ctx->chain;
   int ret;
 
@@ -175,7 +175,7 @@ void scil_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_c
     return;
   }
 
-  float r = determine_randomness(source, count);
+  float r = scilI_determine_randomness(source, count);
   if (ctx->lossless_compression_needed){
       // we can only select byte compressors compress because data must be accurate!
   }

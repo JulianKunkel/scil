@@ -18,12 +18,13 @@
 #include <string.h>
 
 #include <scil-util.h>
+#include <scil-algo-chooser.h>
 
 #define allocate(type, name, count) type* name = (type*)malloc(count * sizeof(type))
 
 static int error_occured = 0;
 
-int test_correctness(double * buffer_in, const int variableSize){
+int test_correctness(const char * name, double * buffer_in, const int variableSize){
 	size_t out_c_size;
 	// accept a suboptimal compression ratio of 0.5
 	allocate(double, buffer_uncompressed, variableSize);
@@ -42,6 +43,8 @@ int test_correctness(double * buffer_in, const int variableSize){
 
   scil_init_hints(&hints);
 	hints.absolute_tolerance = 0.01;
+
+	printf("Pattern %s randomness: %.1f%%\n", name, (double) scilI_determine_randomness(buffer_in, variableSize*sizeof(double)));
 
 	printf("Algorithm, C Error, D Error, Validation, Uncompressed size, Compressed size, Compression factor, CSpeed MiB/s, DSpeed MiB/s, Algo\n");
 
@@ -116,35 +119,38 @@ int test_correctness(double * buffer_in, const int variableSize){
 }
 
 void test_pattern0(double * buffer_in, const int variableSize){
-	printf("Pattern 0\n");
 	for (int i=0; i < variableSize; i++){
 		buffer_in[i] = 0;
 	}
-	test_correctness(buffer_in, variableSize);
+	test_correctness("0", buffer_in, variableSize);
+}
+
+void test_pattern35(double * buffer_in, const int variableSize){
+	for (int i=0; i < variableSize; i++){
+		buffer_in[i] = 35.5353521;
+	}
+	test_correctness("35", buffer_in, variableSize);
 }
 
 void test_patternRND(double * buffer_in, const int variableSize){
-	printf("Pattern RND\n");
 	for (int i=0; i < variableSize; i++){
 		buffer_in[i] = random() / ((double) RAND_MAX);
 	}
-	test_correctness(buffer_in, variableSize);
+	test_correctness("RND", buffer_in, variableSize);
 }
 
 void test_patternALT(double * buffer_in, const int variableSize){
-	printf("Pattern ALTERNATING 0-99\n");
 	for (int i=0; i < variableSize; i++){
 		buffer_in[i] = i % 100;
 	}
-	test_correctness(buffer_in, variableSize);
+	test_correctness("ALTERNATING 0-99", buffer_in, variableSize);
 }
 
 void test_patternALT2(double * buffer_in, const int variableSize){
-	printf("Pattern ALTERNATING 0-1\n");
 	for (int i=0; i < variableSize; i++){
 		buffer_in[i] = i % 2;
 	}
-	test_correctness(buffer_in, variableSize);
+	test_correctness("ALTERNATING 0-1", buffer_in, variableSize);
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -153,6 +159,7 @@ int main(int argc, char** argv){
 	allocate(double, buffer_in, variableSize);
 
 	test_pattern0(buffer_in, variableSize);
+	test_pattern35(buffer_in, variableSize);
 	test_patternRND(buffer_in, variableSize);
 	test_patternALT(buffer_in, variableSize);
 	test_patternALT2(buffer_in, variableSize);
