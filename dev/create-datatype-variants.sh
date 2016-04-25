@@ -17,7 +17,7 @@ rm $TMP 2>/dev/null
 for f in $(find $DIR -name "*.dtype"); do
   f=${f#$DIR/}
   target=${f%%.dtype}
-  echo "Processing $f"
+  echo "  Processing $f"
 
   mkdir -p $(dirname $target)
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "This script builds the dependencies for SCIL from third-party software"
+echo "Building dependencies for SCIL from third-party software"
 
 ZFP=zfp-0.5.0
 FPZIP=fpzip-1.1.0
@@ -16,7 +16,7 @@ fi
 BUILD=0
 
 if [[ ! -e libzfp.a ]] ; then
-	echo "Building fpzip shared library"
+	echo "  Building fpzip shared library"
 	pushd $ZFP
 	cp ../config-zfp Config
 	make shared
@@ -26,7 +26,7 @@ if [[ ! -e libzfp.a ]] ; then
 fi
 
 if [[ ! -e libfpzip.a ]] ; then
-  echo "Building zfp shared library"
+  echo "  Building zfp shared library"
   pushd $FPZIP/src
   make -f ../../Makefile-fpzip-1.1.0
   popd
@@ -40,6 +40,6 @@ if [[ $BUILD == 1 ]] ; then
 
   rm *.a
   cp $(find -name "*.a") .
-else 
-	echo "Nothing to do"
 fi
+
+echo " [OK]"
