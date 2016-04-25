@@ -24,20 +24,14 @@
 #include <algo/lz4fast.h>
 
 
-float scilI_determine_randomness(void* source, size_t count){
+float scilI_determine_randomness(void* source, size_t in_size, byte *restrict buffer, size_t buffer_size){
   // We may want to use https://en.wikipedia.org/wiki/Randomness_tests
-  byte buffer[15000];
-  size_t out_size = 15000;
-  size_t in_size = 10000;
-  if (count < in_size){
-    in_size = count;
-  }
-  int ret = scil_lz4fast_compress(NULL, buffer, &out_size, source, in_size);
+  int ret = scil_lz4fast_compress(NULL, buffer, &buffer_size, source, in_size);
   if (ret == 0){
-    double rnd = out_size * 100.0 / in_size ;
+    double rnd = buffer_size * 100.0 / in_size ;
     return rnd;
   }else{
-    critical("lz4fast error to determine_randomness %d\n", ret);
+    critical("lz4fast error to determine randomness: %d\n", ret);
   }
 }
 
@@ -175,7 +169,14 @@ void scilI_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_
     return;
   }
 
-  float r = scilI_determine_randomness(source, count);
+  size_t out_size = 15000;
+  byte buffer[15000];
+  size_t in_size = 10000;
+  if (count < in_size){
+    in_size = count;
+  }
+
+  float r = scilI_determine_randomness(source, in_size, buffer, out_size);
   if (ctx->lossless_compression_needed){
       // we can only select byte compressors compress because data must be accurate!
   }

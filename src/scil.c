@@ -809,8 +809,6 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
 
 end:
   free(data_out);
-	a.comp_speed.multiplier = 1.0f;
-	a.decomp_speed.multiplier = 1.0f;
 	*out_accuracy = a;
 
 	return ret;

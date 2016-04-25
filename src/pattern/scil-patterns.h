@@ -13,14 +13,18 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SCIL_ALGO_CHOOSER_H__
-#define SCIL_ALGO_CHOOSER_H__
+#ifndef SCIL_PATTERN_LIB_H
+#define SCIL_PATTERN_LIB_H
 
 #include <scil.h>
 
-void scilI_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_context_p ctx);
-void scilI_compression_algo_chooser_init();
+int scilP_available_patterns_count();
+char * scilP_available_patterns_name(int p);
 
-float scilI_determine_randomness(void* source, size_t in_size, byte *restrict buffer, size_t buffer_size);
+/*
+ * Create the pattern selected by num with the arguments
+ */
+int scilP_create_pattern_double(scil_dims * dims, double * buffer, char * name, float mn, float mx, float arg);
+int scilP_create_pattern_float (scil_dims * dims, float * buffer, char * name, float mn, float mx, float arg);
 
 #endif

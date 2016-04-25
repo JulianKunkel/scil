@@ -31,8 +31,6 @@ set (CMAKE_C_FLAGS_RELEASE "-O3")
 set (SCIL_ALGO_SOURCE ${CMAKE_SOURCE_DIR}/algo)
 set (SCIL_ALGO_BINARY ${CMAKE_BINARY_DIR}/algo)
 
-include_directories(.)
-
 # run during configure:
 execute_process(COMMAND ${DEPS_DIR}/build-dependencies.sh WORKING_DIRECTORY ${DEPS_DIR})
 execute_process(COMMAND ${DEV_DIR}/create-datatype-variants.sh ${CMAKE_SOURCE_DIR} WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/)
@@ -44,8 +42,7 @@ add_library(scil SHARED scil.c scil-util.c scil-errors.c scil-dummy.cpp scil-alg
 target_link_libraries(scil m)
 
 # for specific algorithms
-include_directories(${DEPS_DIR}/include/fpzip ${CMAKE_BINARY_DIR})
-include_directories(${DEPS_DIR}/include/zfp)
+include_directories(${CMAKE_BINARY_DIR}  ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/pattern ${DEPS_DIR}/include/zfp ${DEPS_DIR}/include/fpzip)
 target_link_libraries(scil z)
 target_link_libraries(scil
   ${DEPS_DIR}/libfpzip.a
@@ -68,3 +65,4 @@ install(TARGETS scil LIBRARY DESTINATION lib)
 install(FILES scil.h DESTINATION include)
 
 SUBDIRS (test)
+SUBDIRS (pattern)

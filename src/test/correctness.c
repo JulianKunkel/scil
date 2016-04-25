@@ -19,18 +19,16 @@
 
 #include <scil-util.h>
 #include <scil-algo-chooser.h>
+#include <scil-patterns.h>
 
 #define allocate(type, name, count) type* name = (type*)malloc(count * sizeof(type))
 
 static int error_occured = 0;
+static double * buffer_uncompressed;
 
-int test_correctness(const char * name, double * buffer_in, const int variableSize){
+int test_correctness(const char * name, double * buffer_in, scil_dims dims){
 	size_t out_c_size;
-	// accept a suboptimal compression ratio of 0.5
-	allocate(double, buffer_uncompressed, variableSize);
-
-	scil_dims dims;
-	scil_init_dims_1d(&dims, variableSize);
+	size_t variableSize = scil_get_data_count(& dims);
 
 	const size_t c_size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, &dims);
 
@@ -44,7 +42,9 @@ int test_correctness(const char * name, double * buffer_in, const int variableSi
   scil_init_hints(&hints);
 	hints.absolute_tolerance = 0.01;
 
-	printf("Pattern %s randomness: %.1f%%\n", name, (double) scilI_determine_randomness(buffer_in, variableSize*sizeof(double)));
+	double r = (double) scilI_determine_randomness(buffer_in, variableSize*sizeof(double), tmp_buff, c_size);
+
+	printf("Pattern %s randomness: %.1f%%\n", name, r);
 
 	printf("Algorithm, C Error, D Error, Validation, Uncompressed size, Compressed size, Compression factor, CSpeed MiB/s, DSpeed MiB/s, Algo\n");
 
@@ -114,56 +114,53 @@ int test_correctness(const char * name, double * buffer_in, const int variableSi
 
 	printf("Done.\n");
 	free(buffer_out);
-	free(buffer_uncompressed);
 	return 0;
 }
 
-void test_pattern0(double * buffer_in, const int variableSize){
-	for (int i=0; i < variableSize; i++){
-		buffer_in[i] = 0;
-	}
-	test_correctness("0", buffer_in, variableSize);
-}
-
-void test_pattern35(double * buffer_in, const int variableSize){
-	for (int i=0; i < variableSize; i++){
-		buffer_in[i] = 35.5353521;
-	}
-	test_correctness("35", buffer_in, variableSize);
-}
-
-void test_patternRND(double * buffer_in, const int variableSize){
-	for (int i=0; i < variableSize; i++){
-		buffer_in[i] = random() / ((double) RAND_MAX);
-	}
-	test_correctness("RND", buffer_in, variableSize);
-}
-
-void test_patternALT(double * buffer_in, const int variableSize){
-	for (int i=0; i < variableSize; i++){
-		buffer_in[i] = i % 100;
-	}
-	test_correctness("ALTERNATING 0-99", buffer_in, variableSize);
-}
-
-void test_patternALT2(double * buffer_in, const int variableSize){
-	for (int i=0; i < variableSize; i++){
-		buffer_in[i] = i % 2;
-	}
-	test_correctness("ALTERNATING 0-1", buffer_in, variableSize);
-}
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int main(int argc, char** argv){
 	const int variableSize = 1000000/sizeof(double);
+	int ret;
 	allocate(double, buffer_in, variableSize);
 
-	test_pattern0(buffer_in, variableSize);
-	test_pattern35(buffer_in, variableSize);
-	test_patternRND(buffer_in, variableSize);
-	test_patternALT(buffer_in, variableSize);
-	test_patternALT2(buffer_in, variableSize);
+	buffer_uncompressed = malloc(variableSize*4*sizeof(double));
+
+	scil_dims dims;
+	scil_init_dims_1d(& dims, variableSize);
+
+	ret = scilP_create_pattern_double(& dims, buffer_in, "constant", 0, -1, -1);
+	assert( ret == SCIL_NO_ERR);
+	test_correctness("0", buffer_in, dims);
+
+	ret = scilP_create_pattern_double(& dims, buffer_in, "constant", 35.3535, -1, -1);
+	assert( ret == SCIL_NO_ERR);
+	test_correctness("35", buffer_in, dims);
+
+
+	ret = scilP_create_pattern_double(& dims, buffer_in, "random", 1, 2, -1);
+	assert( ret == SCIL_NO_ERR);
+	test_correctness("rnd 1-2", buffer_in, dims);
+
+	ret = scilP_create_pattern_double(& dims, buffer_in, "random", 0, 1, -1);
+	assert( ret == SCIL_NO_ERR);
+	test_correctness("rnd 0-1", buffer_in, dims);
+
+	ret = scilP_create_pattern_double(& dims, buffer_in, "random", 1, 100, -1);
+	assert( ret == SCIL_NO_ERR);
+	test_correctness("rnd 1-100", buffer_in, dims);
+
+
+	ret = scilP_create_pattern_double(& dims, buffer_in, "steps", 0, 1, 2);
+	assert( ret == SCIL_NO_ERR);
+	test_correctness("steps 2", buffer_in, dims);
+
+	ret = scilP_create_pattern_double(& dims, buffer_in, "steps", 1, 100, 100);
+	assert( ret == SCIL_NO_ERR);
+	test_correctness("steps 100", buffer_in, dims);
 
 	free(buffer_in);
+	free(buffer_uncompressed);
+
 	return error_occured;
 }
