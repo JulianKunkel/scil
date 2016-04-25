@@ -532,7 +532,7 @@ int scil_compress(byte* restrict dest,
 			header += header_size_out;
 
 			*header = algo->magic_number;
-			debug("C MAGIC %d at pos %llu\n", *header, (long long unsigned) header)
+			debugI("C MAGIC %d at pos %llu\n", *header, (long long unsigned) header)
 			header++;
 			out_size++;
 
@@ -562,7 +562,7 @@ int scil_compress(byte* restrict dest,
 		// check if we have to preserve another header from the preconditioners
 		if (datatypes_size != input_size){
 			// we have to copy some header.
-			debug("Preserving %lld %lld\n", (long long) datatypes_size, (long long) input_size);
+			debugI("Preserving %lld %lld\n", (long long) datatypes_size, (long long) input_size);
 			const int preserve = input_size - datatypes_size;
 			memcpy((char*)dst+out_size, (char*)src+datatypes_size, preserve);
 			out_size += preserve;
@@ -571,7 +571,7 @@ int scil_compress(byte* restrict dest,
 
 		remaining_compressors--;
 		((char*)dst)[out_size] = algo->magic_number;
-		debug("C MAGIC %d at pos %llu\n", algo->magic_number, (long long unsigned) & ((char*)dst)[out_size]);
+		debugI("C MAGIC %d at pos %llu\n", algo->magic_number, (long long unsigned) & ((char*)dst)[out_size]);
 
 		out_size++;
 		input_size = out_size;
@@ -585,7 +585,7 @@ int scil_compress(byte* restrict dest,
 		ret = chain->byte_compressor->c.Btype.compress(ctx, dest, &out_size, (byte *) src, input_size);
 		if (ret != 0) return ret;
 		dest[out_size] = chain->byte_compressor->magic_number;
-		debug("C MAGIC %d at pos %llu\n", chain->byte_compressor->magic_number, (long long unsigned) & dest[out_size]);
+		debugI("C MAGIC %d at pos %llu\n", chain->byte_compressor->magic_number, (long long unsigned) & dest[out_size]);
 
 		out_size++;
 		//scilU_print_buffer(dest, out_size);
@@ -623,7 +623,7 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims*c
 	src_size--;
 	uint8_t magic_number = src_adj[src_size];
 
-	debug("D MAGIC %d at pos %llu\n", magic_number, (long long unsigned) & src_adj[src_size]);
+	debugI("D MAGIC %d at pos %llu\n", magic_number, (long long unsigned) & src_adj[src_size]);
 
 	CHECK_MAGIC(magic_number)
 	//printf("SCHUH %d %lld\n", magic_number, source_size);
@@ -649,7 +649,7 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims*c
 			magic_number = header[0];
 			header--;
 
-			debug("D MAGIC %d at pos %llu\n", magic_number, (long long unsigned) header);
+			debugI("D MAGIC %d at pos %llu\n", magic_number, (long long unsigned) header);
 			CHECK_MAGIC(magic_number)
 			algo = algo_array[magic_number];
 		}
@@ -705,7 +705,7 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims*c
 		if(remaining_compressors > 0){
 			//scilU_print_buffer(dst, src_size);
 			magic_number = *((char*) header);
-			debug("D MAGIC %d at pos %llu\n", magic_number, (long long unsigned) header);
+			debugI("D MAGIC %d at pos %llu\n", magic_number, (long long unsigned) header);
 			header--;
 			CHECK_MAGIC(magic_number)
 			algo = algo_array[magic_number];

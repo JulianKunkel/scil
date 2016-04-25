@@ -29,6 +29,12 @@
   #define debug(...)
 #endif
 
+#ifdef DEBUG_INTERNALS
+  #define debugI(...) fprintf(stderr, "[SCIL DEBUG I] "__VA_ARGS__);
+#else
+  #define debugI(...)
+#endif
+
 #define critical(...) { fprintf(stderr, "[SCIL CRITICAL] "__VA_ARGS__); exit(1); }
 #define warn(...) fprintf(stderr, "[SCIL WARN] "__VA_ARGS__);
 
