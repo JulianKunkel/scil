@@ -49,7 +49,7 @@ char * scilP_available_patterns_name(int i){
 }
 
 int scilP_patterns_by_name(char * name){
-  for(int i=0; i < scilP_available_patterns_count(); i++){    
+  for(int i=0; i < scilP_available_patterns_count(); i++){
     if(strcmp(name, patterns[i]->name) == 0){
       return i;
     }
@@ -82,4 +82,69 @@ int scilP_create_pattern_float (scil_dims * dims, float * buffer, char * name,  
   }
   free(buf);
   return SCIL_NO_ERR;
+}
+
+typedef struct{
+  char * pattern;
+  char * name;
+  float mn;
+  float mx;
+  float arg;
+} library_pattern;
+
+static library_pattern * library = NULL;
+static int library_size = 0;
+static int library_capacity = 100;
+
+static void library_add(char * pattern, char * name, float mn, float mx, float arg){
+  assert(library_size < library_capacity);
+  library_pattern p = {pattern, name, mn, mx, arg};
+  library[library_size] = p;
+
+  library_size++;
+}
+
+static void create_library_patterns_if_needed(){
+  static int initialized = 0;
+  if (initialized){
+    return;
+  }
+  initialized = 1;
+  library = malloc(sizeof(library_pattern) * library_capacity);
+
+  library_add("constant", "constant0", 0, -1, -1);
+  library_add("constant", "constant35", 35.3335353, -1, -1);
+
+  library_add("random", "random0-1", 0, 1, -1);
+  library_add("random", "random1-100", 1, 100, -1);
+  library_add("random", "random-1-+1", -1, 1, -1);
+
+  library_add("steps", "steps2", 0, 1, 2);
+  library_add("steps", "steps100", 1, 100, 100);
+}
+
+int scilP_library_size(){
+  create_library_patterns_if_needed();
+  return library_size;
+}
+
+char * scilP_library_pattern_name(int p){
+  create_library_patterns_if_needed();
+  assert( p <= library_size && p >= 0);
+
+  return library[p].name;
+}
+
+int scilP_library_create_pattern_double(int p, scil_dims * dims, double * buffer){
+  create_library_patterns_if_needed();
+  assert( p <= library_size && p >= 0);
+  library_pattern * l = & library[p];
+  return scilP_create_pattern_double(dims, buffer, l->pattern, l->mn, l->mx, l->arg);
+}
+
+int scilP_library_create_pattern_float (int p, scil_dims * dims, float * buffer){
+  create_library_patterns_if_needed();
+  assert( p <= library_size && p >= 0);
+  library_pattern * l = & library[p];
+  return scilP_create_pattern_float(dims, buffer, l->pattern, l->mn, l->mx, l->arg);
 }

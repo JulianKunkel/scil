@@ -129,35 +129,13 @@ int main(int argc, char** argv){
 	scil_dims dims;
 	scil_init_dims_1d(& dims, variableSize);
 
-	ret = scilP_create_pattern_double(& dims, buffer_in, "constant", 0, -1, -1);
-	assert( ret == SCIL_NO_ERR);
-	test_correctness("0", buffer_in, dims);
+	for(int i=0; i < scilP_library_size(); i++){
+		char * name = scilP_library_pattern_name(i);
+		scilP_library_create_pattern_double(i, & dims, buffer_in);
+		assert( ret == SCIL_NO_ERR);
+		test_correctness(name, buffer_in, dims);
+	}
 
-	ret = scilP_create_pattern_double(& dims, buffer_in, "constant", 35.3535, -1, -1);
-	assert( ret == SCIL_NO_ERR);
-	test_correctness("35", buffer_in, dims);
-
-
-	ret = scilP_create_pattern_double(& dims, buffer_in, "random", 1, 2, -1);
-	assert( ret == SCIL_NO_ERR);
-	test_correctness("rnd 1-2", buffer_in, dims);
-
-	ret = scilP_create_pattern_double(& dims, buffer_in, "random", 0, 1, -1);
-	assert( ret == SCIL_NO_ERR);
-	test_correctness("rnd 0-1", buffer_in, dims);
-
-	ret = scilP_create_pattern_double(& dims, buffer_in, "random", 1, 100, -1);
-	assert( ret == SCIL_NO_ERR);
-	test_correctness("rnd 1-100", buffer_in, dims);
-
-
-	ret = scilP_create_pattern_double(& dims, buffer_in, "steps", 0, 1, 2);
-	assert( ret == SCIL_NO_ERR);
-	test_correctness("steps 2", buffer_in, dims);
-
-	ret = scilP_create_pattern_double(& dims, buffer_in, "steps", 1, 100, 100);
-	assert( ret == SCIL_NO_ERR);
-	test_correctness("steps 100", buffer_in, dims);
 
 	free(buffer_in);
 	free(buffer_uncompressed);
