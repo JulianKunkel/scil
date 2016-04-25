@@ -22,4 +22,7 @@ extern scil_pattern scil_pattern_constant;
 extern scil_pattern scil_pattern_steps;
 extern scil_pattern scil_pattern_rnd;
 
+extern scilP_mutator scilP_interpolator;
+extern scilP_mutator scilP_repeater;
+
 #endif

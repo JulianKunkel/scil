@@ -23,4 +23,6 @@ typedef struct {
   char * name;
 } scil_pattern;
 
+typedef void (*scilP_mutator)(scil_dims * dims, double * buffer);
+
 #endif

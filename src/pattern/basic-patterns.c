@@ -15,7 +15,31 @@
 
 #include <basic-patterns.h>
 
+#include <stdio.h>
+
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+
+static void m_interpolator(scil_dims * dims, double * buffer){
+  size_t count = scil_get_data_count(dims);
+  // for now interpolate only in 1D
+  double val = buffer[0];
+  for (size_t i=1; i < count-1; i++){
+    double new = buffer[i];
+    buffer[i] = (val + buffer[i+1])/2;
+    val = new;
+  }
+}
+scilP_mutator scilP_interpolator = & m_interpolator;
+
+static void m_repeater(scil_dims * dims, double * buffer){
+  size_t count = scil_get_data_count(dims) - 1;
+  // repeat a value two times, odd become even
+  double val = buffer[0];
+  for (size_t i=0; i < count; i+= 2){
+    buffer[i] = buffer[i+1];
+  }
+}
+scilP_mutator scilP_repeater = & m_repeater;
 
 static int constant(scil_dims * dims, double * buffer, float mn, float mx, float arg){
   size_t count = scil_get_data_count(dims);
