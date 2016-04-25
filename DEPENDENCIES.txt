@@ -1,4 +1,0 @@
-Name    version     Source
-zlib    1.28        http://www.zlib.net/
-fpzip   1.1.0       http://computation.llnl.gov/projects/floating-point-compression
-liblz4-dev

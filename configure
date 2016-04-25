@@ -2,7 +2,7 @@
 
 PARAMETERS="$0 $*"
 CMAKEFLAGS=
-SRCDIR=$(dirname $(readlink -f $0))
+SRCDIR=$(dirname $(readlink -f $0))/src
 CURPATH="$PWD"
 
 function help(){
@@ -87,3 +87,10 @@ else
 		exit 1
 	fi
 fi
+
+echo
+echo "To compile run:"
+echo "  cd $buildDIR"
+echo "  make"
+echo "To run tests run:"
+echo "  make test"
