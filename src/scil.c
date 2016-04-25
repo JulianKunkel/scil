@@ -472,13 +472,15 @@ int scil_compress(byte* restrict dest,
 	assert(source != NULL);
 
 	size_t input_size = scilI_get_data_size(ctx->datatype, dims);
-	if (input_size == 0){
+	const size_t datatypes_size = input_size;
+
+	if (datatypes_size == 0){
 		*out_size_p = 1;
 		dest[0] = (byte) 0;
 
 		return SCIL_NO_ERR;
 	}
-	if( in_dest_size < 4 * input_size){
+	if( in_dest_size < 4 * datatypes_size){
 		return SCIL_MEMORY_ERR;
 	}
 
@@ -499,15 +501,15 @@ int scil_compress(byte* restrict dest,
 
 	// now process the compression pipeline
 	// we use 1.5 the memory buffer as intermediate location
-	const size_t buffer_tmp_offset = (size_t) (1.5 * input_size)+10;
+	const size_t buffer_tmp_offset = 2*datatypes_size+10;
 	byte* restrict buff_tmp = & dest[buffer_tmp_offset];
 
 	// process the compression chain
 	// apply the pre-conditioners
 	if(chain->precond_count > 0){
-		out_size += input_size;
+		out_size += datatypes_size;
 		// add the header at the end of the preconditioners
-		byte * header = input_size + (byte*) pick_buffer(0, total_compressors, 1 + total_compressors - chain->precond_count, source, dest, buff_tmp, dest);
+		byte * header = datatypes_size + (byte*) pick_buffer(0, total_compressors, 1 + total_compressors - chain->precond_count, source, dest, buff_tmp, dest);
 
 		for(int i=0; i < chain->precond_count; i++){
 			int header_size_out;
@@ -533,16 +535,19 @@ int scil_compress(byte* restrict dest,
 			debug("C MAGIC %d at pos %llu\n", *header, (long long unsigned) header)
 			header++;
 			out_size++;
+
+			//scilU_print_buffer(dst, out_size);
 		}
 		input_size = out_size;
 	}
 
 	if(chain->data_compressor){
+		// we need to preserve the header of the pre-conditioners.
 		void * src = pick_buffer(1, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
 		void * dst = pick_buffer(0, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
 
 		// set the output size to the expected buffer size
-		out_size = (size_t) (input_size * 2);
+		out_size = (size_t) (datatypes_size * 2);
 
 		scil_compression_algorithm * algo = chain->data_compressor;
 		switch(ctx->datatype){
@@ -554,6 +559,16 @@ int scil_compress(byte* restrict dest,
 				break;
 		}
 		if (ret != 0) return ret;
+		// check if we have to preserve another header from the preconditioners
+		if (datatypes_size != input_size){
+			// we have to copy some header.
+			debug("Preserving %lld %lld\n", (long long) datatypes_size, (long long) input_size);
+			const int preserve = input_size - datatypes_size;
+			memcpy((char*)dst+out_size, (char*)src+datatypes_size, preserve);
+			out_size += preserve;
+			scilU_print_buffer(dst, out_size);
+		}
+
 		remaining_compressors--;
 		((char*)dst)[out_size] = algo->magic_number;
 		debug("C MAGIC %d at pos %llu\n", algo->magic_number, (long long unsigned) & ((char*)dst)[out_size]);
@@ -652,13 +667,13 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims*c
 				ret = algo->c.DNtype.decompress_double(dst, dims, src, src_size);
 				break;
 		}
-		//scilU_print_buffer(dst, output_size);
 
 		if (ret != 0) return ret;
 		remaining_compressors--;
 		if(remaining_compressors > 0){
 			//scilU_print_buffer(dst, src_size);
-			magic_number = ((char*) dst)[src_size];
+			magic_number = *((char*) header);
+			header--;
 			CHECK_MAGIC(magic_number)
 			algo = algo_array[magic_number];
 		}

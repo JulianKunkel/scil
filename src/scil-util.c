@@ -119,6 +119,10 @@ void scilU_print_buffer(char * dest, size_t out_size){
 		printf("%x", dest[i]);
 	}
 	printf("\n");
+  //for (size_t i=0; i < out_size ; i++){
+	//	printf("%c ", dest[i]);
+	//}
+	//printf("\n");
 }
 
 

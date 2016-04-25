@@ -42,7 +42,7 @@ void test(char * name, size_t expected_size, int check_compressed_output){
   size_t out_size = -1;
   ret = scil_compress(buff, size, data, & dims, & out_size,  ctx);
   printf("%d %lld\n", ret, (long long) out_size);
-  assert(ret == SCIL_NO_ERR);
+  assert(ret == SCIL_NO_ERR && "ERROR COMPRESSION");
   assert(out_size == expected_size);
 
   if(check_compressed_output){
@@ -54,7 +54,7 @@ void test(char * name, size_t expected_size, int check_compressed_output){
 
   memset(data_check, 0, sizeof(data_check));
   ret = scil_decompress(SCIL_TYPE_DOUBLE, data_check, & dims, buff, out_size, tmpBuff);
-  assert(ret == SCIL_NO_ERR);
+  assert(ret == SCIL_NO_ERR && "ERROR DECOMPRESSION");
 
   int compare = memcmp(data_check, data, sizeof(data)) == 0;
   if(! compare){
@@ -88,13 +88,13 @@ int main(){
   test("lz4", 58, 0);
   test("zfp-abstol", 98, 0);
 
-  test("zfp-abstol,lz4", 49, 0);
+  test("zfp-abstol,lz4", 47, 0);
 
-  test("dummy-precond,zfp-abstol", 98, 0);
-  test("dummy-precond,dummy-precond,zfp-abstol", 98, 0);
+  test("dummy-precond,zfp-abstol", 104, 0);
+  test("dummy-precond,dummy-precond,zfp-abstol", 110, 0);
 
-  test("dummy-precond,zfp-abstol,lz4", 98, 0);
-  test("dummy-precond,dummy-precond,zfp-abstol,lz4", 98, 0);
+  test("dummy-precond,zfp-abstol,lz4", 49, 0);
+  test("dummy-precond,dummy-precond,zfp-abstol,lz4", 55, 0);
 
   free(buff);
 
