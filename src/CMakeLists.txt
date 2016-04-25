@@ -37,7 +37,7 @@ execute_process(COMMAND ${DEV_DIR}/create-datatype-variants.sh ${CMAKE_SOURCE_DI
 
 FILE(GLOB ALGO ${CMAKE_SOURCE_DIR}/algo/*.c ${CMAKE_BINARY_DIR}/algo/*.c)
 
-MESSAGE( STATUS "Available algorithms: " ${ALGO})
+# MESSAGE( STATUS "Available algorithms: " ${ALGO})
 add_library(scil SHARED scil.c scil-util.c scil-errors.c scil-dummy.cpp scil-algo-chooser.c scil-hardware-limits.c ${ALGO})
 target_link_libraries(scil m)
 

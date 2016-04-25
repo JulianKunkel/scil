@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Checking datatype variants of the source code"
+
 DATATYPES="float double"
 
 TMP=tmp.x
@@ -17,6 +19,9 @@ rm $TMP 2>/dev/null
 for f in $(find $DIR -name "*.dtype"); do
   f=${f#$DIR/}
   target=${f%%.dtype}
+  if [[ ! "$DIR/$f" -nt "$target" ]]; then
+    continue
+  fi
   echo "  Processing $f"
 
   mkdir -p $(dirname $target)
@@ -29,3 +34,5 @@ for f in $(find $DIR -name "*.dtype"); do
   mv $TMP $target
 
 done
+
+echo "[OK]"

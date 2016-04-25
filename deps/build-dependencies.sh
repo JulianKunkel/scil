@@ -42,4 +42,4 @@ if [[ $BUILD == 1 ]] ; then
   cp $(find -name "*.a") .
 fi
 
-echo " [OK]"
+echo "[OK]"
