@@ -23,7 +23,7 @@ set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -pedantic-errors -std=gnu11 -pedantic -Wal
 # -fvisibility=hidden -fvisibility-inlines-hidden -Wl,--print-gc-sections
 set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--no-allow-shlib-undefined -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt")
 
-set (CMAKE_C_FLAGS_DEBUG   "-O0 -ggdb -DDEBUG")
+set (CMAKE_C_FLAGS_DEBUG   "-O0 -ggdb -gdwarf-2 -DDEBUG")
 set (CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb")
 
 set (CMAKE_C_FLAGS_RELEASE "-O3")
@@ -63,6 +63,17 @@ configure_file("${DEV_DIR}/scil.pc.in" "scil.pc" @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/scil.pc"  DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
 install(TARGETS scil LIBRARY DESTINATION lib)
 install(FILES scil.h DESTINATION include)
+
+## Documentation
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+    add_custom_target(doc
+        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating API documentation with Doxygen" VERBATIM
+    )
+endif(DOXYGEN_FOUND)
 
 SUBDIRS (test)
 SUBDIRS (pattern)
