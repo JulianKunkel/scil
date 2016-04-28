@@ -8,7 +8,7 @@
   "errorMatch": [
     "(?<file>[\\/0-9a-zA-Z\\._\\-]+):(?<line>\\d+):(?<col>\\d+):\\s+(?<message>.+)"
   ],
-  "keymap": "C",
+  "keymap": "CTRL-B",
   "atomCommandName": "namespace:command",
   "targets": {
     "build": {

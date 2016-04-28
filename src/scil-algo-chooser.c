@@ -112,7 +112,7 @@ void scilI_compression_algo_chooser_init(){
 
     config_file_entry_t * e = & config_list[config_list_size];
     char name[100];
-    int tokens = sscanf(buff, "%f, %s %f, %f, %f", & e->randomness, name, & e->c_speed, & e->d_speed, & e->ratio);
+    int tokens = sscanf(buff, "%f; %s %f; %f; %f", & e->randomness, name, & e->c_speed, & e->d_speed, & e->ratio);
     if( tokens != 5){
       warn("Parsing configuration line \"%s\" returned an error after token %d\n", buff, tokens);
       continue;
@@ -123,7 +123,7 @@ void scilI_compression_algo_chooser_init(){
       warn("Parsing configuration line \"%s\"; could not parse compressor chain \"%s\"\n", buff, name);
       continue;
     }
-    debug("Configuration line %.3f, %s, %.1f, %.1f, %.3f\n", (double) e->randomness, name, (double) e->c_speed, (double) e->d_speed, (double) e->ratio);
+    debug("Configuration line %.3f; %s; %.1f; %.1f; %.3f\n", (double) e->randomness, name, (double) e->c_speed, (double) e->d_speed, (double) e->ratio);
 
     config_list_size++;
     if(config_list_size >= config_list_capacity){

@@ -17,6 +17,54 @@
  * \brief Header containing the Scientific Compression Interface Library
  * \author Julian Kunkel <juliankunkel@googlemail.com>
  * \author Armin Schaare <3schaare@informatik.uni-hamburg.de>
+
+\startuml{scil-components.png}
+  title Components of SCIL
+
+  folder "Core in src/" {
+
+    frame "libscil" {
+        'component X #PowderBlue
+        interface "scil.h" #Orange
+        component "scil-algo-chooser" #Wheat
+
+        'note left of X
+        'end note
+        '[Thread] ..> [SIOX-LL] : use
+      }
+
+    folder "tools" {
+      artifact [scil-benchmark]
+    }
+
+    folder "pattern"{
+      frame "libscil-patterns"{
+        interface "scil-patterns.h" #Purple
+      }
+    }
+  }
+
+  actor admin
+  admin --> [scil-benchmark] : runs
+
+  folder "Install directory"{
+    artifact [scil.conf]
+    artifact [scil.pc]
+  }
+
+  [scil-benchmark]..> [scil.conf] : creates
+  [scil-algo-chooser]..> [scil.conf] : reads
+
+  [scil-algo-chooser]-->[scil-patterns.h] : use
+
+  folder "Additional tools in tools/"{
+    folder "hdf5-plugin"{
+      component [libhdf5-filter-scil]
+    }
+  }
+
+  [libhdf5-filter-scil] --> [scil.h] : use
+\enduml
  */
 
 #ifndef SCIL_HEADER_

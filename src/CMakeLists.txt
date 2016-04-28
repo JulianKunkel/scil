@@ -20,6 +20,7 @@ include(CheckCSourceCompiles)
 
 # compile flags
 set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -pedantic-errors -std=gnu11 -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections  -Wl,--no-allow-shlib-undefined")
+# -fdiagnostics-color=always
 # -fvisibility=hidden -fvisibility-inlines-hidden -Wl,--print-gc-sections
 set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--no-allow-shlib-undefined -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt")
 
@@ -53,8 +54,41 @@ target_link_libraries(scil
 configure_file("${CMAKE_SOURCE_DIR}/scil-config.h.in" "scil-config.h" @ONLY)
 
 
-##
+## Documentation
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+    add_custom_target(doc
+        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Generating API documentation with Doxygen" VERBATIM
+    )
 
+    find_package( Java )
+    # add_feature_info( Java DESCRIPTION "Java is needed in the documentation to run Plantuml" TYPE OPTIONAL)
+    if(JAVA_FOUND)
+      find_path (PLANTUML_JAR_PATH plantuml.jar HINTS ${DEPS_DIR} DOC "PLANTUML directory" ENV PLANTUML_JAR_PATH)
+      if(PLANTUML_JAR_PATH)
+        set(PLANTUML_JAR_PATH "${PLANTUML_JAR_PATH}/plantuml.jar")
+        set(PLANTUML_ON ON)
+      else()
+        message(STATUS "Warning: no plantuml.jar found.")
+      endif()
+    endif(JAVA_FOUND)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+endif(DOXYGEN_FOUND)
+
+option(plantuml "Plantuml support" ${PLANTUML_ON})
+add_feature_info(plantuml plantuml  "PlantUML for documentation" URL http://de.plantuml.com/ TYPE OPTIONAL)
+##### END Documentation
+
+
+
+SUBDIRS (test)
+SUBDIRS (tools)
+SUBDIRS (pattern)
+
+
+##
 feature_summary(WHAT ALL)
 
 ## Installation
@@ -63,17 +97,3 @@ configure_file("${DEV_DIR}/scil.pc.in" "scil.pc" @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/scil.pc"  DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
 install(TARGETS scil LIBRARY DESTINATION lib)
 install(FILES scil.h DESTINATION include)
-
-## Documentation
-find_package(Doxygen)
-if(DOXYGEN_FOUND)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
-    add_custom_target(doc
-        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        COMMENT "Generating API documentation with Doxygen" VERBATIM
-    )
-endif(DOXYGEN_FOUND)
-
-SUBDIRS (test)
-SUBDIRS (pattern)

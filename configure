@@ -18,6 +18,7 @@ function help(){
 	echo "--debug                  : build SIOX with debug flags"
 	echo "--verbose                : output the command but do not execute it"
 	echo "--reconfigure            : run configure again with the parameters used the last time"
+	echo "--plantuml-jar-dir=<dir> : directory containing plantuml.jar, useful for building the documentation"
 	echo
 }
 
@@ -32,7 +33,7 @@ function reconfigure(){
 	exit $?
 }
 
-set -- `getopt -ul "help,version,debug,reconfigure,prefix:,with-cc:,with-cxx:,verbose,build-dir:" hV "$@"`
+set -- `getopt -ul "help,version,debug,reconfigure,prefix:,plantuml-jar-dir:,with-cc:,with-cxx:,verbose,build-dir:" hV "$@"`
 test $# -lt 1  && exit 1
 while test $# -gt 0
 do
@@ -45,6 +46,7 @@ do
 		--with-cc) ccbin="$2"; shift;;
 		--with-cxx) cxxbin="$2"; shift;;
 		--build-dir) buildDIR="$2"; shift;;
+		--plantuml-jar-dir) export PLANTUML_JAR_PATH="$2"; shift;;
 		--verbose) VERBOSE="YES";;
 		--) ;;
 		*) echo "Unknown option $1"; exit 1;;

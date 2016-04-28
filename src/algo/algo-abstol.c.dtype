@@ -72,8 +72,7 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
     //Locally assigning absolute tolerance
     double abs_tol = ctx->hints.absolute_tolerance;
 
-
-    if((double)(max - min) < SCIL_SMALL || abs_tol <= 0){
+    if((double)(max - min) < SCIL_SMALL || abs_tol >= SCIL_ACCURACY_DBL_FINEST){
       return -1;
     }
 
@@ -177,7 +176,7 @@ int scil_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict dest,
     bits_per_num = *source;
     source++;
     in_size--;
-    
+
     uint64_t max_index = scil_get_data_count(dims);
     uint64_t index = 0;
     for(uint64_t i = 0; index < max_index; i+=bits_per_num){
