@@ -32,7 +32,7 @@ void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double 
 	size_t out_c_size;
 
 	const size_t buff_size = scil_compress_buffer_size_bound(datatype, &dims);
-	const size_t data_size = scilI_get_data_size(datatype, &dims);
+	const size_t data_size = scil_get_data_size(datatype, &dims);
 
 	allocate(byte, buffer_out, buff_size);
 	allocate(byte, tmp_buff, buff_size);

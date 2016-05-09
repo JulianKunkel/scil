@@ -191,6 +191,9 @@ void scil_init_dims_array(scil_dims* dims, uint8_t dimensions_count, const size_
  */
 size_t scil_get_data_count(const scil_dims* dims);
 
+size_t scil_get_data_size(enum SCIL_Datatype type, const scil_dims* dims);
+
+
 /*
  * \brief Return the minimum size of the compression buffer needed.
  */

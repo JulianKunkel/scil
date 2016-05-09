@@ -117,7 +117,6 @@ struct scil_context_t{
 };
 
 int scilI_parse_compression_algorithms(scil_compression_chain_t * chain, char * str_in);
-size_t scilI_get_data_size(enum SCIL_Datatype type, const scil_dims* dims);
 scil_compression_algorithm * scilI_find_compressor_by_name(const char * name);
 
 #endif

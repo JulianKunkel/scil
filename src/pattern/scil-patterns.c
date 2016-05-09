@@ -22,11 +22,13 @@
 #include <scil-internal.h>
 
 #include <basic-patterns.h>
+#include <simplex-noise.h>
 
 static scil_pattern * patterns[] ={
   & scil_pattern_constant,
   & scil_pattern_rnd,
   & scil_pattern_steps,
+  & scil_pattern_simplex_noise,
   NULL
 };
 
@@ -72,7 +74,7 @@ int scilP_create_pattern_double(scil_dims * dims, double * buf, char * name, flo
 }
 
 int scilP_create_pattern_float (scil_dims * dims, float * buffer, char * name,  float mn, float mx, float arg){
-  size_t size = scilI_get_data_size(SCIL_TYPE_DOUBLE, dims);
+  size_t size = scil_get_data_size(SCIL_TYPE_DOUBLE, dims);
   double * buf = (double*) malloc(size);
   int ret = scilP_create_pattern_double(dims, buf, name, mn, mx, arg);
   if (ret != SCIL_NO_ERR){
@@ -136,6 +138,8 @@ static void create_library_patterns_if_needed(){
 
   library_add("steps", "steps2", 0, 1, 2, 0);
   library_add("steps", "steps100", 1, 100, 100, 0);
+
+  library_add("simplexNoise", "simplex", -1, 1, 4711, 0);
 }
 
 int scilP_library_size(){
@@ -169,7 +173,7 @@ int scilP_library_create_pattern_double(int p, scil_dims * dims, double * buffer
 int scilP_library_create_pattern_float (int p, scil_dims * dims, float * buffer){
   create_library_patterns_if_needed();
   assert( p <= library_size && p >= 0);
-  size_t size = scilI_get_data_size(SCIL_TYPE_DOUBLE, dims);
+  size_t size = scil_get_data_size(SCIL_TYPE_DOUBLE, dims);
   double * buf = (double*) malloc(size);
   int ret = scilP_library_create_pattern_double(p, dims, buf);
   if (ret != SCIL_NO_ERR){

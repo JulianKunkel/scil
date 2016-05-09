@@ -227,3 +227,19 @@ void scilU_critical_error(const char * msg){
   // printf("%d", 1/0);
   exit(1);
 }
+
+int scilU_double_equal(double val1, double val2){
+  if ( val1 > val2){
+    return val1 - val2 < 1e-300;
+  }else{
+    return val2 - val1 < 1e-300;
+  }
+}
+
+int scilU_float_equal(float val1, float val2){
+  if ( val1 > val2){
+    return val1 - val2 < 1e-40;
+  }else{
+    return val2 - val1 < 1e-40;
+  }
+}

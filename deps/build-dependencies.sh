@@ -6,14 +6,16 @@ ZFP=zfp-0.5.0
 FPZIP=fpzip-1.1.0
 OPENJPG=2.1
 
-if [[ ! -e ${FPZIP}.tar.gz ]] ; then
-	wget http://computation.llnl.gov/projects/floating-point-compression/download/$FPZIP.tar.gz
-	wget http://computation.llnl.gov/projects/floating-point-compression/download/$ZFP.tar.gz
-	wget https://github.com/uclouvain/openjpeg/archive/version.$OPENJPG.tar.gz
-	for x in *.gz ; do
-		tar -xf $x
-	done
-fi
+function download(){
+		if [[ ! -e $1 ]] ; then
+			wget $2/$1
+			tar -xf $1
+		fi
+}
+
+download $FPZIP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download/
+download $ZFP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download/
+download version.$OPENJPG.tar.gz https://github.com/uclouvain/openjpeg/archive/
 
 BUILD=0
 
@@ -27,6 +29,7 @@ if [[ ! -e $JPEG_INSTALL ]] ; then
 	cmake ../ -DCMAKE_INSTALL_PREFIX=$JPEG_INSTALL -DCMAKE_C_FLAGS="-Wl,--rpath=$JPEG_INSTALL/lib/"
 	make install
 	popd
+	BUILD=1
 fi
 
 if [[ ! -e libzfp.a ]] ; then

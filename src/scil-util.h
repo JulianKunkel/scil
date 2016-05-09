@@ -224,8 +224,7 @@ double scilU_significant_bits_to_relative_tolerance(uint8_t sig_bits);
 
 int scilU_convert_significant_decimals_to_bits(int decimals);
 int scilU_convert_significant_bits_to_decimals(int bits);
-
-
-
+int scilU_double_equal(double val1, double val2);
+int scilU_float_equal(float val1, float val2);
 
 #endif /* UTIL_H */

@@ -255,7 +255,7 @@ size_t scil_get_data_count(const scil_dims* dims){
 	return result;
 }
 
-size_t scilI_get_data_size(enum SCIL_Datatype datatype, const scil_dims* dims){
+size_t scil_get_data_size(enum SCIL_Datatype datatype, const scil_dims* dims){
 	if(dims->dims == 0){
 		return 0;
 	}
@@ -426,7 +426,7 @@ static inline void * pick_buffer(int is_src, int total, int remain, void*restric
 }
 
 size_t scil_compress_buffer_size_bound(enum SCIL_Datatype datatype, const scil_dims* dims){
-	return scilI_get_data_size(datatype, dims)*4 + SCIL_BLOCK_HEADER_MAX_SIZE;
+	return scil_get_data_size(datatype, dims)*4 + SCIL_BLOCK_HEADER_MAX_SIZE;
 }
 
 /*
@@ -471,7 +471,7 @@ int scil_compress(byte* restrict dest,
 	assert(out_size_p != NULL);
 	assert(source != NULL);
 
-	size_t input_size = scilI_get_data_size(ctx->datatype, dims);
+	size_t input_size = scil_get_data_size(ctx->datatype, dims);
 	const size_t datatypes_size = input_size;
 
 	if (datatypes_size == 0){
@@ -616,7 +616,7 @@ int scil_decompress(enum SCIL_Datatype datatype, void*restrict dest, scil_dims*c
 	size_t src_size = source_size - 1;
 	int ret;
 
-	const size_t output_size = scilI_get_data_size(datatype, dims);
+	const size_t output_size = scil_get_data_size(datatype, dims);
 	byte*restrict buff_tmp2 = & buff_tmp1[(int)(output_size*2+10)];
 
 	//for(int i=0; i < chain_size; i++){

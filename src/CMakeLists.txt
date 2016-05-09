@@ -14,6 +14,9 @@ set (VERSION_MINOR 1)
 set(DEV_DIR "${CMAKE_SOURCE_DIR}/../dev")
 set(DEPS_DIR "${CMAKE_SOURCE_DIR}/../deps")
 
+
+find_package(PkgConfig REQUIRED)
+
 include(CTest)
 include(FeatureSummary)
 include(CheckCSourceCompiles)
@@ -39,11 +42,11 @@ execute_process(COMMAND ${DEV_DIR}/create-datatype-variants.sh ${CMAKE_SOURCE_DI
 FILE(GLOB ALGO ${CMAKE_SOURCE_DIR}/algo/*.c ${CMAKE_BINARY_DIR}/algo/*.c)
 
 # MESSAGE( STATUS "Available algorithms: " ${ALGO})
-add_library(scil SHARED scil.c scil-util.c scil-errors.c scil-dummy.cpp scil-algo-chooser.c scil-hardware-limits.c ${ALGO})
+add_library(scil SHARED scil.c scil-util.c scil-errors.c scil-dummy.cpp scil-algo-chooser.c scil-hardware-limits.c ${ALGO} ${DEPS_DIR}/open-simplex-noise-in-c/open-simplex-noise.c)
 target_link_libraries(scil m)
 
 # for specific algorithms
-include_directories(${CMAKE_BINARY_DIR}  ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/pattern ${DEPS_DIR}/include/zfp ${DEPS_DIR}/include/fpzip)
+include_directories(${CMAKE_BINARY_DIR} ${DEPS_DIR}/open-simplex-noise-in-c ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/pattern ${DEPS_DIR}/include/zfp ${DEPS_DIR}/include/fpzip)
 target_link_libraries(scil z)
 target_link_libraries(scil
   ${DEPS_DIR}/libfpzip.a
@@ -82,14 +85,10 @@ add_feature_info(plantuml plantuml  "PlantUML for documentation" URL http://de.p
 ##### END Documentation
 
 
-
 SUBDIRS (test)
 SUBDIRS (tools)
 SUBDIRS (pattern)
 
-
-##
-feature_summary(WHAT ALL)
 
 ## Installation
 configure_file("${DEV_DIR}/scil.pc.in" "scil.pc" @ONLY)
@@ -97,3 +96,6 @@ configure_file("${DEV_DIR}/scil.pc.in" "scil.pc" @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/scil.pc"  DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
 install(TARGETS scil LIBRARY DESTINATION lib)
 install(FILES scil.h DESTINATION include)
+
+##
+feature_summary(WHAT ALL)
