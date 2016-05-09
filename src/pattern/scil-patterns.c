@@ -139,7 +139,9 @@ static void create_library_patterns_if_needed(){
   library_add("steps", "steps2", 0, 1, 2, 0);
   library_add("steps", "steps100", 1, 100, 100, 0);
 
-  library_add("simplexNoise", "simplex", -1, 1, 4, 0);
+  library_add("simplexNoise", "simplex102", -1, 1, 102, 0); // 2 passes
+  library_add("simplexNoise", "simplex106", -1, 1, 106, 0); // 6 passes
+  library_add("simplexNoise", "simplex206", -1, 1, 306, 0); // 6 passes, 3 hills
 }
 
 int scilP_library_size(){

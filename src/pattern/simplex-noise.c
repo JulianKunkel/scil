@@ -21,15 +21,16 @@
 
 
 static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float arg){
-  if( scilU_double_equal(mn, mx) || (int) arg <= 0 ){
+  if( scilU_double_equal(mn, mx) || (int) arg <= 100 ){
     return SCIL_EINVAL;
   }
 	struct osn_context *ctx;
   int64_t seed = 4711;
 	open_simplex_noise(seed, &ctx);
 
-  const int frequencyCount = (int) arg;
-  const int64_t max_potenz = 1<<frequencyCount;
+  const int frequencyCount = (int) arg % 10;
+  double highFrequency = ((int) arg / 10) / 10;
+  int64_t max_potenz = 1<<frequencyCount;
 
   switch(dims->dims){
     case (1):{
@@ -39,7 +40,7 @@ static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float 
         int64_t potenz = max_potenz;
         int64_t divisor = 1;
         for(int f = 1 ; f <= frequencyCount; f++){
-          buffer[i] += potenz * open_simplex_noise2(ctx, 1.0, (double) i / count * divisor);
+          buffer[i] += potenz * open_simplex_noise2(ctx, 1.0, (double) i / count * divisor * highFrequency);
           potenz /= 2;
           divisor *= 2;
         }
@@ -53,7 +54,7 @@ static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float 
           int64_t potenz = max_potenz;
           int64_t divisor = 1;
           for(int f = 1 ; f <= frequencyCount; f++){
-            var += potenz * open_simplex_noise2(ctx, (double) x / dims->length[0] * divisor, (double) y / dims->length[1] * divisor);
+            var += potenz * open_simplex_noise2(ctx, (double) x / dims->length[0] * divisor*highFrequency, (double) y / dims->length[1] * divisor*highFrequency);
             potenz /= 2;
             divisor *= 2;
           }
@@ -66,7 +67,15 @@ static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float 
       for (size_t z=0; z < dims->length[2]; z++){
         for (size_t y=0; y < dims->length[1]; y++){
           for (size_t x=0; x < dims->length[0]; x++){
-            buffer[x+y*dims->length[0]+z*(dims->length[0]*dims->length[1])] = open_simplex_noise3(ctx, (double) x / dims->length[0], (double) y / dims->length[1], (double) z / dims->length[2]);
+            double var = 0;
+            int64_t potenz = max_potenz;
+            int64_t divisor = 1;
+            for(int f = 1 ; f <= frequencyCount; f++){
+              var += potenz * open_simplex_noise3(ctx, (double) x / dims->length[0]*divisor*highFrequency, (double) y / dims->length[1]*divisor*highFrequency, (double) z / dims->length[2]*divisor*highFrequency);
+              potenz /= 2;
+              divisor *= 2;
+            }
+            buffer[x+y*dims->length[0]+z*(dims->length[0]*dims->length[1])] = var;
           }
         }
       }
@@ -76,8 +85,15 @@ static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float 
         for (size_t z=0; z < dims->length[2]; z++){
           for (size_t y=0; y < dims->length[1]; y++){
             for (size_t x=0; x < dims->length[0]; x++){
-              buffer[x+y*dims->length[0]+z*(dims->length[0]*dims->length[1])+w*(dims->length[0]*dims->length[1]*dims->length[2])] =
-                open_simplex_noise4(ctx, (double) x / dims->length[0], (double) y / dims->length[1], (double) z / dims->length[2], (double) w / dims->length[3]);
+              double var = 0;
+              int64_t potenz = max_potenz;
+              int64_t divisor = 1;
+              for(int f = 1 ; f <= frequencyCount; f++){
+                var += potenz * open_simplex_noise4(ctx, (double) x / dims->length[0]*divisor*highFrequency, (double) y / dims->length[1]*divisor*highFrequency, (double) z / dims->length[2]*divisor*highFrequency, (double) w / dims->length[3]*divisor*highFrequency);
+                potenz /= 2;
+                divisor *= 2;
+              }
+              buffer[x+y*dims->length[0]+z*(dims->length[0]*dims->length[1])+w*(dims->length[0]*dims->length[1]*dims->length[2])] = var;
             }
           }
         }
