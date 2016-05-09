@@ -27,6 +27,7 @@ void plot1D(const char* name, scil_dims dims, double * buffer_in){
   for(size_t x = 1; x < dims.length[0]; x++){
     fprintf(f, ",%f", buffer_in[x]);
   }
+  fprintf(f, "\n");
   fclose(f);
 }
 

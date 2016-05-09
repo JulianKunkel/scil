@@ -21,25 +21,45 @@
 
 
 static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float arg){
-  if( scilU_double_equal(mn, mx) ){
+  if( scilU_double_equal(mn, mx) || (int) arg <= 0 ){
     return SCIL_EINVAL;
   }
 	struct osn_context *ctx;
-  int64_t seed = (int64_t) arg;
+  int64_t seed = 4711;
 	open_simplex_noise(seed, &ctx);
+
+  const int frequencyCount = (int) arg;
+  const int64_t max_potenz = 1<<frequencyCount;
 
   switch(dims->dims){
     case (1):{
       size_t count = scil_get_data_count(dims);
       for (size_t i=0; i < count; i++){
-        buffer[i] = open_simplex_noise2(ctx, 1.0, (double) i / count);
+        buffer[i] = 0;
+        int64_t potenz = max_potenz;
+        int64_t divisor = 1;
+        for(int f = 1 ; f <= frequencyCount; f++){
+          buffer[i] += potenz * open_simplex_noise2(ctx, 1.0, (double) i / count * divisor);
+          potenz /= 2;
+          divisor *= 2;
+        }
       }
       break;
     }case (2):{
       for (size_t y=0; y < dims->length[1]; y++){
+
         for (size_t x=0; x < dims->length[0]; x++){
-          buffer[x+y*dims->length[0]] = open_simplex_noise2(ctx, (double) x / dims->length[0], (double) y / dims->length[1]);
+          double var = 0;
+          int64_t potenz = max_potenz;
+          int64_t divisor = 1;
+          for(int f = 1 ; f <= frequencyCount; f++){
+            var += potenz * open_simplex_noise2(ctx, (double) x / dims->length[0] * divisor, (double) y / dims->length[1] * divisor);
+            potenz /= 2;
+            divisor *= 2;
+          }
+          buffer[x+y*dims->length[0]] = var;
         }
+
       }
       break;
     }case (3):{
@@ -76,7 +96,7 @@ static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float 
   }
 
   double scaling = (double)(mx - mn) / (mx_o-mn_o); // intended min/max
-  
+
   // rescale
   for (size_t i=0; i < count; i++){
     buffer[i] = (double) mn + (buffer[i]-mn_o) *scaling;

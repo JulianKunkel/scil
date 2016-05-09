@@ -16,6 +16,25 @@
 # along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
 
+plotme3D = function (file, d){
+  library(plot3D) # install.packages("plot3D")
+  pdf(paste(file, ".pdf", sep=""))
+  image2D(d, rasterImage = TRUE, contour = TRUE, shade = 0.5, lphi = 0)
+  dev.off()
+
+  png(paste(file, "-3D1.png", sep=""), width=1024, height=1024, units="px", pointsize = 24)
+  persp3D(z=d, contour = list(side = c("zmax", "z")), theta = 0, phi=35)
+  dev.off()
+
+  png(paste(file, "-3D2.png", sep=""), width=1024, height=1024, units="px", pointsize = 24)
+  persp3D(z=d, contour = list(side = c("zmax", "z")), theta = 90, phi=45)
+  dev.off()
+
+  png(paste(file, "-3D3.png", sep=""), width=1024, height=1024, units="px", pointsize = 24)
+  persp3D(z=d, contour = list(side = c("zmax", "z")), theta = -90, phi=45)
+  dev.off()
+}
+
 options <- commandArgs(trailingOnly = TRUE)
 
 if( length(options) < 1){
@@ -37,34 +56,23 @@ if (! is.na(head[3])){
   dimy = head[2][,]
 }
 
-
 d = as.matrix(d[2:nrow(d),])
 
 print(sprintf("min: %f max: %f", min(d), max(d)))
-
-pdf(paste(file, ".pdf", sep=""))
+print("Be aware: this visulation tool takes a long time if data is random")
 
 if(dims == 1){
+  pdf(paste(file, ".pdf", sep=""))
   plot(d[1,], ylab="Value")
+  dev.off()
 }
 if(dims == 2){
   # image(d)
-  library(plot3D) # install.packages("plot3D")
-  image2D(d, rasterImage = TRUE, contour = TRUE, shade = 0.5, lphi = 0)
-  dev.off()
-
-  png(paste(file, "-3D.png", sep=""), width=1024, height=1024, units="px", pointsize = 24)
-  persp3D(z=d, contour = list(side = c("zmax", "z")))
-  dev.off()
+  plotme3D(file, d)
 }
+
 if(dims == 3){
   print("We plot a 2D slice")
-  library(plot3D) # install.packages("plot3D")
-  p = d[1:dimy,]
-  image2D(p, rasterImage = TRUE, contour = TRUE, shade = 0.5, lphi = 0)
-  dev.off()
-
-  png(paste(file, "-3D.png", sep=""), width=1024, height=1024, units="px", pointsize = 24)
-  persp3D(z=p, contour = list(side = c("zmax", "z")))
-  dev.off()
+  p = d[1:dimy+dimy,]
+  plotme3D(name, p)
 }

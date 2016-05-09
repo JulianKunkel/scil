@@ -14,6 +14,7 @@
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <basic-patterns.h>
+#include <scil-util.h>
 
 #include <stdio.h>
 
@@ -34,7 +35,6 @@ scilP_mutator scilP_interpolator = & m_interpolator;
 static void m_repeater(scil_dims * dims, double * buffer){
   size_t count = scil_get_data_count(dims) - 1;
   // repeat a value two times, odd become even
-  double val = buffer[0];
   for (size_t i=0; i < count; i+= 2){
     buffer[i] = buffer[i+1];
   }
@@ -50,11 +50,11 @@ static int constant(scil_dims * dims, double * buffer, float mn, float mx, float
 }
 
 static int steps(scil_dims * dims, double * buffer, float mn, float mx, float arg){
-  if(arg <= 0 || mn == mx){
+  if(arg <= 0 || scilU_float_equal(mn, mx) ){
     return SCIL_EINVAL;
   }
-  int steps = (mx - mn);
-  float step_width = steps / arg;
+  int steps = (int) arg;
+  float step_width = (mx - mn) / (steps-1);
   size_t count = scil_get_data_count(dims);
   for (size_t i=0; i < count; i++){
     buffer[i] = mn + (i % steps) * step_width;
@@ -63,7 +63,7 @@ static int steps(scil_dims * dims, double * buffer, float mn, float mx, float ar
 }
 
 static int rnd(scil_dims * dims, double * buffer, float mn, float mx, float arg){
-  if(mn == mx){
+  if(scilU_float_equal(mn, mx)){
     return SCIL_EINVAL;
   }
   size_t count = scil_get_data_count(dims);
