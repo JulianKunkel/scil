@@ -10,3 +10,4 @@ target_link_libraries(scil-pattern-plotter scil scil-patterns)
 install(TARGETS scil-pattern-plotter RUNTIME DESTINATION bin)
 
 install(FILES scil-plot-csv.R DESTINATION bin)
+install(FILES scil-plot-csv.py DESTINATION bin)

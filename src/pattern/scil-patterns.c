@@ -28,6 +28,7 @@ static scil_pattern * patterns[] ={
   & scil_pattern_constant,
   & scil_pattern_rnd,
   & scil_pattern_steps,
+  & scil_pattern_sin,
   & scil_pattern_simplex_noise,
   NULL
 };
@@ -138,6 +139,10 @@ static void create_library_patterns_if_needed(){
 
   library_add("steps", "steps2", 0, 1, 2, 0);
   library_add("steps", "steps100", 1, 100, 100, 0);
+
+  library_add("sin", "sin", 1, 100, 101, 0); // 1 pass
+  library_add("sin", "sin3", 1, 100, 301, 0); // 3 sines
+  library_add("sin", "sin3p", 1, 100, 203, 0); // 3 passes, 2 sines
 
   library_add("simplexNoise", "simplex102", -1, 1, 102, 0); // 2 passes
   library_add("simplexNoise", "simplex106", -1, 1, 106, 0); // 6 passes
