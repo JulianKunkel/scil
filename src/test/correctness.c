@@ -17,128 +17,155 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <scil-util.h>
 #include <scil-algo-chooser.h>
 #include <scil-patterns.h>
+#include <scil-util.h>
 
-#define allocate(type, name, count) type* name = (type*)malloc(count * sizeof(type))
+#define allocate(type, name, count) \
+    type* name = (type*)malloc(count * sizeof(type))
 
 static int error_occured = 0;
-static double * buffer_uncompressed;
+static double* buffer_uncompressed;
 
-int test_correctness(const char * name, double * buffer_in, scil_dims dims){
-	size_t out_c_size;
-	size_t variableSize = scil_get_data_count(& dims);
+int test_correctness(const char* name, double* buffer_in, scil_dims dims)
+{
+    size_t out_c_size;
+    size_t variableSize = scil_get_data_count(&dims);
 
-	const size_t c_size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, &dims);
+    const size_t c_size =
+        scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, &dims);
 
-	allocate(byte, buffer_out, c_size);
-	allocate(byte, tmp_buff, c_size);
+    allocate(byte, buffer_out, c_size);
+    allocate(byte, tmp_buff, c_size);
 
-  scil_context_p ctx;
-  scil_hints hints;
-	scil_hints out_accuracy;
+    scil_context_p ctx;
+    scil_hints hints;
+    scil_hints out_accuracy;
 
-  scil_init_hints(&hints);
-	hints.absolute_tolerance = 0.01;
+    scil_init_hints(&hints);
+    hints.absolute_tolerance = 0.01;
 
-	double r = (double) scilI_determine_randomness(buffer_in, variableSize*sizeof(double), tmp_buff, c_size);
+    double r = (double)scilI_determine_randomness(
+        buffer_in, variableSize * sizeof(double), tmp_buff, c_size);
 
-	printf("Pattern %s randomness: %.1f%%\n", name, r);
+    printf("Pattern %s randomness: %.1f%%\n", name, r);
 
-	printf("Algorithm, C Error, D Error, Validation, Uncompressed size, Compressed size, Compression factor, CSpeed MiB/s, DSpeed MiB/s, Algo\n");
+    printf(
+        "Algorithm, C Error, D Error, Validation, Uncompressed size, "
+        "Compressed size, Compression factor, CSpeed MiB/s, DSpeed MiB/s, "
+        "Algo\n");
 
-	for(int i=-1; i < scil_compressors_available(); i++ ){
-		char compression_name[1024];
-		if (i == -1){
-			hints.force_compression_methods = NULL;
-		}else{
-			sprintf(compression_name, "%s", scil_compressor_name(i));
-			hints.force_compression_methods = compression_name;
-		}
+    for (int i = -1; i < scil_compressors_available(); i++) {
+        char compression_name[1024];
+        if (i == -1) {
+            hints.force_compression_methods = NULL;
+        } else {
+            sprintf(compression_name, "%s", scil_compressor_name(i));
+            hints.force_compression_methods = compression_name;
+        }
 
-		int ret = scil_create_compression_context(& ctx, SCIL_TYPE_DOUBLE, &hints);
-		if (ret != 0){
-			printf("Invalid combination %s\n", compression_name);
-			continue;
-		}
-		assert(ctx != NULL);
-		int ret_c;
-		int ret_d;
-		int ret_v;
+        int ret =
+            scil_create_compression_context(&ctx, SCIL_TYPE_DOUBLE, &hints);
+        if (ret != 0) {
+            printf("Invalid combination %s\n", compression_name);
+            continue;
+        }
+        assert(ctx != NULL);
+        int ret_c;
+        int ret_d;
+        int ret_v;
 
-		const uint8_t loops = 10;
-		scil_timer timer;
-		scilU_start_timer(& timer);
+        const uint8_t loops = 10;
+        scil_timer timer;
+        scilU_start_timer(&timer);
 
-		for(uint8_t i = 0; i < loops; ++i){
-			ret_c = scil_compress(buffer_out, c_size, buffer_in, & dims,&out_c_size, ctx);
-			if(ret_c != 0) break;
-		}
-		double seconds_compress = scilU_stop_timer(timer);
-		ret_d = -1;
-		ret_v = -1;
+        for (uint8_t i = 0; i < loops; ++i) {
+            ret_c = scil_compress(
+                buffer_out, c_size, buffer_in, &dims, &out_c_size, ctx);
+            if (ret_c != 0) break;
+        }
+        double seconds_compress = scilU_stop_timer(timer);
+        ret_d                   = -1;
+        ret_v                   = -1;
 
-		if(ret_c == 0){
-			scilU_start_timer(& timer);
-			for(uint8_t i = 0; i < loops; ++i){
-				ret_d = scil_decompress(SCIL_TYPE_DOUBLE, buffer_uncompressed, & dims, buffer_out, out_c_size, tmp_buff);
-				if(ret_d != 0) break;
-			}
-		}
-		double seconds_decompress = scilU_stop_timer(timer);
+        if (ret_c == 0) {
+            scilU_start_timer(&timer);
+            for (uint8_t i = 0; i < loops; ++i) {
+                ret_d = scil_decompress(SCIL_TYPE_DOUBLE,
+                                        buffer_uncompressed,
+                                        &dims,
+                                        buffer_out,
+                                        out_c_size,
+                                        tmp_buff);
+                if (ret_d != 0) break;
+            }
+        }
+        double seconds_decompress = scilU_stop_timer(timer);
 
-		if(ret_d == 0){
-			ret_v = scil_validate_compression(SCIL_TYPE_DOUBLE, buffer_in, & dims, buffer_out, out_c_size, ctx, & out_accuracy);
-		}
+        if (ret_d == 0) {
+            ret_v = scil_validate_compression(SCIL_TYPE_DOUBLE,
+                                              buffer_in,
+                                              &dims,
+                                              buffer_out,
+                                              out_c_size,
+                                              ctx,
+                                              &out_accuracy);
+        }
 
-		size_t u_size = variableSize * sizeof(double);
-		double c_fac = (double)(u_size) / out_c_size;
+        size_t u_size = variableSize * sizeof(double);
+        double c_fac  = (double)(u_size) / out_c_size;
 
-		if (ret_c != 0 || ret_d != 0 ){ // Ignore validation errors here
-			error_occured = 1;
-		}
-		if( i == -1 && ret_v != 0){
-			error_occured = 1;
-		}
-		if ( i == -1){
-			hints.force_compression_methods = compression_name;
-			scil_compression_sprint_last_algorithm_chain(ctx, compression_name, 1024);
-		}
+        if (ret_c != 0 || ret_d != 0) { // Ignore validation errors here
+            error_occured = 1;
+        }
+        if (i == -1 && ret_v != 0) {
+            error_occured = 1;
+        }
+        if (i == -1) {
+            hints.force_compression_methods = compression_name;
+            scil_compression_sprint_last_algorithm_chain(
+                ctx, compression_name, 1024);
+        }
 
-		printf("%d, %d, %d, %d, %lu, %lu, %.1lf, %.1lf, %.1lf, %s \n",
-			i, ret_c, ret_d, ret_v,
-			u_size, out_c_size, c_fac,
-			u_size/seconds_compress/1024 /1024, u_size/seconds_decompress/1024 /1024, hints.force_compression_methods);
-  }
+        printf("%d, %d, %d, %d, %lu, %lu, %.1lf, %.1lf, %.1lf, %s \n",
+               i,
+               ret_c,
+               ret_d,
+               ret_v,
+               u_size,
+               out_c_size,
+               c_fac,
+               u_size / seconds_compress / 1024 / 1024,
+               u_size / seconds_decompress / 1024 / 1024,
+               hints.force_compression_methods);
+    }
 
-	printf("Done.\n");
-	free(buffer_out);
-	return 0;
+    printf("Done.\n");
+    free(buffer_out);
+    return 0;
 }
 
-
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int main(int argc, char** argv){
-	const int variableSize = 1000000/sizeof(double);
-	int ret;
-	allocate(double, buffer_in, variableSize);
+int main(int argc, char** argv)
+{
+    const int variableSize = 1000000 / sizeof(double);
+    int ret;
+    allocate(double, buffer_in, variableSize);
 
-	buffer_uncompressed = malloc(variableSize*4*sizeof(double));
+    buffer_uncompressed = malloc(variableSize * 4 * sizeof(double));
 
-	scil_dims dims;
-	scil_init_dims_1d(& dims, variableSize);
+    scil_dims dims;
+    scil_init_dims_1d(&dims, variableSize);
 
-	for(int i=0; i < scilP_library_size(); i++){
-		char * name = scilP_library_pattern_name(i);
-		scilP_library_create_pattern_double(i, & dims, buffer_in);
-		assert( ret == SCIL_NO_ERR);
-		test_correctness(name, buffer_in, dims);
-	}
+    for (int i = 0; i < scilP_library_size(); i++) {
+        char* name = scilP_library_pattern_name(i);
+        scilP_library_create_pattern_double(i, &dims, buffer_in);
+        assert(ret == SCIL_NO_ERR);
+        test_correctness(name, buffer_in, dims);
+    }
 
+    free(buffer_in);
+    free(buffer_uncompressed);
 
-	free(buffer_in);
-	free(buffer_uncompressed);
-
-	return error_occured;
+    return error_occured;
 }
