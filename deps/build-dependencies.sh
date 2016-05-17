@@ -13,8 +13,8 @@ function download(){
 		fi
 }
 
-download $FPZIP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download/
-download $ZFP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download/
+download $FPZIP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download
+download $ZFP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download
 download version.$OPENJPG.tar.gz https://github.com/uclouvain/openjpeg/archive/
 
 BUILD=0
@@ -29,6 +29,9 @@ if [[ ! -e $JPEG_INSTALL ]] ; then
 	cmake ../ -DCMAKE_INSTALL_PREFIX=$JPEG_INSTALL -DCMAKE_C_FLAGS="-Wl,--rpath=$JPEG_INSTALL/lib/"
 	make install
 	popd
+	echo "  Installing openjpg library"
+	sudo apt-get update
+  sudo apt-get install libopenjpeg-dev
 	BUILD=1
 fi
 
