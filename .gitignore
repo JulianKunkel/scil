@@ -16,6 +16,7 @@ build/
 *.tar.gz
 *.gch
 *.tags*
+.clang*
 testFileGenerator/
 deps/
 !build-dependencies.sh
