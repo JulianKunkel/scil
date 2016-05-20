@@ -17,6 +17,8 @@ set(DEPS_DIR "${CMAKE_SOURCE_DIR}/../deps")
 
 find_package(PkgConfig REQUIRED)
 
+pkg_search_module(OPENJPEG REQUIRED libopenjp2)
+
 include(CTest)
 include(FeatureSummary)
 include(CheckCSourceCompiles)
@@ -52,6 +54,7 @@ target_link_libraries(scil
   ${DEPS_DIR}/libfpzip.a
   ${DEPS_DIR}/libzfp.a
   lz4
+  ${OPENJPEG_LIBRARIES}
   )
 
 configure_file("${CMAKE_SOURCE_DIR}/scil-config.h.in" "scil-config.h" @ONLY)

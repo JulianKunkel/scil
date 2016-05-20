@@ -29,9 +29,6 @@ if [[ ! -e $JPEG_INSTALL ]] ; then
 	cmake ../ -DCMAKE_INSTALL_PREFIX=$JPEG_INSTALL -DCMAKE_C_FLAGS="-Wl,--rpath=$JPEG_INSTALL/lib/"
 	make install
 	popd
-	echo "  Installing openjpg library"
-	sudo apt-get update
-  sudo apt-get install libopenjpeg-dev
 	BUILD=1
 fi
 
