@@ -47,13 +47,16 @@ file = options[1]
 d = read.csv(file, header=F)
 head = d[1,]
 dims = 1
+
+dimx = head[1][,]
+
 if (! is.na(head[2])){
   dims = 2
+  dimy = head[2][,]
 }
 if (! is.na(head[3])){
   dims = 3
-  dimz = head[3][,]
-  dimy = head[2][,]
+  dimz = head[3][,]  
 }
 
 d = as.matrix(d[2:nrow(d),])
@@ -74,5 +77,8 @@ if(dims == 2){
 if(dims == 3){
   print("We plot a 2D slice")
   p = d[1:dimy+dimy,]
-  plotme3D(name, p)
+  plotme3D( paste(file, "1", sep=""), p)
+
+  p = matrix(d[1:nrow(d),2] , ncol=dimz)
+  plotme3D( paste(file, "2", sep=""), p)
 }

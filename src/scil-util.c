@@ -314,3 +314,12 @@ void scilG_iter(double * data, scil_dims dims, scil_dims offset, scil_dims ende,
     }
   }
 }
+
+void scilU_print_dims(scil_dims pos){
+  printf("(");
+  printf("%zu", pos.length[0]);
+  for(int i=1; i < pos.dims; i++){
+    printf(",%zu", pos.length[i]);
+  }
+  printf(") ");
+}

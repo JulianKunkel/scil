@@ -244,6 +244,11 @@ void scil_init_dims_4d(scil_dims* dims, size_t dim1, size_t dim2, size_t dim3, s
 	dims->length[3] = dim4;
 }
 
+void scil_copy_dims_array(scil_dims* out_dims, scil_dims in_dims){
+	out_dims->dims = in_dims.dims;
+	memcpy(out_dims->length, & in_dims.length, sizeof(size_t)* in_dims.dims);
+}
+
 void scil_init_dims_array(scil_dims* dims, uint8_t count, const size_t* length){
 	dims->dims = count;
 	assert(count <= 4);

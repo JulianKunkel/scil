@@ -19,14 +19,10 @@
 
 #include <scil-util.h>
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 static void printVarDimsOffsets(double * data, scil_dims pos, scil_dims size, int * iter, void * user_ptr){
-  printf("(");
-  printf("%zu", pos.length[0]);
-  for(int i=1; i < pos.dims; i++){
-    printf(",%zu", pos.length[i]);
-  }
-  printf(") ");
+  scilU_print_dims(pos);
 }
 
 static void initVarDims(double * data, scil_dims pos, scil_dims size, int * iter, void * user_ptr){

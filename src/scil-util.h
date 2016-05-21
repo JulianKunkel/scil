@@ -243,4 +243,6 @@ size_t scilG_data_pos(scil_dims * pos, scil_dims * size);
  */
 void scilG_iter(double * data, scil_dims dims, scil_dims offset, scil_dims end, int * iter, scilG_iterfunc func, void * user_ptr);
 
+void scilU_print_dims(scil_dims dims);
+
 #endif /* UTIL_H */

@@ -95,7 +95,7 @@ static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float 
                 potenz /= 2;
                 divisor *= 2;
               }
-              buffer[x+y*len[0]+z*(len[0]*len[1])+w*(len[0]*len[1]*len[2])] = var;
+              buffer[x+len[0]*(y+len[1]*(z+len[2]*w))] = var;
             }
           }
         }

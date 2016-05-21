@@ -50,7 +50,7 @@ void plot3D(const char* name, scil_dims dims, double * buffer_in){
   fprintf(f, "%zu, %zu, %zu\n", dims.length[0], dims.length[1], dims.length[2]);
 
   for(size_t z = 0; z < dims.length[2]; z++){
-    size_t z_ = z * (dims.length[0]+dims.length[1]);
+    size_t z_ = z * dims.length[0]*dims.length[1];
     for(size_t y = 0; y < dims.length[1]; y++){
       fprintf(f, "%f", buffer_in[0+ y * dims.length[0] + z_]);
       for(size_t x = 1; x < dims.length[0]; x++){
