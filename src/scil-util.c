@@ -238,8 +238,8 @@ int scilU_double_equal(double val1, double val2){
 
 int scilU_float_equal(float val1, float val2){
   if ( val1 > val2){
-    return val1 - val2 < 1e-40;
+    return val1 - val2 < 1e-40f;
   }else{
-    return val2 - val1 < 1e-40;
+    return val2 - val1 < 1e-40f;
   }
 }
