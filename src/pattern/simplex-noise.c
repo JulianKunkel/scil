@@ -106,18 +106,7 @@ static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float 
   }
 
   // fix min + max, first identify min/max
-  size_t count = scil_get_data_count(dims);
-  double mn_o = 1e308, mx_o=-1e308;
-  for (size_t i=0; i < count; i++){
-    mn_o = min(mn_o, buffer[i]);
-    mx_o = max(mx_o, buffer[i]);
-  }
-
-  double scaling = (double)(mx - mn) / (mx_o-mn_o); // intended min/max
-  // rescale
-  for (size_t i=0; i < count; i++){
-    buffer[i] = (double) mn + (buffer[i]-mn_o) *scaling;
-  }
+  scilPI_fix_min_max(buffer, dims, mn, mx);
 
   open_simplex_noise_free(ctx);
 

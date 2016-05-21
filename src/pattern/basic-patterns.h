@@ -23,4 +23,6 @@ extern scil_pattern scil_pattern_steps;
 extern scil_pattern scil_pattern_rnd;
 extern scil_pattern scil_pattern_sin;
 
+extern scil_pattern scil_pattern_poly4;
+
 #endif

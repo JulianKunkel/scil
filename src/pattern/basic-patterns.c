@@ -135,24 +135,39 @@ static int p_sin(scil_dims * dims, double * buffer, float mn, float mx, float ar
       assert(0);
   }
 
-  // fix min + max, first identify min/max
-  size_t count = scil_get_data_count(dims);
-  double mn_o = 1e308, mx_o=-1e308;
-  for (size_t i=0; i < count; i++){
-    mn_o = min(mn_o, buffer[i]);
-    mx_o = max(mx_o, buffer[i]);
-  }
-
-  double scaling = (double)(mx - mn) / (mx_o-mn_o); // intended min/max
-  // rescale
-  for (size_t i=0; i < count; i++){
-    buffer[i] = (double) mn + (buffer[i]-mn_o) *scaling;
-  }
+  scilPI_fix_min_max(buffer, dims, mn, mx);
 
   return SCIL_NO_ERR;
 }
+
+static void m_poly_func(double * data, scil_dims pos, scil_dims size, int * iter, void * user_ptr){
+  double val = 1;
+  for(int i=0; i < pos.dims; i++){
+    double x = pos.length[i] - size.length[i] * 0.5;
+    val = val * x;
+  }
+  data[scilG_data_pos(& pos, & size)] = val;
+}
+
+
+static int poly4(scil_dims * dims, double * data, float mn, float mx, float arg, float arg2){
+  if(scilU_float_equal(mn, mx)){
+    return SCIL_EINVAL;
+  }
+  scil_dims pos;
+  scil_copy_dims_array(& pos, *dims);
+  memset(pos.length, 0, sizeof(size_t)*pos.dims);
+
+  scilG_iter(data, *dims, pos, *dims, NULL, & m_poly_func, NULL );
+
+  scilPI_fix_min_max(data, dims, mn, mx);
+
+  return SCIL_NO_ERR;
+}
+
 
 scil_pattern scil_pattern_constant = { &constant, "constant" };
 scil_pattern scil_pattern_steps = { &steps , "steps" };
 scil_pattern scil_pattern_rnd = { &rnd , "random" };
 scil_pattern scil_pattern_sin = { &p_sin , "sin" };
+scil_pattern scil_pattern_poly4 = {&poly4, "poly4"};

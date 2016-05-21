@@ -31,6 +31,7 @@ static scil_pattern * patterns[] ={
   & scil_pattern_steps,
   & scil_pattern_sin,
   & scil_pattern_simplex_noise,
+  & scil_pattern_poly4,
   NULL
 };
 
@@ -154,6 +155,9 @@ static void create_library_patterns_if_needed(){
   library_add("sin", "sin3", 1, 100, 3.0, 1, 0); // 3 sines
   library_add("sin", "sin3p", 1, 100, 2.0, 3, 0); // 3 passes, 2 sines
 
+
+  library_add("poly4", "poly4", 1, 100, 0, 0, 0);
+
   library_add("simplexNoise", "simplex102", -1, 1, 1.0, 2, 0); // 2 passes
   library_add("simplexNoise", "simplex106", -1, 1, 1.0, 6, 0); // 6 passes
   library_add("simplexNoise", "simplex206", -1, 1, 3.0, 6, 0); // 6 passes, 3 hills
@@ -202,4 +206,20 @@ int scilP_library_create_pattern_float (int p, scil_dims * dims, float * buffer)
   }
   free(buf);
   return SCIL_NO_ERR;
+}
+
+void scilPI_fix_min_max(double * buffer, scil_dims * dims, float mn, float mx){
+  // fix min + max, first identify min/max
+  size_t count = scil_get_data_count(dims);
+  double mn_o = 1e308, mx_o=-1e308;
+  for (size_t i=0; i < count; i++){
+    mn_o = min(mn_o, buffer[i]);
+    mx_o = max(mx_o, buffer[i]);
+  }
+
+  double scaling = (double)(mx - mn) / (mx_o-mn_o); // intended min/max
+  // rescale
+  for (size_t i=0; i < count; i++){
+    buffer[i] = (double) mn + (buffer[i]-mn_o) *scaling;
+  }
 }

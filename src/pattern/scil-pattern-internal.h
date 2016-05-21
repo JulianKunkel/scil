@@ -25,4 +25,6 @@ typedef struct {
 
 typedef void (*scilP_mutator)(scil_dims * dims, double * buffer, float arg);
 
+void scilPI_fix_min_max(double * buffer, scil_dims * dims, float mn, float mx);
+
 #endif
