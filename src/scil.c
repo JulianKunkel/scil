@@ -228,18 +228,20 @@ void scil_init_dims_2d(scil_dims* dims, size_t dim1, size_t dim2){
 	dims->length[0] = dim1;
 	dims->length[1] = dim2;
 }
+
 void scil_init_dims_3d(scil_dims* dims, size_t dim1, size_t dim2, size_t dim3){
 	dims->dims = 3;
 	dims->length[0] = dim1;
 	dims->length[1] = dim2;
 	dims->length[2] = dim3;
 }
+
 void scil_init_dims_4d(scil_dims* dims, size_t dim1, size_t dim2, size_t dim3, size_t dim4){
 	dims->dims = 4;
 	dims->length[0] = dim1;
 	dims->length[1] = dim2;
 	dims->length[2] = dim3;
-	dims->length[2] = dim4;
+	dims->length[3] = dim4;
 }
 
 void scil_init_dims_array(scil_dims* dims, uint8_t count, const size_t* length){
