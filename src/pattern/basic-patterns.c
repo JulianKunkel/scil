@@ -22,28 +22,38 @@
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-static void m_interpolator(scil_dims * dims, double * buffer){
+static void m_interpolator(scil_dims * dims, double * buffer, float arg){
   size_t count = scil_get_data_count(dims);
+
+  const int l = (int) arg;
   // for now interpolate only in 1D
-  double val = buffer[0];
-  for (size_t i=1; i < count-1; i++){
-    double new = buffer[i];
-    buffer[i] = (val + buffer[i+1])/2;
-    val = new;
+  const size_t end = count-(l - 1);
+
+  for (size_t i=0; i < end; i += l){
+    double start = buffer[i];
+    double h = (buffer[i+l] - start) / l;
+    for(int r = 1; r < l; r++){
+      buffer[i+r] = start + h * r;
+    }
   }
 }
+
 scilP_mutator scilP_interpolator = & m_interpolator;
 
-static void m_repeater(scil_dims * dims, double * buffer){
+static void m_repeater(scil_dims * dims, double * buffer, float arg){
   size_t count = scil_get_data_count(dims) - 1;
+  const int l = (int) arg;
   // repeat a value two times, odd become even
-  for (size_t i=0; i < count; i+= 2){
-    buffer[i] = buffer[i+1];
+  const size_t end = count-(l - 1);
+  for (size_t i=0; i < end; i += l){
+    for(int r = 1; r < l; r++){
+      buffer[i+r] = buffer[i];
+    }
   }
 }
 scilP_mutator scilP_repeater = & m_repeater;
 
-static int constant(scil_dims * dims, double * buffer, float mn, float mx, float arg){
+static int constant(scil_dims * dims, double * buffer, float mn, float mx, float arg, float arg2){
   size_t count = scil_get_data_count(dims);
   for (size_t i=0; i < count; i++){
     buffer[i] = mn;
@@ -51,7 +61,7 @@ static int constant(scil_dims * dims, double * buffer, float mn, float mx, float
   return SCIL_NO_ERR;
 }
 
-static int steps(scil_dims * dims, double * buffer, float mn, float mx, float arg){
+static int steps(scil_dims * dims, double * buffer, float mn, float mx, float arg, float arg2){
   if(arg <= 0 || scilU_float_equal(mn, mx) ){
     return SCIL_EINVAL;
   }
@@ -64,7 +74,7 @@ static int steps(scil_dims * dims, double * buffer, float mn, float mx, float ar
   return SCIL_NO_ERR;
 }
 
-static int rnd(scil_dims * dims, double * buffer, float mn, float mx, float arg){
+static int rnd(scil_dims * dims, double * buffer, float mn, float mx, float arg, float arg2){
   if(scilU_float_equal(mn, mx)){
     return SCIL_EINVAL;
   }
@@ -76,13 +86,13 @@ static int rnd(scil_dims * dims, double * buffer, float mn, float mx, float arg)
   return SCIL_NO_ERR;
 }
 
-static int p_sin(scil_dims * dims, double * buffer, float mn, float mx, float arg){
-  const int frequencyCount = (int) arg % 10;
+static int p_sin(scil_dims * dims, double * buffer, float mn, float mx, float arg, float arg2){
+  const int frequencyCount = (int) arg2;
+  double highFrequency = (double)arg;
 
   if(scilU_float_equal(mn, mx) || frequencyCount <= 0){
     return SCIL_EINVAL;
   }
-  double highFrequency = ((int) arg / 10) / 10.0;
   int64_t max_potenz = 1<<frequencyCount;
   const double pi = highFrequency*M_PI*2;
   size_t * len = dims->length;

@@ -20,17 +20,17 @@
 #include <open-simplex-noise.h>
 
 
-static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float arg){
-  const int frequencyCount = (int) arg % 10;
+static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float arg, float arg2){
+  const int frequencyCount = (int) arg2;
+  double highFrequency = (double)arg;
 
-  if( scilU_float_equal(mn, mx) || (int) arg <= 100  || frequencyCount <= 0 ){
+  if( scilU_float_equal(mn, mx) || frequencyCount <= 0 ){
     return SCIL_EINVAL;
   }
 	struct osn_context *ctx;
   int64_t seed = 4711;
 	open_simplex_noise(seed, &ctx);
 
-  double highFrequency = ((int) arg / 10) / 10;
   int64_t max_potenz = 1<<frequencyCount;
   size_t * len = dims->length;
 

@@ -24,8 +24,8 @@ char * scilP_available_patterns_name(int p);
 /*
  * Create the pattern selected by num with the arguments
  */
-int scilP_create_pattern_double(scil_dims * dims, double * buffer, char * name, float mn, float mx, float arg);
-int scilP_create_pattern_float (scil_dims * dims, float * buffer, char * name, float mn, float mx, float arg);
+int scilP_create_pattern_double(scil_dims * dims, double * buffer, char * name, float mn, float mx, float arg, float arg2);
+int scilP_create_pattern_float (scil_dims * dims, float * buffer, char * name, float mn, float mx, float arg, float arg2);
 
 /*
  * The pattern library contains a list of useful patterns.
