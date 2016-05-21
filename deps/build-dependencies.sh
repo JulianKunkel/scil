@@ -19,7 +19,7 @@ download version.$OPENJPG.tar.gz https://github.com/uclouvain/openjpeg/archive/
 
 BUILD=0
 
-JPEG_INSTALL=$PWD/openjpeg-version.$OPENJPG/install
+JPEG_INSTALL=$PWD/openjpeg
 
 if [[ ! -e $JPEG_INSTALL ]] ; then
 	echo "  Building openjpg"
