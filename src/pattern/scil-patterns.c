@@ -22,6 +22,7 @@
 #include <scil-internal.h>
 
 #include <basic-patterns.h>
+#include <basic-mutators.h>
 #include <simplex-noise.h>
 
 static scil_pattern * patterns[] ={
@@ -136,7 +137,7 @@ static void create_library_patterns_if_needed(){
   initialized = 1;
   library = malloc(sizeof(library_pattern) * library_capacity);
 
-  library_add("random", "randomRep2-100", 1, 100, -1, 0,     1, scilP_repeater, 2.0);
+  library_add("random", "randomRep10-100", 1, 100, -1, 0,     1, scilP_repeater, 10.0);
   library_add("random", "randomIpol10-100", 1, 100, -1, 0,   1, scilP_interpolator, 10.0);
 
   library_add("constant", "constant0", 0, -1, -1, 0, 0);
