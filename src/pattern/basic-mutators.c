@@ -55,7 +55,10 @@ static void m_interpolator_func(double * data, scil_dims pos, scil_dims size, in
 
   double start_v = data[scilG_data_pos(&start, & size)];
   double end_v =   data[scilG_data_pos(&end, & size)];
-  double val = start_v + weight * (end_v - start_v);
+
+  // use cosine interpolation  
+  weight = (1-cos(weight*M_PI))/2;
+  double val = (1.0-weight) * start_v + weight * end_v;
   //printf("%.2f %.1f \n", weight, val);
   data[scilG_data_pos(& pos, & size)] = val;
 }
