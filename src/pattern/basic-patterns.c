@@ -45,9 +45,7 @@ static int steps(scil_dims * dims, double * buffer, float mn, float mx, float ar
 }
 
 static int rnd(scil_dims * dims, double * buffer, float mn, float mx, float arg, float arg2){
-  if(scilU_float_equal(mn, mx)){
-    return SCIL_EINVAL;
-  }
+  srand((int) arg);
   size_t count = scil_get_data_count(dims);
   double delta = (mx - mn);
   for (size_t i=0; i < count; i++){
@@ -140,25 +138,56 @@ static int p_sin(scil_dims * dims, double * buffer, float mn, float mx, float ar
   return SCIL_NO_ERR;
 }
 
+typedef struct{
+  int points;
+  double * values;
+} poly4_data;
+
 static void m_poly_func(double * data, scil_dims pos, scil_dims size, int * iter, void * user_ptr){
-  double val = 1;
-  for(int i=0; i < pos.dims; i++){
-    double x = pos.length[i] - size.length[i] * 0.5;
-    val = val * x;
+  poly4_data * usr = (poly4_data*) user_ptr;
+  double val = 0;
+  for(int d=0; d < pos.dims; d++){
+    double new = 1;
+    double * v = & usr->values[usr->points * d];
+    for(int i=0; i < usr->points; i++){
+      new = new * (pos.length[d] - v[i]);
+    }
+    val += new;
   }
+
   data[scilG_data_pos(& pos, & size)] = val;
 }
 
 
 static int poly4(scil_dims * dims, double * data, float mn, float mx, float arg, float arg2){
-  if(scilU_float_equal(mn, mx)){
-    return SCIL_EINVAL;
-  }
   scil_dims pos;
   scil_copy_dims_array(& pos, *dims);
   memset(pos.length, 0, sizeof(size_t)*pos.dims);
 
-  scilG_iter(data, *dims, pos, *dims, NULL, & m_poly_func, NULL );
+  srand((int) arg);
+
+  poly4_data usr;
+  // initialize random 0 points
+  usr.points = (int) arg2;
+  assert(usr.points > 0);
+  usr.points += 2;
+
+  usr.values = (double*) malloc(sizeof(double)*dims->dims * usr.points);
+
+  // initialize values
+  double * vals = usr.values;
+  for(int d=0; d < dims->dims; d++){
+    int frac = dims->length[d] / usr.points;
+    for(int i=0; i < usr.points; i++){
+      *vals = (rand() % (frac*10)) / 10.0 + i*frac;
+      vals++;
+    }
+    usr.values[d*usr.points] = 0;
+    usr.values[(d+1)*usr.points - 1] = dims->length[d];
+  }
+
+  scilG_iter(data, *dims, pos, *dims, NULL, & m_poly_func, &usr );
+  free(usr.values);
 
   scilPI_fix_min_max(data, dims, mn, mx);
 

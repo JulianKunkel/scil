@@ -114,6 +114,9 @@ int scilP_create_pattern_float (scil_dims * dims, float * buffer, char * name,  
 static void library_add(char * pattern, char * name, float mn, float mx, float arg, float arg2, int mutator_count, ...){
   assert(library_size < library_capacity);
   mutator_config * m = NULL;
+
+  assert(! scilU_float_equal(mn, mx));
+
   if (mutator_count > 0){
     va_list vl;
     va_start(vl,mutator_count);
@@ -156,7 +159,7 @@ static void create_library_patterns_if_needed(){
   library_add("sin", "sin3p", 1, 100, 2.0, 3, 0); // 3 passes, 2 sines
 
 
-  library_add("poly4", "poly4", 1, 100, 0, 0, 0);
+  library_add("poly4", "poly4", 1, 100, -1, 5, 0);
 
   library_add("simplexNoise", "simplex102", -1, 1, 1.0, 2, 0); // 2 passes
   library_add("simplexNoise", "simplex106", -1, 1, 1.0, 6, 0); // 6 passes

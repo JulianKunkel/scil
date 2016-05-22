@@ -88,8 +88,16 @@ int main(int argc, char ** argv){
 
 	double * buffer_in = (double*) malloc(scil_get_data_size(SCIL_TYPE_DOUBLE, & dims));
 
+  char * check_pattern = getenv("SCIL_PATTERN_PLOTTER_PATTERN");
+
 	for(int i=0; i < scilP_library_size(); i++){
 		char * name = scilP_library_pattern_name(i);
+
+    if( check_pattern != NULL && strcmp(name, check_pattern) != 0){
+      printf("Skipping %s\n", name);
+      continue;
+    }
+
     char fullName[1024];
     sprintf(fullName, "%s.csv", name);
 
