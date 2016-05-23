@@ -16,6 +16,8 @@
 #include <math.h>
 #include <string.h>
 
+#include <scil-errors.h>
+
 #include <algo/algo-abstol.h>
 #include <algo/algo-abstol-init.c.x>
 
@@ -80,13 +82,21 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
     // Locally assigning absolute tolerance
     double abs_tol = ctx->hints.absolute_tolerance;
 
+    /*
+    // Den Teil hier verstehe ich nicht...
     if ((double)(max - min) < SCIL_SMALL ||
         abs_tol >= SCIL_ACCURACY_DBL_FINEST) {
-        return 5; // SCIL_PRECISION_ERR
+        return SCIL_PRECISION_ERR;
     }
+    */
 
     // Get needed bits per compressed number in data
     uint8_t bits_per_num = get_needed_bit_count_<DATATYPE>(min, max, abs_tol);
+
+    printf("%u\n", bits_per_num);
+    if(bits_per_num >= 8 * sizeof(<DATATYPE>)){
+        return SCIL_PRECISION_ERR;
+    }
 
     // Header byte size
     // (sizes of magic number + min + abs_tol + bits_per_num + dimensional

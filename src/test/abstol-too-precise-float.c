@@ -3,6 +3,7 @@
 #include <scil-util.h>
 #include <scil.h>
 
+#include <scil-internal.h>
 #include <scil-patterns.h>
 
 int main()
@@ -25,6 +26,9 @@ int main()
     hints.force_compression_methods = "1";
     scil_init_hints(&hints);
     scil_create_compression_context(&ctx, SCIL_TYPE_FLOAT, &hints);
+
+    printf("%s\n", ctx->chain.byte_compressor->name);
+    printf("%s\n", ctx->chain.data_compressor->name);
 
     int ret = scil_compress(dest, dest_size, source, &dims, &dest_size, ctx);
     printf("%d %d\n", ret, SCIL_PRECISION_ERR);
