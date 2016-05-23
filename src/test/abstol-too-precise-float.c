@@ -14,7 +14,7 @@ int main()
     scil_dims dims;
     scil_init_dims_1d(&dims, count);
 
-    scilP_create_pattern_float(&dims, source, "random", -100.0f, 100.0f, 0.0f);
+    scilP_create_pattern_float(&dims, source, "random", -100.0f, 100.0f, 0.0f, 0.0f);
 
     size_t dest_size = scil_compress_buffer_size_bound(SCIL_TYPE_FLOAT, &dims);
     byte* dest       = (byte*)SAFE_MALLOC(dest_size);
@@ -27,7 +27,7 @@ int main()
     scil_create_compression_context(&ctx, SCIL_TYPE_FLOAT, &hints);
 
     int ret = scil_compress(dest, dest_size, source, &dims, &dest_size, ctx);
-    printf("%d\n", ret);
+    printf("%d %d\n", ret, SCIL_PRECISION_ERR);
 
     free(source);
     free(dest);
