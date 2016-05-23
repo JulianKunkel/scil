@@ -85,8 +85,8 @@ int scilP_patterns_by_name(char * name){
   return -1;
 }
 
-
 int scilP_create_pattern_double(scil_dims * dims, double * buf, char * name, float mn, float mx, float arg, float arg2){
+
   if (name == NULL){
     return SCIL_EINVAL;
   }
