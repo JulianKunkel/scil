@@ -113,3 +113,4 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 	open_simplex_noise_free(ctx);
 	return 0;
 }
+
