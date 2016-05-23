@@ -98,13 +98,13 @@ int scilP_create_pattern_double(scil_dims * dims, double * buf, char * name, flo
 }
 
 int scilP_create_pattern_float (scil_dims * dims, float * buffer, char * name,  float mn, float mx, float arg, float arg2){
-  size_t size = scil_get_data_size(SCIL_TYPE_DOUBLE, dims);
-  double * buf = (double*) malloc(size);
+  size_t count = scil_get_data_count(dims);
+  double * buf = (double*) malloc(count * sizeof(double));
   int ret = scilP_create_pattern_double(dims, buf, name, mn, mx, arg, arg2);
   if (ret != SCIL_NO_ERR){
     return ret;
   }
-  for(size_t i=0; i < size; i++){
+  for(size_t i=0; i < count; i++){
     buffer[i] = (float) buf[i];
   }
   free(buf);
