@@ -19,5 +19,6 @@ build/
 .clang_complete
 testFileGenerator/
 deps/
+.clang_complete
 !build-dependencies.sh
 !Makefile-fpzip-1.1.0

@@ -19,10 +19,12 @@
 #include <scil.h>
 
 typedef struct {
-  int (*create)(scil_dims * dims, double * buffer, float mn, float mx, float arg);
+  int (*create)(scil_dims * dims, double * buffer, float mn, float mx, float arg, float arg2);
   char * name;
 } scil_pattern;
 
-typedef void (*scilP_mutator)(scil_dims * dims, double * buffer);
+typedef void (*scilP_mutator)(scil_dims * dims, double * buffer, float arg);
+
+void scilPI_fix_min_max(double * buffer, scil_dims * dims, float mn, float mx);
 
 #endif

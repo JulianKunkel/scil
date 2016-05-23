@@ -30,46 +30,52 @@
 #include <algo/algo-sigbits.h>
 #include <algo/algo-zfp-abstol.h>
 #include <algo/algo-zfp-precision.h>
+//#include <algo/algo-opj.h>
 #include <algo/lz4fast.h>
 #include <algo/precond-dummy.h>
 
 // this file is automatically created
 #include "scil-dtypes.h"
 
-static scil_compression_algorithm* algo_array[] = {&algo_memcopy,
-                                                   &algo_abstol,
-                                                   &algo_gzip,
-                                                   &algo_sigbits,
-                                                   &algo_fpzip,
-                                                   &algo_zfp_abstol,
-                                                   &algo_zfp_precision,
-                                                   &algo_lz4fast,
-                                                   &algo_precond_dummy,
-                                                   NULL};
+static scil_compression_algorithm * algo_array[] = {
+	& algo_memcopy,
+	& algo_abstol,
+	& algo_gzip,
+	& algo_sigbits,
+	& algo_fpzip,
+	& algo_zfp_abstol,
+	& algo_zfp_precision,
+	& algo_lz4fast,
+	& algo_precond_dummy,
+//	& algo_opj,
+	NULL
+};
 
-static char* performance_units[] = {"IGNORE",
-                                    "MiB",
-                                    "GiB",
-                                    "NetworkSpeed",
-                                    "NodeLocalStorageSpeed",
-                                    "SingleStreamSharedStorageSpeed"};
+static char * performance_units[] = {
+	"IGNORE",
+	"MiB",
+	"GiB",
+	"NetworkSpeed",
+	"NodeLocalStorageSpeed",
+	"SingleStreamSharedStorageSpeed"
+};
 
-int scil_compressors_available()
-{
-    static int count = -1;
-    if (count > 0) {
-        return count;
-    }
 
-    scil_compression_algorithm** cur = algo_array;
-    count                            = 0;
-    // count
-    while (*cur != NULL) {
-        count++;
-        cur++;
-    }
+int scil_compressors_available(){
+	static int count = -1;
+	if (count > 0){
+		return count;
+	}
 
-    return count;
+	scil_compression_algorithm ** cur = algo_array;
+	count = 0;
+	// count
+	while(*cur != NULL){
+		count++;
+		cur++;
+	}
+
+	return count;
 }
 
 const char* scil_compressor_name(int num)
@@ -239,6 +245,7 @@ void scil_init_dims_2d(scil_dims* dims, size_t dim1, size_t dim2)
     dims->length[0] = dim1;
     dims->length[1] = dim2;
 }
+<<<<<<< HEAD
 void scil_init_dims_3d(scil_dims* dims, size_t dim1, size_t dim2, size_t dim3)
 {
     dims->dims      = 3;
@@ -254,6 +261,27 @@ void scil_init_dims_4d(
     dims->length[1] = dim2;
     dims->length[2] = dim3;
     dims->length[2] = dim4;
+=======
+
+void scil_init_dims_3d(scil_dims* dims, size_t dim1, size_t dim2, size_t dim3){
+	dims->dims = 3;
+	dims->length[0] = dim1;
+	dims->length[1] = dim2;
+	dims->length[2] = dim3;
+}
+
+void scil_init_dims_4d(scil_dims* dims, size_t dim1, size_t dim2, size_t dim3, size_t dim4){
+	dims->dims = 4;
+	dims->length[0] = dim1;
+	dims->length[1] = dim2;
+	dims->length[2] = dim3;
+	dims->length[3] = dim4;
+}
+
+void scil_copy_dims_array(scil_dims* out_dims, scil_dims in_dims){
+	out_dims->dims = in_dims.dims;
+	memcpy(out_dims->length, & in_dims.length, sizeof(size_t)* in_dims.dims);
+>>>>>>> master
 }
 
 void scil_init_dims_array(scil_dims* dims, uint8_t count, const size_t* length)

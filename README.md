@@ -21,7 +21,7 @@ The following requirements are automatically downloaded and installed.
 
 The following command installs all requirements for an Ubuntu 15.10/16.04 System:
 
-		apt-get install g++ gcc liblz4-dev zlib1g-dev
+		apt-get install g++ gcc liblz4-dev zlib1g-dev libopenjpeg-dev
 
 ***************************
 

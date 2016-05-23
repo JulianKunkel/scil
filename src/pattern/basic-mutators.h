@@ -13,16 +13,12 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SCIL_PATTERN_BASIC_H
-#define SCIL_PATTERN_BASIC_H
+#ifndef SCIL_PATTERN_BASIC_MUTATORS_H
+#define SCIL_PATTERN_BASIC_MUTATORS_H
 
 #include <scil-pattern-internal.h>
 
-extern scil_pattern scil_pattern_constant;
-extern scil_pattern scil_pattern_steps;
-extern scil_pattern scil_pattern_rnd;
-extern scil_pattern scil_pattern_sin;
-
-extern scil_pattern scil_pattern_poly4;
+extern scilP_mutator scilP_interpolator;
+extern scilP_mutator scilP_repeater;
 
 #endif

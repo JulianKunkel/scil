@@ -20,17 +20,17 @@
 #include <open-simplex-noise.h>
 
 
-static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float arg){
-  const int frequencyCount = (int) arg % 10;
+static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float arg, float arg2){
+  const int frequencyCount = (int) arg2;
+  double highFrequency = (double)arg;
 
-  if( scilU_float_equal(mn, mx) || (int) arg <= 100  || frequencyCount <= 0 ){
+  if( scilU_float_equal(mn, mx) || frequencyCount <= 0 ){
     return SCIL_EINVAL;
   }
 	struct osn_context *ctx;
   int64_t seed = 4711;
 	open_simplex_noise(seed, &ctx);
 
-  double highFrequency = ((int) arg / 10) / 10;
   int64_t max_potenz = 1<<frequencyCount;
   size_t * len = dims->length;
 
@@ -95,7 +95,7 @@ static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float 
                 potenz /= 2;
                 divisor *= 2;
               }
-              buffer[x+y*len[0]+z*(len[0]*len[1])+w*(len[0]*len[1]*len[2])] = var;
+              buffer[x+len[0]*(y+len[1]*(z+len[2]*w))] = var;
             }
           }
         }
@@ -106,18 +106,7 @@ static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float 
   }
 
   // fix min + max, first identify min/max
-  size_t count = scil_get_data_count(dims);
-  double mn_o = 1e308, mx_o=-1e308;
-  for (size_t i=0; i < count; i++){
-    mn_o = min(mn_o, buffer[i]);
-    mx_o = max(mx_o, buffer[i]);
-  }
-
-  double scaling = (double)(mx - mn) / (mx_o-mn_o); // intended min/max
-  // rescale
-  for (size_t i=0; i < count; i++){
-    buffer[i] = (double) mn + (buffer[i]-mn_o) *scaling;
-  }
+  scilPI_fix_min_max(buffer, dims, mn, mx);
 
   open_simplex_noise_free(ctx);
 

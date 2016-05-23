@@ -39,6 +39,14 @@ set (SCIL_ALGO_BINARY ${CMAKE_BINARY_DIR}/algo)
 execute_process(COMMAND ${DEPS_DIR}/build-dependencies.sh WORKING_DIRECTORY ${DEPS_DIR})
 execute_process(COMMAND ${DEV_DIR}/create-datatype-variants.sh ${CMAKE_SOURCE_DIR} WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/)
 
+
+
+#
+set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${DEPS_DIR}/openjpeg/lib/pkgconfig/")
+
+pkg_search_module(OPENJPEG REQUIRED libopenjp2)
+
+
 FILE(GLOB ALGO ${CMAKE_SOURCE_DIR}/algo/*.c ${CMAKE_BINARY_DIR}/algo/*.c)
 
 # MESSAGE( STATUS "Available algorithms: " ${ALGO})
@@ -46,12 +54,14 @@ add_library(scil SHARED scil.c scil-util.c scil-errors.c scil-dummy.cpp scil-alg
 target_link_libraries(scil m)
 
 # for specific algorithms
-include_directories(${CMAKE_BINARY_DIR} ${DEPS_DIR}/open-simplex-noise-in-c ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/pattern ${DEPS_DIR}/include/zfp ${DEPS_DIR}/include/fpzip)
+include_directories(${CMAKE_BINARY_DIR} ${DEPS_DIR}/open-simplex-noise-in-c ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/pattern ${DEPS_DIR}/include/zfp ${DEPS_DIR}/include/fpzip ${OPENJPEG_INCLUDE_DIRS})
+
 target_link_libraries(scil z)
 target_link_libraries(scil
   ${DEPS_DIR}/libfpzip.a
   ${DEPS_DIR}/libzfp.a
   lz4
+  ${OPENJPEG_LDFLAGS}
   )
 
 configure_file("${CMAKE_SOURCE_DIR}/scil-config.h.in" "scil-config.h" @ONLY)

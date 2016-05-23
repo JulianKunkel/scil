@@ -199,6 +199,8 @@ void scil_init_dims_array(scil_dims* dims,
                           uint8_t dimensions_count,
                           const size_t* dimensions_length);
 
+void scil_copy_dims_array(scil_dims* out_dims, scil_dims in_dims);
+
 /*
  * \brief Method to get the number of actual data points in multidimensional
  * data.

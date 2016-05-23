@@ -24,6 +24,8 @@ scil_lz4fast_compress
 scil_lz4fast_decompress
 scil_memcopy_compress
 scil_memcopy_decompress
+scil_opj_compress
+scil_opj_decompress
 scil_retrieve_effective_hints
 scil_sigbits_compress_double
 scil_sigbits_compress_float

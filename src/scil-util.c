@@ -238,8 +238,88 @@ int scilU_double_equal(double val1, double val2){
 
 int scilU_float_equal(float val1, float val2){
   if ( val1 > val2){
-    return val1 - val2 < 1e-40;
+    return val1 - val2 < 1e-40f;
   }else{
-    return val2 - val1 < 1e-40;
+    return val2 - val1 < 1e-40f;
   }
+}
+
+
+/*
+\brief Convert the current position in a ND array to the position of the original 1D data array.
+ */
+size_t scilG_data_pos(scil_dims * pos, scil_dims * size){
+  assert(size->dims == pos->dims);
+  size_t cur = pos->length[size->dims - 1];
+  if(size->dims == 0){
+    return cur;
+  }
+  for(int i=size->dims - 2; i >= 0; i--){
+    cur *= size->length[i+1];
+    cur += pos->length[i];
+  }
+  return cur;
+}
+
+
+void scilG_iter(double * data, scil_dims dims, scil_dims offset, scil_dims ende, int * iter, scilG_iterfunc func, void * user_ptr){
+  assert(dims.dims > 0);
+  // check arguments further
+  for(int i = 0; i < dims.dims; i++){
+    assert(dims.length[i] > 0);
+    assert(ende.length[i] <= dims.length[i]);
+  }
+
+  scil_dims pos_dims;
+  pos_dims.dims = dims.dims;
+  size_t * pos = pos_dims.length;
+  for(int i = 0; i < dims.dims; i++){
+    pos[i] = offset.length[i];
+  }
+  int iter_local[dims.dims];
+
+  if(iter == NULL){
+    iter = iter_local;
+    for(int i = 0; i < dims.dims; i++){
+      iter[i] = 1;
+    }
+  }
+
+  // descent into starting point
+  int stackpos = dims.dims - 1;
+  while(stackpos != -1){
+    // walk over last dimension
+    {
+      size_t start = offset.length[dims.dims - 1];
+      size_t end = ende.length[dims.dims - 1];
+      for(size_t i=start; i < end; i+= iter[stackpos]){
+        pos[stackpos] = i;
+        func(data, pos_dims, dims, iter, user_ptr);
+      }
+    }
+    // propagate upwards
+    stackpos--;
+    while(stackpos != -1){
+      pos[stackpos]+= iter[stackpos];
+
+      size_t start = offset.length[stackpos];
+      size_t end = ende.length[stackpos];
+
+      if(pos[stackpos] < end){
+        stackpos = dims.dims - 1;
+        break;
+      }
+      pos[stackpos] = start;
+      stackpos--;
+    }
+  }
+}
+
+void scilU_print_dims(scil_dims pos){
+  printf("(");
+  printf("%zu", pos.length[0]);
+  for(int i=1; i < pos.dims; i++){
+    printf(",%zu", pos.length[i]);
+  }
+  printf(") ");
 }
