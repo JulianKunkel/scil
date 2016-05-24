@@ -30,7 +30,7 @@
 #include <algo/algo-sigbits.h>
 #include <algo/algo-zfp-abstol.h>
 #include <algo/algo-zfp-precision.h>
-//#include <algo/algo-opj.h>
+#include <algo/algo-opj.h>
 #include <algo/lz4fast.h>
 #include <algo/precond-dummy.h>
 
@@ -47,7 +47,7 @@ static scil_compression_algorithm * algo_array[] = {
 	& algo_zfp_precision,
 	& algo_lz4fast,
 	& algo_precond_dummy,
-//	& algo_opj,
+	& algo_opj,
 	NULL
 };
 
@@ -199,7 +199,7 @@ int scilI_parse_compression_algorithms(scil_compression_chain_t* chain,
         switch (algo->type) {
             case (SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER): {
                 if (stage != 1) {
-                    return -1; // INVALID CHAIN
+                    return -1; // INVALID CHAIN 
                 }
                 chain->pre_cond[(int)chain->precond_count] = algo;
                 chain->precond_count++;
