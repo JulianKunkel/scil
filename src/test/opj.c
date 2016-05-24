@@ -103,12 +103,12 @@ int main (int argc, char *argv[])
 
   /* should be test_tile_encoder 3 2000 2000 1000 1000 8 tte1.j2k */
 
-    num_comps = 3;
+    num_comps = 1;
     image_width = 2000;
     image_height = 2000;
-    tile_width = 1000;
-    tile_height = 1000;
-    comp_prec = 8;
+    tile_width = 2000;
+    tile_height = 2000;
+    comp_prec = 16;
     irreversible = 1;
     strcpy(output_file, "test.jp2" );
 
@@ -187,8 +187,8 @@ int main (int argc, char *argv[])
 	/* l_param.roi_shift = 0; */
 
 	/* we are not using multiple tile parts for a tile. */
-	/* l_param.tp_on = 0; */
-	/* l_param.tp_flag = 0; */
+	l_param.tp_on = 0;
+	l_param.tp_flag = 0;
 
 	/* if we are using mct */
 #ifdef USING_MCT
@@ -235,7 +235,7 @@ int main (int argc, char *argv[])
 	opj_set_warning_handler(l_codec, warning_callback,00);
 	opj_set_error_handler(l_codec, error_callback,00);
 
-	l_image = opj_image_tile_create(num_comps,l_params,OPJ_CLRSPC_SRGB);
+	l_image = opj_image_tile_create(num_comps,l_params,OPJ_CLRSPC_GRAY);
 	if (! l_image) {
 		opj_destroy_codec(l_codec);
 		return 1;
@@ -245,7 +245,7 @@ int main (int argc, char *argv[])
 	l_image->y0 = 0;
 	l_image->x1 = (OPJ_UINT32)image_width;
 	l_image->y1 = (OPJ_UINT32)image_height;
-	l_image->color_space = OPJ_CLRSPC_SRGB;
+	l_image->color_space = OPJ_CLRSPC_GRAY;
 
 	if (! opj_setup_encoder(l_codec,&l_param,l_image)) {
 		fprintf(stderr, "ERROR -> test_tile_encoder: failed to setup the codec!\n");
