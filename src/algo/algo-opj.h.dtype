@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SCIL_OPJ_H_
-#define SCIL_OPJ_H_
+#ifndef SCIL_OPJ_H_<DATATYPE>
+#define SCIL_OPJ_H_<DATATYPE>
 
 #include <scil-internal.h>
 
@@ -27,7 +27,11 @@
  * \param source_size Byte size of uncompressed buffer
  * \return Success state of the compression
  */
-int scil_opj_compress(const scil_context_p ctx, byte* restrict dest, size_t* restrict dest_size, const byte* restrict source, const size_t source_size);
+int scil_opj_compress_<DATATYPE>(const scil_context_p ctx,
+                                    byte* restrict dest,
+                                    size_t* restrict dest_size,
+                                    <DATATYPE>* restrict source,
+                                    const scil_dims* dims);
 
 /**
  * \brief Deompression function of openjpeg
@@ -37,7 +41,10 @@ int scil_opj_compress(const scil_context_p ctx, byte* restrict dest, size_t* res
  * \param uncompressed_size_out Byte-size of the decompressed buffer
  * \return Success state of the compression
  */
-int scil_opj_decompress(byte*restrict data_out, size_t buff_size, const byte*restrict compressed_buf_in, const size_t in_size, size_t * uncomp_size_out);
+int scil_opj_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
+                                      scil_dims* dims,
+                                      byte* restrict compressed_buf_in,
+                                      const size_t in_size);
 
 extern scil_compression_algorithm algo_opj;
 
