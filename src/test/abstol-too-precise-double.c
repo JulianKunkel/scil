@@ -19,11 +19,12 @@ int main(int argc, char** argv)
     size_t dest_size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, &dims);
     byte* dest       = (byte*)SAFE_MALLOC(dest_size);
 
-    scil_context_p ctx;
     scil_hints hints;
-    hints.absolute_tolerance        = 1e-100;
-    hints.force_compression_methods = "1";
     scil_init_hints(&hints);
+    hints.force_compression_methods = "1";
+    hints.absolute_tolerance        = 1e-300;
+
+    scil_context_p ctx;
     scil_create_compression_context(&ctx, SCIL_TYPE_DOUBLE, &hints);
 
     int ret = scil_compress(dest, dest_size, source, &dims, &dest_size, ctx);

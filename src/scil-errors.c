@@ -1,4 +1,4 @@
-#include <scil.h>
+#include <scil-errors.h>
 
 static const char* scil_error_messages[] = {
     "Error code 0: SUCCESS.",
