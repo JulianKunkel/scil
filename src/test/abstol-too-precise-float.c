@@ -20,15 +20,16 @@ int main()
     size_t dest_size = scil_compress_buffer_size_bound(SCIL_TYPE_FLOAT, &dims);
     byte* dest       = (byte*)SAFE_MALLOC(dest_size);
 
-    scil_context_p ctx;
     scil_hints hints;
-    hints.absolute_tolerance        = 1e-100;
-    hints.force_compression_methods = "1";
     scil_init_hints(&hints);
+    hints.force_compression_methods = "1";
+    hints.absolute_tolerance        = 1e-100;
+
+    scil_context_p ctx;
     scil_create_compression_context(&ctx, SCIL_TYPE_FLOAT, &hints);
 
-    printf("%s\n", ctx->chain.byte_compressor->name);
-    printf("%s\n", ctx->chain.data_compressor->name);
+    //printf("%s\n", ctx->chain.byte_compressor->name);
+    //printf("%s\n", ctx->chain.data_compressor->name);
 
     int ret = scil_compress(dest, dest_size, source, &dims, &dest_size, ctx);
     printf("%d %d\n", ret, SCIL_PRECISION_ERR);
