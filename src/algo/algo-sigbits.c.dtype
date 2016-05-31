@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <scil-errors.h>
+
 #include <algo/algo-sigbits.h>
 #include <algo/algo-sigbits-init.c.x>
 
@@ -109,7 +111,11 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_p ctx,
     uint8_t end_mask[9] = {0, 255-127, 255-63, 255-31, 255-15, 255-7, 255-3, 255-1, 255};
     // 00000000 10000000 11000000 11100000 11110000 11111000 11111100 11111110 11111111
 
-    uint8_t bits_per_num = (signs_id == 2) + exp_bits + mant_bits;
+    uint16_t bits_per_num = (signs_id == 2) + exp_bits + mant_bits;
+
+    if(bits_per_num >= 8 * sizeof(<DATATYPE>)){
+        return SCIL_PRECISION_ERR;
+    }
 
     *dest_size = round_up_byte(bits_per_num * count) + header_size;
 
