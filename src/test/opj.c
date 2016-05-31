@@ -69,9 +69,11 @@ int main(){
 
   scil_context_p ctx;
   scil_hints hints;
-  hints.absolute_tolerance        = 1e-100;
-  hints.force_compression_methods = "9";
+
   scil_init_hints(&hints);
+
+  hints.absolute_tolerance        = 1e-100;
+  hints.force_compression_methods = "opj";
   scil_create_compression_context(&ctx, SCIL_TYPE_FLOAT, &hints);
 
   int ret = scil_compress(dest, dest_size, source, &dims, &dest_size, ctx);

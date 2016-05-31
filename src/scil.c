@@ -565,8 +565,7 @@ int scil_compress(byte* restrict dest,
     const scil_hints* hints         = &ctx->hints;
     scil_compression_chain_t* chain = &ctx->chain;
 
-    if (hints->force_compression_methods ==
-        NULL) { // if != NULL do nothing as we have parsed the pipeline already
+    if (hints->force_compression_methods == NULL) { // if != NULL do nothing as we have parsed the pipeline already
         scilI_compression_algo_chooser(source, dims, ctx);
     }
 
