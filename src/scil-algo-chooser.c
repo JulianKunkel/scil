@@ -23,7 +23,6 @@
 
 #include <algo/lz4fast.h>
 
-
 float scilI_determine_randomness(void* source, size_t in_size, byte *restrict buffer, size_t buffer_size){
   // We may want to use https://en.wikipedia.org/wiki/Randomness_tests
   int ret = scil_lz4fast_compress(NULL, buffer, &buffer_size, source, in_size);

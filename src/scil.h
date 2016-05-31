@@ -73,18 +73,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <scil-errors.h>
+
 typedef unsigned char byte;
 
 enum SCIL_Datatype { SCIL_TYPE_FLOAT, SCIL_TYPE_DOUBLE };
-
-enum scil_error_code {
-    SCIL_NO_ERR = 0,
-    SCIL_BUFFER_ERR,
-    SCIL_MEMORY_ERR,
-    SCIL_EINVAL,
-    SCIL_UNKNOWN_ERR,
-    SCIL_PRECISION_ERR
-};
 
 enum scil_performance_unit {
     SCIL_PERFORMANCE_IGNORE = 0,
@@ -173,8 +166,6 @@ typedef struct
     // dimensions as long as they are <= 4
     size_t length[4];
 } scil_dims;
-
-const char* scil_strerr(enum scil_error_code error);
 
 /*
  \brief Returns the number of available compression schemes.
