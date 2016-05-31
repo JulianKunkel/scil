@@ -46,6 +46,7 @@ void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double 
 	double r = (double) scilI_determine_randomness(buffer_in, data_size, tmp_buff, buff_size);
 
 	char * outputFiles = getenv("SCIL_BENCHMARK_OUTPUT");
+	const size_t buffer_size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, & dims);
 
 	for(int i=0; i < scil_compressors_available(); i++ ){
 		char compression_name[1024];
@@ -69,6 +70,9 @@ void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double 
 
 		double seconds_decompress;
 		if(ret_c == 0){
+			// initialize memory
+			memset(buffer_uncompressed, -1, buffer_size);
+
 			scilU_start_timer(& timer);
 			ret_d = scil_decompress(SCIL_TYPE_DOUBLE, buffer_uncompressed, & dims, buffer_out, out_c_size, tmp_buff);
 			seconds_decompress = scilU_stop_timer(timer);
@@ -131,9 +135,9 @@ int main(int argc, char** argv){
 		scil_init_dims_1d(& dims, 1024*1024);
 	}
 
-	int variableSize = scil_get_data_size(SCIL_TYPE_DOUBLE, & dims);
-	allocate(double, buffer_in, variableSize);
-	buffer_uncompressed = malloc(variableSize*4*sizeof(double));
+	int bufferSize = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, & dims);
+	double * buffer_in = (double*) malloc(bufferSize);
+	buffer_uncompressed = malloc(bufferSize);
 
 	printf("This program creates a new scil.conf by measuring performance\n");
 

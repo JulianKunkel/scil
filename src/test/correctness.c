@@ -32,8 +32,7 @@ int test_correctness(const char* name, double* buffer_in, scil_dims dims)
     size_t out_c_size;
     size_t variableSize = scil_get_data_count(&dims);
 
-    const size_t c_size =
-        scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, &dims);
+    const size_t c_size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, &dims);
 
     allocate(byte, buffer_out, c_size);
     allocate(byte, tmp_buff, c_size);
@@ -45,8 +44,7 @@ int test_correctness(const char* name, double* buffer_in, scil_dims dims)
     scil_init_hints(&hints);
     hints.absolute_tolerance = 0.01;
 
-    double r = (double)scilI_determine_randomness(
-        buffer_in, variableSize * sizeof(double), tmp_buff, c_size);
+    double r = (double)scilI_determine_randomness( buffer_in, variableSize * sizeof(double), tmp_buff, c_size);
 
     printf("Pattern %s randomness: %.1f%%\n", name, r);
 
@@ -64,8 +62,7 @@ int test_correctness(const char* name, double* buffer_in, scil_dims dims)
             hints.force_compression_methods = compression_name;
         }
 
-        int ret =
-            scil_create_compression_context(&ctx, SCIL_TYPE_DOUBLE, &hints);
+        int ret = scil_create_compression_context(&ctx, SCIL_TYPE_DOUBLE, &hints);
         if (ret != 0) {
             printf("Invalid combination %s\n", compression_name);
             continue;
@@ -80,8 +77,7 @@ int test_correctness(const char* name, double* buffer_in, scil_dims dims)
         scilU_start_timer(&timer);
 
         for (uint8_t i = 0; i < loops; ++i) {
-            ret_c = scil_compress(
-                buffer_out, c_size, buffer_in, &dims, &out_c_size, ctx);
+            ret_c = scil_compress(buffer_out, c_size, buffer_in, &dims, &out_c_size, ctx);
             if (ret_c != 0) break;
         }
         double seconds_compress = scilU_stop_timer(timer);
@@ -89,27 +85,18 @@ int test_correctness(const char* name, double* buffer_in, scil_dims dims)
         ret_v                   = -1;
 
         if (ret_c == 0) {
+            memset(buffer_uncompressed, -1, c_size);
+
             scilU_start_timer(&timer);
             for (uint8_t i = 0; i < loops; ++i) {
-                ret_d = scil_decompress(SCIL_TYPE_DOUBLE,
-                                        buffer_uncompressed,
-                                        &dims,
-                                        buffer_out,
-                                        out_c_size,
-                                        tmp_buff);
+                ret_d = scil_decompress(SCIL_TYPE_DOUBLE, buffer_uncompressed, &dims, buffer_out, out_c_size, tmp_buff);
                 if (ret_d != 0) break;
             }
         }
         double seconds_decompress = scilU_stop_timer(timer);
 
         if (ret_d == 0) {
-            ret_v = scil_validate_compression(SCIL_TYPE_DOUBLE,
-                                              buffer_in,
-                                              &dims,
-                                              buffer_out,
-                                              out_c_size,
-                                              ctx,
-                                              &out_accuracy);
+            ret_v = scil_validate_compression(SCIL_TYPE_DOUBLE, buffer_in, &dims, buffer_out, out_c_size, ctx, &out_accuracy);
         }
 
         size_t u_size = variableSize * sizeof(double);
@@ -123,8 +110,7 @@ int test_correctness(const char* name, double* buffer_in, scil_dims dims)
         }
         if (i == -1) {
             hints.force_compression_methods = compression_name;
-            scil_compression_sprint_last_algorithm_chain(
-                ctx, compression_name, 1024);
+            scil_compression_sprint_last_algorithm_chain(ctx, compression_name, 1024);
         }
 
         printf("%d, %d, %d, %d, %lu, %lu, %.1lf, %.1lf, %.1lf, %s \n",
