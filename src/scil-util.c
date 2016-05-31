@@ -323,3 +323,65 @@ void scilU_print_dims(scil_dims pos){
   }
   printf(") ");
 }
+
+
+
+static void scilU_plot1D(const char* name, scil_dims dims, double * buffer_in){
+  FILE * f = fopen(name, "w");
+  fprintf(f, "%zu\n", dims.length[0]);
+  fprintf(f, "%f", buffer_in[0]);
+  for(size_t x = 1; x < dims.length[0]; x++){
+    fprintf(f, ",%f", buffer_in[x]);
+  }
+  fprintf(f, "\n");
+  fclose(f);
+}
+
+static void scilU_plot2D(const char* name, scil_dims dims, double * buffer_in){
+  FILE * f = fopen(name, "w");
+
+  fprintf(f, "%zu, %zu\n", dims.length[0], dims.length[1]);
+  for(size_t y = 0; y < dims.length[1]; y++){
+    fprintf(f, "%f", buffer_in[0+ y * dims.length[0]]);
+    for(size_t x = 1; x < dims.length[0]; x++){
+      fprintf(f, ",%f", buffer_in[x+ y * dims.length[0]]);
+    }
+    fprintf(f, "\n");
+  }
+  fclose(f);
+}
+
+static void scilU_plot3D(const char* name, scil_dims dims, double * buffer_in){
+  FILE * f = fopen(name, "w");
+  fprintf(f, "%zu, %zu, %zu\n", dims.length[0], dims.length[1], dims.length[2]);
+
+  for(size_t z = 0; z < dims.length[2]; z++){
+    size_t z_ = z * dims.length[0]*dims.length[1];
+    for(size_t y = 0; y < dims.length[1]; y++){
+      fprintf(f, "%f", buffer_in[0+ y * dims.length[0] + z_]);
+      for(size_t x = 1; x < dims.length[0]; x++){
+        fprintf(f, ",%f", buffer_in[x+ y * dims.length[0] + z_]);
+      }
+      fprintf(f, "\n");
+    }
+  }
+  fclose(f);
+}
+
+void scilU_plot(const char* name, scil_dims dims, double * buffer_in){
+  switch(dims.dims){
+    case (1):{
+       scilU_plot1D(name, dims, buffer_in);
+       break;
+     }case (2):{
+       scilU_plot2D(name, dims, buffer_in);
+       break;
+     }case (3):{
+       scilU_plot3D(name, dims, buffer_in);
+       break;
+     }default:{
+       printf("Error can only plot up to 3D\n");
+       exit(1);
+     }
+   }
+ }

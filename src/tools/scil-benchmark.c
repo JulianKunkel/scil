@@ -45,6 +45,8 @@ void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double 
 
 	double r = (double) scilI_determine_randomness(buffer_in, data_size, tmp_buff, buff_size);
 
+	char * outputFiles = getenv("SCIL_BENCHMARK_OUTPUT");
+
 	for(int i=0; i < scil_compressors_available(); i++ ){
 		char compression_name[1024];
 		sprintf(compression_name, "%s", scil_compressor_name(i));
@@ -74,6 +76,14 @@ void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double 
 			seconds_decompress = 1;
 		}
 
+		if ( ret_c == 0 && ret_d == 0 && outputFiles != NULL ){
+			// dump the file
+			char filename[1024];
+			sprintf(filename,"%s-%s.csv", name, compression_name);
+			scilU_plot(filename, dims, (double*) buffer_uncompressed);
+		}
+
+
 		if (ret_c != 0 || ret_d != 0 ){
 			error_occured = 1;
 			printf("Warning: compression %s returned an error!\n",  hints.force_compression_methods);
@@ -98,13 +108,30 @@ void scilU_check_std_err(char const * what, int ret){
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int main(int argc, char** argv){
-	int variableSize = 1024*1024*10/sizeof(double);
-	if (argc != 1){
-		variableSize = atoll(argv[1]);
-	}
 	int ret;
 	scil_dims dims;
 
+	if (argc != 1){
+	  switch(argc - 1){
+	    case (1):{
+	  	  scil_init_dims_1d(& dims, atol(argv[1]));
+	      break;
+	    }case (2):{
+	      scil_init_dims_2d(& dims, atol(argv[1]), atol(argv[2]));
+	      break;
+	    }case (3):{
+	      scil_init_dims_3d(& dims, atol(argv[1]), atol(argv[2]), atol(argv[3]));
+	      break;
+	    }default:{
+	      printf("Error will only benchmark up to 3D\n");
+	      exit(1);
+	    }
+	  }
+	}else{
+		scil_init_dims_1d(& dims, 1024*1024);
+	}
+
+	int variableSize = scil_get_data_size(SCIL_TYPE_DOUBLE, & dims);
 	allocate(double, buffer_in, variableSize);
 	buffer_uncompressed = malloc(variableSize*4*sizeof(double));
 
@@ -117,10 +144,16 @@ int main(int argc, char** argv){
 		scilU_check_std_err("fwrite", ret != 1);
 	}
 
-	scil_init_dims_1d(& dims, variableSize);
+	char * check_pattern = getenv("SCIL_PATTERN_TO_USE");
 
 	for(int i=0; i < scilP_library_size(); i++){
 		char * name = scilP_library_pattern_name(i);
+
+		if( check_pattern != NULL && strcmp(name, check_pattern) != 0){
+			printf("Skipping %s\n", name);
+			continue;
+		}
+
 		ret = scilP_library_create_pattern_double(i, & dims, buffer_in);
 		assert( ret == SCIL_NO_ERR);
 		benchmark(f, SCIL_TYPE_DOUBLE, name, buffer_in, dims);

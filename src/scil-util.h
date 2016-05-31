@@ -245,4 +245,6 @@ void scilG_iter(double * data, scil_dims dims, scil_dims offset, scil_dims end, 
 
 void scilU_print_dims(scil_dims dims);
 
+void scilU_plot(const char* name, scil_dims dims, double * buffer_in);
+
 #endif /* UTIL_H */

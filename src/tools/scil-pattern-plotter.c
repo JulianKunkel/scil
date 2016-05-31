@@ -19,48 +19,7 @@
 #include <errno.h>
 
 #include <scil-patterns.h>
-
-void plot1D(const char* name, scil_dims dims, double * buffer_in){
-  FILE * f = fopen(name, "w");
-  fprintf(f, "%zu\n", dims.length[0]);
-  fprintf(f, "%f", buffer_in[0]);
-  for(size_t x = 1; x < dims.length[0]; x++){
-    fprintf(f, ",%f", buffer_in[x]);
-  }
-  fprintf(f, "\n");
-  fclose(f);
-}
-
-void plot2D(const char* name, scil_dims dims, double * buffer_in){
-  FILE * f = fopen(name, "w");
-
-  fprintf(f, "%zu, %zu\n", dims.length[0], dims.length[1]);
-  for(size_t y = 0; y < dims.length[1]; y++){
-    fprintf(f, "%f", buffer_in[0+ y * dims.length[0]]);
-    for(size_t x = 1; x < dims.length[0]; x++){
-      fprintf(f, ",%f", buffer_in[x+ y * dims.length[0]]);
-    }
-    fprintf(f, "\n");
-  }
-  fclose(f);
-}
-
-void plot3D(const char* name, scil_dims dims, double * buffer_in){
-  FILE * f = fopen(name, "w");
-  fprintf(f, "%zu, %zu, %zu\n", dims.length[0], dims.length[1], dims.length[2]);
-
-  for(size_t z = 0; z < dims.length[2]; z++){
-    size_t z_ = z * dims.length[0]*dims.length[1];
-    for(size_t y = 0; y < dims.length[1]; y++){
-      fprintf(f, "%f", buffer_in[0+ y * dims.length[0] + z_]);
-      for(size_t x = 1; x < dims.length[0]; x++){
-        fprintf(f, ",%f", buffer_in[x+ y * dims.length[0] + z_]);
-      }
-      fprintf(f, "\n");
-    }
-  }
-  fclose(f);
-}
+#include <scil-util.h>
 
 int main(int argc, char ** argv){
   if (argc == 1 || strcmp(argv[1], "-h") == 0 ){
@@ -88,7 +47,7 @@ int main(int argc, char ** argv){
 
 	double * buffer_in = (double*) malloc(scil_get_data_size(SCIL_TYPE_DOUBLE, & dims));
 
-  char * check_pattern = getenv("SCIL_PATTERN_PLOTTER_PATTERN");
+  char * check_pattern = getenv("SCIL_PATTERN_TO_USE");
 
 	for(int i=0; i < scilP_library_size(); i++){
 		char * name = scilP_library_pattern_name(i);
@@ -104,22 +63,7 @@ int main(int argc, char ** argv){
     printf("Processing %s\n", name);
 		ret = scilP_library_create_pattern_double(i, & dims, buffer_in);
 		assert( ret == SCIL_NO_ERR);
-    switch(argc - 1){
-      case (1):{
-  	     plot1D(fullName, dims, buffer_in);
-         break;
-       }case (2):{
-         plot2D(fullName, dims, buffer_in);
-         break;
-       }case (3):{
-         plot3D(fullName, dims, buffer_in);
-         break;
-       }default:{
-         printf("Error can only plot up to 3D\n");
-         exit(1);
-       }
-     }
-
+    scilU_plot(fullName, dims, buffer_in);
 	}
   free(buffer_in);
 
