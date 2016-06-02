@@ -28,15 +28,19 @@ static int print_value(option_help * o){
     assert(o->variable != NULL);
 
     switch(o->type){
+      case('f'):{
+        pos += printf("=%f ", *(double*) o->variable);
+        break;
+      }
       case('d'):{
         pos += printf("=%d ", *(int*) o->variable);
         break;
       }
       case('s'):{
-        if ( ((char**) o->variable)[0][0] != 0 ){
+        if ( *(char**) o->variable != NULL &&  ((char**) o->variable)[0][0] != 0 ){
           pos += printf("=%s", *(char**) o->variable);
         }else{
-          pos += printf("=string");
+          pos += printf("=STRING");
         }
         break;
       }
@@ -125,23 +129,31 @@ static void print_help(char * name, option_help * args){
   print_help_section(args, OPTION_REQUIRED_ARGUMENT, "Required arguments");
   print_help_section(args, OPTION_FLAG, "Flags");
   print_help_section(args, OPTION_OPTIONAL_ARGUMENT, "Optional arguments");
-  exit(0);
 }
 
 void scilO_parseOptions(int argc, char ** argv, option_help * args){
   int error = 0;
   int printhelp = 0;
+  int requiredArgsSeen = 0;
+  int requiredArgsNeeded = 0;
+
+  for(option_help * o = args; o->shortVar != 0 || o->longVar != 0 ; o++ ){
+    if(o->arg == OPTION_REQUIRED_ARGUMENT){
+      requiredArgsNeeded++;
+    }
+  }
+
   for(int i=1; i < argc; i++){
     char * txt = argv[i];
     int foundOption = 0;
+    char * arg = strstr(txt, "=");
+    if(arg != NULL){
+      arg[0] = 0;
+      arg++;
+    }
+
     // try to find matching option help
     for(option_help * o = args; o->shortVar != 0 || o->longVar != 0 ; o++ ){
-      char * arg = strstr(txt, "=");
-      if(arg != NULL){
-        arg[0] = 0;
-        arg++;
-      }
-
       if ( (strlen(txt) == 2 && txt[0] == '-' && o->shortVar == txt[1]) || (strlen(txt) > 2 && txt[0] == '-' && txt[1] == '-' && o->longVar != NULL && strcmp(txt + 2, o->longVar) == 0)){
         foundOption = 1;
 
@@ -161,6 +173,10 @@ void scilO_parseOptions(int argc, char ** argv, option_help * args){
             }
 
             switch(o->type){
+              case('f'):{
+                *(double*) o->variable = atof(arg);
+                break;
+              }
               case('d'):{
                 *(int*) o->variable = atoi(arg);
                 break;
@@ -186,6 +202,10 @@ void scilO_parseOptions(int argc, char ** argv, option_help * args){
           }
         }
 
+        if(o->arg == OPTION_REQUIRED_ARGUMENT){
+          requiredArgsSeen++;
+        }
+
         break;
       }
     }
@@ -198,8 +218,16 @@ void scilO_parseOptions(int argc, char ** argv, option_help * args){
         }
     }
   }
+
+  if( requiredArgsSeen != requiredArgsNeeded ){
+    printf("Error: Missing some required arguments\n");
+    print_help(argv[0], args);
+    exit(1);
+  }
+
   if(printhelp != 0){
     print_help(argv[0], args);
+    exit(0);
   }
   if(error != 0){
     printf("Invalid options, aborting\n");

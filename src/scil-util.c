@@ -328,6 +328,10 @@ void scilU_print_dims(scil_dims pos){
 
 static void scilU_plot1D(const char* name, scil_dims dims, double * buffer_in){
   FILE * f = fopen(name, "w");
+  if(f == NULL){
+    printf("Coult not open %s for write\n", name);
+    exit(1);
+  }
   fprintf(f, "%zu\n", dims.length[0]);
   fprintf(f, "%f", buffer_in[0]);
   for(size_t x = 1; x < dims.length[0]; x++){
@@ -339,7 +343,10 @@ static void scilU_plot1D(const char* name, scil_dims dims, double * buffer_in){
 
 static void scilU_plot2D(const char* name, scil_dims dims, double * buffer_in){
   FILE * f = fopen(name, "w");
-
+  if(f == NULL){
+    printf("Coult not open %s for write\n", name);
+    exit(1);
+  }
   fprintf(f, "%zu, %zu\n", dims.length[0], dims.length[1]);
   for(size_t y = 0; y < dims.length[1]; y++){
     fprintf(f, "%f", buffer_in[0+ y * dims.length[0]]);
@@ -353,6 +360,10 @@ static void scilU_plot2D(const char* name, scil_dims dims, double * buffer_in){
 
 static void scilU_plot3D(const char* name, scil_dims dims, double * buffer_in){
   FILE * f = fopen(name, "w");
+  if(f == NULL){
+    printf("Coult not open %s for write\n", name);
+    exit(1);
+  }
   fprintf(f, "%zu, %zu, %zu\n", dims.length[0], dims.length[1], dims.length[2]);
 
   for(size_t z = 0; z < dims.length[2]; z++){
