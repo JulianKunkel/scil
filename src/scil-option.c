@@ -168,8 +168,21 @@ void scilO_parseOptions(int argc, char ** argv, option_help * args){
           case (OPTION_REQUIRED_ARGUMENT):{
             // check if next is an argument
             if(arg == NULL){
-              printf("Error option %c (%s) requires an argument.\n", o->shortVar, o->longVar);
+              char str_s[1024] = "";
+              if(o->shortVar){
+                strcat(str_s, "-");
+                strncat(str_s, & o->shortVar, 1);
+                strcat(str_s, " ");
+              }
+              if(o->longVar){
+                strcat(str_s, "(--");
+                strcat(str_s, o->longVar);
+                strcat(str_s, ") ");
+              }
+
+              printf("Error option %srequires an argument.\n", str_s);
               error = 1;
+              break;
             }
 
             switch(o->type){
@@ -220,7 +233,7 @@ void scilO_parseOptions(int argc, char ** argv, option_help * args){
   }
 
   if( requiredArgsSeen != requiredArgsNeeded ){
-    printf("Error: Missing some required arguments\n");
+    printf("Error: Missing some required arguments\n\n");
     print_help(argv[0], args);
     exit(1);
   }
