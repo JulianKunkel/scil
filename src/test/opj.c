@@ -52,13 +52,15 @@
 
 int main(){
 
+  printf("Begin TEST\n");
   const size_t count = 10;
 
   float* source = (float*)SAFE_MALLOC(count * sizeof(float));
 
+  printf("source array:\n");
   for(int i = 0; i < count; ++i){
       source[i] = i % 10;
-      printf("%d ", source[i]);
+      printf("%f ", source[i]);
   }
 
   scil_dims dims;
@@ -77,11 +79,12 @@ int main(){
   scil_create_compression_context(&ctx, SCIL_TYPE_FLOAT, &hints);
 
   int ret = scil_compress(dest, dest_size, source, &dims, &dest_size, ctx);
-  printf("\n\n%d %d\n", ret, SCIL_PRECISION_ERR);
+  printf("\n\n?error %d %d\n", ret, SCIL_PRECISION_ERR);
 
   free(source);
   free(dest);
   free(ctx);
 
+  printf("End   TEST\n");
   return ret != SCIL_PRECISION_ERR;
 }

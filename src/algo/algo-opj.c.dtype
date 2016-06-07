@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <assert.h>
 #include <math.h>
 #include <string.h>
 
@@ -73,23 +74,165 @@ static <DATATYPE> DataType_repres_<DATATYPE>(const uint64_t num,
 }
 /* -------------------------------------------------------------------------- */
 
-#define NUM_COMPS_MAX 4
-
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_opj_compress_<DATATYPE>(const scil_context_p ctx,
-                                    byte* restrict dest,
-                                    size_t* restrict dest_size,
-                                    <DATATYPE>* restrict source,
-                                    const scil_dims* dims)
+int scil_opj_compress_<DATATYPE>(const scil_context_p ctx, byte* restrict dest, size_t* restrict dest_size, <DATATYPE>* restrict source, const scil_dims* dims)
 {
+  opj_image_cmptparm_t image_param;
+  opj_cparameters_t param;
+  opj_codec_t* codec;
+  opj_stream_t* stream;
+  opj_image_t* image;
+  OPJ_UINT32 data_size;
+
+  OPJ_UINT32 i;
+  OPJ_BYTE *data;
+
+  int numcomps = 1;
+  int image_width;
+  int image_height = 1;
+  int prec = 8;
+  int irreversible = 1;
+
+  printf("\n<BEGIN Compress function\n");
+
+  //1D, 2D array integer
+  assert(dims->dims < 3);
+  if(dims->dims < 3)
+  {
+    switch(dims->dims)
+    {
+        case 2: image_height = dims->length[1];
+        case 1: image_width = dims->length[0];
+    }
+  }
+
+  data = (OPJ_BYTE*) malloc(image_width * image_height * sizeof(OPJ_BYTE));
+
+  for (i=0;i<image_width * image_height;i++)	{
+		data[i] = source[i];
+	}
+
+
+  //opj_stream_set_user_data_length(stream, data_size);
+  //opj_stream_set_user_data(stream, source, NULL);
+
+  opj_set_default_encoder_parameters(&param);
+
+  /** you may here add custom encoding parameters */
+	/* rate specifications */
+	/** number of quality layers in the stream */
+	param.tcp_numlayers = 1;
+	param.cp_fixed_quality = 1;
+	param.tcp_distoratio[0] = 20;
+
+
+	/* tile definitions parameters */
+	/*param.cp_tx0 = 0;
+	param.cp_ty0 = 0;
+	param.tile_size_on = OPJ_FALSE;
+	param.irreversible = irreversible;*/
+
+	/** number of resolutions */
+	param.numresolution = 6;
+
+	param.prog_order = OPJ_LRCP;
+
+	param.tp_on = 0;
+	param.tp_flag = 0;
+
+  image_param.bpp = 16;
+  image_param.prec = 16;
+  image_param.sgnd = 0; //unsigned 0
+  image_param.dx = 1;
+  image_param.dy = 1;
+  image_param.x0 = 0;
+  image_param.y0 = 0;
+  image_param.w = image_width;
+  image_param.h = image_height;
+
+  image = opj_image_create(numcomps, &image_param, OPJ_CLRSPC_GRAY);
+
+  if (! image)
+  {
+    return 1;
+  }
+
+  image->x0 = 0;
+  image->y0 = 0;
+  image->x1 = (OPJ_UINT32)image_width;
+  image->y1 = (OPJ_UINT32)image_height;
+  image->color_space = OPJ_CLRSPC_GRAY;
+
+  // set the data, for grayscale there is only a single component
+  for (i = 0; i < image_height*image_width; ++i)
+  {
+    image->comps[0].data[i] = data[i];
+    printf("%i ",image->comps[0].data[i]);
+  }
+
+  codec = opj_create_compress(OPJ_CODEC_JP2);
+
+  if (!codec)
+  {
+    opj_image_destroy(image);
+    return 1;
+  }
+
+  if (! opj_setup_encoder(codec, &param, image))
+  {
+    fprintf(stderr, "ERROR -> test_tile_encoder: failed to setup the codec!\n");
+    opj_destroy_codec(codec);
+    opj_image_destroy(image);
+    return 1;
+  }
+
+  printf("\nCompression started\n");
+
+  stream = opj_stream_default_create(OPJ_FALSE);
+
+  if(!stream)
+  {
+    opj_destroy_codec(codec);
+    opj_image_destroy(image);
+    return 1;
+  }
+
+  if (! opj_start_compress(codec, image, stream))
+  {
+    fprintf(stderr, "ERROR -> test_encoder: failed to start compress!\n");
+    opj_stream_destroy(stream);
+    opj_destroy_codec(codec);
+    opj_image_destroy(image);
+    return 1;
+  }
+
+  if (! opj_encode(codec, stream))
+  {
+    opj_stream_destroy(stream);
+    opj_destroy_codec(codec);
+    opj_image_destroy(image);
+    return 1;
+  }
+
+  if (! opj_end_compress(codec,stream))
+  {
+    fprintf(stderr, "ERROR -> test_encoder: failed to end compress!\n");
+    opj_stream_destroy(stream);
+    opj_destroy_codec(codec);
+    opj_image_destroy(image);
+    return 1;
+  }
+
+  opj_stream_destroy(stream);
+  opj_destroy_codec(codec);
+  opj_image_destroy(image);
+
+  printf("\n<END   Compress function\n");
   return 0;
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_opj_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
-                                      scil_dims* dims,
-                                      byte* restrict source,
-                                      const size_t source_size)
+int scil_opj_decompress_<DATATYPE>(<DATATYPE>* restrict dest, scil_dims* dims, byte* restrict source, const size_t source_size)
 {
 
   return 0;
