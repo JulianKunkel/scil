@@ -143,7 +143,7 @@ int main(int argc, char** argv){
 
 	FILE * f = fopen("scil.conf.bak", "w+");
 	{
-		char * str = "#randomness; compressor name; compr. performance MiB; decompr. performance MiB; inverse compr. ratio";
+		char * str = "#randomness; compressor name; compr. performance MiB; decompr. performance MiB; inverse compr. ratio\n";
 		ret = fwrite(str, strlen(str), 1, f);
 		scilU_check_std_err("fwrite", ret != 1);
 	}
