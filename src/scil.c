@@ -426,23 +426,16 @@ int scil_create_compression_context(scil_context_p* out_ctx,
 
     if (oh->significant_bits != SCIL_ACCURACY_INT_IGNORE) {
         if (oh->significant_digits == SCIL_ACCURACY_INT_IGNORE) {
-            oh->significant_digits = scilU_convert_significant_bits_to_decimals(
-                oh->significant_bits);
+            oh->significant_digits = scilU_convert_significant_bits_to_decimals(oh->significant_bits);
 
             // we need to round the bits properly to decimals, i.e., 1 bit
             // precision in the mantissa requires 1 decimal digit.
-            const int newbits = scilU_convert_significant_decimals_to_bits(
-                oh->significant_digits);
+            const int newbits = scilU_convert_significant_decimals_to_bits(oh->significant_digits);
             if (newbits < oh->significant_bits) {
-                oh->significant_digits =
-                    scilU_convert_significant_bits_to_decimals(
-                        oh->significant_bits);
+                oh->significant_digits = scilU_convert_significant_bits_to_decimals(oh->significant_bits);
             }
         } else {
-            oh->significant_digits =
-                max(scilU_convert_significant_bits_to_decimals(
-                        oh->significant_bits),
-                    oh->significant_digits);
+            oh->significant_digits = max(scilU_convert_significant_bits_to_decimals(oh->significant_bits), oh->significant_digits);
         }
 
         // Why should this make any sense:
@@ -460,8 +453,7 @@ int scil_create_compression_context(scil_context_p* out_ctx,
 
     if (oh->force_compression_methods != NULL) {
         // now we can prefill the compression pipeline
-        ret = scilI_parse_compression_algorithms(
-            &ctx->chain, hints->force_compression_methods);
+        ret = scilI_parse_compression_algorithms(&ctx->chain, hints->force_compression_methods);
 
         oh->force_compression_methods = strdup(oh->force_compression_methods);
     }

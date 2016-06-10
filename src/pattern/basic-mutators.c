@@ -56,7 +56,7 @@ static void m_interpolator_func(double * data, scil_dims pos, scil_dims size, in
   double start_v = data[scilG_data_pos(&start, & size)];
   double end_v =   data[scilG_data_pos(&end, & size)];
 
-  // use cosine interpolation  
+  // use cosine interpolation
   weight = (1-cos(weight*M_PI))/2;
   double val = (1.0-weight) * start_v + weight * end_v;
   //printf("%.2f %.1f \n", weight, val);
@@ -108,7 +108,11 @@ static void m_repeater_func(double * data, scil_dims pos, scil_dims size, int * 
   double val = data[scilG_data_pos(& pos, & size)];
   scil_dims extend;
   for(int j=0; j < pos.dims; j++){
-    extend.length[j] = pos.length[j] + l;
+    if( pos.length[j] + l < size.length[j] ){
+      extend.length[j] = pos.length[j] + l;
+    }else{
+      extend.length[j] = size.length[j];
+    }
   }
   scilG_iter(data, size, pos, extend, NULL, & m_repeater_func_i, & val );
 }
