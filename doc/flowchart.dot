@@ -1,0 +1,68 @@
+digraph {
+    label="Program flow of compression configuration"
+
+    node[shape="diamond"]
+        datatype;
+        precision_f[label="check\nprecision\nfloat"];
+        precision_d[label="check\nprecision\ndouble"];
+        check_sig_dig1[label="check\nsignificant\ndigits"];
+        check_sig_bit[label="check\nsignificant\nbits"]
+        check_sig_dig2[label="check\nsignificant\ndigits"];
+        frc_comp_meth_null[label="check force\ncompression\nmethods"]
+        chk_err[label="check\nerror"];
+    node[shape="box"]
+        set_finest_d[label="set finest\ndouble"];
+        set_finest_f[label="set finest\nfloat"];
+        conv_dig_bit[label="convert\ndigits\nto bits"];
+        conv_bit_dig[label="convert\nbits to\ndigits"];
+        set_sig_dig[label="set\nsignificant\ndigits"];
+        set_f_sig_dig[label="set finer\nsignificant\ndigits"];
+        set_losles[label="set lossless\ncompression\nneeded"];
+        fix_dbl_sets[label="fix double\nsettings"];
+        prs_comp_alogs[label="parse\ncompression\nalgorithms"]
+        set_ctx[label="set output context"];
+        free_ctx[label="free context"];
+    node[shape="box", style="rounded"]
+        start;
+        end;
+
+    start -> datatype;
+
+    datatype -> precision_f[label="float"];
+    //datatype -> float[label="significant_digits > 6 ||\nsignificant_bits > 23"];
+    datatype -> precision_d[label="double"];
+    //datatype -> double[label="significant_digits > 15 ||\nsignificant_bits > 52"];
+
+    precision_f -> set_finest_f[label="finest"];
+    precision_d -> set_finest_d[label="finest"];
+
+    precision_f -> check_sig_dig1[label="!finest"];
+    precision_d -> check_sig_dig1[label="!finest"];
+
+    set_finest_f -> check_sig_dig1;
+    set_finest_d -> check_sig_dig1;
+
+    check_sig_dig1 -> check_sig_bit[label="ignore"];
+    check_sig_dig1 -> conv_dig_bit[label="!ignore"];
+    conv_dig_bit -> check_sig_bit;
+
+    check_sig_bit -> conv_bit_dig[label="!ignore"];
+    check_sig_bit -> set_losles[label="ignore"];
+
+    conv_bit_dig -> check_sig_dig2;
+    check_sig_dig2 -> set_sig_dig[label="ignore"];
+    check_sig_dig2 -> set_f_sig_dig[label="!ignore"];
+
+    set_sig_dig -> set_losles;
+    set_f_sig_dig -> set_losles;
+    set_losles -> fix_dbl_sets;
+    fix_dbl_sets -> frc_comp_meth_null;
+    frc_comp_meth_null -> chk_err[label="NULL"];
+    frc_comp_meth_null -> prs_comp_alogs[label="!NULL"];
+    prs_comp_alogs -> chk_err;
+    chk_err -> set_ctx[label="!error"];
+    chk_err -> free_ctx[label="error"];
+
+    set_ctx -> end;
+    free_ctx -> end;
+}
