@@ -138,7 +138,7 @@ static void compute_significant_bit_mapping(){
 
 	for(int i = 0; i < MANTISSA_MAX_LENGTH_P1; ++i){
 		sig_bits[i] = (unsigned char)ceil(i * LOG10B2);
-		sig_decimals[i] = (unsigned char)floor(i * LOG2B10);
+		sig_decimals[i] = (unsigned char)ceil(i * LOG2B10);
 	}
 }
 
