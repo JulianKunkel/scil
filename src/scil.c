@@ -425,17 +425,13 @@ int scil_create_compression_context(scil_context_p* out_ctx,
     //}
 
     if (oh->significant_bits != SCIL_ACCURACY_INT_IGNORE) {
+		// Due to bugfix in commit f33d2dd6bccf40f9a9f22f4a03c52ebbd6992713
+		// this is now working without correction checking code.
+		int new_significant_digits = scilU_convert_significant_bits_to_decimals(oh->significant_bits);
         if (oh->significant_digits == SCIL_ACCURACY_INT_IGNORE) {
-            oh->significant_digits = scilU_convert_significant_bits_to_decimals(oh->significant_bits);
-
-            // we need to round the bits properly to decimals, i.e., 1 bit
-            // precision in the mantissa requires 1 decimal digit.
-            const int newbits = scilU_convert_significant_decimals_to_bits(oh->significant_digits);
-            if (newbits < oh->significant_bits) {
-                oh->significant_digits = scilU_convert_significant_bits_to_decimals(oh->significant_bits);
-            }
+			oh->significant_digits = new_significant_digits;
         } else {
-            oh->significant_digits = max(scilU_convert_significant_bits_to_decimals(oh->significant_bits), oh->significant_digits);
+            oh->significant_digits = max(new_significant_digits, oh->significant_digits);
         }
 
         // Why should this make any sense:
