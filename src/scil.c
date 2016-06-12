@@ -428,7 +428,8 @@ int scil_create_compression_context(scil_context_p* out_ctx,
 		// Due to bugfix in commit f33d2dd6bccf40f9a9f22f4a03c52ebbd6992713
 		// this is now working without correction checking code.
 		int new_significant_digits = scilU_convert_significant_bits_to_decimals(oh->significant_bits);
-        if (oh->significant_digits == SCIL_ACCURACY_INT_IGNORE) {
+
+		if (oh->significant_digits == SCIL_ACCURACY_INT_IGNORE) {
 			oh->significant_digits = new_significant_digits;
         } else {
             oh->significant_digits = max(new_significant_digits, oh->significant_digits);
@@ -446,6 +447,7 @@ int scil_create_compression_context(scil_context_p* out_ctx,
     fix_double_setting(&oh->relative_err_finest_abs_tolerance);
     fix_double_setting(&oh->absolute_tolerance);
     // TODO handle float differently.
+	// Why? hints can be double while compressing float-data.
 
     if (oh->force_compression_methods != NULL) {
         // now we can prefill the compression pipeline
