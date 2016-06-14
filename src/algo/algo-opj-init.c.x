@@ -17,6 +17,31 @@ static uint8_t get_bits(const uint64_t num, const uint8_t start, const uint8_t s
     return (uint8_t)((num << (64 - start)) >> (64 - size));
 }
 
+/* -------------------------------------------------------------------------- */
+
+/**
+sample error debug callback expecting no client object
+*/
+static void scil_opj_error_callback(const char *msg, void *client_data) {
+	(void)client_data;
+	fprintf(stdout, "[ERROR] %s", msg);
+}
+/**
+sample warning debug callback expecting no client object
+*/
+static void scil_opj_warning_callback(const char *msg, void *client_data) {
+	(void)client_data;
+	fprintf(stdout, "[WARNING] %s", msg);
+}
+/**
+sample debug callback expecting no client object
+*/
+static void scil_opj_info_callback(const char *msg, void *client_data) {
+	(void)client_data;
+	fprintf(stdout, "[INFO] %s", msg);
+}
+/* -------------------------------------------------------------------------- */
+
 scil_compression_algorithm algo_opj = {
     .c.DNtype = {
 	      scil_opj_compress_float,

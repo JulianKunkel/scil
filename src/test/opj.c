@@ -53,18 +53,23 @@
 int main(){
 
   printf("Begin TEST\n");
-  const size_t count = 10;
+  const size_t count1 = 64;
+  const size_t count2 = 64;
+  //static float *data_check;
 
-  float* source = (float*)SAFE_MALLOC(count * sizeof(float));
+  float* source = (float *)SAFE_MALLOC(count1 * count2 * sizeof(float));
 
-  printf("source array:\n");
-  for(int i = 0; i < count; ++i){
-      source[i] = i % 10;
-      printf("%f ", source[i]);
+  //printf("source array:\n");
+  for(uint i = 0; i < count1; i++){
+    for (uint j = 0; j < count2; j++)
+    {
+      *(source + i*count2 + j) = i+0.1;
+      //printf("%f ", *(source + i*count1 + j));
+    }
   }
 
   scil_dims dims;
-  scil_init_dims_1d(&dims, count);
+  scil_init_dims_2d(&dims, count1, count2);
 
   size_t dest_size = scil_compress_buffer_size_bound(SCIL_TYPE_FLOAT, &dims);
   byte* dest       = (byte*)SAFE_MALLOC(dest_size);
@@ -78,12 +83,27 @@ int main(){
   hints.force_compression_methods = "opj";
   scil_create_compression_context(&ctx, SCIL_TYPE_FLOAT, &hints);
 
+  printf("##Compression##\n");
+printf("DEST: %i",dest_size);
   int ret = scil_compress(dest, dest_size, source, &dims, &dest_size, ctx);
-  printf("\n\n?error %d %d\n", ret, SCIL_PRECISION_ERR);
+  //printf("\n\n?error %d %d\n", ret, SCIL_PRECISION_ERR);
+  assert(ret == SCIL_NO_ERR && "ERROR COMPRESSION");
+printf("DEST: %i",dest_size);
+  ret = scil_destroy_compression_context(& ctx);
+  assert(ret == SCIL_NO_ERR);
+  free(ctx);
+
+  float* data_check        = (float*)malloc(count1*count2*sizeof(SCIL_TYPE_FLOAT));
+  byte* tmpBuff        = (byte*)malloc(count1*count2*sizeof(SCIL_TYPE_FLOAT));
+
+  printf("##Decompression##\n");
+  //memset(data_check, 0, sizeof(data_check));
+  ret = scil_decompress(SCIL_TYPE_FLOAT, data_check, & dims, dest, dest_size, tmpBuff);
+
+  //assert(ret == SCIL_NO_ERR && "ERROR DECOMPRESSION");
 
   free(source);
   free(dest);
-  free(ctx);
 
   printf("End   TEST\n");
   return ret != SCIL_PRECISION_ERR;
