@@ -1,0 +1,12 @@
+This flowchart shows the internal work flow of the scil_create_compression_context
+function.
+At first, a case differentiation is conducted, whether the datatype of the
+buffer to compress is double or float. In either case it is checked if the
+one of the precision parameters in the hints is finer than double or float respectively.
+In the case of a float datatype this, would be the case for significant_digits > 6
+or significant_bits > 23. For double it is significant_digits > 15 or
+significant_bits > 52. The precision parameters will be set to
+SCIL_ACCURACY_INT_FINEST if this is the case.
+Next, it is checked whether significant_digits is not set to be ignored, in which case
+a conversion from significant_digits to significant_bits is conducted. significant_bits
+will then be set to the converted value if it is more precision restricting.
