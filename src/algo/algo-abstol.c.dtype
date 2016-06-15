@@ -47,11 +47,13 @@ static uint64_t get_needed_bit_count_<DATATYPE>(const <DATATYPE> min_value,
     assert(max_value > min_value);
     assert(absolute_tolerance > 0);
 
+    /*
     printf("Abs. tol.: %f\n", absolute_tolerance);
     printf("1/Abs. tol.: %f\n", 1.0 / absolute_tolerance);
     printf("(m-m)/(2*abstol): %f\n", (double)(max_value - min_value) / (2 * absolute_tolerance));
     printf("1+(m-m)/(2*abstol): %f\n", 1 + (double)(max_value - min_value) / (2 * absolute_tolerance));
     printf("log(1-(m-m)/(2*abstol)): %f\n", log2(1 + (double)(max_value - min_value) / (2 * absolute_tolerance)));
+    */
 
     return (uint64_t)ceil(log2(1 +
                               (double)(max_value - min_value) /
