@@ -14,6 +14,5 @@ target_link_libraries(scil-compress-csv scil)
 
 install(TARGETS scil-compress-csv DESTINATION bin)
 
-
 install(FILES scil-plot-csv.R DESTINATION bin)
 install(FILES scil-plot-csv.py DESTINATION bin)

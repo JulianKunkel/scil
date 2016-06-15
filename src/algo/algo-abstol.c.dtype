@@ -17,13 +17,14 @@
 #include <string.h>
 
 #include <scil-errors.h>
+#include <scil-quantizer.h>
 
 #include <algo/algo-abstol.h>
 #include <algo/algo-abstol-init.c.x>
 
-static int find_min_max_<DATATYPE>(<DATATYPE>* restrict min,
-                                   <DATATYPE>* restrict max,
-                                   const <DATATYPE>* buf,
+static int find_min_max_<DATATYPE>(<DATATYPE>* const restrict min,
+                                   <DATATYPE>* const restrict max,
+                                   const <DATATYPE>* const restrict buf,
                                    const uint64_t size)
 {
     assert(buf != NULL);
@@ -61,7 +62,6 @@ static uint64_t int_repres_<DATATYPE>(const <DATATYPE> num,
                                       const <DATATYPE> min,
                                       const double absolute_tolerance)
 {
-    // printf("num %f, min %f\n", num, min);
     assert(num >= min);
 
     return (uint64_t)round((double)(num - min) / (2 * absolute_tolerance));
