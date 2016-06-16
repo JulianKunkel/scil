@@ -1,0 +1,39 @@
+#include <scil-quantizer.h>
+
+#include <math.h>
+
+#include <scil-errors.h>
+
+static double find_minimum_<DATATYPE>(const <DATATYPE>* const buffer, const size_t count){
+
+    <DATATYPE> min = INFINITY;
+
+    for(size_t i = 0; i < count; ++i){
+        if(buffer[i] < min){
+            min = buffer[i];
+        }
+    }
+
+    return min;
+}
+
+static uint64_t scil_quantize_value_<DATATYPE>(const <DATATYPE> value,
+                                               const <DATATYPE> minimum,
+                                               const double absolute_tolerance){
+
+    return (uint64_t)round((value - minimum) / (2 * absolute_tolerance));
+}
+
+int scil_quantize_buffer_<DATATYPE>(const <DATATYPE>* const restrict buf_in,
+                                uint64_t* const restrict buf_out,
+                                const size_t count,
+                                const double absolute_tolerance){
+
+    <DATATYPE> minimum = find_minimum_<DATATYPE>(buf_in, count);
+
+    for(size_t i = 0; i < count; ++i){
+        buf_out[i] = scil_quantize_value_<DATATYPE>(buf_in[i], minimum, absolute_tolerance);
+    }
+
+    return 0;
+}
