@@ -1,12 +1,59 @@
 This flowchart shows the internal work flow of the scil_create_compression_context
 function.
-At first, a case differentiation is conducted, whether the datatype of the
-buffer to compress is double or float. In either case it is checked if the
-one of the precision parameters in the hints is finer than double or float respectively.
-In the case of a float datatype this, would be the case for significant_digits > 6
-or significant_bits > 23. For double it is significant_digits > 15 or
-significant_bits > 52. The precision parameters will be set to
-SCIL_ACCURACY_INT_FINEST if this is the case.
-Next, it is checked whether significant_digits is not set to be ignored, in which case
-a conversion from significant_digits to significant_bits is conducted. significant_bits
-will then be set to the converted value if it is more precision restricting.
+
+[1] Datatype
+    - Case differentiation between float and double datatypes
+
+[2a] Check precision float
+    - Checks if finest precision is needed (significant_digits > 6 || siggnificant_bits > 23)
+[2b] Check precision double
+    - Checks if finest precision is needed (significant_digits > 15 || siggnificant_bits > 52)
+
+[3] Set finest
+    - Sets significant_digits and significant_bits to finest precision (SCIL_ACCURACY_INT_FINEST)
+
+[4] Check significant digits ignored
+    - Checks if significant_digits are ignored (is set to SCIL_ACCURACY_INT_IGNORE)
+
+[5] Convert digits to bits
+    - Converts significant_digits to significant_bits
+    - Sets the hints significant_bits to the finer of the two (significant_bits and the converted significant bits out of sig. digits)
+
+[6] Check significant bits
+    - Checks if significant_bits are ignored (is set to SCIL_ACCURACY_INT_IGNORE)
+
+[7] Convert bits to digits
+    - Converts significant_bits to significant_digits (saves it in local new_significant_digits)
+
+[8] Check significant digits
+    - Checks if significant_digits are ignored (is set to SCIL_ACCURACY_INT_IGNORE)
+
+[9a] Set significant digits
+    - Sets hints significant_digits to new_significant_digits
+
+[9b] Set finer significant digits
+    - Sets hints significant_digits to the finer of the two (new_significant_digits and significant_digits)
+
+[10] Set lossless compression needed
+    - Sets a boolean whether a lossless compression is needed or not, based on the hints
+
+[11] Fix double settings
+    - Sets each precision hint to highest double value if they are ignored beforehand (if value is SCIL_ACCURACY_DBL_IGNORE)
+        - relative_tolerance_percent
+        - relative_err_finest_abs_tolerance
+        - absolute_tolerance
+
+[12] Check force compression methods
+    - Checks if compression methods are forced (hint force_compression_methods is not null-pointer)
+
+[13] Parse compression algorithms
+    - Parses the force_compression_methods string to actual algorithms and saves the functions success code to 'ret'
+
+[14] Check error
+    - Checks if ret is SCIL_NO_ERR
+
+[15a] Set output context
+    - Sets the output context pointer to the address of the successfully created  context
+
+[15b] Free context
+    - Frees the memory of the not successfully created context

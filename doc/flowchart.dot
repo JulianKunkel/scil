@@ -2,26 +2,25 @@ digraph {
     label="Program flow of compression configuration"
 
     node[shape="diamond"]
-        datatype;
-        precision_f[label="check\nprecision\nfloat"];
-        precision_d[label="check\nprecision\ndouble"];
-        check_sig_dig1[label="check\nsignificant\ndigits"];
-        check_sig_bit[label="check\nsignificant\nbits"]
-        check_sig_dig2[label="check\nsignificant\ndigits"];
-        frc_comp_meth_null[label="check force\ncompression\nmethods"]
-        chk_err[label="check\nerror"];
+        datatype[label="[1] Datatype"];
+        precision_f[label="[2a] Check\nprecision\nfloat"];
+        precision_d[label="[2b] Check\nprecision\ndouble"];
+        check_sig_dig1[label="[4] Check\nsignificant\ndigits ignored"];
+        check_sig_bit[label="[6] Check\nsignificant\nbits"]
+        check_sig_dig2[label="[8] Check\nsignificant\ndigits"];
+        frc_comp_meth_null[label="[12] Check force\ncompression\nmethods"]
+        chk_err[label="[14] Check\nerror"];
     node[shape="box"]
-        set_finest_d[label="set finest\ndouble"];
-        set_finest_f[label="set finest\nfloat"];
-        conv_dig_bit[label="convert\ndigits\nto bits"];
-        conv_bit_dig[label="convert\nbits to\ndigits"];
-        set_sig_dig[label="set\nsignificant\ndigits"];
-        set_f_sig_dig[label="set finer\nsignificant\ndigits"];
-        set_losles[label="set lossless\ncompression\nneeded"];
-        fix_dbl_sets[label="fix double\nsettings"];
-        prs_comp_alogs[label="parse\ncompression\nalgorithms"]
-        set_ctx[label="set output context"];
-        free_ctx[label="free context"];
+        set_finest[label="[3] Set finest"];
+        conv_dig_bit[label="[5] Convert\ndigits\nto bits"];
+        conv_bit_dig[label="[7] Convert\nbits to\ndigits"];
+        set_sig_dig[label="[9a] Set\nsignificant\ndigits"];
+        set_f_sig_dig[label="[9b] Set finer\nsignificant\ndigits"];
+        set_losles[label="[10] Set lossless\ncompression\nneeded"];
+        fix_dbl_sets[label="[11] Fix double\nsettings"];
+        prs_comp_alogs[label="[13] Parse\ncompression\nalgorithms"];
+        set_ctx[label="[15a] Set output context"];
+        free_ctx[label="[15b] Free context"];
     node[shape="box", style="rounded"]
         start;
         end;
@@ -33,14 +32,13 @@ digraph {
     datatype -> precision_d[label="double"];
     //datatype -> double[label="significant_digits > 15 ||\nsignificant_bits > 52"];
 
-    precision_f -> set_finest_f[label="finest"];
-    precision_d -> set_finest_d[label="finest"];
+    precision_f -> set_finest[label="finest"];
+    precision_d -> set_finest[label="finest"];
 
     precision_f -> check_sig_dig1[label="!finest"];
     precision_d -> check_sig_dig1[label="!finest"];
 
-    set_finest_f -> check_sig_dig1;
-    set_finest_d -> check_sig_dig1;
+    set_finest -> check_sig_dig1;
 
     check_sig_dig1 -> check_sig_bit[label="ignore"];
     check_sig_dig1 -> conv_dig_bit[label="!ignore"];
