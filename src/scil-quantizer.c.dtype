@@ -24,10 +24,10 @@ static uint64_t scil_quantize_value_<DATATYPE>(const <DATATYPE> value,
     return (uint64_t)round((value - minimum) / (2 * absolute_tolerance));
 }
 
-int scil_quantize_buffer_<DATATYPE>(const <DATATYPE>* const restrict buf_in,
-                                uint64_t* const restrict buf_out,
-                                const size_t count,
-                                const double absolute_tolerance){
+int scil_quantize_buffer_<DATATYPE>(uint64_t* const restrict buf_out,
+                                    const <DATATYPE>* const restrict buf_in,
+                                    const size_t count,
+                                    const double absolute_tolerance){
 
     <DATATYPE> minimum = find_minimum_<DATATYPE>(buf_in, count);
 

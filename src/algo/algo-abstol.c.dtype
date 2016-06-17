@@ -83,20 +83,15 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
                                     <DATATYPE>* restrict source,
                                     const scil_dims* dims)
 {
+    // Element count in buffer to compress
+    size_t count = scil_get_data_count(dims);
+
     // Finding minimum and maximum values in data
     <DATATYPE> min, max;
-    find_min_max_<DATATYPE>(&min, &max, source, scil_get_data_count(dims));
+    find_min_max_<DATATYPE>(&min, &max, source, count);
 
     // Locally assigning absolute tolerance
     double abs_tol = ctx->hints.absolute_tolerance;
-
-    /*
-    // Den Teil hier verstehe ich nicht...
-    if ((double)(max - min) < SCIL_SMALL ||
-        abs_tol >= SCIL_ACCURACY_DBL_FINEST) {
-        return SCIL_PRECISION_ERR;
-    }
-    */
 
     // Get needed bits per compressed number in data
     uint64_t bits_per_num = get_needed_bit_count_<DATATYPE>(min, max, abs_tol);
@@ -123,15 +118,16 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
     dest++;
     head_size += 1;
 
+    // Quantizing values from source buffer
+    uint64_t* quantized_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
+    if(scil_quantize_buffer_<DATATYPE>(quantized_buffer, source, count, abs_tol)){
+        return SCIL_BUFFER_ERR;
+    }
 
-    size_t qcount = scil_get_data_count(dims);
-    uint64_t* quanted_buffer = (uint64_t*)SAFE_MALLOC(qcount * sizeof(uint64_t));
-    scil_quantize_buffer_<DATATYPE>(source, quanted_buffer, qcount, abs_tol);
-    
+    // Packing data in quantized buffer tightly
 
     // Get number of needed bytes for the whole compressed buffer
-    *dest_size =
-        round_up_byte(bits_per_num * scil_get_data_count(dims)) + head_size;
+    *dest_size = round_up_byte(bits_per_num * scil_get_data_count(dims)) + head_size;
 
     uint8_t end_mask[9] = {0,
                            255 - 127,
@@ -190,6 +186,8 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
 
         bit_index += bits_per_num;
     }
+
+    free(quantized_buffer);
 
     return 0;
 }
