@@ -20,6 +20,7 @@ find_package(PkgConfig REQUIRED)
 include(CTest)
 include(FeatureSummary)
 include(CheckCSourceCompiles)
+include(CheckCSourceRuns)
 
 # compile flags
 set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -pedantic-errors -std=gnu11 -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections  -Wl,--no-allow-shlib-undefined")
@@ -35,11 +36,40 @@ set (CMAKE_C_FLAGS_RELEASE "-O3")
 set (SCIL_ALGO_SOURCE ${CMAKE_SOURCE_DIR}/algo)
 set (SCIL_ALGO_BINARY ${CMAKE_BINARY_DIR}/algo)
 
+option(endianess "Endianess" ${ENDIANESS})
+
+CHECK_C_SOURCE_RUNS("
+  #include <assert.h>
+  int main(){
+    int v = 1;
+    char *p = (char*) & v;
+    assert(*p == 1);
+  }  " LITTLE_ENDIAN)
+
+if( ${LITTLE_ENDIAN} )
+  set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -D SCIL_LITTLE_ENDIAN")
+  set (ENDIANESS "LITTLE")
+endif()
+
+
+CHECK_C_SOURCE_RUNS("
+  #include <assert.h>
+  int main(){
+    int v = 1;
+    char *p = (char*) & v;
+    assert(*(p + sizeof(int) - 1) == 1);
+  }  " BIG_ENDIAN)
+
+if( ${BIG_ENDIAN} )
+  set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -D SCIL_BIG_ENDIAN")
+  set (ENDIANESS "BIG")
+endif()
+
+
+
 # run during configure:
 execute_process(COMMAND ${DEPS_DIR}/build-dependencies.sh WORKING_DIRECTORY ${DEPS_DIR})
 execute_process(COMMAND ${DEV_DIR}/create-datatype-variants.sh ${CMAKE_SOURCE_DIR} WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/)
-
-
 
 #
 set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${DEPS_DIR}/openjpeg/lib/pkgconfig/")

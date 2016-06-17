@@ -248,4 +248,18 @@ void scilU_print_dims(scil_dims dims);
 void scilU_plot(const char* name, scil_dims dims, double * buffer_in);
 
 
+#ifdef SCIL_LITTLE_ENDIAN
+
+#define scilU_pack4(buffer, val) *((int32_t*)buffer) = val
+#define scilU_unpack4(buffer, result_p) *result_p = *((int32_t*) buffer);
+
+#define scilU_pack8(buffer, val) *((int64_t*)buffer) = val
+#define scilU_unpack8(buffer, result_p) *result_p = *((int64_t*) buffer);
+
+#else
+
+#error Please implement scilU_pack* for big endian maschines
+
+#endif
+
 #endif /* UTIL_H */

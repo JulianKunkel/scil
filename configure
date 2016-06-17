@@ -33,7 +33,7 @@ function reconfigure(){
 	exit $?
 }
 
-set -- `getopt -l "help,version,debug,reconfigure,prefix:,plantuml-jar-dir:,with-cc:,with-cxx:,verbose,build-dir:" -o hV -u -- "$@"`
+set -- `getopt -u -l "help,version,debug,reconfigure,prefix:,plantuml-jar-dir:,with-cc:,with-cxx:,verbose,build-dir:" -o "hV" -- "$@"`
 test $# -lt 1  && exit 1
 while test $# -gt 0
 do
