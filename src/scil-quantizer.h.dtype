@@ -1,5 +1,5 @@
-#ifndef SCIL_QUANTIZER_H
-#define SCIL_QUANTIZER_H
+#ifndef SCIL_QUANTIZER_H_<DATATYPE>
+#define SCIL_QUANTIZER_H_<DATATYPE>
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -19,4 +19,4 @@
                                  const size_t count,
                                  const double absolute_tolerance);
 
-#endif /* SCIL_QUANTIZER_H */
+#endif /* SCIL_QUANTIZER_H__<DATATYPE> */

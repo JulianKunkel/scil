@@ -123,11 +123,11 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
     dest++;
     head_size += 1;
 
-    /*
+
     size_t qcount = scil_get_data_count(dims);
     uint64_t* quanted_buffer = (uint64_t*)SAFE_MALLOC(qcount * sizeof(uint64_t));
     scil_quantize_buffer_<DATATYPE>(source, quanted_buffer, qcount, abs_tol);
-    */
+    
 
     // Get number of needed bytes for the whole compressed buffer
     *dest_size =
