@@ -15,19 +15,26 @@
 
 // Code is partially based on MAFISC filter
 
+// @see: https://www.hdfgroup.org/HDF5/doc/Advanced/DynamicallyLoadedFilters/HDF5DynamicallyLoadedFilters.pdf
+
+#include <assert.h>
 #include <hdf5.h>
+#include <string.h>
 
 #include <scil-hdf5-plugin.h>
 
 #include <scil.h>
+#include <scil-util.h>
 
 #define DEBUG
 
 #ifdef DEBUG
-#define debug(...) printf(__VA_ARGS__)
+#define debug(...) printf("[SCIL HDF5] "__VA_ARGS__)
 #else
 #define debug(...)
 #endif
+
+#define error(...) printf("[SCIL HDF5] ERROR: "__VA_ARGS__)
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
@@ -62,8 +69,6 @@ static htri_t compressorCanCompress(hid_t dcpl_id, hid_t type_id, hid_t space_id
 		case H5T_INTEGER:
 		case H5T_FLOAT:
 			switch(H5Tget_size(type_id)) {
-				case 1:
-				case 2:
 				case 4:
 				case 8: return 1;
 				default: return 0;
@@ -81,27 +86,104 @@ static htri_t compressorCanCompress(hid_t dcpl_id, hid_t type_id, hid_t space_id
 		case H5T_NCLASSES:	//default would have been sufficient...
 		default: return 0;
 	}
-	dcpl_id = 0;	//Shut up. Never executed.
 }
 
-static herr_t compressorSetLocal(hid_t pList, hid_t type, hid_t space) {
-//	fprintf(stderr, "compressorSetLocal()\n");
-	int rank = H5Sget_simple_extent_ndims(space), i;
+typedef struct {
+	scil_context_p ctx;
+	size_t dst_size; // the size of the buffer
+} plugin_compress_config;
+
+typedef struct {
+	plugin_compress_config * cfg;
+
+	scil_dims dims;
+	enum SCIL_Datatype type;
+} plugin_config_persisted;
+
+static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
+	debug("compressorSetLocal()\n");
+	int rank = H5Sget_simple_extent_ndims(space);
 	if(rank <= 0) return -4;
 
-  hsize_t chunkSize[rank];	//Once again an unfounded compiler complaint.
+	if (rank > 4){
+		error("SCIL only supports up to 4D variables\n");
+		exit(1);
+	}
+
+	const int cd_size = sizeof(plugin_config_persisted) / sizeof(unsigned int);
+
+	unsigned int cd_values[cd_size];
+	memset(cd_values, 0, sizeof(cd_values));
+	plugin_config_persisted * cfg_p = (plugin_config_persisted *) cd_values;
+
+	cfg_p->cfg = (plugin_compress_config*) malloc(sizeof(plugin_compress_config));
+	plugin_compress_config * config = cfg_p->cfg;
+
+  hsize_t chunkSize[rank];
 	int chunkRank = H5Pget_chunk(pList, rank, chunkSize);
 	if(chunkRank <= 0) return -1;
 	if(chunkRank > rank) return -2;
 
-  debug("compressorSetLocal called\n");
+	assert(sizeof(size_t) == sizeof(hsize_t) );
+	scil_init_dims_array(& cfg_p->dims, rank, (const size_t*) chunkSize);
 
-  return 0;
+  scil_hints h;
+  scil_init_hints(& h);
+
+	switch(H5Tget_size(type_id)) {
+		case 4: cfg_p->type = SCIL_TYPE_FLOAT; break;
+		case 8: cfg_p->type = SCIL_TYPE_DOUBLE; break;
+		default: return 0;
+	}
+  int ret = scil_create_compression_context(& config->ctx, cfg_p->type, & h);
+	assert(ret == SCIL_NO_ERR);
+
+	config->dst_size = scil_compress_buffer_size_bound(cfg_p->type, & cfg_p->dims);
+
+	// now we store the options with the dataset, this is actually not needed...
+	return H5Pmodify_filter( pList, SCIL_ID, H5Z_FLAG_OPTIONAL, cd_size, cd_values );
 }
 
-static size_t compressorFilter(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nBytes, size_t *buf_size, void **buf) {
-  //if(flags & H5Z_FLAG_REVERSE) ;
-  uint8_t v =  scil_compressor_num_by_name("memcpy");
-  debug("compressorFilter called\n");
-  return (size_t) v;
+static size_t compressorFilter(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nBytes, size_t *buf_size, void **buf){
+	debug("compressorFilter called %d %lld %lld %d \n", flags, (long long) nBytes, (long long) * buf_size, (int) cd_nelmts);
+
+	size_t out_size = *buf_size;
+	int ret;
+
+  if(flags & H5Z_FLAG_REVERSE){
+		// uncompress
+		plugin_config_persisted* cfg_p = ((plugin_config_persisted *) cd_values);
+
+		const size_t buff_size = scil_compress_buffer_size_bound(cfg_p->type, & cfg_p->dims);
+		byte * buffer = (byte*) malloc(buff_size);
+
+		byte * in_buf = ((byte**) buf)[0];
+
+		size_t c_buf_size;
+		scilU_unpack8(in_buf, &c_buf_size);
+		in_buf += 8;
+
+		debug("DC: %zu \n", c_buf_size);
+
+		ret = scil_decompress(cfg_p->type, buffer, & cfg_p->dims, in_buf, c_buf_size, buffer + buff_size/2 + 1);
+
+		*buf = buffer;
+
+	}else{ // compress
+
+		plugin_config_persisted* cfg_p = ((plugin_config_persisted *) cd_values);
+		plugin_compress_config* config = cfg_p->cfg;
+
+		byte * buffer = (byte*) malloc(config->dst_size + 8);
+
+		ret = scil_compress(buffer + 8, config->dst_size, ((byte**) buf)[0], (& cfg_p->dims), & out_size, config->ctx);
+		scilU_pack8(buffer, out_size);
+		debug("CS: %zu \n", out_size);
+		out_size +=8;
+
+		*buf = buffer;
+	}
+	assert(ret == SCIL_NO_ERR);
+
+  return out_size; // 0 means error.
 }
