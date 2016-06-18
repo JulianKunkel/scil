@@ -36,6 +36,9 @@
 
 #define error(...) printf("[SCIL HDF5] ERROR: "__VA_ARGS__)
 
+#define PLUGIN_ERROR 0
+#define PLUGIN_OK 1
+
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 H5PL_type_t H5PLget_plugin_type(void) {
@@ -70,8 +73,8 @@ static htri_t compressorCanCompress(hid_t dcpl_id, hid_t type_id, hid_t space_id
 		case H5T_FLOAT:
 			switch(H5Tget_size(type_id)) {
 				case 4:
-				case 8: return 1;
-				default: return 0;
+				case 8: return PLUGIN_OK;
+				default: return PLUGIN_ERROR;
 			}
 		case H5T_NO_CLASS:
 		case H5T_TIME:
@@ -84,7 +87,7 @@ static htri_t compressorCanCompress(hid_t dcpl_id, hid_t type_id, hid_t space_id
 		case H5T_VLEN:
 		case H5T_ARRAY:
 		case H5T_NCLASSES:	//default would have been sufficient...
-		default: return 0;
+		default: return PLUGIN_ERROR;
 	}
 }
 
@@ -129,6 +132,8 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 
   scil_hints h;
   scil_init_hints(& h);
+
+	// TODO set the hints (accuracy) according to the property lists in HDF5
 
 	switch(H5Tget_size(type_id)) {
 		case 4: cfg_p->type = SCIL_TYPE_FLOAT; break;
