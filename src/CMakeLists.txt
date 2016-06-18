@@ -36,7 +36,10 @@ set (CMAKE_C_FLAGS_RELEASE "-O3")
 set (SCIL_ALGO_SOURCE ${CMAKE_SOURCE_DIR}/algo)
 set (SCIL_ALGO_BINARY ${CMAKE_BINARY_DIR}/algo)
 
-option(endianess "Endianess" ${ENDIANESS})
+
+##### ENDIANESS
+
+set(ENDIANESS "undefined" CACHE STRING "Endianess")
 
 CHECK_C_SOURCE_RUNS("
   #include <assert.h>
@@ -48,7 +51,7 @@ CHECK_C_SOURCE_RUNS("
 
 if( ${LITTLE_ENDIAN} )
   set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -D SCIL_LITTLE_ENDIAN")
-  set (ENDIANESS "LITTLE")
+  set (ENDIANESS "LITTLE" CACHE STRING "Endianess" FORCE)
 endif()
 
 
@@ -62,9 +65,12 @@ CHECK_C_SOURCE_RUNS("
 
 if( ${BIG_ENDIAN} )
   set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -D SCIL_BIG_ENDIAN")
-  set (ENDIANESS "BIG")
+  set (ENDIANESS "BIG" CACHE STRING "Endianess" FORCE)
 endif()
 
+message(STATUS "Endianess: ${ENDIANESS}")
+
+#########################
 
 
 # run during configure:

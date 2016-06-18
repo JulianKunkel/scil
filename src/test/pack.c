@@ -47,5 +47,11 @@ int main(){
   printf("%llu == %llu\n", (long long unsigned) v64, (long long unsigned) result64);
   assert(v64 == result64);
 
+  scilU_reverse_copy(& result64, & v64, sizeof(v64));
+  for(unsigned i=0; i < sizeof(v64); i++){
+    assert( ((char*) & v64)[i] == ((char*) & result64)[sizeof(v64)-i-1]);
+  }
+  printf("%llu == %llu\n", (long long unsigned) v64, (long long unsigned) result64);
+
   return 0;
 }
