@@ -16,7 +16,7 @@
 #include <math.h>
 #include <string.h>
 
-#include <scil-errors.h>
+#include <scil.h>
 #include <scil-quantizer.h>
 
 #include <algo/algo-abstol.h>

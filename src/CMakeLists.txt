@@ -142,6 +142,7 @@ configure_file("${DEV_DIR}/scil.pc.in" "scil.pc" @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/scil.pc"  DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
 install(TARGETS scil LIBRARY DESTINATION lib)
 install(FILES scil.h DESTINATION include)
+install(FILES scil-util.h DESTINATION include)
 
 ##
 feature_summary(WHAT ALL)

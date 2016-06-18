@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-#include <scil-errors.h>
+#include <scil.h>
 
 static double find_minimum_double(const double* const buffer, const size_t count){
 
