@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include <scil.h>
+
 #include <scil-hdf5-plugin.h>
 
 // use the plugin to compress some floating point data.
@@ -34,7 +36,7 @@ int main(){
   hid_t dcpl = H5Pcreate(H5P_DATASET_CREATE);
   hsize_t chunk_size[2] = {2,5};
   H5Pset_chunk(dcpl, 2, chunk_size);
-  H5Pset_filter(dcpl, SCIL_ID, 0, 0, NULL);
+  H5Pset_filter(dcpl, SCIL_ID, H5Z_FLAG_MANDATORY, 0, NULL);
 
   hsize_t dims[2] = {4,10};
   data_space = H5Screate_simple (2, dims, NULL);
@@ -49,20 +51,23 @@ int main(){
     }
   }
 
-  /*
-  for (int i=0; i < 4; i++){
-    for(int j=0; j < 10; j++){
-      printf("%f ", buff[i][j]);
-    }
-    printf("\n");
-  }
-  */
-
   err = H5Dwrite( dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
   assert(err == 0);
 
+  // check the resuls
+  memset(data, -1, sizeof(double)*10*4);
+
   err = H5Dread( dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
   assert(err == 0);
+
+  for (int i=0; i < 4; i++){
+    buff[i] = & data[10*i];
+    for(int j=0; j < 10; j++){
+      printf("%f ", buff[i][j]);
+      assert(buff[i][j] == (i+1)*j);
+    }
+    printf("\n");
+  }
 
   H5Dclose(dset);
   H5Fclose(fid);
