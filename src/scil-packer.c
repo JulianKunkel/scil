@@ -42,22 +42,13 @@ int scil_swage(byte* const restrict buf_out,
 
         uint8_t right_shifts = bits_per_value - 8 + bit_offset;
 
-        if(start_byte == end_byte)
-        {
-            buf_out[start_byte] &= end_mask[bit_offset];
-            buf_out[start_byte] |= (byte)(buf_in[i] >> right_shifts;
-        }
-        else if(start_byte + 1 == end_byte)
-        {
-            buf_out[start_byte] &= end_mask[bit_offset];
-            buf_out[start_byte] |= (byte)(buf_in[i] >> right_shifts;
+        // Write to first byte
+        buf_out[start_byte] &= end_mask[bit_offset];
+        buf_out[start_byte] |= (byte)(buf_in[i] >> right_shifts;
 
-            buf_out[end_byte] = 0;
-            buf_out[end_byte] = bits_per_value - 8 + bit_offset
-        }
-        else
-        {
-
+        // Write to following bytes
+        for(uint8_t k = 1, uint8_t j = start_byte + 1; j <= end_byte; ++j, ++k){
+            buf_out[j] = (byte)(buf_in[i] >> (right_shifts - 8 * k));
         }
     }
 
