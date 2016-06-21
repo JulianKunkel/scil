@@ -239,8 +239,7 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
 
         } else {
             // Get start byte relevant bits
-            value = get_bits(
-                source[start_byte], first_byte_after, first_byte_after);
+            value = get_bits(source[start_byte], first_byte_after, first_byte_after);
 
             // Get intermediate bytes bits
             for (uint64_t j = start_byte + 1; j < end_byte; ++j) {
@@ -249,8 +248,7 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
             }
 
             // Get last byte relevant bits
-            uint8_t remaining_bits = bits_per_num - first_byte_after -
-                                     (end_byte - start_byte - 1) * 8;
+            uint8_t remaining_bits = bits_per_num - first_byte_after - (end_byte - start_byte - 1) * 8;
 
             if (remaining_bits != 0) {
                 value <<= remaining_bits;
