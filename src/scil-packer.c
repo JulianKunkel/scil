@@ -73,36 +73,28 @@ int scil_unswage(uint64_t* const restrict buf_out,
 {
     for(size_t i = 0, size_t bit_index = 0; i < count; ++i, bit_index+=bits_per_value)
     {
-        size_t start_byte = bit_index / 8;
-        size_t end_byte   = (bit_index + bits_per_value) / 8;
-        uint8_t bit_offset = bit_index % 8;
+        size_t start_byte = bit_index / 8;                         // Index of starting byte of current value in swaged buffer
+        size_t end_byte   = (bit_index + bits_per_value) / 8;      // Index of ending byte of current value in swaged buffer
+
+        uint8_t bit_offset = bit_index % 8;                        // Index of current bit in byte [0-7]
+        uint8_t end_byte_bits = (bit_index + bits_per_value) % 8;  // Number of bits in end_byte occupied by current value
 
         int8_t right_shifts = 8 - bits_per_value - bit_offset;
 
-        if(start_byte == end_byte){
-            buf_out[i] = buf_in[start_byte]
-        }
-
-        byte intermed = buf_in[start_byte] & start_mask[bit_offset];
-        if (bit_offset + bits_per_value < 8)
-            intermed &= end_mask[bit_offset + bits_per_value];
-
-        right_shift_8(intermed, right_shifts);
-
-        /*
-        // Read from first byte
-
-        // Set remaining bits in start_byte to 0
-        buf_out[start_byte] &= end_mask[bit_offset];
-        // Write as much bits of number as possible to remaining bits
-        buf_out[start_byte] |= (byte)(buf_in[i] >> right_shifts);
-
-        // Write to following bytes
-        for(uint8_t k = 1, uint8_t j = start_byte + 1; j <= end_byte; ++j, ++k)
+        // Read from start_byte
+        uint64_t intermed = right_shift_8(buf_in[start_byte] & start_mask[bit_offset], right_shifts); // Masks away first value-unrelated bits in start_byte and shifts related bits to final position
+        // Read from intermediate bytes
+        for(uint8_t k = 1, uint8_t j = start_byte + 1; j < end_byte; ++j, ++k)
         {
-            buf_out[j] = (byte)(buf_in[i] >> (right_shifts - k * 8));
+            intermed |= right_shift_8(buf_in[j], right_shifts + k * 8); // Shifts whole byte to final position and applies it
         }
-        */
+        // Read from end_byte
+        if(start_byte != end_byte)
+        {
+            intermed |= right_shift_8(buf_in[end_byte], 8 - end_byte_bits); // Shifts out unrelated end bits in end_byte and applies value
+        }
+        // Write to output buffer
+        buf_out[i] = intermed;
     }
 
     return 0;
