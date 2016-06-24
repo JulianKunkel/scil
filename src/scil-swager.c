@@ -1,7 +1,7 @@
 #include <scil-swager.h>
 
 static uint8_t start_mask[9] = {
-    255  //0b11111111
+    255, //0b11111111
     127, //0b01111111
     63,  //0b00111111
     31,  //0b00011111
@@ -9,7 +9,7 @@ static uint8_t start_mask[9] = {
     7,   //0b00000111
     3,   //0b00000011
     1,   //0b00000001
-    0,   //0b00000000
+    0    //0b00000000
 };
 
 static uint8_t end_mask[9] = {
@@ -41,7 +41,8 @@ int scil_swage(byte* const restrict buf_out,
                const size_t count,
                const uint8_t bits_per_value)
 {
-    for(size_t i = 0, size_t bit_index = 0; i < count; ++i, bit_index+=bits_per_value)
+    size_t bit_index = 0;
+    for(size_t i = 0; i < count; ++i)
     {
         size_t start_byte = bit_index / 8;
         size_t end_byte   = (bit_index + bits_per_value) / 8;
@@ -57,10 +58,14 @@ int scil_swage(byte* const restrict buf_out,
         buf_out[start_byte] |= right_shift_64(buf_in[i], right_shifts);
 
         // Write to following bytes
-        for(uint8_t k = 1, uint8_t j = start_byte + 1; j <= end_byte; ++j, ++k)
+        uint8_t k = 1;
+        for(uint8_t j = start_byte + 1; j <= end_byte; ++j)
         {
             buf_out[j] = right_shift_64(buf_in[i], right_shifts - k * 8);
+            ++k;
         }
+
+        bit_index += bits_per_value;
     }
 
     return 0;
@@ -71,7 +76,8 @@ int scil_unswage(uint64_t* const restrict buf_out,
                  const size_t count,
                  const uint8_t bits_per_value)
 {
-    for(size_t i = 0, size_t bit_index = 0; i < count; ++i, bit_index+=bits_per_value)
+    size_t bit_index = 0;
+    for(size_t i = 0; i < count; ++i)
     {
         size_t start_byte = bit_index / 8;                         // Index of starting byte of current value in swaged buffer
         size_t end_byte   = (bit_index + bits_per_value) / 8;      // Index of ending byte of current value in swaged buffer
@@ -84,17 +90,22 @@ int scil_unswage(uint64_t* const restrict buf_out,
         // Read from start_byte
         uint64_t intermed = right_shift_8(buf_in[start_byte] & start_mask[bit_offset], right_shifts); // Masks away first value-unrelated bits in start_byte and shifts related bits to final position
         // Read from intermediate bytes
-        for(uint8_t k = 1, uint8_t j = start_byte + 1; j < end_byte; ++j, ++k)
+        uint8_t k = 1;
+        for(uint8_t j = start_byte + 1; j < end_byte; ++j)
         {
             intermed |= right_shift_8(buf_in[j], right_shifts + k * 8); // Shifts whole byte to final position and applies it
+            ++k;
         }
         // Read from end_byte
         if(start_byte != end_byte)
         {
             intermed |= right_shift_8(buf_in[end_byte], 8 - end_byte_bits); // Shifts out unrelated end bits in end_byte and applies value
         }
+
         // Write to output buffer
         buf_out[i] = intermed;
+
+        bit_index += bits_per_value;
     }
 
     return 0;

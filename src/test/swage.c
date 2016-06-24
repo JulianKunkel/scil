@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <assert.h>
 
 int main(void){
 
@@ -26,8 +27,8 @@ int main(void){
             buf_in[i] = (uint64_t)floor( ((double)rand() / RAND_MAX) * (1 << i) );
         }
 
-        scil_swage(buf_out, buf_in, count, bits_per_value);
-        scil_unswage(buf_end, buf_out, count, bits_per_value);
+        scil_swage(buf_out, buf_in, count, i);
+        scil_unswage(buf_end, buf_out, count, i);
 
         for(uint64_t i = 0; i < count; ++i)
         {

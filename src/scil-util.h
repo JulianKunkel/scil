@@ -50,7 +50,6 @@
 
 #define DATATYPE_LENGTH(type) (type == SCIL_TYPE_FLOAT ? sizeof(float) : sizeof(double))
 
-
 /**
  * \brief Allocates a buffer with error checking.
  *

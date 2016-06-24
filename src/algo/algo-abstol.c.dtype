@@ -142,7 +142,6 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
     // 11111111
 
     uint64_t bit_index = 0;
-    size_t count       = scil_get_data_count(dims);
     for (size_t i = 0; i < count * 1; ++i) {
         // Test whether write to address after buffer
         if ((bit_index >> 3) > *dest_size - head_size) return SCIL_BUFFER_ERR;
