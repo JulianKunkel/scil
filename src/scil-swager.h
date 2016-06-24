@@ -1,5 +1,5 @@
-#ifndef SCIL_PACKER_H
-#define SCIL_PACKER_H
+#ifndef SCIL_SWAGER_H
+#define SCIL_SWAGER_H
 
 #include <stdlib.h>
 
@@ -33,4 +33,4 @@ int scil_unswage(uint64_t* const restrict buf_out,
                 const size_t count,
                 const uint8_t bits_per_value);
 
-#endif /* SCIL_PACKER_H */
+#endif /* SCIL_SWAGER_H */
