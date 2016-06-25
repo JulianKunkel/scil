@@ -28,7 +28,7 @@ set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -pedantic-errors -std=gnu11 -pedantic -Wal
 # -fvisibility=hidden -fvisibility-inlines-hidden -Wl,--print-gc-sections
 set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--no-allow-shlib-undefined -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt")
 
-set (CMAKE_C_FLAGS_DEBUG   "-O0 -ggdb -gdwarf-2 -DDEBUG")
+set (CMAKE_C_FLAGS_DEBUG   "-Og -ggdb -DDEBUG")
 set (CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb")
 
 set (CMAKE_C_FLAGS_RELEASE "-O3")
