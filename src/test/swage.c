@@ -9,8 +9,8 @@
 
 int main(void){
 
-    const uint32_t count = 10;
-    const uint8_t max_bits_per_value = 63;
+    const uint32_t count = 1000;
+    const uint8_t max_bits_per_value = 64;
 
     const uint64_t buf_size = count * sizeof(uint64_t);
 
@@ -20,9 +20,9 @@ int main(void){
 
     srand((unsigned)time(NULL));
 
-    for(uint8_t i = 1; i < max_bits_per_value; ++i)
+    for(uint8_t i = 1; i <= max_bits_per_value; ++i)
     {
-        uint64_t l = 1 << (i - 1);
+        uint64_t l = 1UL << (i - 1);
         printf("Test input values for %u bits:\n", i);
         for(uint64_t j = 0; j < count; ++j)
         {
@@ -52,6 +52,8 @@ int main(void){
             }
         }
     }
+
+    printf("Success!\n");
 
     free(buf_in);
     free(buf_out);

@@ -59,7 +59,7 @@ int scil_swage(byte* const restrict buf_out,
 
         // Write to following bytes
         uint8_t k = 1;
-        for(uint8_t j = start_byte + 1; j <= end_byte; ++j)
+        for(uint64_t j = start_byte + 1; j <= end_byte; ++j)
         {
             buf_out[j] = right_shift_64(buf_in[i], right_shifts - k * 8);
             ++k;
@@ -91,7 +91,7 @@ int scil_unswage(uint64_t* const restrict buf_out,
         uint64_t intermed = right_shift_8(buf_in[start_byte] & start_mask[bit_offset], right_shifts); // Masks away first value-unrelated bits in start_byte and shifts related bits to final position
         // Read from intermediate bytes
         uint8_t k = 1;
-        for(uint8_t j = start_byte + 1; j < end_byte; ++j)
+        for(uint64_t j = start_byte + 1; j < end_byte; ++j)
         {
             intermed |= right_shift_8(buf_in[j], right_shifts + k * 8); // Shifts whole byte to final position and applies it
             ++k;
