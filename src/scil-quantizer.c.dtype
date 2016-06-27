@@ -63,7 +63,7 @@ int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* const restrict buf_out,
                                            const double absolute_tolerance,
                                            const <DATATYPE> minimum,
                                            const <DATATYPE> maximum){
-    if(scil_calculate_bits_needed >= 64){
+    if(scil_calculate_bits_needed > 64){
         return 1; // Quantizing would result in values bigger than UINT64_MAX
     }
 
