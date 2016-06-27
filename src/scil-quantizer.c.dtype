@@ -23,13 +23,13 @@
         if(buffer[i] > max) { max = buffer[i]; }
     }
 
-    return min;
+    return max;
 }
 
 void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* const restrict buffer,
                                           const size_t count,
-                                          double* const restrict minimum,
-                                          double* const restrict maximum){
+                                          double* const minimum,
+                                          double* const maximum){
     <DATATYPE> min = INFINITY;
     <DATATYPE> max = -INFINITY;
 
@@ -37,6 +37,9 @@ void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* const restrict buffe
         if (buffer[i] < min) { min = buffer[i]; }
         if (buffer[i] > max) { max = buffer[i]; }
     }
+
+    *minimum = min;
+    *maximum = max;
 }
 
 static uint64_t scil_calculate_bits_needed(const double minimum,

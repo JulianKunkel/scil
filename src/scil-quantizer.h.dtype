@@ -38,8 +38,8 @@
  */
 void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* const restrict buffer,
                                           const size_t count,
-                                          double* const restrict minimum,
-                                          double* const restrict maximum);
+                                          double* const minimum,
+                                          double* const maximum);
 
 /**
  * \brief Quantizes the values of the given buffer with a known minimum
@@ -92,6 +92,6 @@ int scil_unquantize_buffer_<DATATYPE>(<DATATYPE>* const restrict buf_out,
                                       const uint64_t* const restrict buf_in,
                                       const size_t count,
                                       const double absolute_tolerance,
-                                      const <DATATYTE> minimum);
+                                      const <DATATYPE> minimum);
 
 #endif /* SCIL_QUANTIZER_H_<DATATYPE> */
