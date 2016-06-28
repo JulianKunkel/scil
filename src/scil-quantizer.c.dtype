@@ -28,8 +28,8 @@
 
 void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* const restrict buffer,
                                           const size_t count,
-                                          double* const minimum,
-                                          double* const maximum){
+                                          <DATATYPE>* const minimum,
+                                          <DATATYPE>* const maximum){
     <DATATYPE> min = INFINITY;
     <DATATYPE> max = -INFINITY;
 
@@ -42,9 +42,9 @@ void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* const restrict buffe
     *maximum = max;
 }
 
-static uint64_t scil_calculate_bits_needed(const double minimum,
-                                           const double maximum,
-                                           const double absolute_tolerance){
+uint64_t scil_calculate_bits_needed_<DATATYPE>(const <DATATYPE> minimum,
+                                               const <DATATYPE> maximum,
+                                               const double absolute_tolerance){
     return (uint64_t)ceil( log2( 1 + (maximum - minimum) / (2 * absolute_tolerance) ) );
 }
 
@@ -57,7 +57,7 @@ static uint64_t scil_quantize_value_<DATATYPE>(const <DATATYPE> value,
 static <DATATYPE> scil_unquantize_value_<DATATYPE>(const uint64_t value,
                                                    const double absolute_tolerance,
                                                    const <DATATYPE> minimum){
-    return minimum + (<DATATYPE>)value * 2 * absolute_tolerance);
+    return minimum + (<DATATYPE>)(value * 2 * absolute_tolerance);
 }
 
 int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* const restrict buf_out,
@@ -66,7 +66,7 @@ int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* const restrict buf_out,
                                            const double absolute_tolerance,
                                            const <DATATYPE> minimum,
                                            const <DATATYPE> maximum){
-    if(scil_calculate_bits_needed > 64){
+    if(scil_calculate_bits_needed_<DATATYPE>(minimum, maximum, absolute_tolerance) > 64){
         return 1; // Quantizing would result in values bigger than UINT64_MAX
     }
 
@@ -94,7 +94,7 @@ int scil_quantize_buffer_<DATATYPE>(uint64_t* const restrict buf_out,
                                     const size_t count,
                                     const double absolute_tolerance){
     <DATATYPE> minimum, maximum;
-    scil_find_minimum_maximum_<DATATYPE>(buf_in, count, minimum, maximum);
+    scil_find_minimum_maximum_<DATATYPE>(buf_in, count, &minimum, &maximum);
 
     return scil_quantize_buffer_minmax_<DATATYPE>(buf_out, buf_in, count, absolute_tolerance, minimum, maximum);
 }
