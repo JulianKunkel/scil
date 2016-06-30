@@ -138,7 +138,7 @@ void readCSVData(){
 void writeCSVData(){
   FILE * f = fopen(out_file, "w");
   if(f == NULL){
-    printf("Coult not open %s for write\n", out_file);
+    printf("Could not open %s for write\n", out_file);
     exit(1);
   }
   double * buffer_in = (double *) output_data;
@@ -166,10 +166,53 @@ void writeCSVData(){
 }
 
 void readData(){
+  FILE * f = fopen(in_file, "rb");
 
+  if(f == NULL){
+    printf("Could not open %s for read\n", in_file);
+    exit(1);
+  }
+
+  uint8_t rows;
+  size_t x ,y = 1, input_data_size, curr_pos;
+  fread(&rows, sizeof(uint8_t), 1, f);
+  fread(&x, sizeof(size_t), 1, f);
+
+  if(rows > 1){
+    fread(&y, sizeof(size_t), 1, f);
+    scil_init_dims_2d(&dims, x, y);
+  }else{
+    scil_init_dims_1d(&dims, x);
+  }
+
+  curr_pos = ftell(f);
+  fseek(f, 0L, SEEK_END);
+  input_data_size = ftell(f) - curr_pos;
+  fseek(f, curr_pos, SEEK_SET);
+
+  input_data = (byte*) malloc(input_data_size);
+
+  fread(input_data, 1, input_data_size, f);
+
+  fclose(f);
 }
 
 void writeData(){
+  FILE * f = fopen(out_file, "wb");
+  if(f == NULL){
+    printf("Could not open %s for write\n", out_file);
+    exit(1);
+  }
+
+  size_t buffer_in_size = dims.length[0] * sizeof(double);
+  fwrite(&dims.dims, sizeof(dims.dims), 1, f);
+  fwrite(&dims.length, sizeof(dims.length[0]), dims.dims, f);
+  for (size_t i = 1; i < dims.dims; i++){
+    buffer_in_size *= dims.length[i];
+  }
+  fwrite(output_data, 1, buffer_in_size, f);
+
+  fclose(f);
 
 }
 
@@ -212,10 +255,11 @@ int main(int argc, char ** argv){
 
   if (compress || cycle){
     readCSVData();
+    printf("Read CSV data\n");
   }else{
     readData();
+    printf("Read Binary data\n");
   }
-
 
   // TODO do compression, decompression
   output_data = input_data;
@@ -234,8 +278,10 @@ int main(int argc, char ** argv){
 
   if (uncompress || cycle){
     writeCSVData();
+    printf("Write CSV data\n");
   }else{
     writeData();
+    printf("Write Binary data\n");
   }
 
   return 0;
