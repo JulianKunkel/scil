@@ -71,7 +71,7 @@ int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* const restrict buf_out,
     }
 
     for(size_t i = 0; i < count; ++i){
-        buf_out[i] = scil_quantize_value_<DATATYPE>(buf_in[i], minimum, absolute_tolerance);
+        buf_out[i] = scil_quantize_value_<DATATYPE>(buf_in[i], absolute_tolerance, minimum);
     }
 
     return 0;
@@ -83,7 +83,7 @@ int scil_unquantize_buffer_<DATATYPE>(<DATATYPE>* const restrict buf_out,
                                       const double absolute_tolerance,
                                       const <DATATYPE> minimum){
     for(size_t i = 0; i < count; ++i){
-        buf_out[i] = scil_unquantize_value_<DATATYPE>(buf_in[i], minimum, absolute_tolerance);
+        buf_out[i] = scil_unquantize_value_<DATATYPE>(buf_in[i], absolute_tolerance, minimum);
     }
 
     return 0;
