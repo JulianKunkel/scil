@@ -7,7 +7,7 @@
 
 int main(void){
 
-    const size_t count = 1000;
+    const size_t count = 10;
 
     double*   buf_in  = (double*)SAFE_MALLOC(count * sizeof(double));
     uint64_t* buf_out = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
@@ -19,7 +19,7 @@ int main(void){
     for(uint16_t i = 1; i < 100; ++i){
 
         for(uint16_t j = 0; j < count; ++j){
-            buf_in[j] = -1000000.0 + ((double)rand() / (double)RAND_MAX) * 2000000.0;
+            buf_in[j] = -1.0 + ((double)rand() / (double)RAND_MAX) * 2.0;
         }
 
         double absolute_tolerance = pow(2.0, -i);
@@ -28,9 +28,25 @@ int main(void){
         scil_find_minimum_maximum_double(buf_in, count, &minimum, &maximum);
 
         printf("#Cycle %d with following attributes:\n", i);
-        printf("#Absolute tolerance: %f, Minimum: %f, Maximum: %f\n", absolute_tolerance, minimum, maximum);
+        printf("#Absolute tolerance: %.20f, Minimum: %+.20f, Maximum: %+.20f\n", absolute_tolerance, minimum, maximum);
 
         uint64_t bits_needed = scil_calculate_bits_needed_double(minimum, maximum, absolute_tolerance);
+
+        printf("#Bits needed per value: %lu\n", bits_needed);
+
+        datatype_cast_double max_union, max_union_m1;
+        max_union.f = maximum;
+        max_union_m1.f = maximum;
+        max_union_m1.p.mantissa -= 1;
+
+        double max_prec = max_union.f - max_union_m1.f;
+
+        printf("Maximum precision: %.20f\n", max_prec);
+
+        if( max_union.f - max_union_m1.f > absolute_tolerance / 2){
+            printf("#!!!Risk of unsufficient double precision!!!\n");
+        }
+
         uint8_t ret = scil_quantize_buffer_minmax_double(buf_out, buf_in, count, absolute_tolerance, minimum, maximum);
 
         if(bits_needed > 64){
@@ -53,9 +69,12 @@ int main(void){
             printf("#Values before and after a quant-unquant-cycle.\n");
             printf("#before,after\n");
             for(uint16_t j = 0; j < count; ++j){
-                printf("%f,%f\n", buf_in[j], buf_end[j]);
+                printf("%+.20f,%+.20f\n", buf_in[j], buf_end[j]);
                 if( fabs(buf_in[j] - buf_end[j]) > absolute_tolerance ){
                     printf("#FAILURE: value at index %d was after quantizing not in the tolerated error margin.\n", j);
+                    printf("#Difference: %.20f\n", fabs(buf_in[j] - buf_end[j]) );
+                    printf("#Error tol.: %.20f\n", absolute_tolerance );
+                    printf("#Max. prec.: %.20f\n", max_prec);
                     return 1;
                 }
             }
