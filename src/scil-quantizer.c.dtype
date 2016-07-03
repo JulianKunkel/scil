@@ -45,19 +45,19 @@ void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* const restrict buffe
 uint64_t scil_calculate_bits_needed_<DATATYPE>(const <DATATYPE> minimum,
                                                const <DATATYPE> maximum,
                                                const double absolute_tolerance){
-    return (uint64_t)ceil( log2( 1 + (maximum - minimum) / (2 * absolute_tolerance) ) );
+    return (uint64_t)ceil( log2( 1.0 + (maximum - minimum) / (2.0 * absolute_tolerance) ) );
 }
 
 static uint64_t scil_quantize_value_<DATATYPE>(const <DATATYPE> value,
                                                const double absolute_tolerance,
                                                const <DATATYPE> minimum){
-    return (uint64_t)round( (value - minimum) / (2 * absolute_tolerance) );
+    return (uint64_t)round( (value - minimum) / (2.0 * absolute_tolerance) );
 }
 
 static <DATATYPE> scil_unquantize_value_<DATATYPE>(const uint64_t value,
                                                    const double absolute_tolerance,
                                                    const <DATATYPE> minimum){
-    return minimum + (<DATATYPE>)(value * 2 * absolute_tolerance);
+    return minimum + (<DATATYPE>)(value * 2.0 * absolute_tolerance);
 }
 
 int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* const restrict buf_out,
