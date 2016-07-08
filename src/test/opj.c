@@ -84,14 +84,14 @@ int main(){
   scil_create_compression_context(&ctx, SCIL_TYPE_FLOAT, &hints);
 
   printf("##Compression##\n");
-  printf("DEST: %i",dest_size);
+  printf("DEST: %lu",dest_size);
 
   scilU_print_buffer((char*)source, dest_size);
 
   int ret = scil_compress(dest, dest_size, source, &dims, &dest_size, ctx);
   //printf("\n\n?error %d %d\n", ret, SCIL_PRECISION_ERR);
   assert(ret == SCIL_NO_ERR && "ERROR COMPRESSION");
-printf("DEST: %i",dest_size);
+printf("DEST: %lu",dest_size);
   ret = scil_destroy_compression_context(& ctx);
   assert(ret == SCIL_NO_ERR);
   free(ctx);
@@ -110,5 +110,5 @@ printf("DEST: %i",dest_size);
   free(dest);
 
   printf("End   TEST\n");
-  return ret != SCIL_PRECISION_ERR;
+  return ret == SCIL_NO_ERR;
 }

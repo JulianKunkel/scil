@@ -22,6 +22,8 @@
 #define SUCCESS 0
 
 static void test(enum SCIL_Datatype type, int digits, int bits, int expected_digits, int expected_bits){
+  if(expected_digits == -1 || expected_bits == -1) { return; }
+
   printf("d: %d b: %d ed: %d eb: %d\n", digits, bits, expected_digits, expected_bits);
 
   int ret;

@@ -83,20 +83,15 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
                                     <DATATYPE>* restrict source,
                                     const scil_dims* dims)
 {
+    // Element count in buffer to compress
+    size_t count = scil_get_data_count(dims);
+
     // Finding minimum and maximum values in data
     <DATATYPE> min, max;
-    find_min_max_<DATATYPE>(&min, &max, source, scil_get_data_count(dims));
+    find_min_max_<DATATYPE>(&min, &max, source, count);
 
     // Locally assigning absolute tolerance
     double abs_tol = ctx->hints.absolute_tolerance;
-
-    /*
-    // Den Teil hier verstehe ich nicht...
-    if ((double)(max - min) < SCIL_SMALL ||
-        abs_tol >= SCIL_ACCURACY_DBL_FINEST) {
-        return SCIL_PRECISION_ERR;
-    }
-    */
 
     // Get needed bits per compressed number in data
     uint64_t bits_per_num = get_needed_bit_count_<DATATYPE>(min, max, abs_tol);
@@ -123,9 +118,16 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
     dest++;
     head_size += 1;
 
+    // Quantizing values from source buffer
+    uint64_t* quantized_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
+    if(scil_quantize_buffer_<DATATYPE>(quantized_buffer, source, count, abs_tol)){
+        return SCIL_BUFFER_ERR;
+    }
+
+    // Packing data in quantized buffer tightly
+
     // Get number of needed bytes for the whole compressed buffer
-    *dest_size =
-        round_up_byte(bits_per_num * scil_get_data_count(dims)) + head_size;
+    *dest_size = round_up_byte(bits_per_num * scil_get_data_count(dims)) + head_size;
 
     uint8_t end_mask[9] = {0,
                            255 - 127,
@@ -140,7 +142,6 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
     // 11111111
 
     uint64_t bit_index = 0;
-    size_t count       = scil_get_data_count(dims);
     for (size_t i = 0; i < count * 1; ++i) {
         // Test whether write to address after buffer
         if ((bit_index >> 3) > *dest_size - head_size) return SCIL_BUFFER_ERR;
@@ -184,6 +185,8 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
 
         bit_index += bits_per_num;
     }
+
+    free(quantized_buffer);
 
     return 0;
 }
@@ -235,8 +238,7 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
 
         } else {
             // Get start byte relevant bits
-            value = get_bits(
-                source[start_byte], first_byte_after, first_byte_after);
+            value = get_bits(source[start_byte], first_byte_after, first_byte_after);
 
             // Get intermediate bytes bits
             for (uint64_t j = start_byte + 1; j < end_byte; ++j) {
@@ -245,8 +247,7 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
             }
 
             // Get last byte relevant bits
-            uint8_t remaining_bits = bits_per_num - first_byte_after -
-                                     (end_byte - start_byte - 1) * 8;
+            uint8_t remaining_bits = bits_per_num - first_byte_after - (end_byte - start_byte - 1) * 8;
 
             if (remaining_bits != 0) {
                 value <<= remaining_bits;

@@ -28,7 +28,7 @@ set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -pedantic-errors -std=gnu11 -pedantic -Wal
 # -fvisibility=hidden -fvisibility-inlines-hidden -Wl,--print-gc-sections
 set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--no-allow-shlib-undefined -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt")
 
-set (CMAKE_C_FLAGS_DEBUG   "-O0 -ggdb -gdwarf-2 -DDEBUG")
+set (CMAKE_C_FLAGS_DEBUG   "-O0 -ggdb -fvar-tracking -DDEBUG")
 set (CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb")
 
 set (CMAKE_C_FLAGS_RELEASE "-O3")
@@ -86,7 +86,7 @@ pkg_search_module(OPENJPEG REQUIRED libopenjp2)
 FILE(GLOB ALGO ${CMAKE_SOURCE_DIR}/algo/*.c ${CMAKE_BINARY_DIR}/algo/*.c)
 
 # MESSAGE( STATUS "Available algorithms: " ${ALGO})
-add_library(scil SHARED scil.c scil-util.c scil-errors.c scil-dummy.cpp scil-option.c scil-algo-chooser.c scil-hardware-limits.c scil-quantizer.c ${ALGO} ${DEPS_DIR}/open-simplex-noise-in-c/open-simplex-noise.c)
+add_library(scil SHARED scil.c scil-util.c scil-errors.c scil-dummy.cpp scil-option.c scil-algo-chooser.c scil-hardware-limits.c scil-swager.c ${CMAKE_BINARY_DIR}/scil-quantizer.c ${ALGO} ${DEPS_DIR}/open-simplex-noise-in-c/open-simplex-noise.c)
 target_link_libraries(scil m)
 
 # for specific algorithms

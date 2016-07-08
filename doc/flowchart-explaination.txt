@@ -21,7 +21,7 @@ function.
 
 [6] Check significant bits
     - Checks if significant_bits are ignored (is set to SCIL_ACCURACY_INT_IGNORE)
-
+    
 [7] Convert bits to digits
     - Converts significant_bits to significant_digits (saves it in local new_significant_digits)
 
