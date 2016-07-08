@@ -151,12 +151,9 @@ int scilU_convert_significant_decimals_to_bits(int decimals){
 }
 
 int scilU_convert_significant_bits_to_decimals(int bits){
-  if (bits == SCIL_ACCURACY_INT_FINEST){
-    return SCIL_ACCURACY_INT_FINEST;
-  }
-  if(bits == 0){
-		return 0;
-	}
+    if (bits == SCIL_ACCURACY_INT_FINEST){
+        return SCIL_ACCURACY_INT_FINEST;
+    }
 	// compute mapping between decimals and bits
 	compute_significant_bit_mapping();
 	return sig_decimals[bits];
