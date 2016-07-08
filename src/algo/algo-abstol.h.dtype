@@ -49,10 +49,10 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
  * \param in_size Byte size of compressed buffer
  * \return Success state of the compression
  */
-int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
-                                      scil_dims* dims,
-                                      byte* restrict compressed_buf_in,
-                                      const size_t in_size);
+int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* const restrict dest,
+                                      const scil_dims* const dims,
+                                      const byte* const restrict compressed_buf_in,
+                                      size_t in_size);
 
 extern scil_compression_algorithm algo_abstol;
 

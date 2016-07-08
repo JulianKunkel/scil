@@ -1,6 +1,7 @@
 #ifndef SCIL_ABSTOL_INITIALZIER
 #define SCIL_ABSTOL_INITIALZIER
 
+#define SCIL_ABSTOL_HEADER_SIZE 18
 #define SCIL_SMALL 0.00000000000000000000001
 
 static uint64_t round_up_byte(const uint64_t bits){
@@ -11,12 +12,38 @@ static uint64_t round_up_byte(const uint64_t bits){
     return 1 + (bits - a) / 8;
 }
 
-static uint8_t get_bits(const uint64_t num, const uint8_t start, const uint8_t size){
+static void read_header(const byte* source,
+                        size_t* const source_size,
+                        double* const minimum,
+                        double* const absolute_tolerance,
+                        uint8_t* const bits_per_value){
 
-    assert(start <= 64);
-    assert(size <= 8);
+    *minimum = *((double*)(source));
+    source += 8;
+    *source_size -= 8;
 
-    return (uint8_t)((num << (64 - start)) >> (64 - size));
+    *absolute_tolerance = *((double*)(source));
+    source += 8;
+    *source_size -= 8;
+
+    *bits_per_value = *source;
+    source += 1;
+    *source_size -= 1;
+}
+
+static void write_header(byte* dest,
+                         double minimum,
+                         double absolute_tolerance,
+                         uint8_t bits_per_value){
+
+    *((double*)dest) = minimum;
+    dest += 8;
+
+    *((double*)dest) = absolute_tolerance;
+    dest += 8;
+
+    *dest = bits_per_value;
+    dest += 1;
 }
 
 scil_compression_algorithm algo_abstol = {
