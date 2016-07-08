@@ -73,9 +73,9 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
     return SCIL_NO_ERR;
 }
 
-int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* const restrict dest,
-                                      const scil_dims* const dims,
-                                      const byte* const restrict source,
+int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
+                                      scil_dims* dims,
+                                      byte* restrict source,
                                       size_t source_size){
 
     assert(dest != NULL);
