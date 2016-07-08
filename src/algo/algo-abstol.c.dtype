@@ -18,71 +18,58 @@
 
 #include <scil.h>
 #include <scil-quantizer.h>
+#include <scil-swager.h>
 
 #include <algo/algo-abstol.h>
 #include <algo/algo-abstol-init.c.x>
 
-static int find_min_max_<DATATYPE>(<DATATYPE>* const restrict min,
-                                   <DATATYPE>* const restrict max,
-                                   const <DATATYPE>* const restrict buf,
-                                   const uint64_t size)
-{
-    assert(buf != NULL);
+#define SCIL_ABSTOL_HEADER_SIZE 18
 
-    *min = INFINITY;
-    *max = -INFINITY;
+static void read_header(const byte* source,
+                        size_t* const source_size,
+                        double* const minimum,
+                        double* const absolute_tolerance,
+                        uint8_t* const bits_per_value){
 
-    for (uint64_t i = 0; i < size; ++i) {
-        if (buf[i] < *min) *min = buf[i];
-        if (buf[i] > *max) *max = buf[i];
-    }
+    *minimum = *((double*)(source));
+    source += 8;
+    *source_size -= 8;
 
-    return 0;
+    *abs_tol = *((double*)(source));
+    source += 8;
+    *source_size -= 8;
+
+    *bits_per_value = *source;
+    source += 1;
+    *source_size--;
 }
 
-static uint64_t get_needed_bit_count_<DATATYPE>(const <DATATYPE> min_value,
-                                               const <DATATYPE> max_value,
-                                               const double absolute_tolerance)
-{
-    assert(max_value > min_value);
-    assert(absolute_tolerance > 0);
+static void write_header(byte* dest,
+                         double minimum,
+                         double absolute_tolerance,
+                         uint8_t bits_per_value){
 
-    /*
-    printf("Abs. tol.: %f\n", absolute_tolerance);
-    printf("1/Abs. tol.: %f\n", 1.0 / absolute_tolerance);
-    printf("(m-m)/(2*abstol): %f\n", (double)(max_value - min_value) / (2 * absolute_tolerance));
-    printf("1+(m-m)/(2*abstol): %f\n", 1 + (double)(max_value - min_value) / (2 * absolute_tolerance));
-    printf("log(1-(m-m)/(2*abstol)): %f\n", log2(1 + (double)(max_value - min_value) / (2 * absolute_tolerance)));
-    */
+    *((double*)dest) = minimum;
+    dest += 8;
 
-    return (uint64_t)ceil(log2(1 +
-                              (double)(max_value - min_value) /
-                                  (2 * absolute_tolerance))); // TODO: Test this
+    *((double*)dest) = absolute_tolerance;
+    dest += 8;
+
+    *dest = bits_per_value;
+    dest += 1;
 }
 
-static uint64_t int_repres_<DATATYPE>(const <DATATYPE> num,
-                                      const <DATATYPE> min,
-                                      const double absolute_tolerance)
-{
-    assert(num >= min);
-
-    return (uint64_t)round((double)(num - min) / (2 * absolute_tolerance));
-}
-
-static <DATATYPE> DataType_repres_<DATATYPE>(const uint64_t num,
-                                            const <DATATYPE> min,
-                                            const double absolute_tolerance)
-{
-    return (<DATATYPE>)((double)min + num * 2 * absolute_tolerance);
-}
-
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
-                                    byte* restrict dest,
+                                    byte* const restrict dest,
                                     size_t* restrict dest_size,
                                     <DATATYPE>* restrict source,
-                                    const scil_dims* dims)
-{
+                                    const scil_dims* dims){
+
+    assert(dest != NULL);
+    assert(dest_size != NULL);
+    assert(source != NULL);
+    assert(dims != NULL);
+
     // Element count in buffer to compress
     size_t count = scil_get_data_count(dims);
 
@@ -94,173 +81,66 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
     double abs_tol = ctx->hints.absolute_tolerance;
 
     // Get needed bits per compressed number in data
-    uint64_t bits_per_num = get_needed_bit_count_<DATATYPE>(min, max, abs_tol);
-
-    if(bits_per_num >= 8 * sizeof(<DATATYPE>)){
+    uint64_t bits_per_value = scil_calculate_bits_needed_<DATATYPE>(min, max, abstol);
+    if(bits_per_value >= 8 * sizeof(<DATATYPE>)){
         return SCIL_PRECISION_ERR;
     }
 
-    // Header byte size
-    // (sizes of magic number + min + abs_tol + bits_per_num + dimensional
-    // configuration)
-    uint16_t head_size = 1; // magic number
+    // Get number of needed bytes for the whole compressed buffer
+    *dest_size = round_up_byte(bits_per_value * count) + SCIL_ABSTOL_HEADER_SIZE;
 
-    // Set compression information
-    *((double*)dest) = min;
-    dest += 8;
-    head_size += 8;
-
-    *((double*)dest) = abs_tol;
-    dest += 8;
-    head_size += 8;
-
-    *dest = bits_per_num;
-    dest++;
-    head_size += 1;
-
-    // Quantizing values from source buffer
     uint64_t* quantized_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
-    if(scil_quantize_buffer_<DATATYPE>(quantized_buffer, source, count, abs_tol)){
+
+    // ==================== Compress ==========================================
+    write_header(dest, min, abs_tol, bits_per_value);
+
+    if(scil_quantize_buffer_minmax_<DATATYPE>(quantized_buffer, source, count, abs_tol, min, max)){
         return SCIL_BUFFER_ERR;
     }
 
     // Packing data in quantized buffer tightly
-
-    // Get number of needed bytes for the whole compressed buffer
-    *dest_size = round_up_byte(bits_per_num * scil_get_data_count(dims)) + head_size;
-
-    uint8_t end_mask[9] = {0,
-                           255 - 127,
-                           255 - 63,
-                           255 - 31,
-                           255 - 15,
-                           255 - 7,
-                           255 - 3,
-                           255 - 1,
-                           255};
-    // 00000000 10000000 11000000 11100000 11110000 11111000 11111100 11111110
-    // 11111111
-
-    uint64_t bit_index = 0;
-    for (size_t i = 0; i < count * 1; ++i) {
-        // Test whether write to address after buffer
-        if ((bit_index >> 3) > *dest_size - head_size) return SCIL_BUFFER_ERR;
-
-        uint64_t value = int_repres_<DATATYPE>(source[i], min, abs_tol);
-
-        uint64_t start_byte = bit_index / 8;
-        uint64_t end_byte   = (bit_index + bits_per_num) / 8;
-
-        uint8_t first_byte_fill = bit_index % 8;
-        uint8_t first_byte_void = 8 - first_byte_fill;
-
-        if (start_byte == end_byte) {
-            uint8_t bits = get_bits(value, bits_per_num, bits_per_num);
-
-            dest[start_byte] &= end_mask[first_byte_fill];
-            dest[start_byte] |= bits << (first_byte_void - bits_per_num);
-
-        } else {
-            // Start byte write
-            uint8_t bits = get_bits(value, bits_per_num, first_byte_void);
-
-            dest[start_byte] &= end_mask[first_byte_fill];
-            dest[start_byte] |= bits;
-
-            // Intermediate byte write
-            for (uint64_t j = start_byte + 1; j < end_byte; ++j) {
-                uint8_t bit_start =
-                    bits_per_num - first_byte_void - (j - start_byte - 1) * 8;
-
-                dest[j] = get_bits(value, bit_start, 8);
-            }
-
-            // End byte write
-            uint8_t end_bit_size = bits_per_num - first_byte_void -
-                                   (end_byte - start_byte - 1) * 8;
-            bits = get_bits(value, end_bit_size, end_bit_size);
-
-            dest[end_byte] = bits << (8 - end_bit_size);
-        }
-
-        bit_index += bits_per_num;
+    if(scil_swage(out, quantized_buffer, count, (uint8_t)bits_per_value)){
+        return SCIL_BUFFER_ERR;
     }
+    // ========================================================================
 
     free(quantized_buffer);
 
-    return 0;
+    return SCIL_NO_ERR;
 }
 
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
-                                      scil_dims* dims,
-                                      byte* restrict source,
-                                      const size_t source_size)
-{
+int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* const restrict dest,
+                                      const scil_dims* const dims,
+                                      const byte* const restrict source,
+                                      const size_t source_size){
+
+    assert(dest != NULL);
     assert(source != NULL);
+    assert(dims != NULL);
 
     double min, abs_tol;
-    uint8_t bits_per_num;
+    uint8_t bits_per_value;
+    byte* in = source;
     size_t in_size = source_size;
+    size_t count = scil_get_data_count(dims);
+    uint64_t* unswaged_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t*));
 
-    // parse Header
-    min = *((double*)(source));
-    source += 8;
-    in_size -= 8;
+    // ============ Decompress ================================================
+    // Parse Header
+    read_header(in, &in_size, &min, &abs_tol, &bits_per_value);
 
-    abs_tol = *((double*)(source));
-    source += 8;
-    in_size -= 8;
-
-    bits_per_num = *source;
-    source++;
-    in_size--;
-
-    uint64_t max_index = scil_get_data_count(dims);
-    uint64_t index     = 0;
-    for (uint64_t i = 0; index < max_index; i += bits_per_num) {
-        // Test whether write to address after buffer
-        // if ...
-
-        // Get index of start and end byte
-        uint64_t start_byte = i / 8;
-        uint64_t end_byte   = (i + bits_per_num) / 8;
-
-        // # of bits in byte before bit index (i)
-        uint8_t first_byte_before = i % 8;
-        // # of bits in byte after bit index (i)
-        uint8_t first_byte_after = 8 - first_byte_before;
-
-        uint64_t value = 0;
-        if (start_byte == end_byte) {
-            value =
-                get_bits(source[start_byte], first_byte_after, bits_per_num);
-
-        } else {
-            // Get start byte relevant bits
-            value = get_bits(source[start_byte], first_byte_after, first_byte_after);
-
-            // Get intermediate bytes bits
-            for (uint64_t j = start_byte + 1; j < end_byte; ++j) {
-                value <<= 8;
-                value |= get_bits(source[j], 8, 8);
-            }
-
-            // Get last byte relevant bits
-            uint8_t remaining_bits = bits_per_num - first_byte_after - (end_byte - start_byte - 1) * 8;
-
-            if (remaining_bits != 0) {
-                value <<= remaining_bits;
-                uint8_t bits = get_bits(source[end_byte], 8, remaining_bits);
-                value |= bits;
-                // printf("%lu\t%f\n", value, DataType_repres(value, min,
-                // abs_tol));
-            }
-        }
-
-        dest[index] = DataType_repres_<DATATYPE>(value, min, abs_tol);
-        ++index;
+    // Unpacking buffer
+    if(scil_unswage(unswaged_buffer, in, count, bits_per_value)){
+        return SCIL_BUFFER_ERR;
     }
+
+    // Unquantizing buffer
+    if(scil_unquantize_buffer_<DATATYPE>(dest, unswaged_buffer, count, abs_tol, min)){
+        return SCIL_BUFFER_ERR;
+    }
+    // ========================================================================
+
+    free(unswaged_buffer);
 
     return 0;
 }
