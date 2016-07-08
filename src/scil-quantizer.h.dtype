@@ -12,7 +12,7 @@
  * \return Smallest value in the buffer
  */
 <DATATYPE> scil_find_minimum_<DATATYPE>(const <DATATYPE>* const buffer,
-                                        const size_t count);
+                                        size_t count);
 
 /**
  * \brief Finds and returns the biggest value of the given buffer.
@@ -22,7 +22,7 @@
  * \return Biggest value in the buffer
  */
 <DATATYPE> scil_find_maximum_<DATATYPE>(const <DATATYPE>* const buffer,
-                                        const size_t count);
+                                        size_t count);
 
 /**
  * \brief Finds the smallest and biggest values of a buffer and stores them
@@ -37,7 +37,7 @@
  * \return Biggest value in the buffer
  */
 void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* const restrict buffer,
-                                          const size_t count,
+                                          size_t count,
                                           <DATATYPE>* const minimum,
                                           <DATATYPE>* const maximum);
 
@@ -49,9 +49,9 @@ void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* const restrict buffe
  * \param absolute_tolerance The maximum, tolerated, absolute error
  * \return Bits needed per value
  */
-uint64_t scil_calculate_bits_needed_<DATATYPE>(const <DATATYPE> minimum,
-                                               const <DATATYPE> maximum,
-                                               const double absolute_tolerance);
+uint64_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum,
+                                               <DATATYPE> maximum,
+                                               double absolute_tolerance);
 
 /**
  * \brief Quantizes the values of the given buffer with a known minimum
@@ -67,11 +67,11 @@ uint64_t scil_calculate_bits_needed_<DATATYPE>(const <DATATYPE> minimum,
  * \return SCIL error code
  */
 int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* const restrict buf_out,
-                                        const <DATATYPE>* const restrict buf_in,
-                                        const size_t count,
-                                        const double absolute_tolerance,
-                                        const <DATATYPE> minimum,
-                                        const <DATATYPE> maximum);
+                                           const <DATATYPE>* const restrict buf_in,
+                                           size_t count,
+                                           double absolute_tolerance,
+                                           <DATATYPE> minimum,
+                                           <DATATYPE> maximum);
 
 /**
 * \brief Quantizes the values of the given buffer.
@@ -86,8 +86,8 @@ int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* const restrict buf_out,
 */
 int scil_quantize_buffer_<DATATYPE>(uint64_t* const restrict buf_out,
                                     const <DATATYPE>* const restrict buf_in,
-                                    const size_t count,
-                                    const double absolute_tolerance);
+                                    size_t count,
+                                    double absolute_tolerance);
 
 /**
  * \brief Unquantizes the values of the given buffer.
@@ -102,8 +102,8 @@ int scil_quantize_buffer_<DATATYPE>(uint64_t* const restrict buf_out,
  */
 int scil_unquantize_buffer_<DATATYPE>(<DATATYPE>* const restrict buf_out,
                                       const uint64_t* const restrict buf_in,
-                                      const size_t count,
-                                      const double absolute_tolerance,
-                                      const <DATATYPE> minimum);
+                                      size_t count,
+                                      double absolute_tolerance,
+                                      <DATATYPE> minimum);
 
 #endif /* SCIL_QUANTIZER_H_<DATATYPE> */
