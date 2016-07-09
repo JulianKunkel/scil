@@ -40,14 +40,11 @@ int main(){
   }
   printf("\nBits\n");
   val = 2;
+
   // compare the output of both conversions
-  int old_digit = 0;
   for (int i= 1; i < MANTISSA_MAX_LENGTH_P1; i++){
     printf("%d = %lld: %d digits \n", i, val -1, sig_bits[i]);
-    if (sig_bits[i] != old_digit){
-      old_digit = old_digit + 1;
-      assert(sig_digits[old_digit] == i);
-    }
+    assert( sig_digits[sig_bits[i]] >= i);
     val *= 2;
   }
 
