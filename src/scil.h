@@ -190,8 +190,7 @@ void scil_compression_sprint_last_algorithm_chain(scil_context_p ctx,
 void scil_init_dims_1d(scil_dims* dims, size_t dim1);
 void scil_init_dims_2d(scil_dims* dims, size_t dim1, size_t dim2);
 void scil_init_dims_3d(scil_dims* dims, size_t dim1, size_t dim2, size_t dim3);
-void scil_init_dims_4d(
-    scil_dims* dims, size_t dim1, size_t dim2, size_t dim3, size_t dim4);
+void scil_init_dims_4d(scil_dims* dims, size_t dim1, size_t dim2, size_t dim3, size_t dim4);
 
 /*
  */
