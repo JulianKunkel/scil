@@ -9,6 +9,7 @@ opj.c:
 precision-set.c:
     - berechnet Werte falsch
     - nicht mehr wirklich nötig
+    => Warum? Das braucht man schon, oder?
 
 quantize.c:
     - begrenzte double precision führt zu Werten, die minimal die
@@ -17,8 +18,4 @@ quantize.c:
 compression-chain.c:
     - woher weiß man die erwartete Größe von Buffern?
         (vielleicht einmal mit anderem tool komprimieren?)
-
-precision.c
-    - Fehlerhafter Test denke ich. Assertion in Zeile 49
-        ist nicht korrekt, da 1 bit mit 1 digit dargestellt
-        werden kann, aber nicht 1 digit mit 1 bit (sondern 4).
+    => das geht bei mir.
