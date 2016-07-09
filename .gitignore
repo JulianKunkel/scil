@@ -19,6 +19,7 @@ build/
 .clang_complete
 testFileGenerator/
 deps/
+src/test/abstol.c
 .clang_complete
 !build-dependencies.sh
 !Makefile-fpzip-1.1.0
