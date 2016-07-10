@@ -190,7 +190,7 @@ void readData(){
   input_data_size = ftell(f) - curr_pos;
   fseek(f, curr_pos, SEEK_SET);
 
-  input_data = (byte*) malloc(input_data_size);
+  input_data = (byte*) SAFE_MALLOC(input_data_size);
 
   fread(input_data, 1, input_data_size, f);
 
@@ -252,6 +252,7 @@ int main(int argc, char ** argv){
   }
 
   ret = scil_create_compression_context(& ctx, datatype, &hints);
+  assert(ret == SCIL_NO_ERR);
 
   if (compress || cycle){
     readCSVData();
@@ -261,16 +262,45 @@ int main(int argc, char ** argv){
     printf("Read Binary data\n");
   }
 
-  // TODO do compression, decompression
-  output_data = input_data;
+  size_t buff_size, input_size;
 
-  // scil_compress_buffer_size_bound(datatype, & dims);
+  input_size = scil_compress_buffer_size_bound(datatype, & dims);
+  output_data = (byte*) SAFE_MALLOC(input_size);
 
 	scil_timer timer;
 	scilU_start_timer(& timer);
 
-	// ret = scil_compress(buffer_out, buff_size, buffer_in, & dims, & out_c_size, ctx);
-  // ret = scil_decompress(datatype, buffer_uncompressed, & dims, buffer_out, out_c_size, tmp_buff);
+  if (cycle){
+    printf("...compression and decompression\n");
+    byte* result = (byte*) SAFE_MALLOC(input_size);
+
+    ret = scil_compress(result, input_size, (double*)input_data, & dims, & buff_size, ctx);
+    assert(ret == SCIL_NO_ERR);
+    ret = scil_destroy_compression_context(& ctx);
+    assert(ret == SCIL_NO_ERR);
+
+    byte* tmp_buff = (byte*) SAFE_MALLOC(buff_size);
+    ret = scil_decompress(datatype, output_data, & dims, result, buff_size, tmp_buff);
+    assert(ret == SCIL_NO_ERR);
+    free(tmp_buff);
+  }
+
+  else if (compress){
+    printf("...compression\n");
+    ret = scil_compress(output_data, input_size, (double*)input_data, & dims, & buff_size, ctx);
+    assert(ret == SCIL_NO_ERR);
+    ret = scil_destroy_compression_context(& ctx);
+    assert(ret == SCIL_NO_ERR);
+  }
+
+  else if (uncompress){
+    printf("...decompression\n");
+    byte* tmp_buff = (byte*) SAFE_MALLOC(input_size);
+    ret = scil_decompress(datatype, output_data, & dims, input_data, input_size, tmp_buff);
+    free(tmp_buff);
+    assert(ret == SCIL_NO_ERR);
+  }
+
 	double runtime = scilU_stop_timer(timer);
   if(measure_time){
     printf("%fs \n", runtime);
