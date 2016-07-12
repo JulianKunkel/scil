@@ -21,9 +21,17 @@
 
 #include <scil-option.h>
 
+static char* scil_performance_unit_names[] = {
+    "SCIL_PERFORMANCE_IGNORE",
+    "SCIL_PERFORMANCE_MIB",
+    "SCIL_PERFORMANCE_GIB",
+    "SCIL_PERFORMANCE_NETWORK",
+    "SCIL_PERFORMANCE_NODELOCAL_STORAGE",
+    "SCIL_PERFORMANCE_SINGLESTREAM_SHARED_STORAGE"
+};
 
 static int print_value(option_help * o){
-  int pos = 0;
+  int pos = 0, i;
   if (o->arg == OPTION_OPTIONAL_ARGUMENT || o->arg == OPTION_REQUIRED_ARGUMENT){
     assert(o->variable != NULL);
 
@@ -50,6 +58,13 @@ static int print_value(option_help * o){
       }
       case('l'):{
         pos += printf("=%lld", *(long long*) o->variable);
+        break;
+      }
+      case('e'):{
+        for (i = 0; i < sizeof(scil_performance_unit_names)/sizeof(scil_performance_unit_names[0]); i++)
+          if (strcmp(*(char**) o->variable, scil_performance_unit_names[i]) == 0)
+            break;
+        pos += printf("=%d", i);
         break;
       }
     }
@@ -136,6 +151,7 @@ void scilO_parseOptions(int argc, char ** argv, option_help * args){
   int printhelp = 0;
   int requiredArgsSeen = 0;
   int requiredArgsNeeded = 0;
+  int i;
 
   for(option_help * o = args; o->shortVar != 0 || o->longVar != 0 ; o++ ){
     if(o->arg == OPTION_REQUIRED_ARGUMENT){
@@ -143,7 +159,7 @@ void scilO_parseOptions(int argc, char ** argv, option_help * args){
     }
   }
 
-  for(int i=1; i < argc; i++){
+  for(i=1; i < argc; i++){
     char * txt = argv[i];
     int foundOption = 0;
     char * arg = strstr(txt, "=");
@@ -207,6 +223,29 @@ void scilO_parseOptions(int argc, char ** argv, option_help * args){
               }
               case('l'):{
                 *(long long*) o->variable = atoll(arg);
+                break;
+              }
+              case('e'):{
+                int it = 0, found = 0;
+
+                if (atoi(arg)){
+                  *(int*) o->variable = atoi(arg);
+                  if ((*(int*) o->variable) >=0 && (*(int*) o->variable) < 6)
+                    found = 1;
+                }
+                else {
+                  while(!found && it <6){
+                    if(!strcmp(arg, scil_performance_unit_names[it])){
+                      found = 1;
+                      *(int*) o->variable = it;
+                    }
+                    it++;
+                  }
+                }
+                if(!found){
+                  printf("Error, enum value %s is not valid.\n", arg);
+                  exit(1);
+                }
                 break;
               }
             }

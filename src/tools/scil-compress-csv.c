@@ -227,10 +227,8 @@ int main(int argc, char ** argv){
   option_help known_args[] = {
     {'i', "in_file", "Input file (file format depends on mode)", OPTION_REQUIRED_ARGUMENT, 's', & in_file},
     {'o', "out_file", "Output file (file format depends on mode)", OPTION_REQUIRED_ARGUMENT, 's', & out_file},
-    {'x', "decompress", "Infile is expected to be a binary compressed with this tool, outfile a CSV file",
-      OPTION_FLAG, 'd', & uncompress},
-    {'c', "compress", "Infile is expected to be a CSV file, outfile a binary",
-      OPTION_FLAG, 'd' , & compress},
+    {'x', "decompress", "Infile is expected to be a binary compressed with this tool, outfile a CSV file",OPTION_FLAG, 'd', & uncompress},
+    {'c', "compress", "Infile is expected to be a CSV file, outfile a binary",OPTION_FLAG, 'd' , & compress},
     {'f', "float", "Use float as datatype otherwise double.", OPTION_FLAG, 'd', & data_type_float},
     {'t', "time", "Measure time for the operation.", OPTION_FLAG, 'd', & measure_time},
     {'V', "validate", "Validate the output", OPTION_FLAG, 'd', & validate},
@@ -238,10 +236,15 @@ int main(int argc, char ** argv){
     {'d', "delim", "Seperator", OPTION_OPTIONAL_ARGUMENT, 'c', & delim},
     {0, "hint-force_compression_methods", NULL,  OPTION_OPTIONAL_ARGUMENT, 's', & hints.force_compression_methods},
     {0, "hint-absolute-tolerance", NULL,  OPTION_OPTIONAL_ARGUMENT, 'f', & hints.absolute_tolerance},
+    {0, "hint-relative_tolerance_percent", NULL,  OPTION_OPTIONAL_ARGUMENT, 'f', & hints.relative_tolerance_percent},
+    {0, "hint-relative_err_finest_abs_tolerance", NULL,  OPTION_OPTIONAL_ARGUMENT, 'f', & hints.relative_err_finest_abs_tolerance},
+    {0, "hint-significant_bits", NULL,  OPTION_OPTIONAL_ARGUMENT, 'd', & hints.significant_bits},
+    {0, "hint-significant_digits", NULL,  OPTION_OPTIONAL_ARGUMENT, 'd', & hints.significant_digits},
+    {0, "hint-comp_speed", NULL,  OPTION_OPTIONAL_ARGUMENT, 'e', & hints.comp_speed.unit},
+    {0, "hint-decomp_speed", NULL,  OPTION_OPTIONAL_ARGUMENT, 'e', & hints.decomp_speed.unit},
     {0, "add-output-header", "Provide an header for plotting", OPTION_FLAG, 'd', & output_header},
     {0, "ignore-header", "Ignore the header", OPTION_FLAG, 'd', & ignore_header},
-    {0, "cycle", "For testing: Compress, then decompress and store the output. Files are CSV files",
-        OPTION_FLAG, 'd' , & cycle},
+    {0, "cycle", "For testing: Compress, then decompress and store the output. Files are CSV files",OPTION_FLAG, 'd' , & cycle},
     {0, 0, 0, 0, 0, NULL}
   };
 
