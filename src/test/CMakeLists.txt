@@ -15,4 +15,4 @@ foreach(TESTFILE ${TESTFILES})
 
 endforeach()
 
-SUBDIRS (complex)
+#SUBDIRS (complex)

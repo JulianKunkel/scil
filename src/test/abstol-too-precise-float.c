@@ -6,7 +6,7 @@
 #include <scil-internal.h>
 #include <scil-patterns.h>
 
-int main()
+int main(void)
 {
     const size_t count = 100;
 

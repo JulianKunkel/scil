@@ -139,7 +139,6 @@ int scil_compressor_num_by_name(const char* name)
     return -1;
 }
 
-#pragma GCC diagnostic ignored "-Wfloat-equal"
 static int check_compress_lossless_needed(scil_context_p ctx)
 {
     const scil_hints hints = ctx->hints;
