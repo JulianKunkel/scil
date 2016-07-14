@@ -5,6 +5,8 @@
 
 #include <math.h>
 
+#define SCIL_SIGBITS_HEADER_SIZE 5
+
 static uint64_t mask[] = {
     0,
     1,
@@ -60,6 +62,44 @@ static uint64_t mask[] = {
     2251799813685247,
     4503599627370495,
 };
+
+static void read_header(const byte* source,
+                        size_t* const source_size,
+                        double* const minimum,
+                        double* const absolute_tolerance,
+                        uint8_t* const bits_per_value){
+
+    *minimum = *((double*)(source));
+    source += 8;
+    *source_size -= 8;
+
+    *absolute_tolerance = *((double*)(source));
+    source += 8;
+    *source_size -= 8;
+
+    *bits_per_value = *source;
+    source += 1;
+    *source_size -= 1;
+}
+
+static void write_header(byte* dest,
+                         uint8_t signs_id,
+                         uint8_t exponent_bit_count,
+                         uint8_t mantissa_bit_count,
+                         uint16_t minimum_exponent){
+
+    *dest = signs_id;
+    ++dest;
+
+    *dest = exp_bits;
+    ++dest;
+
+    *dest = mant_bits;
+    ++dest;
+
+    *((int16_t*)dest) = min_exponent;
+    dest += 2;
+}
 
 static uint8_t calc_sign_bits(uint8_t min_sign, uint8_t max_sign){
 
