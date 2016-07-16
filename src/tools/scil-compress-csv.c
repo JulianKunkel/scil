@@ -40,6 +40,7 @@ static int data_type_float = 0;
 static int measure_time = 0;
 static int ignore_header = 0;
 static int output_header = 0;
+static int print_hints = 0;
 
 // data we process
 
@@ -234,6 +235,7 @@ int main(int argc, char ** argv){
     {'V', "validate", "Validate the output", OPTION_FLAG, 'd', & validate},
     {'v', "verbose", "Increase the verbosity level", OPTION_FLAG, 'd', & verbose},
     {'d', "delim", "Seperator", OPTION_OPTIONAL_ARGUMENT, 'c', & delim},
+    {'H', "print-hints", "Print the effective hints", OPTION_FLAG, 'd', & print_hints},
     {0, "hint-force_compression_methods", NULL,  OPTION_OPTIONAL_ARGUMENT, 's', & hints.force_compression_methods},
     {0, "hint-absolute-tolerance", NULL,  OPTION_OPTIONAL_ARGUMENT, 'F', & hints.absolute_tolerance},
     {0, "hint-relative_tolerance_percent", NULL,  OPTION_OPTIONAL_ARGUMENT, 'F', & hints.relative_tolerance_percent},
@@ -259,6 +261,12 @@ int main(int argc, char ** argv){
 
   ret = scil_create_compression_context(& ctx, datatype, &hints);
   assert(ret == SCIL_NO_ERR);
+
+  if (print_hints){
+    printf("Effective hints (only needed for compression)\n");
+    scil_hints e = scil_retrieve_effective_hints(ctx);
+    scil_hints_print(& e);
+  }
 
   if (compress || cycle){
     readCSVData();
@@ -289,17 +297,15 @@ int main(int argc, char ** argv){
     ret = scil_decompress(datatype, output_data, & dims, result, buff_size, tmp_buff);
     assert(ret == SCIL_NO_ERR);
     free(tmp_buff);
-  }
 
-  else if (compress){
+  } else if (compress){
     printf("...compression\n");
     ret = scil_compress(output_data, input_size, (double*)input_data, & dims, & buff_size, ctx);
     assert(ret == SCIL_NO_ERR);
     ret = scil_destroy_compression_context(& ctx);
     assert(ret == SCIL_NO_ERR);
-  }
 
-  else if (uncompress){
+  } else if (uncompress){
     printf("...decompression\n");
     byte* tmp_buff = (byte*) SAFE_MALLOC(input_size);
     ret = scil_decompress(datatype, output_data, & dims, input_data, input_size, tmp_buff);

@@ -37,7 +37,7 @@ static int print_value(option_help * o){
 
     switch(o->type){
       case('F'):{
-        pos += printf("=%f ", *(double*) o->variable);
+        pos += printf("=%.14f ", *(double*) o->variable);
         break;
       }
       case('f'):{
