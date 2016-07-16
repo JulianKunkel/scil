@@ -22,22 +22,26 @@
 #include <scil-option.h>
 
 static char* scil_performance_unit_names[] = {
-    "SCIL_PERFORMANCE_IGNORE",
-    "SCIL_PERFORMANCE_MIB",
-    "SCIL_PERFORMANCE_GIB",
-    "SCIL_PERFORMANCE_NETWORK",
-    "SCIL_PERFORMANCE_NODELOCAL_STORAGE",
-    "SCIL_PERFORMANCE_SINGLESTREAM_SHARED_STORAGE"
+    "IGNORE",
+    "MIB",
+    "GIB",
+    "NETWORK",
+    "NODELOCAL_STORAGE",
+    "SINGLESTREAM_SHARED_STORAGE"
 };
 
 static int print_value(option_help * o){
-  int pos = 0, i;
+  int pos = 0;
   if (o->arg == OPTION_OPTIONAL_ARGUMENT || o->arg == OPTION_REQUIRED_ARGUMENT){
     assert(o->variable != NULL);
 
     switch(o->type){
-      case('f'):{
+      case('F'):{
         pos += printf("=%f ", *(double*) o->variable);
+        break;
+      }
+      case('f'):{
+        pos += printf("=%f ", *(float*) o->variable);
         break;
       }
       case('d'):{
@@ -61,10 +65,7 @@ static int print_value(option_help * o){
         break;
       }
       case('e'):{
-        for (i = 0; i < sizeof(scil_performance_unit_names)/sizeof(scil_performance_unit_names[0]); i++)
-          if (strcmp(*(char**) o->variable, scil_performance_unit_names[i]) == 0)
-            break;
-        pos += printf("=%d", i);
+        pos += printf("=%s", scil_performance_unit_names[*(int*) o->variable]);
         break;
       }
     }
@@ -202,8 +203,12 @@ void scilO_parseOptions(int argc, char ** argv, option_help * args){
             }
 
             switch(o->type){
-              case('f'):{
+              case('F'):{
                 *(double*) o->variable = atof(arg);
+                break;
+              }
+              case('f'):{
+                *(float*) o->variable = atof(arg);
                 break;
               }
               case('d'):{
