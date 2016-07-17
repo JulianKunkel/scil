@@ -63,9 +63,6 @@ static uint64_t mask[] = {
     4503599627370495,
 };
 
-static uint8_t end_mask[9] = {0, 255-127, 255-63, 255-31, 255-15, 255-7, 255-3, 255-1, 255};
-// 00000000 10000000 11000000 11100000 11110000 11111000 11111100 11111110 11111111
-
 static void read_header(const byte* source,
                         size_t* const source_size,
                         uint8_t* const signs_id,
