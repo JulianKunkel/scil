@@ -22,6 +22,7 @@
 
 #include <zfp.h>
 
+#pragma GCC diagnostic ignored "-Wfloat-equal"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_p ctx,
                         byte * restrict dest,

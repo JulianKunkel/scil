@@ -41,7 +41,7 @@ static int print_value(option_help * o){
         break;
       }
       case('f'):{
-        pos += printf("=%f ", *(float*) o->variable);
+        pos += printf("=%.6f ", (double) *(float*) o->variable);
         break;
       }
       case('d'):{
