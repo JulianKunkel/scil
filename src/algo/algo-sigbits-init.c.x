@@ -5,6 +5,8 @@
 
 #include <math.h>
 
+#define SCIL_SIGBITS_HEADER_SIZE 5
+
 static uint64_t mask[] = {
     0,
     1,
@@ -61,14 +63,60 @@ static uint64_t mask[] = {
     4503599627370495,
 };
 
-static uint8_t calc_sign_bits(uint8_t min_sign, uint8_t max_sign){
+static uint8_t end_mask[9] = {0, 255-127, 255-63, 255-31, 255-15, 255-7, 255-3, 255-1, 255};
+// 00000000 10000000 11000000 11100000 11110000 11111000 11111100 11111110 11111111
 
-    return min_sign == max_sign ? min_sign : 2;
+static void read_header(const byte* source,
+                        size_t* const source_size,
+                        uint8_t* const signs_id,
+                        uint8_t* const exponent_bit_count,
+                        uint8_t* const mantissa_bit_count,
+                        int16_t* const minimum_exponent){
+
+    *signs_id = *((uint8_t*)source);
+    source += 1;
+    *source_size -= 1;
+
+    *exponent_bit_count = *((uint8_t*)source);
+    source += 1;
+    *source_size -= 1;
+
+    *mantissa_bit_count = *((uint8_t*)source);
+    source += 1;
+    *source_size -= 1;
+
+    *minimum_exponent = *((int16_t*)source);
+    source += 2;
+    *source_size -= 2;
 }
 
-static uint8_t calc_exp_bits(uint16_t min_exponent, uint16_t max_exponent){
+static void write_header(byte* dest,
+                         uint8_t signs_id,
+                         uint8_t exponent_bit_count,
+                         uint8_t mantissa_bit_count,
+                         uint16_t minimum_exponent){
 
-    return (uint8_t)ceil(log2(max_exponent - min_exponent));
+    *dest = signs_id;
+    ++dest;
+
+    *dest = exponent_bit_count;
+    ++dest;
+
+    *dest = mantissa_bit_count;
+    ++dest;
+
+    *((int16_t*)dest) = minimum_exponent;
+    dest += 2;
+}
+
+static uint8_t calc_sign_bit_count(uint8_t minimum_sign, uint8_t maximum_sign){
+
+    return minimum_sign == maximum_sign ? minimum_sign : 2;
+}
+
+static uint8_t calc_exponent_bit_count(int16_t minimum_exponent, int16_t max_exponent){
+
+    return (uint8_t)ceil(log2(max_exponent - minimum_exponent));
 }
 
 static uint64_t round_up_byte(const uint64_t bits){
@@ -79,34 +127,31 @@ static uint64_t round_up_byte(const uint64_t bits){
     return 1 + (bits - a) / 8;
 }
 
-static uint8_t get_bits(const uint64_t num, const uint8_t start, const uint8_t size){
+static uint8_t get_bit_count_per_value(uint8_t signs_id, uint8_t exponent_bit_count, uint8_t mantissa_bit_count){
 
-    assert(start <= 64);
-    assert(size <= 8);
-
-    return (uint8_t)((num << (64 - start)) >> (64 - size));
+    return (signs_id == 2) + exponent_bit_count + mantissa_bit_count;
 }
 
-static uint8_t get_sign(uint64_t value, uint8_t bits_per_num, uint8_t signs_id){
+static uint8_t get_sign(uint64_t value, uint8_t bits_per_value, uint8_t signs_id){
 
     if(signs_id != 2) return signs_id;
 
-    return value >> (bits_per_num - 1);
+    return value >> (bits_per_value - 1);
 }
 
-static int16_t get_exponent(uint64_t value, uint8_t exp_bits, uint8_t mant_bits, int16_t min_exponent){
+static int16_t get_exponent(uint64_t value, uint8_t exponent_bit_count, uint8_t mantissa_bit_count, int16_t minimum_exponent){
 
-    return min_exponent + ((value & (mask[mant_bits + exp_bits] ^ mask[mant_bits])) >> mant_bits);
+    return minimum_exponent + ((value & (mask[mantissa_bit_count + exponent_bit_count] ^ mask[mantissa_bit_count])) >> mantissa_bit_count);
 }
 
-static uint32_t get_mantissa_float(uint64_t value, uint8_t mant_bits){
+static uint32_t get_mantissa_float(uint64_t value, uint8_t mantissa_bit_count){
 
-    return (value & mask[mant_bits]) << (MANTISSA_LENGTH_FLOAT - mant_bits);
+    return (value & mask[mantissa_bit_count]) << (MANTISSA_LENGTH_FLOAT - mantissa_bit_count);
 }
 
-static uint64_t get_mantissa_double(uint64_t value, uint8_t mant_bits){
+static uint64_t get_mantissa_double(uint64_t value, uint8_t mantissa_bit_count){
 
-    return (value & mask[mant_bits]) << (MANTISSA_LENGTH_DOUBLE - mant_bits);
+    return (value & mask[mantissa_bit_count]) << (MANTISSA_LENGTH_DOUBLE - mantissa_bit_count);
 }
 
 scil_compression_algorithm algo_sigbits = {

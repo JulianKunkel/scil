@@ -17,9 +17,9 @@
  * \return scil error code
  */
 int scil_swage(byte* const restrict buf_out,
-              const uint64_t* const restrict buf_in,
-              const size_t count,
-              const uint8_t bits_per_value);
+               const uint64_t* const restrict buf_in,
+               const size_t count,
+               const uint8_t bits_per_value);
 
 /**
  * \brief Unacks data from a bit-perfectly packed buffer
@@ -32,8 +32,8 @@ int scil_swage(byte* const restrict buf_out,
  * \return scil error code
  */
 int scil_unswage(uint64_t* const restrict buf_out,
-                const byte* const restrict buf_in,
-                const size_t count,
-                const uint8_t bits_per_value);
+                 const byte* const restrict buf_in,
+                 const size_t count,
+                 const uint8_t bits_per_value);
 
 #endif /* SCIL_SWAGER_H */

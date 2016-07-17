@@ -58,11 +58,12 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
     // ==================== Compress ==========================================
     write_header(dest, min, abs_tol, bits_per_value);
 
+    // Use quantization to reduce each values bit count
     if(scil_quantize_buffer_minmax_<DATATYPE>(quantized_buffer, source, count, abs_tol, min, max)){
         return SCIL_BUFFER_ERR;
     }
 
-    // Packing data in quantized buffer tightly
+    // Pack data in quantized buffer tightly
     if(scil_swage(dest, quantized_buffer, count, (uint8_t)bits_per_value)){
         return SCIL_BUFFER_ERR;
     }

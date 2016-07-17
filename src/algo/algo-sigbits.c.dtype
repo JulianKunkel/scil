@@ -14,37 +14,61 @@
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <scil.h>
+#include <scil-swager.h>
 
 #include <algo/algo-sigbits.h>
 #include <algo/algo-sigbits-init.c.x>
 
-static void find_minimums_and_maximums_<DATATYPE>(const <DATATYPE>* buf,
+static void find_minimums_and_maximums_<DATATYPE>(const <DATATYPE>* const buffer,
                                                   const size_t size,
-                                                  uint8_t* min_sign,
-                                                  uint8_t* max_sign,
-                                                  int16_t* min_exponent,
-                                                  int16_t* max_exponent)
-{
-    *min_sign = 1;
-    *max_sign = 0;
+                                                  uint8_t* const minimum_sign,
+                                                  uint8_t* const maximum_sign,
+                                                  int16_t* const minimum_exponent,
+                                                  int16_t* const maximum_exponent){
 
-    *min_exponent = 0x7fff;
-    *max_exponent = -*min_exponent;
+    *minimum_sign = 1;
+    *maximum_sign = 0;
+
+    *minimum_exponent = 0x7fff;
+    *maximum_exponent = -*minimum_exponent;
 
     for(size_t i = 0; i < size; ++i){
 
         datatype_cast_<DATATYPE> cur;
-        cur.f = buf[i];
+        cur.f = buffer[i];
 
-        if(*min_sign != 0 && cur.p.sign < *min_sign) *min_sign = cur.p.sign;
-        if(*max_sign != 1 && cur.p.sign > *max_sign) *max_sign = cur.p.sign;
+        if(*minimum_sign != 0 && cur.p.sign < *minimum_sign) *minimum_sign = cur.p.sign;
+        if(*maximum_sign != 1 && cur.p.sign > *maximum_sign) *maximum_sign = cur.p.sign;
 
-        if(cur.p.exponent < *min_exponent) *min_exponent = cur.p.exponent;
-        if(cur.p.exponent > *max_exponent) *max_exponent = cur.p.exponent;
+        if(cur.p.exponent < *minimum_exponent) *minimum_exponent = cur.p.exponent;
+        if(cur.p.exponent > *maximum_exponent) *maximum_exponent = cur.p.exponent;
     }
 }
 
-static uint64_t compress_<DATATYPE>(<DATATYPE> value, uint8_t signs_id, uint8_t exp_bits, uint8_t mant_bits, int16_t min_exponent){
+static void get_header_data_<DATATYPE>(const <DATATYPE>* const source,
+                                       size_t count,
+                                       uint8_t* const signs_id,
+                                       uint8_t* const exponent_bit_count,
+                                       int16_t* const minimum_exponent){
+
+    uint8_t minimum_sign, maximum_sign;
+    int16_t maximum_exponent;
+    find_minimums_and_maximums_<DATATYPE>(source,
+                                          count,
+                                          &minimum_sign,
+                                          &maximum_sign,
+                                          minimum_exponent,
+                                          &maximum_exponent);
+
+    *signs_id = calc_sign_bit_count(minimum_sign, maximum_sign);
+    *exponent_bit_count = calc_exponent_bit_count(*minimum_exponent, maximum_exponent);
+}
+
+static uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
+                                          uint8_t signs_id,
+                                          uint8_t exponent_bit_count,
+                                          uint8_t mantissa_bit_count,
+                                          int16_t minimum_exponent){
 
     uint64_t result = 0;
 
@@ -52,199 +76,171 @@ static uint64_t compress_<DATATYPE>(<DATATYPE> value, uint8_t signs_id, uint8_t 
     cur.f = value;
 
     if(signs_id == 2){
-        result = ((uint64_t)cur.p.sign) << exp_bits;
+        result = ((uint64_t)cur.p.sign) << exponent_bit_count;
     }
-    result |= (uint64_t)(cur.p.exponent - min_exponent);
-    result <<= mant_bits;
-    result |= ((uint64_t)cur.p.mantissa) >> (MANTISSA_LENGTH_<DATATYPE_UPPER> - mant_bits);
+    result |= (uint64_t)(cur.p.exponent - minimum_exponent);
+    result <<= mantissa_bit_count;
+    result |= ((uint64_t)cur.p.mantissa) >> (MANTISSA_LENGTH_<DATATYPE_UPPER> - mantissa_bit_count);
 
     return result;
 }
 
-static <DATATYPE> decompress_<DATATYPE>(uint64_t value, uint8_t bits_per_num, uint8_t signs_id, uint8_t exp_bits, uint8_t mant_bits, int16_t min_exponent){
+static <DATATYPE> decompress_value_<DATATYPE>(uint64_t value,
+                                              uint8_t bit_count_per_value,
+                                              uint8_t signs_id,
+                                              uint8_t exponent_bit_count,
+                                              uint8_t mantissa_bit_count,
+                                              int16_t minimum_exponent){
 
     datatype_cast_<DATATYPE> cur;
 
-    cur.p.sign = get_sign(value, bits_per_num, signs_id);
-    cur.p.exponent = get_exponent(value, exp_bits, mant_bits, min_exponent);
-    cur.p.mantissa = get_mantissa_<DATATYPE>(value, mant_bits);
+    cur.p.sign = get_sign(value, bit_count_per_value, signs_id);
+    cur.p.exponent = get_exponent(value, exponent_bit_count, mantissa_bit_count, minimum_exponent);
+    cur.p.mantissa = get_mantissa_<DATATYPE>(value, mantissa_bit_count);
 
     return cur.f;
 }
 
-#pragma GCC diagnostic ignored "-Wunused-parameter"
+static int compress_buffer_<DATATYPE>(uint64_t* const restrict dest,
+                                      const <DATATYPE>* const restrict source,
+                                      size_t count,
+                                      uint8_t signs_id,
+                                      uint8_t exponent_bit_count,
+                                      uint8_t mantissa_bit_count,
+                                      uint8_t minimum_exponent){
+
+    for(size_t i = 0; i < count; ++i){
+        dest[i] = compress_value_<DATATYPE>(source[i], signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
+    }
+
+    return SCIL_NO_ERR;
+}
+
+static int decompress_buffer_<DATATYPE>(<DATATYPE>* const restrict dest,
+                                        const uint64_t* restrict source,
+                                        size_t count,
+                                        uint8_t bit_count_per_value,
+                                        uint8_t signs_id,
+                                        uint8_t exponent_bit_count,
+                                        uint8_t mantissa_bit_count,
+                                        uint8_t minimum_exponent){
+
+    for (size_t i = 0; i < count; ++i) {
+        dest[i] = decompress_value_<DATATYPE>(source[i], bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
+    }
+
+    return SCIL_NO_ERR;
+}
+
 int scil_sigbits_compress_<DATATYPE>(const scil_context_p ctx,
-                        byte * restrict dest,
-                        size_t* restrict dest_size,
-                        <DATATYPE>*restrict source,
-                        const scil_dims* dims)
-{
+                                     byte * restrict dest,
+                                     size_t* dest_size,
+                                     <DATATYPE>*restrict source,
+                                     const scil_dims* dims){
+
+    assert(ctx != NULL);
+    assert(dest != NULL);
+    assert(dest_size != NULL);
+    assert(source != NULL);
+    assert(dims != NULL);
+
+    // ==================== Initialization =====================================
+
     size_t count = scil_get_data_count(dims);
 
-    uint8_t min_sign, max_sign;
-    int16_t min_exponent, max_exponent;
-    find_minimums_and_maximums_<DATATYPE>(source, count, &min_sign, &max_sign, &min_exponent, &max_exponent);
+    uint8_t mantissa_bit_count = ctx->hints.significant_bits;
 
-    uint8_t signs_id = calc_sign_bits(min_sign, max_sign);
-    uint8_t exp_bits = calc_exp_bits(min_exponent, max_exponent);
-    uint8_t mant_bits = ctx->hints.significant_bits;
+    uint8_t signs_id, exponent_bit_count;
+    int16_t minimum_exponent;
+    get_header_data_<DATATYPE>(source, count, &signs_id, &exponent_bit_count, &minimum_exponent);
 
-    uint8_t header_size = 0;
-
-    *dest = signs_id;
-    dest++;
-    header_size++;
-
-    *dest = exp_bits;
-    dest++;
-    header_size++;
-
-    *dest = mant_bits;
-    dest++;
-    header_size++;
-
-    *((int16_t*)dest) = min_exponent;
-    dest += 2;
-    header_size += 2;
-
-    // Compress
-    uint8_t end_mask[9] = {0, 255-127, 255-63, 255-31, 255-15, 255-7, 255-3, 255-1, 255};
-    // 00000000 10000000 11000000 11100000 11110000 11111000 11111100 11111110 11111111
-
-    uint16_t bits_per_num = (signs_id == 2) + exp_bits + mant_bits;
-
-    if(bits_per_num >= 8 * sizeof(<DATATYPE>)){
+    uint8_t bit_count_per_value = get_bit_count_per_value(signs_id, exponent_bit_count, mantissa_bit_count);
+    if(bit_count_per_value >= 8 * sizeof(<DATATYPE>)){
         return SCIL_PRECISION_ERR;
     }
 
-    *dest_size = round_up_byte(bits_per_num * count) + header_size;
+    write_header(dest, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
 
-    size_t bit_index = 0;
+    *dest_size = round_up_byte(bit_count_per_value * count) + SCIL_SIGBITS_HEADER_SIZE;
 
-    for(size_t i = 0; i < count; ++i){
+    int ret = SCIL_NO_ERR;
 
-        // Compress current value
-        uint64_t value = compress_<DATATYPE>(source[i], signs_id, exp_bits, mant_bits, min_exponent);
+    // ==================== Compression ========================================
 
-        // Write compressed value to buffer
-        uint64_t start_byte = bit_index / 8;
-        uint64_t end_byte = (bit_index + bits_per_num) / 8;
+    // Allocate intermediate buffer
+    uint64_t* compressed_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
 
-        uint8_t first_byte_fill = bit_index % 8;
-        uint8_t first_byte_void = 8 - first_byte_fill;
-
-        if(start_byte == end_byte){
-
-            uint8_t bits = get_bits(value, bits_per_num, bits_per_num);
-
-            dest[start_byte] &= end_mask[first_byte_fill];
-            dest[start_byte] |= bits << (first_byte_void - bits_per_num);
-
-        }else{
-
-            // Start byte write
-            uint8_t bits = get_bits(value, bits_per_num, first_byte_void);
-
-            dest[start_byte] &= end_mask[first_byte_fill];
-            dest[start_byte] |= bits;
-
-            // Intermediate byte write
-            for(uint64_t j = start_byte + 1; j < end_byte; ++j){
-
-                uint8_t bit_start = bits_per_num - first_byte_void - (j - start_byte - 1) * 8;
-
-                dest[j] = get_bits(value, bit_start, 8);
-            }
-
-            // End byte write
-            uint8_t end_bit_size = bits_per_num - first_byte_void - (end_byte - start_byte - 1) * 8;
-            bits = get_bits(value, end_bit_size, end_bit_size);
-
-            dest[end_byte] = bits << (8 - end_bit_size);
-        }
-
-        bit_index += bits_per_num;
+    // Compress each value in source buffer
+    if(compress_buffer_<DATATYPE>(compressed_buffer, source, count, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent)){
+        ret = SCIL_BUFFER_ERR;
+        goto comp_cleanup;
     }
 
-    return 0;
+    // Pack compressed values tightly
+    if(scil_swage(dest, compressed_buffer, count, (uint8_t)bit_count_per_value)){
+        ret = SCIL_BUFFER_ERR;
+        goto comp_cleanup;
+    }
+
+    // ==================== Cleanup ============================================
+
+    comp_cleanup:
+    free(compressed_buffer);
+    return ret;
 }
 
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_sigbits_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
-                            scil_dims* dims,
-                            byte*restrict compressed_buf_in,
-                            const size_t in_size)
-{
-    assert(compressed_buf_in != NULL);
+int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
+                                       scil_dims* dims,
+                                       byte*restrict source,
+                                       size_t source_size){
 
-    uint8_t signs_id, exp_bits, mant_bits;
-    int16_t min_exponent;
+    assert(dest != NULL);
+    assert(dims != NULL);
+    assert(source != NULL);
 
-    size_t in_size_cp = in_size;
+    // ==================== Initialization =====================================
 
-    signs_id = *((uint8_t*)compressed_buf_in);
-    compressed_buf_in++;
-    in_size_cp--;
+    size_t count = scil_get_data_count(dims);
 
-    exp_bits = *((uint8_t*)compressed_buf_in);
-    compressed_buf_in++;
-    in_size_cp--;
+    size_t source_size_cp = source_size;
 
-    mant_bits = *((uint8_t*)compressed_buf_in);
-    compressed_buf_in++;
-    in_size_cp--;
+    uint8_t signs_id, exponent_bit_count, mantissa_bit_count;
+    int16_t minimum_exponent;
+    read_header(source,
+                &source_size_cp,
+                &signs_id,
+                &exponent_bit_count,
+                &mantissa_bit_count,
+                &minimum_exponent);
 
-    min_exponent = *((int16_t*)compressed_buf_in);
-    compressed_buf_in += 2;
-    in_size_cp -= 2;
+    uint8_t bit_count_per_value = get_bit_count_per_value(signs_id, exponent_bit_count, mantissa_bit_count);
 
-    // Decompress
-    uint64_t max_index = scil_get_data_count(dims);
-    uint64_t index = 0;
-    uint8_t bits_per_num = (signs_id == 2) + exp_bits + mant_bits;
-    for(uint64_t i = 0; index < max_index; i+=bits_per_num){
+    // ==================== Decompression ======================================
 
-        // Get index of start and end byte
-        uint64_t start_byte = i / 8;
-        uint64_t end_byte = (i + bits_per_num) / 8;
+    uint64_t* unswaged_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
 
-        // # of bits in byte before bit index (i)
-        uint8_t first_byte_before = i % 8;
-        // # of bits in byte after bit index (i)
-        uint8_t first_byte_after = 8 - first_byte_before;
+    int ret = SCIL_NO_ERR;
 
-        uint64_t value = 0;
-        if(start_byte == end_byte){
-
-            value = get_bits(compressed_buf_in[start_byte], first_byte_after, bits_per_num);
-
-        }else{
-
-            // Get start byte relevant bits
-            value = get_bits(compressed_buf_in[start_byte], first_byte_after, first_byte_after);
-
-            // Get intermediate bytes bits
-            for(uint64_t j = start_byte + 1; j < end_byte; ++j){
-
-                value <<= 8;
-                value |= get_bits(compressed_buf_in[j], 8, 8);
-            }
-
-            // Get last byte relevant bits
-            uint8_t remaining_bits = bits_per_num - first_byte_after - (end_byte - start_byte - 1) * 8;
-
-            if(remaining_bits != 0){
-
-                value <<= remaining_bits;
-                uint8_t bits = get_bits(compressed_buf_in[end_byte], 8, remaining_bits);
-                value |= bits;
-                //printf("%lu\t%f\n", value, DataType_repres(value, min, abs_tol));
-            }
-        }
-
-        data_out[index] = decompress_<DATATYPE>(value, bits_per_num, signs_id, exp_bits, mant_bits, min_exponent);
-        ++index;
+    if(scil_unswage(unswaged_buffer, source, count, bit_count_per_value)){
+        ret = SCIL_BUFFER_ERR;
+        goto decomp_cleanup;
     }
 
-    return 0;
+    if(decompress_buffer_<DATATYPE>(dest,
+                                    unswaged_buffer,
+                                    count,
+                                    bit_count_per_value,
+                                    signs_id,
+                                    exponent_bit_count,
+                                    mantissa_bit_count,
+                                    minimum_exponent) ){
+        ret = SCIL_BUFFER_ERR;
+        goto decomp_cleanup;
+    }
+
+    // ==================== Cleanup ============================================
+
+    decomp_cleanup:
+    free(unswaged_buffer);
+    return ret;
 }
