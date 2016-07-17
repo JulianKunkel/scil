@@ -56,7 +56,6 @@ void readCSVData(){
     exit(1);
   }
 
-  int ret = 1;
   double dbl;
   int x = 0;
   int y = 0;
@@ -78,7 +77,7 @@ void readCSVData(){
     x = 0;
     while( data != NULL ){
       // count the number of elements.
-      ret = sscanf(data, "%lf", & dbl);
+      sscanf(data, "%lf", & dbl);
       data = strtok(NULL, delimeter);
       x++;
     }
@@ -114,7 +113,7 @@ void readCSVData(){
     x = 0;
     while( data != NULL ){
       // count the number of elements.
-      ret = sscanf(data, "%lf", & dbl);
+      sscanf(data, "%lf", & dbl);
       if(data_type_float){
         ((float*) input_data)[pos] = (float) dbl;
       }else{

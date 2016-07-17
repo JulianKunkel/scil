@@ -5,7 +5,7 @@
 
 #include <basic-patterns.h>
 
-int main(int argc, char** argv)
+int main(void)
 {
     const size_t count = 100;
 

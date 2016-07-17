@@ -2,7 +2,7 @@
 
 #include <scil-util.c>
 
-int main(int argc, char** argv){
+int main(void){
 
     compute_significant_bit_mapping();
 
