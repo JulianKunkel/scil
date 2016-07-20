@@ -24,7 +24,9 @@
 #define allocate(type, name, count) \
     type* name = (type*)malloc(count * sizeof(type))
 
-static int error_occured = 0;
+static int comp_error_occured = 0;
+static int decomp_error_occured = 0;
+static int val_error_occured = 0;
 static double* buffer_uncompressed;
 
 int test_correctness(const char* name, double* buffer_in, scil_dims dims)
@@ -102,11 +104,14 @@ int test_correctness(const char* name, double* buffer_in, scil_dims dims)
         size_t u_size = variableSize * sizeof(double);
         double c_fac  = (double)(u_size) / out_c_size;
 
-        if (ret_c != 0 || ret_d != 0) { // Ignore validation errors here
-            error_occured = 1;
+        if (ret_c != 0) { // Ignore validation errors here
+            comp_error_occured = 1;
+        }
+        if (ret_d != 0) {
+            decomp_error_occured = 1;
         }
         if (i == -1 && ret_v != 0) {
-            error_occured = 1;
+            val_error_occured = 1;
         }
         if (i == -1) {
             hints.force_compression_methods = compression_name;
@@ -153,5 +158,15 @@ int main(int argc, char** argv)
     free(buffer_in);
     free(buffer_uncompressed);
 
-    return error_occured;
+    if(comp_error_occured){
+        printf("Compression error occurred.\n");
+    }
+    if(decomp_error_occured){
+        printf("Decompression error occurred.\n");
+    }
+    if(decomp_error_occured){
+        printf("Validation error occurred.\n");
+    }
+
+    return comp_error_occured || decomp_error_occured || val_error_occured;
 }
