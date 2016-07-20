@@ -146,18 +146,19 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_p ctx,
 
     // ==================== Initialization =====================================
 
-    size_t count = scil_get_data_count(dims);
+    int8_t mantissa_bit_count = ctx->hints.significant_bits;
+    // Check whether sigbit compression makes sense
+    if(mantissa_bit_count == SCIL_ACCURACY_INT_FINEST){
+        return SCIL_PRECISION_ERR;
+    }
 
-    uint8_t mantissa_bit_count = ctx->hints.significant_bits;
+    size_t count = scil_get_data_count(dims);
 
     uint8_t signs_id, exponent_bit_count;
     int16_t minimum_exponent;
     get_header_data_<DATATYPE>(source, count, &signs_id, &exponent_bit_count, &minimum_exponent);
 
     uint8_t bit_count_per_value = get_bit_count_per_value(signs_id, exponent_bit_count, mantissa_bit_count);
-    if(bit_count_per_value >= 8 * sizeof(<DATATYPE>)){
-        return SCIL_PRECISION_ERR;
-    }
 
     write_header(dest, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
 
