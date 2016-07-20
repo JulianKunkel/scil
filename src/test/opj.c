@@ -110,5 +110,5 @@ printf("DEST: %lu",dest_size);
   free(dest);
 
   printf("End   TEST\n");
-  return ret == SCIL_NO_ERR;
+  return ret;
 }
