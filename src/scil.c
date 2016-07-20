@@ -408,38 +408,29 @@ int scil_create_compression_context(scil_context_p* out_ctx,
         }
     }
 
-    // We convert between significant digits and bits and take the finer
-    // granularity
-    // An algorithm can then choose which of those metrics to use.
-    if (oh->significant_digits != SCIL_ACCURACY_INT_IGNORE) {
-        oh->significant_bits = max(
-            oh->significant_bits,
-            scilU_convert_significant_decimals_to_bits(oh->significant_digits));
-    }
+	// Convert between significat digits and bits
+	if(	oh->significant_digits != SCIL_ACCURACY_INT_IGNORE &&
+	   	oh->significant_bits   == SCIL_ACCURACY_INT_IGNORE ){
 
-    // Why should this make any sense:
-    // if(oh->relative_tolerance_percent != SCIL_ACCURACY_DBL_IGNORE){
-    //	oh->significant_bits = max(oh->significant_bits,
-    //scilU_relative_tolerance_to_significant_bits(oh->relative_tolerance_percent));
-    //}
+		// If bits are ignored by user, just calculate them from provided digits
+	    oh->significant_bits = scilU_convert_significant_decimals_to_bits(oh->significant_digits);
+	}
+	else if( oh->significant_digits == SCIL_ACCURACY_INT_IGNORE &&
+	   		 oh->significant_bits   != SCIL_ACCURACY_INT_IGNORE ){
 
-    if (oh->significant_bits != SCIL_ACCURACY_INT_IGNORE) {
-		// Due to bugfix in commit f33d2dd6bccf40f9a9f22f4a03c52ebbd6992713
-		// this is now working without correction checking code.
-		int new_significant_digits = scilU_convert_significant_bits_to_decimals(oh->significant_bits);
+		// If digits are ignored by user, just calculate them from provided bits
+		oh->significant_digits = scilU_convert_significant_bits_to_decimals(oh->significant_bits);
+	}
+	else if( oh->significant_digits != SCIL_ACCURACY_INT_IGNORE &&
+	   		 oh->significant_bits   != SCIL_ACCURACY_INT_IGNORE ){
 
-		if (oh->significant_digits == SCIL_ACCURACY_INT_IGNORE) {
-			oh->significant_digits = new_significant_digits;
-        } else {
-            oh->significant_digits = max(new_significant_digits, oh->significant_digits);
-        }
+		// If the user provided both, calculate each other and take the finer ones
+	    int new_sig_digits = scilU_convert_significant_bits_to_decimals(oh->significant_bits);
+	    int new_sig_bits   = scilU_convert_significant_decimals_to_bits(oh->significant_digits);
 
-        // Why should this make any sense:
-        // if(oh->relative_tolerance_percent == SCIL_ACCURACY_DBL_IGNORE){
-        //	oh->relative_tolerance_percent =
-        //scilU_significant_bits_to_relative_tolerance(oh->significant_bits);
-        //}
-    }
+		oh->significant_digits = max(new_sig_digits, oh->significant_digits);
+		oh->significant_bits   = max(new_sig_bits,   oh->significant_bits);
+	}
 
     ctx->lossless_compression_needed = check_compress_lossless_needed(ctx);
     fix_double_setting(&oh->relative_tolerance_percent);
