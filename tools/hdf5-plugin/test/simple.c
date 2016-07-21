@@ -38,6 +38,9 @@ int main(){
   H5Pset_chunk(dcpl, 2, chunk_size);
   H5Pset_filter(dcpl, SCIL_ID, H5Z_FLAG_MANDATORY, 0, NULL);
 
+  double value = 54.34;
+  err = H5Pset_fill_value(dcpl, H5T_NATIVE_DOUBLE, & value);
+
   hsize_t dims[2] = {4,10};
   data_space = H5Screate_simple (2, dims, NULL);
   hid_t dset = H5Dcreate(fid, "dset", H5T_NATIVE_DOUBLE, data_space, H5P_DEFAULT, dcpl, H5P_DEFAULT);

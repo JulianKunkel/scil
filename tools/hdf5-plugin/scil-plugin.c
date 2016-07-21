@@ -143,6 +143,18 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 
 	// TODO set the hints (accuracy) according to the property lists in HDF5
 
+	herr_t hret;
+	H5D_fill_value_t status;
+	hret = H5Pfill_value_defined(pList, & status );
+	if (hret >= 0 &&  status != H5D_FILL_VALUE_UNDEFINED){
+		void * fill_value = malloc(100); // TOOD find proper size
+		hret = H5Pget_fill_value(pList , type_id, fill_value );
+		if (hret >= 0){
+			h.fill_values_count = 1;
+			h.fill_values = fill_value;
+		}
+	}
+
 	H5T_class_t dataTypeClass;
 	dataTypeClass = H5Tget_class(type_id);
 
