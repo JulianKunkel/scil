@@ -13,10 +13,12 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SCIL_OPJ_H_<DATATYPE>
-#define SCIL_OPJ_H_<DATATYPE>
+#ifndef SCIL_OPJ_H_
+#define SCIL_OPJ_H_
 
 #include <scil-internal.h>
+
+// Repeat for each data type
 
 /**
  * \brief Compression function of openjpeg
@@ -45,6 +47,7 @@ int scil_opj_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
                                       scil_dims* dims,
                                       byte* restrict compressed_buf_in,
                                       const size_t in_size);
+// End repeat
 
 extern scil_compression_algorithm algo_opj;
 

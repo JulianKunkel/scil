@@ -69,21 +69,29 @@ static htri_t compressorCanCompress(hid_t dcpl_id, hid_t type_id, hid_t space_id
 	if(result <= 0) return result;	//The dataspace must be simple.
 	dataTypeClass = H5Tget_class(type_id);
 	switch(dataTypeClass) {
+		case H5T_ENUM:
 		case H5T_INTEGER:
+			switch(H5Tget_size(type_id)) {
+				case 1:
+				case 2:
+				case 4:
+				case 8: return PLUGIN_OK;
+				default: return PLUGIN_ERROR;
+			}
 		case H5T_FLOAT:
 			switch(H5Tget_size(type_id)) {
 				case 4:
 				case 8: return PLUGIN_OK;
 				default: return PLUGIN_ERROR;
 			}
+		case H5T_STRING:
+			return PLUGIN_OK;
 		case H5T_NO_CLASS:
 		case H5T_TIME:
-		case H5T_STRING:
 		case H5T_BITFIELD:
 		case H5T_OPAQUE:
 		case H5T_COMPOUND:
 		case H5T_REFERENCE:
-		case H5T_ENUM:
 		case H5T_VLEN:
 		case H5T_ARRAY:
 		case H5T_NCLASSES:	//default would have been sufficient...
@@ -135,11 +143,33 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 
 	// TODO set the hints (accuracy) according to the property lists in HDF5
 
-	switch(H5Tget_size(type_id)) {
-		case 4: cfg_p->type = SCIL_TYPE_FLOAT; break;
-		case 8: cfg_p->type = SCIL_TYPE_DOUBLE; break;
-		default: return 0;
+	H5T_class_t dataTypeClass;
+	dataTypeClass = H5Tget_class(type_id);
+
+	switch(dataTypeClass) {
+		case H5T_ENUM:
+		case H5T_INTEGER:
+			switch(H5Tget_size(type_id)) {
+				case 1:
+					cfg_p->type = SCIL_TYPE_INT8; break;
+				case 2:
+					cfg_p->type = SCIL_TYPE_INT16; break;
+				case 4:
+					cfg_p->type = SCIL_TYPE_INT32; break;
+				case 8:
+					cfg_p->type = SCIL_TYPE_INT64; break;
+			}
+		case H5T_FLOAT:
+			switch(H5Tget_size(type_id)) {
+				case 4: cfg_p->type = SCIL_TYPE_FLOAT; break;
+				case 8: cfg_p->type = SCIL_TYPE_DOUBLE; break;
+			}
+		case H5T_STRING:
+			cfg_p->type = SCIL_TYPE_STRING; break;
+		default:
+			assert(0);
 	}
+
   int ret = scil_create_compression_context(& config->ctx, cfg_p->type, & h);
 	assert(ret == SCIL_NO_ERR);
 

@@ -14,7 +14,6 @@
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <algo/algo-zfp-abstol.h>
-#include <algo/algo-zfp-abstol-init.c.x>
 
 #include <string.h>
 
@@ -22,6 +21,8 @@
 
 #include <zfp.h>
 
+//Supported datatypes: float double
+// Repeat for each data type
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_p ctx,
@@ -115,3 +116,15 @@ int scil_zfp_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
 
     return ret;
 }
+
+// End repeat
+
+scil_compression_algorithm algo_zfp_abstol = {
+    .c.DNtype = {
+        CREATE_INITIALIZER(scil_zfp_abstol)
+    },
+    "zfp-abstol",
+    5,
+    SCIL_COMPRESSOR_TYPE_DATATYPES,
+    1
+};

@@ -396,17 +396,22 @@ int scil_create_compression_context(scil_context_p* out_ctx,
     memcpy(oh, hints, sizeof(scil_hints));
 
     // adjust accuracy needed
-    if (datatype == SCIL_TYPE_FLOAT) {
-        if ((oh->significant_digits > 6) || (oh->significant_bits > 23)) {
-            oh->significant_digits = SCIL_ACCURACY_INT_FINEST;
-            oh->significant_bits   = SCIL_ACCURACY_INT_FINEST;
-        }
-    } else {
-        if ((oh->significant_digits > 15) || (oh->significant_bits > 52)) {
-            oh->significant_digits = SCIL_ACCURACY_INT_FINEST;
-            oh->significant_bits   = SCIL_ACCURACY_INT_FINEST;
-        }
-    }
+		switch(datatype){
+	    case (SCIL_TYPE_FLOAT) : {
+	        if ((oh->significant_digits > 6) || (oh->significant_bits > 23)) {
+	            oh->significant_digits = SCIL_ACCURACY_INT_FINEST;
+	            oh->significant_bits   = SCIL_ACCURACY_INT_FINEST;
+	        }
+					break;
+	    }
+			case (SCIL_TYPE_DOUBLE) : {
+	        if ((oh->significant_digits > 15) || (oh->significant_bits > 52)) {
+	            oh->significant_digits = SCIL_ACCURACY_INT_FINEST;
+	            oh->significant_bits   = SCIL_ACCURACY_INT_FINEST;
+	        }
+					break;
+	    }
+		}
 
 	// Convert between significat digits and bits
 	if(	oh->significant_digits != SCIL_ACCURACY_INT_IGNORE &&
@@ -597,13 +602,26 @@ int scil_compress(byte* restrict dest,
 
             switch (ctx->datatype) {
                 case (SCIL_TYPE_FLOAT):
-                    ret = algo->c.Ptype.compress_float(
-                        ctx, (float*)dst, header, &header_size_out, src, dims);
+                    ret = algo->c.Ptype.compress_float(ctx, (float*)dst, header, &header_size_out, src, dims);
                     break;
                 case (SCIL_TYPE_DOUBLE):
-                    ret = algo->c.Ptype.compress_double(
-                        ctx, (double*)dst, header, &header_size_out, src, dims);
+                    ret = algo->c.Ptype.compress_double(ctx, (double*)dst, header, &header_size_out, src, dims);
                     break;
+								case (SCIL_TYPE_INT8) :
+									ret = algo->c.Ptype.compress_int8(ctx, (int8_t*)dst, header, &header_size_out, src, dims);
+									break;
+								case(SCIL_TYPE_INT16) :
+									ret = algo->c.Ptype.compress_int16(ctx, (int16_t*)dst, header, &header_size_out, src, dims);
+									break;
+								case(SCIL_TYPE_INT32) :
+									ret = algo->c.Ptype.compress_int32(ctx, (int32_t*)dst, header, &header_size_out, src, dims);
+									break;
+								case(SCIL_TYPE_INT64) :
+									ret = algo->c.Ptype.compress_int64(ctx, (int64_t*)dst, header, &header_size_out, src, dims);
+									break;
+								case(SCIL_TYPE_STRING) :
+									assert(0);
+									break;
             }
 
             if (ret != 0) return ret;
@@ -645,13 +663,26 @@ int scil_compress(byte* restrict dest,
         scil_compression_algorithm* algo = chain->data_compressor;
         switch (ctx->datatype) {
             case (SCIL_TYPE_FLOAT):
-                ret = algo->c.DNtype.compress_float(
-                    ctx, dst, &out_size, src, dims);
+                ret = algo->c.DNtype.compress_float(ctx, dst, &out_size, src, dims);
                 break;
             case (SCIL_TYPE_DOUBLE):
-                ret = algo->c.DNtype.compress_double(
-                    ctx, dst, &out_size, src, dims);
+                ret = algo->c.DNtype.compress_double(ctx, dst, &out_size, src, dims);
                 break;
+						case (SCIL_TYPE_INT8) :
+							ret = algo->c.DNtype.compress_int8(ctx, dst, &out_size, src, dims);
+							break;
+						case(SCIL_TYPE_INT16) :
+							ret = algo->c.DNtype.compress_int16(ctx, dst, &out_size, src, dims);
+							break;
+						case(SCIL_TYPE_INT32) :
+							ret = algo->c.DNtype.compress_int32(ctx, dst, &out_size, src, dims);
+							break;
+						case(SCIL_TYPE_INT64) :
+							ret = algo->c.DNtype.compress_int64(ctx, dst, &out_size, src, dims);
+							break;
+						case(SCIL_TYPE_STRING) :
+							assert(0);
+							break;
         }
         if (ret != 0) return ret;
         // check if we have to preserve another header from the preconditioners
@@ -688,8 +719,7 @@ int scil_compress(byte* restrict dest,
 
         // scilU_print_buffer(src, input_size);
 
-        ret = chain->byte_compressor->c.Btype.compress(
-            ctx, dest, &out_size, (byte*)src, input_size);
+        ret = chain->byte_compressor->c.Btype.compress(ctx, dest, &out_size, (byte*)src, input_size);
         if (ret != 0) return ret;
         dest[out_size] = chain->byte_compressor->magic_number;
         debugI("C MAGIC %d at pos %llu\n",
@@ -765,8 +795,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
                                 buff_tmp1,
                                 buff_tmp2);
 
-        ret = algo->c.Btype.decompress(
-            dst, output_size * 2 + 10, (byte*)src, src_size, &src_size);
+        ret = algo->c.Btype.decompress(dst, output_size * 2 + 10, (byte*)src, src_size, &src_size);
         if (ret != 0) return ret;
         remaining_compressors--;
 
@@ -809,9 +838,23 @@ int scil_decompress(enum SCIL_Datatype datatype,
                 ret = algo->c.DNtype.decompress_float(dst, dims, src, src_size);
                 break;
             case (SCIL_TYPE_DOUBLE):
-                ret =
-                    algo->c.DNtype.decompress_double(dst, dims, src, src_size);
+                ret = algo->c.DNtype.decompress_double(dst, dims, src, src_size);
                 break;
+						case (SCIL_TYPE_INT8) :
+							ret = algo->c.DNtype.decompress_int8(dst, dims, src, src_size);
+							break;
+						case(SCIL_TYPE_INT16) :
+							ret = algo->c.DNtype.decompress_int16(dst, dims, src, src_size);
+							break;
+						case(SCIL_TYPE_INT32) :
+							ret = algo->c.DNtype.decompress_int32(dst, dims, src, src_size);
+							break;
+						case(SCIL_TYPE_INT64) :
+							ret = algo->c.DNtype.decompress_int64(dst, dims, src, src_size);
+							break;
+						case(SCIL_TYPE_STRING) :
+							assert(0);
+							break;
         }
 
         if (ret != 0) return ret;
@@ -849,13 +892,26 @@ int scil_decompress(enum SCIL_Datatype datatype,
 
         switch (datatype) {
             case (SCIL_TYPE_FLOAT):
-                ret = algo->c.Ptype.decompress_float(
-                    dst, dims, src, header, &header_parsed);
+                ret = algo->c.Ptype.decompress_float(dst, dims, src, header, &header_parsed);
                 break;
             case (SCIL_TYPE_DOUBLE):
-                ret = algo->c.Ptype.decompress_double(
-                    dst, dims, src, header, &header_parsed);
+                ret = algo->c.Ptype.decompress_double(dst, dims, src, header, &header_parsed);
                 break;
+						case (SCIL_TYPE_INT8) :
+							ret = algo->c.Ptype.decompress_int8(dst, dims, src, header, &header_parsed);
+							break;
+						case(SCIL_TYPE_INT16) :
+							ret = algo->c.Ptype.decompress_int16(dst, dims, src, header, &header_parsed);
+							break;
+						case(SCIL_TYPE_INT32) :
+							ret = algo->c.Ptype.decompress_int32(dst, dims, src, header, &header_parsed);
+							break;
+						case(SCIL_TYPE_INT64) :
+							ret = algo->c.Ptype.decompress_int64(dst, dims, src, header, &header_parsed);
+							break;
+						case(SCIL_TYPE_STRING) :
+							assert(0);
+							break;
         }
         header -= header_parsed;
 

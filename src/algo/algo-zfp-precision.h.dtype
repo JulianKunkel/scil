@@ -20,10 +20,13 @@
  * \author Armin Schaare <3schaare@informatik.uni-hamburg.de>
  */
 
-#ifndef SCIL_ZFP_PRECISION_H_<DATATYPE>
-#define SCIL_ZFP_PRECISION_H_<DATATYPE>
+#ifndef SCIL_ZFP_PRECISION_H_
+#define SCIL_ZFP_PRECISION_H_
 
 #include <scil-internal.h>
+
+//Supported datatypes: float double
+// Repeat for each data type
 
 /**
  * \brief Compression function of zfp with relative error tolerance
@@ -45,6 +48,7 @@ int scil_zfp_precision_compress_<DATATYPE>(const scil_context_p ctx, byte* restr
  * \return Success state of the compression
  */
 int scil_zfp_precision_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_dims* dims, byte*restrict compressed_buf_in, const size_t in_size);
+// End repeat
 
 extern scil_compression_algorithm algo_zfp_precision;
 

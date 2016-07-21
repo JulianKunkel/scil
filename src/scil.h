@@ -74,8 +74,20 @@
 #include <stdlib.h>
 
 typedef unsigned char byte;
+typedef int8_t int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
 
-enum SCIL_Datatype { SCIL_TYPE_FLOAT, SCIL_TYPE_DOUBLE };
+enum SCIL_Datatype {
+  SCIL_TYPE_FLOAT = 0,
+  SCIL_TYPE_DOUBLE,
+  SCIL_TYPE_INT8,
+  SCIL_TYPE_INT16,
+  SCIL_TYPE_INT32,
+  SCIL_TYPE_INT64,
+  SCIL_TYPE_STRING
+};
 
 enum scil_performance_unit {
     SCIL_PERFORMANCE_IGNORE = 0,
@@ -147,6 +159,11 @@ typedef struct
     /** Describes the performance requirements for the compressors */
     scil_performance_hint_t comp_speed;
     scil_performance_hint_t decomp_speed;
+
+    /** fill values are special values that must be preserved, we support a list of fill values*/
+    // TODO implement.
+    int fill_values_count;
+    void * fill_values;
 
     /** \brief */
     char* force_compression_methods;

@@ -1,3 +1,5 @@
+// Repeat for each data type
+
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 static void scil_determine_accuracy_<DATATYPE>(const <DATATYPE> *data_1, const <DATATYPE> *data_2, const size_t length, const double relative_err_finest_abs_tolerance, scil_hints * a){
 	for(size_t i = 0; i < length; i++ ){
@@ -52,3 +54,4 @@ static void scil_determine_accuracy_<DATATYPE>(const <DATATYPE> *data_1, const <
 		a->significant_bits = min(cur.significant_digits, a->significant_bits);
 	}
 }
+// End repeat

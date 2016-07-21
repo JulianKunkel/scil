@@ -15,9 +15,10 @@
 
 #include <assert.h>
 #include <algo/algo-fpzip.h>
-#include <algo/algo-fpzip-init.c.x>
 
 #include <fpzip.h>
+
+// Repeat for each data type
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_fpzip_compress_<DATATYPE>(const scil_context_p ctx,
@@ -100,3 +101,13 @@ int  scil_fpzip_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
 
     return 0;
 }
+// End repeat
+
+scil_compression_algorithm algo_fpzip = {
+    .c.DNtype = {
+        CREATE_INITIALIZER(scil_fpzip)
+    },
+    "fpzip",
+    4,
+    SCIL_COMPRESSOR_TYPE_DATATYPES
+};
