@@ -150,8 +150,8 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 		void * fill_value = malloc(100); // TOOD find proper size
 		hret = H5Pget_fill_value(pList , type_id, fill_value );
 		if (hret >= 0){
-			h.fill_values_count = 1;
-			h.fill_values = fill_value;
+			h.special_values_count = 1;
+			h.special_values = fill_value;
 		}
 	}
 

@@ -160,10 +160,10 @@ typedef struct
     scil_performance_hint_t comp_speed;
     scil_performance_hint_t decomp_speed;
 
-    /** fill values are special values that must be preserved, we support a list of fill values*/
+    /** special values are special values that must be preserved, we support a list of  values*/
     // TODO implement.
-    int fill_values_count;
-    void * fill_values;
+    int special_values_count;
+    void * special_values;
 
     /** \brief */
     char* force_compression_methods;
