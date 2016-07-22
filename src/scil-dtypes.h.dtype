@@ -1,3 +1,4 @@
+//Supported datatypes: float double 
 // Repeat for each data type
 
 #pragma GCC diagnostic ignored "-Wfloat-equal"

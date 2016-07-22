@@ -36,6 +36,7 @@
 
 // this file is automatically created
 #include "scil-dtypes.h"
+#include "scil-dtypes-int.h"
 
 static scil_compression_algorithm * algo_array[] = {
 	& algo_memcopy,
@@ -419,6 +420,9 @@ int scil_create_compression_context(scil_context_p* out_ctx,
 	        }
 					break;
 	    }
+			default:
+	      oh->significant_digits = SCIL_ACCURACY_INT_IGNORE;
+	      oh->significant_bits   = SCIL_ACCURACY_INT_IGNORE;
 		}
 
 	// Convert between significat digits and bits
@@ -956,25 +960,58 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
     a.relative_err_finest_abs_tolerance = 0;
     a.relative_tolerance_percent        = 0;
 
-    if (datatype == SCIL_TYPE_DOUBLE) {
+		switch(datatype){
+    case (SCIL_TYPE_DOUBLE): {
         a.significant_bits = MANTISSA_LENGTH_DOUBLE; // in bits
         scil_determine_accuracy_double((double*)data_1,
                                        (double*)data_2,
                                        scil_get_data_count(dims),
                                        relative_err_finest_abs_tolerance,
                                        &a);
-    } else {
+				break;
+    }
+		case (SCIL_TYPE_FLOAT) : {
         a.significant_bits = MANTISSA_LENGTH_FLOAT; // in bits
         scil_determine_accuracy_float((float*)data_1,
                                       (float*)data_2,
                                       scil_get_data_count(dims),
                                       relative_err_finest_abs_tolerance,
                                       &a);
-    }
+    		break;
+		}
+		case(SCIL_TYPE_INT8):{
+			a.significant_bits = 8;
+			scil_determine_accuracy_int8((int8*)data_1,
+															(int8*)data_2,
+															scil_get_data_count(dims),
+															relative_err_finest_abs_tolerance,
+															&a);
+			break;
+		}
+		case(SCIL_TYPE_INT16):{
+			a.significant_bits = 16;
+			scil_determine_accuracy_int16((int16*)data_1, (int16*)data_2, scil_get_data_count(dims), relative_err_finest_abs_tolerance, &a);
+			break;
+		}
+		case(SCIL_TYPE_INT32):{
+			a.significant_bits = 32;
+			scil_determine_accuracy_int32((int32*)data_1, (int32*)data_2, scil_get_data_count(dims), relative_err_finest_abs_tolerance, &a);
+			break;
+		}
+		case(SCIL_TYPE_INT64):{
+			a.significant_bits = 64;
+			scil_determine_accuracy_int64((int64*)data_1, (int64*)data_2, scil_get_data_count(dims), relative_err_finest_abs_tolerance, &a);
+			break;
+		}
+		case(SCIL_TYPE_STRING):{
+			// No relevant comparision
+			*out_hints = a;
+			return;
+		}
+		}
 
     // convert significant_digits in bits to 10 decimals
-    a.significant_digits =
-        scilU_convert_significant_bits_to_decimals(a.significant_bits);
+    a.significant_digits =     scilU_convert_significant_bits_to_decimals(a.significant_bits);
     a.relative_tolerance_percent *= 100.0;
 
     if (a.relative_err_finest_abs_tolerance == 0) {

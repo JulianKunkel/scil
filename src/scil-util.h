@@ -38,7 +38,7 @@
 #define _FILE_OFFSET_BITS 64
 
 #define MANTISSA_MAX_LENGTH 52
-#define MANTISSA_MAX_LENGTH_P1 (MANTISSA_MAX_LENGTH+1)
+#define MANTISSA_MAX_LENGTH_P1 65
 #define MANTISSA_LENGTH_FLOAT 23
 #define MANTISSA_LENGTH_DOUBLE 52
 
@@ -154,12 +154,13 @@ typedef union {
 
 typedef union {
   struct {
-    uint64_t mantissa  : MANTISSA_LENGTH_DOUBLE;
+    uint64_t mantissa  :  MANTISSA_LENGTH_DOUBLE;
     uint32_t exponent : 11;
     uint32_t sign     : 1;
   } p;
 	double f;
 } datatype_cast_double;
+
 
 
 /**
