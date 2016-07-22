@@ -81,7 +81,7 @@ int main(){
 
   hints.absolute_tolerance        = 1e-100;
   hints.force_compression_methods = "opj";
-  scil_create_compression_context(&ctx, SCIL_TYPE_FLOAT, &hints);
+  scil_create_compression_context(&ctx, SCIL_TYPE_FLOAT, 0, NULL, &hints);
 
   printf("##Compression##\n");
   printf("DEST: %lu",dest_size);

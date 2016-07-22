@@ -160,11 +160,6 @@ typedef struct
     scil_performance_hint_t comp_speed;
     scil_performance_hint_t decomp_speed;
 
-    /** special values are special values that must be preserved, we support a list of  values*/
-    // TODO implement.
-    int special_values_count;
-    void * special_values;
-
     /** \brief */
     char* force_compression_methods;
 
@@ -230,13 +225,14 @@ size_t scil_get_data_size(enum SCIL_Datatype type, const scil_dims* dims);
 /*
  * \brief Return the minimum size of the compression buffer needed.
  */
-size_t scil_compress_buffer_size_bound(enum SCIL_Datatype datatype,
-                                       const scil_dims* dims);
+size_t scil_compress_buffer_size_bound(enum SCIL_Datatype datatype, const scil_dims* dims);
 
 /**
  * \brief Initialize the data structure with the valid hints that are relaxed
+ * TODO: refactor hints to be pointers such that these functions become more meaningful and manage memory as well.
  */
-void scil_init_hints(scil_hints* hints);
+void scil_init_hints(scil_hints * hints);
+void scil_copy_hints(scil_hints * out, const scil_hints* hints);
 
 scil_hints scil_retrieve_effective_hints(scil_context_p ctx);
 
@@ -248,10 +244,13 @@ void scil_hints_print(const scil_hints* hints);
  * \param out_ctx reference to the created context
  * \param hints information on the tolerable error margin
  * \pre hints != NULL
+ * \param special values are special values that must be preserved, we support a list of  values
  * \return success state of the creation
  */
 int scil_create_compression_context(scil_context_p* out_ctx,
                                     enum SCIL_Datatype datatype,
+                                    int special_values_count,
+                                    void * special_values,
                                     const scil_hints* hints);
 
 int scil_destroy_compression_context(scil_context_p* out_ctx);

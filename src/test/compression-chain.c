@@ -36,7 +36,7 @@ void test(char * name, size_t expected_size, int check_compressed_output){
   int ret;
   printf("Running %s\n", name);
   hints.force_compression_methods = name;
-  ret = scil_create_compression_context(& ctx, SCIL_TYPE_DOUBLE, &hints);
+  ret = scil_create_compression_context(& ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
   assert(ret == SCIL_NO_ERR);
 
   size_t out_size = -1;

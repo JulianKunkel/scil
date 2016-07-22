@@ -26,7 +26,7 @@ int main()
     hints.significant_bits          = 32;
 
     scil_context_p ctx;
-    scil_create_compression_context(&ctx, SCIL_TYPE_FLOAT, &hints);
+    scil_create_compression_context(&ctx, SCIL_TYPE_FLOAT, 0, NULL, &hints);
 
     //printf("%s\n", ctx->chain.byte_compressor->name);
     //printf("%s\n", ctx->chain.data_compressor->name);

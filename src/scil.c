@@ -304,13 +304,19 @@ void scil_init_hints(scil_hints* hints)
     hints->decomp_speed.unit = SCIL_PERFORMANCE_IGNORE;
 }
 
+void scil_copy_hints(scil_hints * oh, const scil_hints* hints){
+	memcpy(oh, hints, sizeof(scil_hints));
+	/*if(hints->force_compression_methods != NULL){
+		oh->force_compression_methods = NULL;
+	}
+	*/
+}
+
+
 static void print_performance_hint(const char* name,
                                    const scil_performance_hint_t p)
 {
-    printf("\t%s: %f * %s\n",
-           name,
-           (double)p.multiplier,
-           performance_units[p.unit]);
+    printf("\t%s: %f * %s\n", name, (double)p.multiplier, performance_units[p.unit]);
 }
 
 void scil_hints_print(const scil_hints* h)
@@ -332,13 +338,7 @@ void scil_hints_print(const scil_hints* h)
 
 int scil_destroy_compression_context(scil_context_p* out_ctx)
 {
-    scil_hints h;
-    h = (*out_ctx)->hints;
-
-    if (h.force_compression_methods != NULL) {
-        free(h.force_compression_methods);
-    }
-
+		free(& (*out_ctx)->hints);
     free(*out_ctx);
     *out_ctx = NULL;
 
@@ -378,22 +378,30 @@ static void scil_check_if_initialized()
 
 int scil_create_compression_context(scil_context_p* out_ctx,
                                     enum SCIL_Datatype datatype,
+                                    int special_values_count,
+                                    void * special_values,
                                     const scil_hints* hints)
 {
     scil_check_if_initialized();
 
     int ret = SCIL_NO_ERR;
     scil_context_p ctx;
-    scil_hints* oh;
-
     *out_ctx = NULL;
 
     ctx = (scil_context_p)SAFE_MALLOC(sizeof(struct scil_context_t));
     memset(&ctx->chain, 0, sizeof(ctx->chain));
     ctx->datatype = datatype;
+		ctx->special_values_count = special_values_count;
+		if (ctx->special_values_count > 0){
+			assert(special_values != NULL);
+			ctx->special_values = special_values;
+		}else{
+			ctx->special_values = NULL;
+		}
 
-    oh = &ctx->hints;
-    memcpy(oh, hints, sizeof(scil_hints));
+    scil_hints* oh;
+    oh = & ctx->hints;
+		scil_copy_hints(oh, hints);
 
     // adjust accuracy needed
 		switch(datatype){

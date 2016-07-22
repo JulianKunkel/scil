@@ -132,6 +132,10 @@ struct scil_context_t{
   enum SCIL_Datatype datatype;
   scil_hints hints;
 
+  /** special values are special values that must be preserved, we support a list of  values*/
+  int special_values_count;
+  void * special_values;
+
   // the last compressor used, could be used for debugging
   scil_compression_chain_t chain;
 };
