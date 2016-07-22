@@ -13,7 +13,7 @@ int main(void)
     scil_dims dims;
     scil_init_dims_1d(&dims, count);
 
-    size_t dest_size = scil_compress_buffer_size_bound(SCIL_TYPE_FLOAT, &dims);
+    size_t dest_size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, &dims);
     byte* dest       = (byte*) SAFE_MALLOC(dest_size);
 
     scil_hints hints;
@@ -29,7 +29,7 @@ int main(void)
     // scil_decompress();
 
     scil_hints out_accuracy;
-    ret = scil_validate_compression(SCIL_TYPE_FLOAT, source, & dims, dest, compressed_size,  ctx, & out_accuracy);
+    ret = scil_validate_compression(SCIL_TYPE_DOUBLE, source, & dims, dest, compressed_size,  ctx, & out_accuracy);
 
     scil_hints_print(& out_accuracy);
 
