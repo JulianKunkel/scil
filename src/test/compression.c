@@ -90,7 +90,7 @@ int main(){
 	hints.absolute_tolerance = 0.5;
 	//hints.relative_tolerance_percent = 1.0;
 	hints.significant_bits = 5;
-	scil_create_compression_context(&ctx, SCIL_TYPE_DOUBLE, &hints);
+	scil_create_compression_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
 
 	const size_t count = 100;
 	size_t u_buf_size = count * sizeof(double);

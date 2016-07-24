@@ -20,10 +20,14 @@
  * \author Armin Schaare <3schaare@informatik.uni-hamburg.de>
  */
 
-#ifndef SCIL_FPZIP_H_<DATATYPE>
-#define SCIL_FPZIP_H_<DATATYPE>
+//Supported datatypes: float double
+
+#ifndef SCIL_FPZIP_H_
+#define SCIL_FPZIP_H_
 
 #include <scil-internal.h>
+
+// Repeat for each data type
 
 /**
  * \brief Compression function of fpzip
@@ -45,6 +49,9 @@ int scil_fpzip_compress_<DATATYPE>(const scil_context_p ctx, byte* restrict dest
  * \return Success state of the compression
  */
 int scil_fpzip_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_dims* dims, byte*restrict compressed_buf_in, const size_t in_size);
+
+// End repeat
+
 
 extern scil_compression_algorithm algo_fpzip;
 

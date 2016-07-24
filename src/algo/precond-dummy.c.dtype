@@ -13,11 +13,13 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
+//Supported datatypes: float double int8 int16 int32 int64
+
 #include <string.h>
 
 #include <algo/precond-dummy.h>
-#include <algo/precond-dummy-init.c.x>
 
+// Repeat for each data type
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_dummy_precond_compress_<DATATYPE>(const scil_context_p ctx, <DATATYPE>* restrict data_out, byte*restrict header, int * header_size_out, <DATATYPE>*restrict data_in, const scil_dims* dims){
   size_t size = scil_get_data_size(SCIL_TYPE_<DATATYPE_UPPER>, dims);
@@ -36,3 +38,16 @@ int scil_dummy_precond_decompress_<DATATYPE>(<DATATYPE>*restrict data_out, scil_
   *header_parsed_out = 5;
   return SCIL_NO_ERR;
 }
+
+// End repeat
+
+
+scil_compression_algorithm algo_precond_dummy = {
+    .c.Ptype = {
+        CREATE_INITIALIZER(scil_dummy_precond)
+    },
+    "dummy-precond",
+    8,
+    SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER,
+    0
+};

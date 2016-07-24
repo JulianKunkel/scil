@@ -19,10 +19,12 @@
  * \author Armin Schaare <3schaare@informatik.uni-hamburg.de>
  */
 
-#ifndef SCIL_SIGBITS_H_<DATATYPE>
-#define SCIL_SIGBITS_H_<DATATYPE>
+#ifndef SCIL_SIGBITS_H_
+#define SCIL_SIGBITS_H_
 
 #include <scil-internal.h>
+
+// Repeat for each data type
 
 /**
  * \brief Compression function of sigbits
@@ -45,6 +47,9 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_p ctx, byte* restrict de
  * \return Success state of the compression
  */
 int scil_sigbits_decompress_<DATATYPE>( <DATATYPE>*restrict dest, scil_dims* dims, byte*restrict source, const size_t source_size);
+
+// End repeat
+
 
 extern scil_compression_algorithm algo_sigbits;
 

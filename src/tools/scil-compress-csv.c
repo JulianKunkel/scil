@@ -258,7 +258,7 @@ int main(int argc, char ** argv){
     datatype = SCIL_TYPE_FLOAT;
   }
 
-  ret = scil_create_compression_context(& ctx, datatype, &hints);
+  ret = scil_create_compression_context(& ctx, datatype, 0, NULL, &hints);
   assert(ret == SCIL_NO_ERR);
 
   if (print_hints){

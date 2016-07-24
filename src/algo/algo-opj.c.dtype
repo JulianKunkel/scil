@@ -44,14 +44,15 @@
 #include <string.h>
 
 #include <algo/algo-opj.h>
-#include <algo/algo-opj-init.c.x>
 
 #include <openjpeg.h>
 #include <opj_config.h>
 
 /* -------------------------------------------------------------------------- */
+//Supported datatypes: float double int8 int16 int32 int64
 
 #define NUM_COMPS_MAX 4
+// Repeat for each data type
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_opj_compress_<DATATYPE>(const scil_context_p ctx, byte* restrict dest, size_t* restrict dest_size, <DATATYPE>* restrict source, const scil_dims* dims)
@@ -466,3 +467,15 @@ int scil_opj_decompress_<DATATYPE>(<DATATYPE>* restrict dest, scil_dims* dims, b
   opj_image_destroy(l_image);
   return 0;
 }
+
+// End repeat
+
+scil_compression_algorithm algo_opj = {
+    .c.DNtype = {
+	      CREATE_INITIALIZER(scil_opj)
+    },
+    "opj",
+    9,//magic_number
+    SCIL_COMPRESSOR_TYPE_DATATYPES,
+    0 //is_lossy
+};

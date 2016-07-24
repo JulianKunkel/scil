@@ -21,10 +21,12 @@
  * \author Armin Schaare <3schaare@informatik.uni-hamburg.de>
  */
 
-#ifndef SCIL_ABSTOL_H_<DATATYPE>
-#define SCIL_ABSTOL_H_<DATATYPE>
+#ifndef SCIL_ABSTOL_H_
+#define SCIL_ABSTOL_H_
 
 #include <scil-internal.h>
+
+// Repeat for each data type
 
 /**
  * \brief Compression function of abstol
@@ -53,6 +55,7 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
                                       scil_dims* dims,
                                       byte* restrict source,
                                       size_t in_size);
+// End repeat
 
 extern scil_compression_algorithm algo_abstol;
 

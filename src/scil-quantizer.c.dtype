@@ -3,6 +3,8 @@
 #include <assert.h>
 #include <math.h>
 
+// Repeat for each data type
+
 static uint64_t scil_quantize_value_<DATATYPE>(<DATATYPE> value,
                                                double absolute_tolerance,
                                                <DATATYPE> minimum){
@@ -121,3 +123,4 @@ int scil_quantize_buffer_<DATATYPE>(uint64_t* const restrict dest,
 
     return scil_quantize_buffer_minmax_<DATATYPE>(dest, source, count, absolute_tolerance, minimum, maximum);
 }
+// End repeat

@@ -1,9 +1,10 @@
-#ifndef SCIL_QUANTIZER_H_<DATATYPE>
-#define SCIL_QUANTIZER_H_<DATATYPE>
+#ifndef SCIL_QUANTIZER_H_
+#define SCIL_QUANTIZER_H_
 
 #include <stdlib.h>
 #include <stdint.h>
 
+// Repeat for each data type
 /**
  * \brief Finds and returns the smallest value of the given buffer.
  * \param buffer The buffer to scan
@@ -105,5 +106,7 @@ int scil_unquantize_buffer_<DATATYPE>(<DATATYPE>* const restrict buf_out,
                                       size_t count,
                                       double absolute_tolerance,
                                       <DATATYPE> minimum);
+
+// End repeat
 
 #endif /* SCIL_QUANTIZER_H_<DATATYPE> */

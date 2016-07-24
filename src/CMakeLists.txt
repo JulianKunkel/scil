@@ -75,7 +75,7 @@ message(STATUS "Endianess: ${ENDIANESS}")
 
 # run during configure:
 execute_process(COMMAND ${DEPS_DIR}/build-dependencies.sh WORKING_DIRECTORY ${DEPS_DIR})
-execute_process(COMMAND ${DEV_DIR}/create-datatype-variants.sh ${CMAKE_SOURCE_DIR} WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/)
+execute_process(COMMAND ${DEV_DIR}/create-datatype-variants.py ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/)
 
 #
 set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${DEPS_DIR}/openjpeg/lib/pkgconfig/")

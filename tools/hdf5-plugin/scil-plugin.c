@@ -69,21 +69,29 @@ static htri_t compressorCanCompress(hid_t dcpl_id, hid_t type_id, hid_t space_id
 	if(result <= 0) return result;	//The dataspace must be simple.
 	dataTypeClass = H5Tget_class(type_id);
 	switch(dataTypeClass) {
+		case H5T_ENUM:
 		case H5T_INTEGER:
+			switch(H5Tget_size(type_id)) {
+				case 1:
+				case 2:
+				case 4:
+				case 8: return PLUGIN_OK;
+				default: return PLUGIN_ERROR;
+			}
 		case H5T_FLOAT:
 			switch(H5Tget_size(type_id)) {
 				case 4:
 				case 8: return PLUGIN_OK;
 				default: return PLUGIN_ERROR;
 			}
+		case H5T_STRING:
+			return PLUGIN_OK;
 		case H5T_NO_CLASS:
 		case H5T_TIME:
-		case H5T_STRING:
 		case H5T_BITFIELD:
 		case H5T_OPAQUE:
 		case H5T_COMPOUND:
 		case H5T_REFERENCE:
-		case H5T_ENUM:
 		case H5T_VLEN:
 		case H5T_ARRAY:
 		case H5T_NCLASSES:	//default would have been sufficient...
@@ -130,23 +138,72 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 	assert(sizeof(size_t) == sizeof(hsize_t) );
 	scil_init_dims_array(& cfg_p->dims, rank, (const size_t*) chunkSize);
 
-  scil_hints h;
-  scil_init_hints(& h);
-
+  scil_hints * h;
+	scil_hints hints_new;
 	// TODO set the hints (accuracy) according to the property lists in HDF5
-
-	switch(H5Tget_size(type_id)) {
-		case 4: cfg_p->type = SCIL_TYPE_FLOAT; break;
-		case 8: cfg_p->type = SCIL_TYPE_DOUBLE; break;
-		default: return 0;
+	// H5Tget_precision ?
+	int ret = H5Pget_scil_hints(pList, & h);
+	if(ret != 0 || h == NULL){
+		h = & hints_new;
+		scil_init_hints(h);
 	}
-  int ret = scil_create_compression_context(& config->ctx, cfg_p->type, & h);
+
+
+	H5T_class_t dataTypeClass;
+	dataTypeClass = H5Tget_class(type_id);
+
+	switch(dataTypeClass) {
+		case H5T_ENUM:
+		case H5T_INTEGER:
+			switch(H5Tget_size(type_id)) {
+				case 1:
+					cfg_p->type = SCIL_TYPE_INT8; break;
+				case 2:
+					cfg_p->type = SCIL_TYPE_INT16; break;
+				case 4:
+					cfg_p->type = SCIL_TYPE_INT32; break;
+				case 8:
+					cfg_p->type = SCIL_TYPE_INT64; break;
+			}
+			break;
+		case H5T_FLOAT:
+			switch(H5Tget_size(type_id)) {
+				case 4: cfg_p->type = SCIL_TYPE_FLOAT; break;
+				case 8: cfg_p->type = SCIL_TYPE_DOUBLE; break;
+			}
+			break;
+		case H5T_STRING:
+			cfg_p->type = SCIL_TYPE_STRING;
+			break;
+		default:
+			assert(0);
+	}
+
+	herr_t hret;
+	H5D_fill_value_t status;
+	void * special_values = NULL;
+	int special_cnt = 0;
+	hret = H5Pfill_value_defined(pList, & status);
+	if (hret >= 0 &&  status != H5D_FILL_VALUE_UNDEFINED){
+		void * fill_value = malloc(1024); // TOOD find proper size
+		hret = H5Pget_fill_value(pList, type_id, fill_value );
+		if (hret >= 0){
+			special_cnt = 1;
+			special_values = fill_value;
+		}
+	}
+
+  ret = scil_create_compression_context(& config->ctx, cfg_p->type, special_cnt, special_values, h);
+	if(special_values != NULL){
+		free(special_values);
+	}
+
 	assert(ret == SCIL_NO_ERR);
 
 	config->dst_size = scil_compress_buffer_size_bound(cfg_p->type, & cfg_p->dims);
 
 	// now we store the options with the dataset, this is actually not needed...
-	return H5Pmodify_filter( pList, SCIL_ID, H5Z_FLAG_OPTIONAL, cd_size, cd_values );
+	return H5Pmodify_filter( pList, SCIL_ID, H5Z_FLAG_MANDATORY, cd_size, cd_values );
 }
 
 static size_t compressorFilter(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nBytes, size_t *buf_size, void **buf){
@@ -180,6 +237,7 @@ static size_t compressorFilter(unsigned int flags, size_t cd_nelmts, const unsig
 		plugin_compress_config* config = cfg_p->cfg;
 
 		byte * buffer = (byte*) malloc(config->dst_size + 8);
+		// memset(buffer, 0, config->dst_size + 8);
 
 		ret = scil_compress(buffer + 8, config->dst_size, ((byte**) buf)[0], (& cfg_p->dims), & out_size, config->ctx);
 		scilU_pack8(buffer, out_size);
@@ -191,4 +249,33 @@ static size_t compressorFilter(unsigned int flags, size_t cd_nelmts, const unsig
 	assert(ret == SCIL_NO_ERR);
 
   return out_size; // 0 means error.
+}
+
+#define H5P_SCIL_HINT "scil_hints"
+
+
+herr_t H5Pset_scil_hints(hid_t dcpl, scil_hints * hints){
+	unsigned cd_values[2];
+	//printf("set %p \n", old_hints);
+	memcpy(& cd_values[0], & hints, sizeof(void *));
+	//printf("set %u %u \n", cd_values[0], cd_values[1]);
+
+	return H5Pmodify_filter( dcpl, SCIL_ID, H5Z_FLAG_MANDATORY, 2, (unsigned*) cd_values );
+}
+
+herr_t H5Pget_scil_hints(hid_t dcpl, scil_hints ** out_hints){
+	unsigned int *flags = NULL;
+	size_t cd_nelmts = 2;
+
+	unsigned cd_values[2];
+	unsigned *filter_config = NULL;
+
+	herr_t ret = H5Pget_filter_by_id( dcpl, SCIL_ID, flags, & cd_nelmts, cd_values, 0, NULL, filter_config);
+	if(ret >= 0 && cd_nelmts == 2){
+		//printf("get %u %u \n", cd_values[0], cd_values[1]);
+		memcpy(out_hints, & cd_values[0], sizeof(void *));
+		//printf("get %p \n", *out_hints);
+		return 0;
+	}
+	return -1;
 }

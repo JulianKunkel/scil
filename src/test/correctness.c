@@ -64,7 +64,7 @@ int test_correctness(const char* name, double* buffer_in, scil_dims dims)
             hints.force_compression_methods = compression_name;
         }
 
-        int ret = scil_create_compression_context(&ctx, SCIL_TYPE_DOUBLE, &hints);
+        int ret = scil_create_compression_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
         if (ret != 0) {
             printf("Invalid combination %s\n", compression_name);
             continue;

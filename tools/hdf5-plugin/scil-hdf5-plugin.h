@@ -19,4 +19,18 @@
 #define H5_HAVE_FILTER_SCIL
 #define SCIL_ID 32003
 
+#include <scil.h>
+
+/*
+ * Primitive versions for providing hints to HDF5 data sets
+ * You are not allowed to modify the hints after you have set them.
+ * Memory should be managed externally, you should free memory after you close the dataset that is compressed.
+ */
+herr_t H5Pset_scil_hints(hid_t dcpl, scil_hints * hints);
+
+/*
+ * The memory of the hints is managed internally. Do not free them while the plugin is operational.
+ */
+herr_t H5Pget_scil_hints(hid_t dcpl, scil_hints ** out_hints);
+
 #endif
