@@ -216,6 +216,9 @@ static void get_header_data_<DATATYPE>(const <DATATYPE>* const source,
     *exponent_bit_count = calc_exponent_bit_count(*minimum_exponent, maximum_exponent);
 }
 
+// TODO: Test this mess... Especially for the super rare exponent maximum overflow.
+//       Could happen at only one specific bit configuration.
+// TODO: Speed up shifts with lookup table.
 static uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
                                           uint8_t signs_id,
                                           uint8_t exponent_bit_count,
@@ -227,12 +230,27 @@ static uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
     datatype_cast_<DATATYPE> cur;
     cur.f = value;
 
+    // Calculate potentionally compressed sign bit, writing it and shifting to get space for exponent bits
     if(signs_id == 2){
         result = ((uint64_t)cur.p.sign) << exponent_bit_count;
     }
-    result |= (uint64_t)(cur.p.exponent - minimum_exponent);
+
+    // Amount of bitshifts to do at various points
+    uint8_t shifts = MANTISSA_LENGTH_<DATATYPE_UPPER> - mantissa_bit_count;
+
+    // Calculating compressed mantissa with rounding
+    uint64_t inter_mantissa = cur.p.mantissa + (cur.p.mantissa & (1 << (shifts - 1)));
+
+    // Calculating compressed exponent with potential overflow from mantissa due to rounding up and writing it
+    result |= (uint64_t)(cur.p.exponent - minimum_exponent + (inter_mantissa > mask[52]));
+
+    // Shifting to get space for mantissa
     result <<= mantissa_bit_count;
-    result |= ((uint64_t)cur.p.mantissa) >> (MANTISSA_LENGTH_<DATATYPE_UPPER> - mantissa_bit_count);
+
+    // Clear overflow bit in mantissa
+    inter_mantissa &= ~(1 << shifts);
+    // Write significant bits of mantissa
+    result |= inter_mantissa >> shifts;
 
     return result;
 }
