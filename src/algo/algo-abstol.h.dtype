@@ -26,7 +26,8 @@
 
 #include <scil-internal.h>
 
-// Repeat for each data type
+//Repeat for each data type
+//Supported datatypes:double float
 
 /**
  * \brief Compression function of abstol

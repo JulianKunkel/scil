@@ -68,7 +68,8 @@ static void write_header(byte* dest,
     dest += 1;
 }
 
-// Repeat for each data type
+//Repeat for each data type
+//Supported datatypes:double float
 
 int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
                                     byte* const restrict dest,
