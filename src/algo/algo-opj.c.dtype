@@ -475,7 +475,7 @@ scil_compression_algorithm algo_opj = {
 	      CREATE_INITIALIZER(scil_opj)
     },
     "opj",
-    9,//magic_number
+    9,//compressor_id
     SCIL_COMPRESSOR_TYPE_DATATYPES,
     0 //is_lossy
 };

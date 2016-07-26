@@ -363,7 +363,7 @@ static void scil_check_if_initialized()
     int i = 0;
     for (scil_compression_algorithm **algo = algo_array; *algo != NULL;
          algo++, i++) {
-        if ((*algo)->magic_number != i) {
+        if ((*algo)->compressor_id != i) {
             scilU_critical_error("Magic number does not match!");
         }
         if ((*algo)->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES) {
@@ -513,7 +513,7 @@ Internally, the compressed buffer is formated as follows:
 - byte CHAIN_LENGTH // the number of compressors to apply.
 
 Then for the last compressor that has been applied the format looks like:
-- byte magic_number // The compressor number as registered in SCIL.
+- byte compressor_id // The compressor number as registered in SCIL.
 - byte * COMPRESSOR_SPECIFIC_HEADER
 - byte * COMPRESSED DATA
 
@@ -521,7 +521,7 @@ If the chain consists of multiple compressors (n-many) the final format looks
 like:
 
 byte CHAIN_LENGTH
-byte magic_number_ALGO(n)
+byte compressor_id_ALGO(n)
 ALGO(n) specific header
 ALGO(n-1) data compressed using ALGO(n)
 
@@ -539,12 +539,12 @@ int scil_compress(byte* restrict dest,
                   size_t* restrict out_size_p,
                   scil_context_p ctx)
 {
-    int ret = SCIL_NO_ERR;
+	assert(ctx != NULL);
+	assert(dest != NULL);
+	assert(out_size_p != NULL);
+	assert(source != NULL);
 
-    assert(ctx != NULL);
-    assert(dest != NULL);
-    assert(out_size_p != NULL);
-    assert(source != NULL);
+	int ret = SCIL_NO_ERR;
 
     size_t input_size           = scil_get_data_size(ctx->datatype, dims);
     const size_t datatypes_size = input_size;
@@ -584,33 +584,14 @@ int scil_compress(byte* restrict dest,
     if (chain->precond_count > 0) {
         out_size += datatypes_size;
         // add the header at the end of the preconditioners
-        byte* header =
-            datatypes_size +
-            (byte*)pick_buffer(0,
-                               total_compressors,
-                               1 + total_compressors - chain->precond_count,
-                               source,
-                               dest,
-                               buff_tmp,
-                               dest);
+        byte* header = datatypes_size +
+			(byte*)pick_buffer(0, total_compressors, 1 + total_compressors - chain->precond_count, source, dest, buff_tmp, dest);
 
         for (int i = 0; i < chain->precond_count; i++) {
             int header_size_out;
             scil_compression_algorithm* algo = chain->pre_cond[i];
-            void* src                        = pick_buffer(1,
-                                    total_compressors,
-                                    remaining_compressors,
-                                    source,
-                                    dest,
-                                    buff_tmp,
-                                    dest);
-            void* dst = pick_buffer(0,
-                                    total_compressors,
-                                    remaining_compressors,
-                                    source,
-                                    dest,
-                                    buff_tmp,
-                                    dest);
+            void* src = pick_buffer(1, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
+            void* dst = pick_buffer(0, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
 
             switch (ctx->datatype) {
                 case (SCIL_TYPE_FLOAT):
@@ -619,21 +600,21 @@ int scil_compress(byte* restrict dest,
                 case (SCIL_TYPE_DOUBLE):
                     ret = algo->c.Ptype.compress_double(ctx, (double*)dst, header, &header_size_out, src, dims);
                     break;
-								case (SCIL_TYPE_INT8) :
-									ret = algo->c.Ptype.compress_int8(ctx, (int8_t*)dst, header, &header_size_out, src, dims);
-									break;
-								case(SCIL_TYPE_INT16) :
-									ret = algo->c.Ptype.compress_int16(ctx, (int16_t*)dst, header, &header_size_out, src, dims);
-									break;
-								case(SCIL_TYPE_INT32) :
-									ret = algo->c.Ptype.compress_int32(ctx, (int32_t*)dst, header, &header_size_out, src, dims);
-									break;
-								case(SCIL_TYPE_INT64) :
-									ret = algo->c.Ptype.compress_int64(ctx, (int64_t*)dst, header, &header_size_out, src, dims);
-									break;
-								case(SCIL_TYPE_STRING) :
-									assert(0);
-									break;
+				case (SCIL_TYPE_INT8) :
+					ret = algo->c.Ptype.compress_int8(ctx, (int8_t*)dst, header, &header_size_out, src, dims);
+					break;
+				case(SCIL_TYPE_INT16) :
+					ret = algo->c.Ptype.compress_int16(ctx, (int16_t*)dst, header, &header_size_out, src, dims);
+					break;
+				case(SCIL_TYPE_INT32) :
+					ret = algo->c.Ptype.compress_int32(ctx, (int32_t*)dst, header, &header_size_out, src, dims);
+					break;
+				case(SCIL_TYPE_INT64) :
+					ret = algo->c.Ptype.compress_int64(ctx, (int64_t*)dst, header, &header_size_out, src, dims);
+					break;
+				case(SCIL_TYPE_STRING) :
+					assert(0);
+					break;
             }
 
             if (ret != 0) return ret;
@@ -641,7 +622,7 @@ int scil_compress(byte* restrict dest,
             out_size += header_size_out;
             header += header_size_out;
 
-            *header = algo->magic_number;
+            *header = algo->compressor_id;
             debugI(
                 "C MAGIC %d at pos %llu\n", *header, (long long unsigned)header)
                 header++;
@@ -654,20 +635,8 @@ int scil_compress(byte* restrict dest,
 
     if (chain->data_compressor) {
         // we need to preserve the header of the pre-conditioners.
-        void* src = pick_buffer(1,
-                                total_compressors,
-                                remaining_compressors,
-                                source,
-                                dest,
-                                buff_tmp,
-                                dest);
-        void* dst = pick_buffer(0,
-                                total_compressors,
-                                remaining_compressors,
-                                source,
-                                dest,
-                                buff_tmp,
-                                dest);
+        void* src = pick_buffer(1, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
+        void* dst = pick_buffer(0, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
 
         // set the output size to the expected buffer size
         out_size = (size_t)(datatypes_size * 2);
@@ -680,21 +649,21 @@ int scil_compress(byte* restrict dest,
             case (SCIL_TYPE_DOUBLE):
                 ret = algo->c.DNtype.compress_double(ctx, dst, &out_size, src, dims);
                 break;
-						case (SCIL_TYPE_INT8) :
-							ret = algo->c.DNtype.compress_int8(ctx, dst, &out_size, src, dims);
-							break;
-						case(SCIL_TYPE_INT16) :
-							ret = algo->c.DNtype.compress_int16(ctx, dst, &out_size, src, dims);
-							break;
-						case(SCIL_TYPE_INT32) :
-							ret = algo->c.DNtype.compress_int32(ctx, dst, &out_size, src, dims);
-							break;
-						case(SCIL_TYPE_INT64) :
-							ret = algo->c.DNtype.compress_int64(ctx, dst, &out_size, src, dims);
-							break;
-						case(SCIL_TYPE_STRING) :
-							assert(0);
-							break;
+			case (SCIL_TYPE_INT8) :
+				ret = algo->c.DNtype.compress_int8(ctx, dst, &out_size, src, dims);
+				break;
+			case(SCIL_TYPE_INT16) :
+				ret = algo->c.DNtype.compress_int16(ctx, dst, &out_size, src, dims);
+				break;
+			case(SCIL_TYPE_INT32) :
+				ret = algo->c.DNtype.compress_int32(ctx, dst, &out_size, src, dims);
+				break;
+			case(SCIL_TYPE_INT64) :
+				ret = algo->c.DNtype.compress_int64(ctx, dst, &out_size, src, dims);
+				break;
+			case(SCIL_TYPE_STRING) :
+				assert(0);
+				break;
         }
         if (ret != 0) return ret;
         // check if we have to preserve another header from the preconditioners
@@ -711,9 +680,9 @@ int scil_compress(byte* restrict dest,
         }
 
         remaining_compressors--;
-        ((char*)dst)[out_size] = algo->magic_number;
+        ((char*)dst)[out_size] = algo->compressor_id;
         debugI("C MAGIC %d at pos %llu\n",
-               algo->magic_number,
+               algo->compressor_id,
                (long long unsigned)&((char*)dst)[out_size]);
 
         out_size++;
@@ -721,21 +690,15 @@ int scil_compress(byte* restrict dest,
     }
 
     if (chain->byte_compressor) {
-        void* src = pick_buffer(1,
-                                total_compressors,
-                                remaining_compressors,
-                                source,
-                                dest,
-                                buff_tmp,
-                                dest);
+        void* src = pick_buffer(1, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
 
         // scilU_print_buffer(src, input_size);
 
         ret = chain->byte_compressor->c.Btype.compress(ctx, dest, &out_size, (byte*)src, input_size);
         if (ret != 0) return ret;
-        dest[out_size] = chain->byte_compressor->magic_number;
+        dest[out_size] = chain->byte_compressor->compressor_id;
         debugI("C MAGIC %d at pos %llu\n",
-               chain->byte_compressor->magic_number,
+               chain->byte_compressor->compressor_id,
                (long long unsigned)&dest[out_size]);
 
         out_size++;
@@ -747,7 +710,7 @@ int scil_compress(byte* restrict dest,
 }
 
 #define CHECK_MAGIC(magic)                              \
-    if (magic_number >= scil_compressors_available()) { \
+    if (compressor_id >= scil_compressors_available()) { \
         return SCIL_BUFFER_ERR;                         \
     }
 
@@ -779,16 +742,17 @@ int scil_decompress(enum SCIL_Datatype datatype,
 
     // for(int i=0; i < chain_size; i++){
     src_size--;
-    uint8_t magic_number = src_adj[src_size];
+    uint8_t compressor_id = src_adj[src_size];
+	printf("%u\n", compressor_id);
 
     debugI("D MAGIC %d at pos %llu\n",
-           magic_number,
+           compressor_id,
            (long long unsigned)&src_adj[src_size]);
 
-    CHECK_MAGIC(magic_number)
-    // printf("SCHUH %d %lld\n", magic_number, source_size);
+    CHECK_MAGIC(compressor_id)
+    // printf("SCHUH %d %lld\n", compressor_id, source_size);
 
-    scil_compression_algorithm* algo = algo_array[magic_number];
+    scil_compression_algorithm* algo = algo_array[compressor_id];
     byte* header                     = &src_adj[src_size - 1];
 
     if (algo->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES) {
@@ -818,14 +782,14 @@ int scil_decompress(enum SCIL_Datatype datatype,
             // scilU_print_buffer(dst, src_size);
 
             header--;
-            magic_number = header[0];
+            compressor_id = header[0];
             header--;
 
             debugI("D MAGIC %d at pos %llu\n",
-                   magic_number,
+                   compressor_id,
                    (long long unsigned)header);
-            CHECK_MAGIC(magic_number)
-            algo = algo_array[magic_number];
+            CHECK_MAGIC(compressor_id)
+            algo = algo_array[compressor_id];
         }
     }
 
@@ -873,10 +837,10 @@ int scil_decompress(enum SCIL_Datatype datatype,
         remaining_compressors--;
         if (remaining_compressors > 0) {
             // scilU_print_buffer(dst, src_size);
-            magic_number = *((char*)header);
+            compressor_id = *((char*)header);
             header--;
-            CHECK_MAGIC(magic_number)
-            algo = algo_array[magic_number];
+            CHECK_MAGIC(compressor_id)
+            algo = algo_array[compressor_id];
         }
     }
 
@@ -932,13 +896,13 @@ int scil_decompress(enum SCIL_Datatype datatype,
 
         if (remaining_compressors > 0) {
             // scilU_print_buffer(dst, src_size);
-            magic_number = *((char*)header);
+            compressor_id = *((char*)header);
             debugI("D MAGIC %d at pos %llu\n",
-                   magic_number,
+                   compressor_id,
                    (long long unsigned)header);
             header--;
-            CHECK_MAGIC(magic_number)
-            algo = algo_array[magic_number];
+            CHECK_MAGIC(compressor_id)
+            algo = algo_array[compressor_id];
         }
     }
     // TODO check if the header is completely devoured.

@@ -2,14 +2,14 @@ The compressed buffer consists of a header:
 byte CHAIN_LENGTH // the number of compressors to apply.
 
 Then for the first compressor to apply the format looks like:
-byte magic_number // The compressor number as registered in SCIL.
+byte compressor_id // The compressor number as registered in SCIL.
 byte * COMPRESSOR_SPECIFIC_HEADER
 byte * COMPRESSED DATA
 
 If the chain consists of multiple compressors the final format looks like:
 
 byte CHAIN_LENGTH
-byte magic_number_ALGO1
+byte compressor_id_ALGO1
 ALGO1 specific header
 
 

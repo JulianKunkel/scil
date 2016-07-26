@@ -109,7 +109,7 @@ typedef struct{
 
 
   const char * name;
-  byte magic_number;
+  byte compressor_id;
 
   enum compressor_type type;
   char is_lossy; // byte compressors are expected to be lossless anyway
