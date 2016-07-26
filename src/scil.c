@@ -364,7 +364,7 @@ static void scil_check_if_initialized()
     for (scil_compression_algorithm **algo = algo_array; *algo != NULL;
          algo++, i++) {
         if ((*algo)->compressor_id != i) {
-            scilU_critical_error("Magic number does not match!");
+            scilU_critical_error("compressor ID does not match!");
         }
         if ((*algo)->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES) {
             // we expect that all byte compressors are lossless
@@ -527,7 +527,7 @@ ALGO(n-1) data compressed using ALGO(n)
 
 If ALGO(n-1) is a datatype specific algorithm, then it usually cannot handle
 arbitrary bytes.
-Therefore, the magic number and headers of nested datatypes must be split from
+Therefore, the compressor ID and headers of nested datatypes must be split from
 the data.
 
 A datatype compressor terminates the chain of preconditioners.
@@ -624,7 +624,7 @@ int scil_compress(byte* restrict dest,
 
             *header = algo->compressor_id;
             debugI(
-                "C MAGIC %d at pos %llu\n", *header, (long long unsigned)header)
+                "C compressor ID %d at pos %llu\n", *header, (long long unsigned)header)
                 header++;
             out_size++;
 
@@ -681,7 +681,7 @@ int scil_compress(byte* restrict dest,
 
         remaining_compressors--;
         ((char*)dst)[out_size] = algo->compressor_id;
-        debugI("C MAGIC %d at pos %llu\n",
+        debugI("C compressor ID %d at pos %llu\n",
                algo->compressor_id,
                (long long unsigned)&((char*)dst)[out_size]);
 
@@ -697,7 +697,7 @@ int scil_compress(byte* restrict dest,
         ret = chain->byte_compressor->c.Btype.compress(ctx, dest, &out_size, (byte*)src, input_size);
         if (ret != 0) return ret;
         dest[out_size] = chain->byte_compressor->compressor_id;
-        debugI("C MAGIC %d at pos %llu\n",
+        debugI("C compressor ID %d at pos %llu\n",
                chain->byte_compressor->compressor_id,
                (long long unsigned)&dest[out_size]);
 
@@ -729,7 +729,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
     assert(source != NULL);
     assert(buff_tmp1 != NULL);
 
-    // Read magic number (algorithm id) from header
+    // Read compressor ID (algorithm id) from header
     const int total_compressors = (uint8_t)source[0];
     int remaining_compressors   = total_compressors;
 
@@ -745,7 +745,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
     uint8_t compressor_id = src_adj[src_size];
 	printf("%u\n", compressor_id);
 
-    debugI("D MAGIC %d at pos %llu\n",
+    debugI("D compressor ID %d at pos %llu\n",
            compressor_id,
            (long long unsigned)&src_adj[src_size]);
 
@@ -785,7 +785,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
             compressor_id = header[0];
             header--;
 
-            debugI("D MAGIC %d at pos %llu\n",
+            debugI("D compressor ID %d at pos %llu\n",
                    compressor_id,
                    (long long unsigned)header);
             CHECK_COMPRESSOR_ID(compressor_id)
@@ -897,7 +897,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
         if (remaining_compressors > 0) {
             // scilU_print_buffer(dst, src_size);
             compressor_id = *((char*)header);
-            debugI("D MAGIC %d at pos %llu\n",
+            debugI("D compressor ID %d at pos %llu\n",
                    compressor_id,
                    (long long unsigned)header);
             header--;
