@@ -217,7 +217,6 @@ static void get_header_data_<DATATYPE>(const <DATATYPE>* const source,
 }
 
 // TODO: Test this mess... Especially for the super rare exponent maximum overflow.
-//       Could happen at only one specific bit configuration.
 // TODO: Speed up shifts with lookup table.
 static uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
                                           uint8_t signs_id,
