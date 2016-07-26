@@ -709,9 +709,9 @@ int scil_compress(byte* restrict dest,
     return SCIL_NO_ERR;
 }
 
-#define CHECK_MAGIC(magic)                              \
+#define CHECK_COMPRESSOR_ID(compressor_id)               \
     if (compressor_id >= scil_compressors_available()) { \
-        return SCIL_BUFFER_ERR;                         \
+        return SCIL_BUFFER_ERR;                          \
     }
 
 int scil_decompress(enum SCIL_Datatype datatype,
@@ -749,7 +749,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
            compressor_id,
            (long long unsigned)&src_adj[src_size]);
 
-    CHECK_MAGIC(compressor_id)
+    CHECK_COMPRESSOR_ID(compressor_id)
     // printf("SCHUH %d %lld\n", compressor_id, source_size);
 
     scil_compression_algorithm* algo = algo_array[compressor_id];
@@ -788,7 +788,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
             debugI("D MAGIC %d at pos %llu\n",
                    compressor_id,
                    (long long unsigned)header);
-            CHECK_MAGIC(compressor_id)
+            CHECK_COMPRESSOR_ID(compressor_id)
             algo = algo_array[compressor_id];
         }
     }
@@ -839,7 +839,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
             // scilU_print_buffer(dst, src_size);
             compressor_id = *((char*)header);
             header--;
-            CHECK_MAGIC(compressor_id)
+            CHECK_COMPRESSOR_ID(compressor_id)
             algo = algo_array[compressor_id];
         }
     }
@@ -901,7 +901,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
                    compressor_id,
                    (long long unsigned)header);
             header--;
-            CHECK_MAGIC(compressor_id)
+            CHECK_COMPRESSOR_ID(compressor_id)
             algo = algo_array[compressor_id];
         }
     }
