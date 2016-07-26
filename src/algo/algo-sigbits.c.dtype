@@ -189,11 +189,11 @@ static void find_minimums_and_maximums_<DATATYPE>(const <DATATYPE>* const buffer
         datatype_cast_<DATATYPE> cur;
         cur.f = buffer[i];
 
-        if(*minimum_sign != 0 && cur.p.sign < *minimum_sign) *minimum_sign = cur.p.sign;
-        if(*maximum_sign != 1 && cur.p.sign > *maximum_sign) *maximum_sign = cur.p.sign;
+        if(*minimum_sign != 0 && cur.p.sign < *minimum_sign) { *minimum_sign = cur.p.sign; }
+        if(*maximum_sign != 1 && cur.p.sign > *maximum_sign) { *maximum_sign = cur.p.sign; }
 
-        if(cur.p.exponent < *minimum_exponent) *minimum_exponent = cur.p.exponent;
-        if(cur.p.exponent > *maximum_exponent) *maximum_exponent = cur.p.exponent;
+        if(cur.p.exponent < *minimum_exponent) { *minimum_exponent = cur.p.exponent; }
+        if(cur.p.exponent > *maximum_exponent) { *maximum_exponent = cur.p.exponent; }
     }
 }
 
