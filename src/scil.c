@@ -61,7 +61,6 @@ static char * performance_units[] = {
 	"SingleStreamSharedStorageSpeed"
 };
 
-
 int scil_compressors_available(){
 	static int count = -1;
 	if (count > 0){
@@ -84,6 +83,11 @@ const char* scil_compressor_name(int num)
     assert(num < scil_compressors_available());
     return algo_array[num]->name;
 }
+
+#define CHECK_COMPRESSOR_ID(compressor_id)               \
+    if (compressor_id >= scil_compressors_available()) { \
+        return SCIL_BUFFER_ERR;                          \
+    }
 
 void scil_compression_sprint_last_algorithm_chain(scil_context_p ctx,
                                                   char* out,
@@ -546,23 +550,29 @@ int scil_compress(byte* restrict dest,
 
 	int ret = SCIL_NO_ERR;
 
+	// Get byte size of input data
     size_t input_size           = scil_get_data_size(ctx->datatype, dims);
     const size_t datatypes_size = input_size;
 
+	// Skip the compression if input size is 0 and set destination buffer to a single 0 and size 1
     if (datatypes_size == 0) {
-        *out_size_p = 1;
-        dest[0]     = (byte)0;
+        out_size_p[0] = 1;
+        dest[0]       = (byte)0;
 
         return SCIL_NO_ERR;
     }
+
+	// Why? Factor 4 seems arbitrary
     if (in_dest_size < 4 * datatypes_size) {
         return SCIL_MEMORY_ERR;
     }
 
+	// Set local copies of hints and compression chain
     const scil_hints* hints         = &ctx->hints;
     scil_compression_chain_t* chain = &ctx->chain;
 
-    if (hints->force_compression_methods == NULL) { // if != NULL do nothing as we have parsed the pipeline already
+	// Check whether automatic compressor decision can be skipped because of a user forced chain
+    if (hints->force_compression_methods == NULL) {
         scilI_compression_algo_chooser(source, dims, ctx);
     }
 
@@ -574,8 +584,8 @@ int scil_compress(byte* restrict dest,
     dest[0]                     = total_compressors;
     dest++;
 
-    // now process the compression pipeline
-    // we use 1.5 the memory buffer as intermediate location
+    // Process the compression pipeline
+    // we use 1.5 the memory buffer as intermediate location // no we don't, do we?
     const size_t buffer_tmp_offset = 2 * datatypes_size + 10;
     byte* restrict buff_tmp        = &dest[buffer_tmp_offset];
 
@@ -633,6 +643,7 @@ int scil_compress(byte* restrict dest,
         input_size = out_size;
     }
 
+	// Apply the data compressor
     if (chain->data_compressor) {
         // we need to preserve the header of the pre-conditioners.
         void* src = pick_buffer(1, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
@@ -669,12 +680,9 @@ int scil_compress(byte* restrict dest,
         // check if we have to preserve another header from the preconditioners
         if (datatypes_size != input_size) {
             // we have to copy some header.
-            debugI("Preserving %lld %lld\n",
-                   (long long)datatypes_size,
-                   (long long)input_size);
+            debugI("Preserving %lld %lld\n", (long long)datatypes_size, (long long)input_size);
             const int preserve = input_size - datatypes_size;
-            memcpy(
-                (char*)dst + out_size, (char*)src + datatypes_size, preserve);
+            memcpy((char*)dst + out_size, (char*)src + datatypes_size, preserve);
             out_size += preserve;
             scilU_print_buffer(dst, out_size);
         }
@@ -689,6 +697,7 @@ int scil_compress(byte* restrict dest,
         input_size = out_size;
     }
 
+	// Apply byte compressor
     if (chain->byte_compressor) {
         void* src = pick_buffer(1, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
 
@@ -709,11 +718,6 @@ int scil_compress(byte* restrict dest,
     return SCIL_NO_ERR;
 }
 
-#define CHECK_COMPRESSOR_ID(compressor_id)               \
-    if (compressor_id >= scil_compressors_available()) { \
-        return SCIL_BUFFER_ERR;                          \
-    }
-
 int scil_decompress(enum SCIL_Datatype datatype,
                     void* restrict dest,
                     scil_dims* const dims,
@@ -722,7 +726,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
                     byte* restrict buff_tmp1)
 {
     if (dims->dims == 0) {
-        return 0;
+        return SCIL_NO_ERR;
     }
 
     assert(dest != NULL);

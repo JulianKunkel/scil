@@ -23,7 +23,7 @@
 #include <algo/algo-abstol.h>
 
 
-#define SCIL_ABSTOL_HEADER_SIZE 18
+#define SCIL_ABSTOL_HEADER_SIZE 17
 #define SCIL_SMALL 0.00000000000000000000001
 
 static uint64_t round_up_byte(const uint64_t bits){
@@ -40,7 +40,7 @@ static void read_header(const byte* source,
                         double* const absolute_tolerance,
                         uint8_t* const bits_per_value){
 
-    *minimum = *((double*)(source));
+    *minimum = *((double*)source);
     source += 8;
     *source_size -= 8;
 
@@ -72,7 +72,7 @@ static void write_header(byte* dest,
 //Supported datatypes:double float
 
 int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
-                                    byte* const restrict dest,
+                                    byte* restrict dest,
                                     size_t* restrict dest_size,
                                     <DATATYPE>* restrict source,
                                     const scil_dims* dims){
@@ -107,6 +107,7 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
 
     // ==================== Compress ==========================================
     write_header(dest, min, abs_tol, bits_per_value);
+    dest += SCIL_ABSTOL_HEADER_SIZE;
 
     // Use quantization to reduce each values bit count
     if(scil_quantize_buffer_minmax_<DATATYPE>(quantized_buffer, source, count, abs_tol, min, max)){
@@ -143,6 +144,7 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
     // ============ Decompress ================================================
     // Parse Header
     read_header(in, &in_size, &min, &abs_tol, &bits_per_value);
+    in += SCIL_ABSTOL_HEADER_SIZE;
 
     // Unpacking buffer
     if(scil_unswage(unswaged_buffer, in, count, bits_per_value)){
