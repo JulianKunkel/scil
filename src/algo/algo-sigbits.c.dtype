@@ -263,7 +263,7 @@ static <DATATYPE> decompress_value_<DATATYPE>(uint64_t value,
 
     datatype_cast_<DATATYPE> cur;
 
-    cur.p.sign = get_sign(value, bit_count_per_value, signs_id);
+    cur.p.sign     = get_sign(value, bit_count_per_value, signs_id);
     cur.p.exponent = get_exponent(value, exponent_bit_count, mantissa_bit_count, minimum_exponent);
     cur.p.mantissa = get_mantissa_<DATATYPE>(value, mantissa_bit_count);
 
@@ -276,7 +276,7 @@ static int compress_buffer_<DATATYPE>(uint64_t* const restrict dest,
                                       uint8_t signs_id,
                                       uint8_t exponent_bit_count,
                                       uint8_t mantissa_bit_count,
-                                      uint8_t minimum_exponent){
+                                      int16_t minimum_exponent){
 
     for(size_t i = 0; i < count; ++i){
         dest[i] = compress_value_<DATATYPE>(source[i], signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
@@ -292,7 +292,7 @@ static int decompress_buffer_<DATATYPE>(<DATATYPE>* const restrict dest,
                                         uint8_t signs_id,
                                         uint8_t exponent_bit_count,
                                         uint8_t mantissa_bit_count,
-                                        uint8_t minimum_exponent){
+                                        int16_t minimum_exponent){
 
     for (size_t i = 0; i < count; ++i) {
         dest[i] = decompress_value_<DATATYPE>(source[i], bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
@@ -330,6 +330,7 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_p ctx,
     uint8_t bit_count_per_value = get_bit_count_per_value(signs_id, exponent_bit_count, mantissa_bit_count);
 
     write_header(dest, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
+    dest += SCIL_SIGBITS_HEADER_SIZE;
 
     *dest_size = round_up_byte(bit_count_per_value * count) + SCIL_SIGBITS_HEADER_SIZE;
 
@@ -376,12 +377,8 @@ int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 
     uint8_t signs_id, exponent_bit_count, mantissa_bit_count;
     int16_t minimum_exponent;
-    read_header(source,
-                &source_size_cp,
-                &signs_id,
-                &exponent_bit_count,
-                &mantissa_bit_count,
-                &minimum_exponent);
+    read_header(source, &source_size_cp, &signs_id, &exponent_bit_count, &mantissa_bit_count, &minimum_exponent);
+    source += SCIL_SIGBITS_HEADER_SIZE;
 
     uint8_t bit_count_per_value = get_bit_count_per_value(signs_id, exponent_bit_count, mantissa_bit_count);
 
