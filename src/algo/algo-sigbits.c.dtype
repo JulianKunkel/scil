@@ -231,14 +231,14 @@ static uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
 
     // Calculate potentionally compressed sign bit, writing it and shifting to get space for exponent bits
     if(signs_id == 2){
-        result = ((uint64_t)cur.p.sign) << exponent_bit_count;
+        result = (uint64_t)cur.p.sign << exponent_bit_count;
     }
 
     // Amount of bitshifts to do at various points
     uint8_t shifts = MANTISSA_LENGTH_<DATATYPE_UPPER> - mantissa_bit_count;
 
     // Calculating compressed mantissa with rounding
-    uint64_t inter_mantissa = cur.p.mantissa + (cur.p.mantissa & (1 << (shifts - 1)));
+    uint64_t inter_mantissa = cur.p.mantissa + (cur.p.mantissa & (1UL << (shifts - 1)));
 
     // Calculating compressed exponent with potential overflow from mantissa due to rounding up and writing it
     result |= (uint64_t)(cur.p.exponent - minimum_exponent + (inter_mantissa > mask[52]));
