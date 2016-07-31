@@ -406,28 +406,28 @@ int scil_create_compression_context(scil_context_p* out_ctx,
 
     scil_hints* oh;
     oh = & ctx->hints;
-		scil_copy_hints(oh, hints);
+	scil_copy_hints(oh, hints);
 
-    // adjust accuracy needed
-		switch(datatype){
-	    case (SCIL_TYPE_FLOAT) : {
-	        if ((oh->significant_digits > 6) || (oh->significant_bits > 23)) {
-	            oh->significant_digits = SCIL_ACCURACY_INT_FINEST;
-	            oh->significant_bits   = SCIL_ACCURACY_INT_FINEST;
-	        }
-					break;
-	    }
-			case (SCIL_TYPE_DOUBLE) : {
-	        if ((oh->significant_digits > 15) || (oh->significant_bits > 52)) {
-	            oh->significant_digits = SCIL_ACCURACY_INT_FINEST;
-	            oh->significant_bits   = SCIL_ACCURACY_INT_FINEST;
-	        }
-					break;
-	    }
-			default:
-	      oh->significant_digits = SCIL_ACCURACY_INT_IGNORE;
-	      oh->significant_bits   = SCIL_ACCURACY_INT_IGNORE;
-		}
+	// adjust accuracy needed
+	switch(datatype){
+	case (SCIL_TYPE_FLOAT) : {
+        if ((oh->significant_digits > 6) || (oh->significant_bits > 23)) {
+            oh->significant_digits = SCIL_ACCURACY_INT_FINEST;
+            oh->significant_bits   = SCIL_ACCURACY_INT_FINEST;
+        }
+		break;
+	}
+	case (SCIL_TYPE_DOUBLE) : {
+        if ((oh->significant_digits > 15) || (oh->significant_bits > 52)) {
+            oh->significant_digits = SCIL_ACCURACY_INT_FINEST;
+            oh->significant_bits   = SCIL_ACCURACY_INT_FINEST;
+        }
+		break;
+	}
+	default:
+    	oh->significant_digits = SCIL_ACCURACY_INT_IGNORE;
+    	oh->significant_bits   = SCIL_ACCURACY_INT_IGNORE;
+	}
 
 	// Convert between significat digits and bits
 	if(	oh->significant_digits != SCIL_ACCURACY_INT_IGNORE &&
@@ -541,8 +541,8 @@ int scil_compress(byte* restrict dest,
                   void* restrict source,
                   scil_dims* dims,
                   size_t* restrict out_size_p,
-                  scil_context_p ctx)
-{
+                  scil_context_p ctx) {
+
 	assert(ctx != NULL);
 	assert(dest != NULL);
 	assert(out_size_p != NULL);
@@ -723,8 +723,8 @@ int scil_decompress(enum SCIL_Datatype datatype,
                     scil_dims* const dims,
                     byte* restrict source,
                     const size_t source_size,
-                    byte* restrict buff_tmp1)
-{
+                    byte* restrict buff_tmp1) {
+
     if (dims->dims == 0) {
         return SCIL_NO_ERR;
     }
@@ -919,8 +919,7 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
                              const void* restrict data_2,
                              scil_dims* dims,
                              const double relative_err_finest_abs_tolerance,
-                             scil_hints* out_hints)
-{
+                             scil_hints* out_hints) {
     scil_hints a;
     scil_init_hints(&a);
 
@@ -995,8 +994,7 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
                               byte* restrict data_compressed,
                               const size_t compressed_size,
                               const scil_context_p ctx,
-                              scil_hints* out_accuracy)
-{
+                              scil_hints* out_accuracy) {
     const uint64_t length = scil_compress_buffer_size_bound(datatype, dims);
     byte* data_out        = (byte*)malloc(length);
     if (data_out == NULL) {
