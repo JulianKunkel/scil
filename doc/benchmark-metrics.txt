@@ -1,0 +1,6 @@
+data boxplot:
+    - minimum value
+    - maximum value
+    - mean
+    - median ?
+    - std. deviation
