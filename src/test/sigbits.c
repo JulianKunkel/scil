@@ -1,15 +1,16 @@
 #include <stdio.h>
+#include <time.h>
 
 #include <scil.h>
 
 int main(void){
 
-    size_t count = 10000;
+    size_t count = 1000;
 
     scil_hints hints;
     scil_init_hints(&hints);
     //hints.relative_tolerance_percent = 5.0;
-    hints.significant_bits = 31;
+    hints.relative_tolerance_percent = 0.05;
     hints.force_compression_methods = "3";
 
     scil_context_p context;
@@ -26,9 +27,10 @@ int main(void){
     byte* buffer_tmp   = (byte*)malloc(compressed_size / 2);
     double* buffer_end = (double*)malloc(uncompressed_size);
 
+    srand((unsigned)time(NULL));
     for(size_t i = 0; i < count; ++i){
         //buffer_in[i] = ((double)rand()/RAND_MAX - 0.5) * 200;
-        buffer_in[i] = -100.0 + (double)rand()/RAND_MAX * 200;
+        buffer_in[i] = -100.0 + (double)rand()/RAND_MAX * 200.0;
     }
 
     size_t out_size;
@@ -42,6 +44,13 @@ int main(void){
 
     printf("#Buffer size,Buffer size after compression\n");
     printf("%lu,%lu\n", uncompressed_size, out_size);
+
+    double error_sum = 0.0;
+    for (size_t i = 0; i < count; i++) {
+        error_sum += buffer_end[i] - buffer_in[i];
+    }
+    printf("#Error sum\n");
+    printf("%f\n", error_sum);
 
     free(buffer_in);
     free(buffer_out);
