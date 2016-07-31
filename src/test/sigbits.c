@@ -10,7 +10,7 @@ int main(void){
     scil_hints hints;
     scil_init_hints(&hints);
     //hints.relative_tolerance_percent = 5.0;
-    hints.relative_tolerance_percent = 0.05;
+    hints.significant_bits = 11;
     hints.force_compression_methods = "3";
 
     scil_context_p context;
