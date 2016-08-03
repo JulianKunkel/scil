@@ -53,26 +53,33 @@
 int main(){
 
   printf("Begin TEST\n");
+  int ret = 0;
   const size_t count1 = 64;
   const size_t count2 = 64;
   //static float *data_check;
 
-  float* source = (float *)SAFE_MALLOC(count1 * count2 * sizeof(float));
+  const size_t source_size = count1 * count2 * sizeof(int16_t);
 
-  //printf("source array:\n");
+  int16_t* source = (int16_t *)SAFE_MALLOC(source_size);
+
   for(uint i = 0; i < count1; i++){
-    for (uint j = 0; j < count2; j++)
-    {
-      *(source + i*count2 + j) = i+0.1;
-      //printf("%f ", *(source + i*count1 + j));
+    for (uint j = 0; j < count2; j++){
+      *(source + i*count2 + j) = 2;
     }
   }
+
+  //scilU_print_buffer((char*)source, 20);
+  printf("Array size: %i\n", source_size);
 
   scil_dims dims;
   scil_init_dims_2d(&dims, count1, count2);
 
-  size_t dest_size = scil_compress_buffer_size_bound(SCIL_TYPE_FLOAT, &dims);
+  size_t dest_size = scil_compress_buffer_size_bound(SCIL_TYPE_INT16, &dims);
   byte* dest       = (byte*)SAFE_MALLOC(dest_size);
+
+  //printf("Dest array size: %i\n", dest_size);
+
+  printf("SOURCE: %x %x %x %x %x %x %x %x \n",source[0], source[1],source[2],source[3],source[4],source[5],source[6],source[7]);
 
   scil_context_p ctx;
   scil_hints hints;
@@ -81,27 +88,32 @@ int main(){
 
   hints.absolute_tolerance        = 1e-100;
   hints.force_compression_methods = "opj";
-  scil_create_compression_context(&ctx, SCIL_TYPE_FLOAT, 0, NULL, &hints);
+  scil_create_compression_context(&ctx, SCIL_TYPE_INT16, 0, NULL, &hints);
 
   printf("##Compression##\n");
-  printf("DEST: %lu",dest_size);
+  //printf("DEST: %lu\n",dest_size);
 
-  //scilU_print_buffer((char*)source, dest_size);
+  //scilU_print_buffer((char*)source, count1*count2*sizeof(float));
 
-  int ret = scil_compress(dest, dest_size, source, &dims, &dest_size, ctx);
+  ret = scil_compress(dest, dest_size, source, &dims, &dest_size, ctx);
   //printf("\n\n?error %d %d\n", ret, SCIL_PRECISION_ERR);
-  assert(ret == SCIL_NO_ERR && "ERROR COMPRESSION");
-printf("DEST: %lu",dest_size);
+  //assert(ret == SCIL_NO_ERR && "ERROR COMPRESSION");
+  //printf("DEST: %lu",dest_size);
 
-  float* data_check        = (float*)malloc(count1*count2*sizeof(SCIL_TYPE_FLOAT));
-  byte* tmpBuff        = (byte*)malloc(count1*count2*sizeof(SCIL_TYPE_FLOAT));
+  printf("ENCODED: %x %x %x %x %x %x %x %x \n",dest[0], dest[1],dest[2],dest[3],dest[4], dest[5],dest[6],dest[7]);
+
+  int16_t* data_check        = (int16_t*)malloc(count1*count2*sizeof(SCIL_TYPE_INT16));
+  byte* tmpBuff        = (byte*)malloc(count1*count2*sizeof(SCIL_TYPE_INT16));
 
   printf("##Decompression##\n");
   //memset(data_check, 0, sizeof(data_check));
-  ret = scil_decompress(SCIL_TYPE_FLOAT, data_check, & dims, dest, dest_size, tmpBuff);
+  ret = scil_decompress(SCIL_TYPE_INT16, data_check, & dims, dest, dest_size, tmpBuff);
   assert(ret == SCIL_NO_ERR && "ERROR DECOMPRESSION");
 
-  //scilU_print_buffer((char*)data_check, dest_size);
+  printf("DECODED: %x %x %x %x \n",data_check[0], data_check[1],data_check[2],data_check[3]);
+
+  //printf("Printed buffer \n");
+  //scilU_print_buffer((char*)data_check, 8);
 
   free(source);
   free(dest);

@@ -282,6 +282,7 @@ int scil_opj_compress_<DATATYPE>(const scil_context_p ctx, byte* restrict dest, 
 
   *dest_size = size;
 
+  printf("ENCODED: %x %x %x %x %x %x %x %x \n",dest[0], dest[1],dest[2],dest[3],dest[4],dest[5],dest[6],dest[7]);
 
   return SCIL_NO_ERR;
 }
@@ -313,7 +314,7 @@ int scil_opj_decompress_<DATATYPE>(<DATATYPE>* restrict dest, scil_dims* dims, b
     return 1;
   }
 
-  printf("ENCODED: %i %i %i %i \n",source[0], source[1],source[2],source[3]);
+  printf("ENCODED: %x %x %x %x %x %x %x %x \n",source[0], source[1],source[2],source[3],source[4],source[5],source[6],source[7]);
 
   /*WRITE FILE*/
 
@@ -330,7 +331,6 @@ int scil_opj_decompress_<DATATYPE>(<DATATYPE>* restrict dest, scil_dims* dims, b
 
 
   /*WRITE FILE*/
-
   l_stream = opj_stream_create_default_file_stream(input_file,OPJ_TRUE);
   if (!l_stream){
     free(l_data);
@@ -410,15 +410,6 @@ int scil_opj_decompress_<DATATYPE>(<DATATYPE>* restrict dest, scil_dims* dims, b
       return 1;
     }
 
-    /*printf("%i %i %i %i %i %i %i %i \n", l_tile_index,
-    l_data_size,
-    l_current_tile_x0,
-    l_current_tile_y0,
-    l_current_tile_x1,
-    l_current_tile_y1,
-    l_nb_comps,
-    l_go_on);*/
-
     if (l_go_on)
     {
       if (l_data_size > l_max_data_size)
@@ -434,7 +425,6 @@ int scil_opj_decompress_<DATATYPE>(<DATATYPE>* restrict dest, scil_dims* dims, b
         }
         l_data = l_new_data;
         l_max_data_size = l_data_size;
-        printf("%i ",l_data[0]);
       }
 
       if (! opj_decode_tile_data(l_codec,l_tile_index,l_data,l_data_size,l_stream))
@@ -458,7 +448,7 @@ int scil_opj_decompress_<DATATYPE>(<DATATYPE>* restrict dest, scil_dims* dims, b
     return 1;
   }
 
-  printf("DECODED:%i %i %i %i \n",l_data[0], l_data[1],l_data[2],l_data[3]);
+  printf("DECODED: %x %x %x %x %x %x %x %x \n",l_data[0], l_data[1],l_data[2],l_data[3],l_data[4],l_data[5],l_data[6],l_data[7]);
 
   /* Free memory */
   free(l_data);
