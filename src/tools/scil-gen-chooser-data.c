@@ -28,12 +28,8 @@
 
 #define allocate(type, name, count) type* name = (type*)malloc(count * sizeof(type))
 
-// #############################################################################
-// # Metrics Default Values
-// #############################################################################
-
-#define DEFAULT_ABSOLUTE_ERROR_TOLERANCE  0.005
-#define DEFAULT_SIGNIFICANT_BITS          7
+#define DEFAULT_ABSOLUTE_ERROR_TOLERANCE 0.005
+#define DEFAULT_SIGNIFICANT_BITS         7
 
 // #############################################################################
 // # Data Characteristics Aquistion
@@ -73,6 +69,7 @@ static double get_data_mean(const double* const data, size_t count){
 }
 
 static int compdblp(const void* const a, const void* const b){
+
     if (*(double*)a > *(double*)b){ return 1; }
     if (*(double*)a < *(double*)b){ return -1; }
     return 0;
@@ -121,19 +118,34 @@ static int get_data_characteristics(const double* const data, size_t count,
 }
 
 // #############################################################################
-// # Data Generation
+// # Benchmark
 // #############################################################################
 
-static int generate_single_metric_data(const char[] metric, double start, double step, double end){
+static int benchmark_data(const double* const data, const scil_dims* const dims){
+
+    double minimum, maximum;
+    double mean, median;
+    double standard_deviation;
+
+    get_data_characteristics(data, scil_get_data_count(dims),
+                             &minimum, &maximum, 
+                             &mean, &median,
+                             &standard_deviation);
 
 
 
-    return 1;
 }
 
 int main(int argc, char** argv){
 
+    const size_t count = 1000000;
 
+    allocate(double, data, count);
+
+    scil_dims dims;
+    scil_init_dims_1d(dims, count);
+
+    scilP_create_pattern_double(&dims, data, char *name, float mn, float mx, float arg, float arg2)
 
     return 0;
 }
