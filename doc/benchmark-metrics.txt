@@ -2,6 +2,7 @@ Compression throughput and ratios could depend on:
 
 Data characteristics
     - size of data buffer
+    - dimensionality
     - randomness/entropy
     - minimum value
     - maximum value
