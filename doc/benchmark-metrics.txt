@@ -1,4 +1,4 @@
-Compression throughput and ratios could be dependent on:
+Compression throughput and ratios could depend on:
 
 Data characteristics
     - size of data buffer
