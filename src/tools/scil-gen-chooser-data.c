@@ -33,9 +33,6 @@
 // #############################################################################
 
 #define DEFAULT_ABSOLUTE_ERROR_TOLERANCE  0.005
-
-#define DEFAULT_RELATIVE_ERROR_PERCENTAGE 1.0
-#define DEFAULT_SIGNIFICANT_DIGITS        2
 #define DEFAULT_SIGNIFICANT_BITS          7
 
 // #############################################################################
