@@ -29,7 +29,17 @@
 #define allocate(type, name, count) type* name = (type*)malloc(count * sizeof(type))
 
 // #############################################################################
-// # Data Characteristics
+// # Metrics Default Values
+// #############################################################################
+
+#define DEFAULT_ABSOLUTE_ERROR_TOLERANCE  0.005
+
+#define DEFAULT_RELATIVE_ERROR_PERCENTAGE 1.0
+#define DEFAULT_SIGNIFICANT_DIGITS        2
+#define DEFAULT_SIGNIFICANT_BITS          7
+
+// #############################################################################
+// # Data Characteristics Aquistion
 // #############################################################################
 
 static double get_data_minimum(const double* const data, size_t count){
@@ -113,7 +123,12 @@ static int get_data_characteristics(const double* const data, size_t count,
     return 1;
 }
 
-int generate_single_metric_data(const char[] metric, double start, double step, double end){
+// #############################################################################
+// # Data Generation
+// #############################################################################
+
+static int generate_single_metric_data(const char[] metric, double start, double step, double end){
+
 
 
     return 1;
