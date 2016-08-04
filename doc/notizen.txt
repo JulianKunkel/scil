@@ -1,0 +1,12 @@
+quantize.c:
+    - begrenzte double precision führt zu Werten, die minimal die
+        angegebene absolute Fehlertoleranz brechen
+
+compression-chain.c:
+    - woher weiß man die erwartete Größe von Buffern?
+        (vielleicht einmal mit anderem tool komprimieren?)
+    => das geht bei mir.
+
+scilI_determine_randomness:
+    - Ist es sinnvoll die randomness von Daten mit lz4 zu berechnen?
+    - Wäre es nicht besser allgemein benutzte Größen wie z.B. Standardabweichung dafür zu verwenden?
