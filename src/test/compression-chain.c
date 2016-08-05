@@ -81,11 +81,11 @@ int main(){
   test("dummy-precond,dummy-precond", 93, 1);
   test("dummy-precond,dummy-precond,dummy-precond,dummy-precond", 105, 1);
 
-  test("dummy-precond,lz4", 60, 0);
-  test("dummy-precond,dummy-precond,lz4", 66, 0);
-  test("dummy-precond,dummy-precond,dummy-precond,lz4", 73, 0);
+  test("dummy-precond,lz4", 58, 0);
+  test("dummy-precond,dummy-precond,lz4", 64, 0);
+  test("dummy-precond,dummy-precond,dummy-precond,lz4", 71, 0);
 
-  test("lz4", 58, 0);
+  test("lz4", 56, 0);
   test("zfp-abstol", 98, 0);
 
   test("zfp-abstol,lz4", 47, 0);
