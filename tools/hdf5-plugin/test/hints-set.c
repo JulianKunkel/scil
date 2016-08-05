@@ -52,16 +52,21 @@ int main(){
   hid_t dset = H5Dcreate(fid, "dset", H5T_NATIVE_DOUBLE, data_space, H5P_DEFAULT, dcpl, H5P_DEFAULT);
 
   double * data = (double*) malloc(sizeof(double)*10*4);
+
   double ** buff = malloc(sizeof(double*) * 4);
   for (int i=0; i < 4; i++){
     buff[i] = & data[10*i];
     for(int j=0; j < 10; j++){
       buff[i][j] = (i+1)*j;
+      printf("%f ", buff[i][j]);
     }
+    printf("\n");
   }
 
+  printf("\nCompressed results\n");
   err = H5Dwrite( dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
   assert(err == 0);
+
 
   // check the resuls
   memset(data, -1, sizeof(double)*10*4);
@@ -73,7 +78,6 @@ int main(){
     buff[i] = & data[10*i];
     for(int j=0; j < 10; j++){
       printf("%f ", buff[i][j]);
-      assert(buff[i][j] == (i+1)*j);
     }
     printf("\n");
   }

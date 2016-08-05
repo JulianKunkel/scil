@@ -343,7 +343,6 @@ void scil_hints_print(const scil_hints* h)
 
 int scil_destroy_compression_context(scil_context_p* out_ctx)
 {
-		free(& (*out_ctx)->hints);
     free(*out_ctx);
     *out_ctx = NULL;
 
