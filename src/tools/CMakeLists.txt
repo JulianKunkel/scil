@@ -12,6 +12,9 @@ install(TARGETS scil-pattern-plotter RUNTIME DESTINATION bin)
 add_executable(scil-compress-csv scil-compress-csv.c)
 target_link_libraries(scil-compress-csv scil)
 
+add_executable(scil-gen-chooser-data scil-gen-chooser-data.c)
+target_link_libraries(scil-gen-chooser-data scil scil-patterns)
+
 install(TARGETS scil-compress-csv DESTINATION bin)
 
 install(FILES scil-plot-csv.R DESTINATION bin)
