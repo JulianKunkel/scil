@@ -32,7 +32,7 @@
 #define DEFAULT_SIGNIFICANT_BITS         7
 
 // #############################################################################
-// # Data Characteristics Aquistion
+// # Data Characteristics Aquisition
 // #############################################################################
 
 static double get_data_minimum(const double* const data, size_t count){
@@ -54,7 +54,7 @@ static double get_data_maximum(const double* const data, size_t count){
         if (data[i] > max) { max = data[i]; }
     }
 
-    *maximum = max;
+    return max;
 }
 
 static double get_data_mean(const double* const data, size_t count){
@@ -68,7 +68,7 @@ static double get_data_mean(const double* const data, size_t count){
       return mn / count;
 }
 
-static int compdblp(const void* const a, const void* const b){
+static int compdblp(const void* a, const void* b){
 
     if (*(double*)a > *(double*)b){ return 1; }
     if (*(double*)a < *(double*)b){ return -1; }
@@ -77,13 +77,13 @@ static int compdblp(const void* const a, const void* const b){
 static double get_data_median(const double* const data, size_t count){
 
     allocate(double, tmp_buf, count);
-    memcpy(tmp_buf, data, count);
+    memcpy(tmp_buf, data, count * sizeof(double));
 
-    qsort(tmp_buf, count, sizeof(double) * count, compdblp);
+    qsort(tmp_buf, count, sizeof(double), compdblp);
 
-    double median;
+    double median = 0.0;
 
-    if (count % 2 == 0) { median = (tmp_buff[count/2] + tmp_buf[count/2 + 1]) / 2; }
+    if (count % 2 == 0) { median = 0.5 * (tmp_buf[count/2] + tmp_buf[count/2 + 1]); }
     else                { median = tmp_buf[count/2]; }
 
     free(tmp_buf);
@@ -91,30 +91,30 @@ static double get_data_median(const double* const data, size_t count){
     return median;
 }
 
-static double get_standard_deviation(const double* const data, size_t count, double mean){
+static double get_data_std_deviation(const double* const data, size_t count, double mean){
 
-    double variance = 0.0;
+    double variance_sum = 0.0;
 
     for (size_t i = 0; i < count; i++) {
         double dif = data[i] - mean;
-        variance += dif * dif;
+        variance_sum += dif * dif;
     }
 
-    return sqrt(variance);
+    return sqrt(variance_sum / count);
 }
 
 static int get_data_characteristics(const double* const data, size_t count,
                                     double* const minimum   , double* const maximum,
                                     double* const mean      , double* const median,
-                                    double* const standard_deviation){
+                                    double* const std_deviation){
 
-    *minimum            = get_data_minimum(data, count);
-    *maximum            = get_data_maximum(data, count);
-    *mean               = get_data_mean(data, count);
-    *median             = get_data_median(data, count);
-    *standard_deviation = get_data_standard_deviation(data, count, *mean);
+    *minimum               = get_data_minimum(data, count);
+    *maximum               = get_data_maximum(data, count);
+    *mean                  = get_data_mean(data, count);
+    *median                = get_data_median(data, count);
+    *std_deviation         = get_data_std_deviation(data, count, *mean);
 
-    return 1;
+    return 0;
 }
 
 // #############################################################################
@@ -125,27 +125,144 @@ static int benchmark_data(const double* const data, const scil_dims* const dims)
 
     double minimum, maximum;
     double mean, median;
-    double standard_deviation;
+    double std_deviation;
 
-    get_data_characteristics(data, scil_get_data_count(dims),
-                             &minimum, &maximum, 
-                             &mean, &median,
-                             &standard_deviation);
+    get_data_characteristics(data          , scil_get_data_count(dims),
+                             &minimum      , &maximum,
+                             &mean         , &median,
+                             &std_deviation);
 
+    printf("#minimum,maximum,mean,median,standard deviation\n");
+    printf("%f,%f,%f,%f,%f\n", minimum, maximum, mean, median, std_deviation);
 
-
+    return 0;
 }
 
-int main(int argc, char** argv){
 
-    const size_t count = 1000000;
 
-    allocate(double, data, count);
+static void iterate_random_pattern_minmax_negmin(scil_dims* dims, double* const data) {
 
-    scil_dims dims;
-    scil_init_dims_1d(dims, count);
+    float min_neg = -1e6;
+    float max_neg = -0.99e-6;
+    float min_pos = 1e-6;
+    float max_pos = 1.01e6;
 
-    scilP_create_pattern_double(&dims, data, char *name, float mn, float mx, float arg, float arg2)
+    for (float min = min_neg; min < max_neg; min *= 0.1f) {
+
+        // Negative maximum
+        for (float max = min; max < max_neg; max *= 0.1f){
+            scilP_create_pattern_double(dims, data, "random", min, max, 0.0f, 0.0f);
+        }
+
+        // Zero maximum
+        float max = 0.0f;
+        scilP_create_pattern_double(dims, data, "random", min, max, 0.0f, 0.0f);
+
+        // Positive maximum
+        for (float max = min_pos; max < max_pos; max *= 10.0f) {
+            scilP_create_pattern_double(dims, data, "random", min, max, 0.0f, 0.0f);
+        }
+    }
+}
+static void iterate_random_pattern_minmax_zeromin(scil_dims* dims, double* const data) {
+
+    float min_pos = 1e-6;
+    float max_pos = 1.01e6;
+
+    float min = 0.0f;
+
+    // Zero maximum
+    float max = 0.0f;
+    scilP_create_pattern_double(dims, data, "random", min, max, 0.0f, 0.0f);
+
+    // Positive maximum
+    for (float max = min_pos; max < max_pos; max *= 10.0f) {
+        scilP_create_pattern_double(dims, data, "random", min, max, 0.0f, 0.0f);
+    }
+}
+static void iterate_random_pattern_minmax_posmin(scil_dims* dims, double* const data){
+
+    float min_pos = 1e-6;
+    float max_pos = 1.01e6;
+
+    for (float min = min_pos; min < max_pos; min *= 10.0f) {
+
+        // Positive maximum
+        for (float max = min; max < max_pos; max *= 10.0f) {
+            scilP_create_pattern_double(dims, data, "random", min, max, 0.0f, 0.0f);
+        }
+    }
+}
+static void iterate_random_pattern_minmax(scil_dims* dims, double* const data) {
+
+    iterate_random_pattern_minmax_negmin(dims, data);
+    iterate_random_pattern_minmax_zeromin(dims, data);
+    iterate_random_pattern_minmax_posmin(dims, data);
+}
+
+static void iterate_patterns(double* const data, size_t count) {
+    for (uint8_t pattern = 0; pattern < 4; ++pattern) {
+
+        char* name = scilP_library_pattern_name(pattern);
+
+        switch (pattern) {
+        case 0: //
+            float min_min = -1e6;
+            float min_max = -0.99e-6;
+
+            //Negative
+            for (float min = min_min; min < min_max; min *= 0.1f) {
+                for (float max = min * 0.1f; max < )
+            }
+        }
+        scilP_create_pattern_double(&dims, data, name, float mn, float mx, float arg, float arg2)
+
+    }
+}
+
+static void iterate_dimensions(){
+    for (uint8_t d_size = 1; d_size < 5; ++d_size) {
+
+        scil_dims dims;
+        size_t count_per_dim = (size_t)(pow((double)count, 1.0 / d_size));
+
+        switch (d_size) {
+        case 1: scil_init_dims_1d(&dims, count_per_dim); break;
+        case 2: scil_init_dims_2d(&dims, count_per_dim, count_per_dim); break;
+        case 3: scil_init_dims_3d(&dims, count_per_dim, count_per_dim, count_per_dim); break;
+        case 4: scil_init_dims_4d(&dims, count_per_dim, count_per_dim, count_per_dim, count_per_dim); break;
+        }
+
+        size_t count = (size_t)(pow(count_per_dim, d_size));
+        allocate(double, data, count);
+
+        iterate_patterns();
+
+        free(dims);
+        free(data);
+    }
+}
+
+int main(void){
+
+    const size_t min_count = 10;
+    const size_t max_count = 100000000;
+
+    for (size_t size = min_count; size < max_count + 1; size *= 10) {
+        iterate_dimensions();
+    }
+
+    scilP_create_pattern_double(&dims, data, "random", 0.0f, 1.0f, 0.0f, 0.0f);
+
+    for (size_t i = 0; i < 5; i++) {
+        printf("%f\n", data[i]);
+    }
+    printf("[...]\n");
+    for (size_t i = count-5; i < count; i++) {
+        printf("%f\n", data[i]);
+    }
+
+    benchmark_data(data, &dims);
 
     return 0;
 }
