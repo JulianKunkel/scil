@@ -159,7 +159,6 @@ static void create_library_patterns_if_needed(){
   library_add("sin", "sin3", 1, 100, 3.0, 1, 0); // 3 sines
   library_add("sin", "sin3p", 1, 100, 2.0, 3, 0); // 3 passes, 2 sines
 
-
   library_add("poly4", "poly4", 1, 100, -1, 5, 0);
 
   library_add("simplexNoise", "simplex102", -1, 1, 1.0, 2, 0); // 2 passes
