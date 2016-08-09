@@ -108,18 +108,33 @@ static int get_data_characteristics(const double* const data, size_t count,
                                     double* const mean      , double* const median,
                                     double* const std_deviation){
 
-    *minimum               = get_data_minimum(data, count);
-    *maximum               = get_data_maximum(data, count);
-    *mean                  = get_data_mean(data, count);
-    *median                = get_data_median(data, count);
-    *std_deviation         = get_data_std_deviation(data, count, *mean);
+    *minimum       = get_data_minimum(data, count);
+    *maximum       = get_data_maximum(data, count);
+    *mean          = get_data_mean(data, count);
+    *median        = get_data_median(data, count);
+    *std_deviation = get_data_std_deviation(data, count, *mean);
 
     return 0;
 }
 
 // #############################################################################
-// # Benchmark
+// # Data generation & Benchmark
 // #############################################################################
+
+typedef struct {
+    char* pattern_name;
+    float min_min,  max_max,  step;      // Minimum iteration commences by multiplying step to itervar
+    float arg_min,  arg_max,  arg_step;  // Arg1 iteration commences by summing step to itervar
+    float arg2_min, arg2_max, arg2_step; // Arg2 iteration commences by summing step to itervar
+} pattern_iterator_data_t;
+
+static pattern_iterator_data_t pid;
+pid.min_min  = 1e-6; pid.max_max  = 1.1e6; pid.step      = 10.0f;
+pid.arg_min  = 0.0f; pid.arg_max  = 10.1f; pid.arg_step  = 1.0f;
+pid.arg2_min = 0.0f; pid.arg2_max = 10.1f; pid.arg2_step = 1.0f;
+
+double* data = NULL;
+scil_dims dims;
 
 static int benchmark_data(const double* const data, const scil_dims* const dims){
 
@@ -138,92 +153,82 @@ static int benchmark_data(const double* const data, const scil_dims* const dims)
     return 0;
 }
 
+static void iterate_4_algorithms(){
 
+}
 
-static void iterate_random_pattern_minmax_negmin(scil_dims* dims, double* const data) {
+static void iterate_3_3_arg2(float min, float max, float arg){
 
-    float min_neg = -1e6;
-    float max_neg = -0.99e-6;
-    float min_pos = 1e-6;
-    float max_pos = 1.01e6;
+}
+static void iterate_3_2_arg(float min, float max){
 
-    for (float min = min_neg; min < max_neg; min *= 0.1f) {
+}
+static void iterate_3_1_mn_mx() {
+
+    float min_min = pid.min_min;
+    float max_max = pid.max_max;
+    float step    = pid.step;
+
+    float big_neg_limit = -0.9e-6;
+    float big_pos_limit = 1.1e6;
+
+    // Negative minimum
+    for (float min = -max_max; min < big_neg_limit; min /= step) {
 
         // Negative maximum
-        for (float max = min; max < max_neg; max *= 0.1f){
-            scilP_create_pattern_double(dims, data, "random", min, max, 0.0f, 0.0f);
+        for (float max = min; max < big_neg_limit; max /= step) {
+            iterate_3_2_arg(min, max);
         }
 
         // Zero maximum
-        float max = 0.0f;
-        scilP_create_pattern_double(dims, data, "random", min, max, 0.0f, 0.0f);
+        iterate_3_2_arg(min, 0.0f);
 
         // Positive maximum
-        for (float max = min_pos; max < max_pos; max *= 10.0f) {
-            scilP_create_pattern_double(dims, data, "random", min, max, 0.0f, 0.0f);
+        for (float max = min_min; max < big_pos_limit; max *= step) {
+            iterate_3_2_arg(min, max);
         }
     }
-}
-static void iterate_random_pattern_minmax_zeromin(scil_dims* dims, double* const data) {
 
-    float min_pos = 1e-6;
-    float max_pos = 1.01e6;
+    // Zero minimum
+    { float min = 0.0f;
 
-    float min = 0.0f;
-
-    // Zero maximum
-    float max = 0.0f;
-    scilP_create_pattern_double(dims, data, "random", min, max, 0.0f, 0.0f);
-
-    // Positive maximum
-    for (float max = min_pos; max < max_pos; max *= 10.0f) {
-        scilP_create_pattern_double(dims, data, "random", min, max, 0.0f, 0.0f);
-    }
-}
-static void iterate_random_pattern_minmax_posmin(scil_dims* dims, double* const data){
-
-    float min_pos = 1e-6;
-    float max_pos = 1.01e6;
-
-    for (float min = min_pos; min < max_pos; min *= 10.0f) {
+        // Zero maximum
+        iterate_3_2_arg(min, 0.0f);
 
         // Positive maximum
-        for (float max = min; max < max_pos; max *= 10.0f) {
-            scilP_create_pattern_double(dims, data, "random", min, max, 0.0f, 0.0f);
+        for (float max = min_min; max < big_pos_limit; max *= step) {
+            iterate_3_2_arg(min, max);
+        }
+    }
+
+    // Positive minimum
+    for (float min = min_min; min < big_pos_limit; min *= step) {
+
+        // Positive maximum
+        for (float max = min; max < big_pos_limit; max *= step) {
+            iterate_3_2_arg(min, max);
         }
     }
 }
-static void iterate_random_pattern_minmax(scil_dims* dims, double* const data) {
 
-    iterate_random_pattern_minmax_negmin(dims, data);
-    iterate_random_pattern_minmax_zeromin(dims, data);
-    iterate_random_pattern_minmax_posmin(dims, data);
+static void iterate_2_patterns() {
+
+    pid.name = "constant"; // TODO: for each patter one function
+    iterate_3_1_mn_mx();
+    pid.name = "random";
+    iterate_3_1_mn_mx();
+    pid.name = "step";
+    iterate_3_1_mn_mx();
+    pid.name = "sin";
+    iterate_3_1_mn_mx();
+    pid.name = "poly4";
+    iterate_3_1_mn_mx();
 }
 
-static void iterate_patterns(double* const data, size_t count) {
-    for (uint8_t pattern = 0; pattern < 4; ++pattern) {
+static void iterate_1_dimensions(size_t count){
 
-        char* name = scilP_library_pattern_name(pattern);
-
-        switch (pattern) {
-        case 0: //
-            float min_min = -1e6;
-            float min_max = -0.99e-6;
-
-            //Negative
-            for (float min = min_min; min < min_max; min *= 0.1f) {
-                for (float max = min * 0.1f; max < )
-            }
-        }
-        scilP_create_pattern_double(&dims, data, name, float mn, float mx, float arg, float arg2)
-
-    }
-}
-
-static void iterate_dimensions(){
     for (uint8_t d_size = 1; d_size < 5; ++d_size) {
 
-        scil_dims dims;
         size_t count_per_dim = (size_t)(pow((double)count, 1.0 / d_size));
 
         switch (d_size) {
@@ -233,34 +238,26 @@ static void iterate_dimensions(){
         case 4: scil_init_dims_4d(&dims, count_per_dim, count_per_dim, count_per_dim, count_per_dim); break;
         }
 
-        size_t count = (size_t)(pow(count_per_dim, d_size));
-        allocate(double, data, count);
+        data = (double*)malloc(scil_get_data_size(SCIL_TYPE_DOUBLE, &dims));
 
-        iterate_patterns();
+        iterate_2_patterns();
 
         free(dims);
         free(data);
     }
 }
 
-int main(void){
+static void iterate_0_datasize(){
 
     const size_t min_count = 10;
-    const size_t max_count = 100000000;
+    const size_t max_count = 100000001;
 
-    for (size_t size = min_count; size < max_count + 1; size *= 10) {
-        iterate_dimensions();
+    for (size_t size = min_count; size < max_count; size *= 10) {
+        iterate_1_dimensions(size_t count);
     }
+}
 
-    scilP_create_pattern_double(&dims, data, "random", 0.0f, 1.0f, 0.0f, 0.0f);
-
-    for (size_t i = 0; i < 5; i++) {
-        printf("%f\n", data[i]);
-    }
-    printf("[...]\n");
-    for (size_t i = count-5; i < count; i++) {
-        printf("%f\n", data[i]);
-    }
+int main(void){
 
     benchmark_data(data, &dims);
 
