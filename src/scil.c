@@ -30,7 +30,6 @@
 #include <algo/algo-sigbits.h>
 #include <algo/algo-zfp-abstol.h>
 #include <algo/algo-zfp-precision.h>
-#include <algo/algo-opj.h>
 #include <algo/lz4fast.h>
 #include <algo/precond-dummy.h>
 
@@ -48,7 +47,6 @@ static scil_compression_algorithm * algo_array[] = {
 	& algo_zfp_precision,
 	& algo_lz4fast,
 	& algo_precond_dummy,
-	& algo_opj,
 	NULL
 };
 

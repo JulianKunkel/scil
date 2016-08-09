@@ -139,7 +139,7 @@ int test_correctness(const char* name, double* buffer_in, scil_dims dims)
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int main(int argc, char** argv)
 {
-    const int variableSize = 1000000 / sizeof(double);
+    const int variableSize = 10000 / sizeof(double);
     int ret;
     allocate(double, buffer_in, variableSize);
 
@@ -150,6 +150,7 @@ int main(int argc, char** argv)
 
     for (int i = 0; i < scilP_library_size(); i++) {
         char* name = scilP_library_pattern_name(i);
+        printf("processing: %s\n", name);
         scilP_library_create_pattern_double(i, &dims, buffer_in);
         assert(ret == SCIL_NO_ERR);
         test_correctness(name, buffer_in, dims);

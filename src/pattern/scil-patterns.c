@@ -127,6 +127,7 @@ static void library_add(char * pattern, char * name, float mn, float mx, float a
     }
     va_end(vl);
   }
+
   library_pattern p = {pattern, name, mn, mx, arg, arg2, m, mutator_count};
   library[library_size] = p;
 
