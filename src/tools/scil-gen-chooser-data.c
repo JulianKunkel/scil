@@ -133,6 +133,12 @@ pid.min_min  = 1e-6; pid.max_max  = 1.1e6; pid.step      = 10.0f;
 pid.arg_min  = 0.0f; pid.arg_max  = 10.1f; pid.arg_step  = 1.0f;
 pid.arg2_min = 0.0f; pid.arg2_max = 10.1f; pid.arg2_step = 1.0f;
 
+float negative_minimum = -1e6;
+float negative_limit   = 0.9e-6;
+float positive_minimum = 1e-6;
+float positive_limit   = 1.1e6;
+float factor_step      = 10.0f;
+
 double* data = NULL;
 scil_dims dims;
 
@@ -153,61 +159,210 @@ static int benchmark_data(const double* const data, const scil_dims* const dims)
     return 0;
 }
 
-static void iterate_4_algorithms(){
+// Systematic params
+static void iterate_6_poly4_arg2(float mn, float mx, float arg){
 
+    for (int arg2 = 1; arg2 < 33; arg2 *= 2){
+
+        scilP_create_pattern_double(&dims, data, "sin", mn, mx, arg, arg2);
+    }
 }
+static void iterate_5_poly4_arg(float mn, float mx){
 
-static void iterate_3_3_arg2(float min, float max, float arg){
+    for (int arg = 1; arg < 101; arg *= 10) {
 
+        iterate_6_poly4_arg2(float mn, float mx, float arg)
+    }
 }
-static void iterate_3_2_arg(float min, float max){
+static void iterate_4_poly4_mx_negative(float mn){
 
+    for (float mx = min; mx < negative_limit; mx /= factor_step) {
+        iterate_5_poly4_arg(mn, mx);
+    }
 }
-static void iterate_3_1_mn_mx() {
+static void iterate_4_poly4_mx_zero(float mn){
 
-    float min_min = pid.min_min;
-    float max_max = pid.max_max;
-    float step    = pid.step;
+    iterate_5_poly4_arg(mn, 0.0f);
+}
+static void iterate_4_poly4_mx_positive(float mn){
 
-    float big_neg_limit = -0.9e-6;
-    float big_pos_limit = 1.1e6;
+    for (float mx = positive_minimum; mx < positive_limit; mx *= factor_step) {
+        iterate_5_poly4_arg(mn, mx);
+    }
+}
+static void iterate_3_poly4_mn(){
 
     // Negative minimum
-    for (float min = -max_max; min < big_neg_limit; min /= step) {
+    for (float mn = negative_minimum; mn < negative_limit; mn /= factor_step) {
 
-        // Negative maximum
-        for (float max = min; max < big_neg_limit; max /= step) {
-            iterate_3_2_arg(min, max);
-        }
-
-        // Zero maximum
-        iterate_3_2_arg(min, 0.0f);
-
-        // Positive maximum
-        for (float max = min_min; max < big_pos_limit; max *= step) {
-            iterate_3_2_arg(min, max);
-        }
+        iterate_4_poly4_mx_negative(mn);
+        iterate_4_poly4_mx_zero(mn);
+        iterate_4_poly4_mx_positive(mn);
     }
 
     // Zero minimum
-    { float min = 0.0f;
+    { float mn = 0.0f;
 
-        // Zero maximum
-        iterate_3_2_arg(min, 0.0f);
-
-        // Positive maximum
-        for (float max = min_min; max < big_pos_limit; max *= step) {
-            iterate_3_2_arg(min, max);
-        }
+        iterate_4_poly4_mx_zero(mn);
+        iterate_4_poly4_mx_positive(mn);
     }
 
     // Positive minimum
-    for (float min = min_min; min < big_pos_limit; min *= step) {
+    for (float mn = positive_minimum; mn < positive_limit; mn *= factor_step) {
 
-        // Positive maximum
-        for (float max = min; max < big_pos_limit; max *= step) {
-            iterate_3_2_arg(min, max);
-        }
+        iterate_4_poly4_mx_positive(mn);
+    }
+}
+
+static void iterate_5_sin_arg(){
+
+    for (int arg = 1; arg < arg_maximum; ++arg) {
+
+        scilP_create_pattern_double(&dims, data, "sin", mn, mx, arg, 0.0f);
+    }
+}
+static void iterate_4_sin_mx_negative(float mn){
+
+    for (float mx = min; mx < negative_limit; mx /= factor_step) {
+        iterate_5_sin_arg(mn, mx);
+    }
+}
+static void iterate_4_sin_mx_zero(float mn){
+
+    iterate_5_sin_arg(mn, 0.0f);
+}
+static void iterate_4_sin_mx_positive(float mn){
+
+    for (float mx = positive_minimum; mx < positive_limit; mx *= factor_step) {
+        iterate_5_sin_arg(mn, mx);
+    }
+}
+static void iterate_3_sin_mn(){
+
+    // Negative minimum
+    for (float mn = negative_minimum; mn < negative_limit; mn /= factor_step) {
+
+        iterate_4_sin_mx_negative(mn);
+        iterate_4_sin_mx_zero(mn);
+        iterate_4_sin_mx_positive(mn);
+    }
+
+    // Zero minimum
+    { float mn = 0.0f;
+
+        iterate_4_sin_mx_zero(mn);
+        iterate_4_sin_mx_positive(mn);
+    }
+
+    // Positive minimum
+    for (float mn = positive_minimum; mn < positive_limit; mn *= factor_step) {
+
+        iterate_4_sin_mx_positive(mn);
+    }
+}
+
+static void iterate_5_step_arg(float mn, float mx) {
+
+    for (int arg = 1; arg < 65; arg *= 2) {
+
+        scilP_create_pattern_double(&dims, data, "step", mn, mx, arg, 0.0f);
+    }
+}
+static void iterate_4_step_mx_negative(float mn) {
+
+    for (float mx = min; mx < negative_limit; mx /= factor_step) {
+        iterate_5_step_arg(mn, mx);
+    }
+}
+static void iterate_4_step_mx_zero(float mn) {
+
+    iterate_5_step_arg(mn, 0.0f);
+}
+static void iterate_4_step_mx_positive(float mn) {
+
+    for (float mx = positive_minimum; mx < positive_limit; mx *= factor_step) {
+        iterate_5_step_arg(mn, mx);
+    }
+}
+static void iterate_3_step_mn() {
+
+    // Negative minimum
+    for (float mn = negative_minimum; mn < negative_limit; mn /= factor_step) {
+
+        iterate_4_step_mx_negative(mn);
+        iterate_4_step_mx_zero(mn);
+        iterate_4_step_mx_positive(mn);
+    }
+
+    // Zero minimum
+    { float mn = 0.0f;
+
+        iterate_4_step_mx_zero(mn);
+        iterate_4_step_mx_positive(mn);
+    }
+
+    // Positive minimum
+    for (float mn = positive_minimum; mn < positive_limit; mn *= factor_step) {
+
+        iterate_4_step_mx_positive(mn);
+    }
+}
+
+static void iterate_4_random_mx_negative(float mn) {
+
+    for (float mx = min; mx < negative_limit; mx /= factor_step) {
+
+        scilP_create_pattern_double(&dims, data, "random", mn, mx, 0.0f, 0.0f);
+    }
+}
+static void iterate_4_random_mx_zero(float mn) {
+
+    scilP_create_pattern_double(&dims, data, "random", mn, 0.0f, 0.0f, 0.0f);
+}
+static void iterate_4_random_mx_positive(float mn) {
+
+    for (float mx = positive_minimum; mx < positive_limit; mx *= factor_step) {
+
+        scilP_create_pattern_double(&dims, data, "random", mn, mx, 0.0f, 0.0f);
+    }
+}
+static void iterate_3_random_mn() {
+
+    // Negative minimum
+    for (float mn = negative_minimum; mn < negative_limit; mn /= factor_step) {
+
+        iterate_4_random_mx_negative(mn);
+        iterate_4_random_mx_zero(mn);
+        iterate_4_random_mx_positive(mn);
+    }
+
+    // Zero minimum
+    { float mn = 0.0f;
+
+        iterate_4_random_mx_zero(mn);
+        iterate_4_random_mx_positive(mn);
+    }
+
+    // Positive minimum
+    for (float mn = positive_minimum; mn < positive_limit; mn *= factor_step) {
+
+        iterate_4_random_mx_positive(mn);
+    }
+}
+
+static void iterate_3_constant_mn(){
+
+    // Negative constant
+    for (float mn = negative_minimum; mn < negative_limit; mn /= factor_step) {
+        scilP_create_pattern_double(&dims, data, "constant", mn, 0.0f, 0.0f, 0.0f);
+    }
+
+    // Zero constant
+    scilP_create_pattern_double(&dims, data, "constant", 0.0f, 0.0f, 0.0f, 0.0f);
+
+    // Positive constant
+    for (float mn = positive_minimum; mn < positive_limit; mn *= factor_step) {
+        scilP_create_pattern_double(&dims, data, "constant", mn, 0.0f, 0.0f, 0.0f);
     }
 }
 
@@ -223,6 +378,85 @@ static void iterate_2_patterns() {
     iterate_3_1_mn_mx();
     pid.name = "poly4";
     iterate_3_1_mn_mx();
+}
+
+// Random params
+
+static void random_poly4(){
+
+    float seed = (float)rand();
+    float points = 1.0f + (float)(rand() % 63);
+
+    scilP_create_pattern_double(&dims, data, "poly4", 0.0f, 1.0f, seed, points); // min and max don't matter
+}
+static void random_sin(){
+
+    int iexp;
+    do{
+        iexp = rand() % 13 - 6;
+    }while(iexp == 0);
+    float height = powf(-10.0f + 20.0f * (float)rand()/RAND_MAX, (float)iexp);
+
+    float octaves = 1.0f + (float)(rand() % 10);
+
+    scilP_create_pattern_double(&dims, data, "sin", 0.0f, 1.0f, height, octaves); // min and max don't matter
+}
+static void random_steps(){
+
+    int iexp;
+    do{
+        iexp = rand() % 13 - 6;
+    }while(iexp == 0);
+    float mx_base = 1.0f + 9.0f * (float)rand()/RAND_MAX;
+    float mn_base = -mx_base;
+    float offset = powf(-10.0f + 20.0f * (float)rand()/RAND_MAX, (float)iexp + rand() % 4 - 1);
+
+    float mn = powf(mn_base, (float)iexp) + offset;
+    float mx = powf(mx_base, (float)iexp) + offset;
+
+    float arg = 2.0f + 98.0f * (float)rand()/RAND_MAX;
+
+    scilP_create_pattern_double(&dims, data, "steps", mn, mx, arg, 0.0f);
+}
+static void random_random(){
+
+    int iexp;
+    do{
+        iexp = rand() % 13 - 6;
+    }while(iexp == 0);
+    float mx_base = 1.0f + 9.0f * (float)rand()/RAND_MAX;
+    float mn_base = -mx_base;
+    float offset = powf(-10.0f + 20.0f * (float)rand()/RAND_MAX, (float)iexp + rand() % 4 - 1);
+
+    float mn = powf(mn_base, (float)iexp) + offset;
+    float mx = powf(mx_base, (float)iexp) + offset;
+
+    scilP_create_pattern_double(&dims, data, "random", mn, mx, 0.0f, 0.0f);
+}
+static void random_constant(){
+
+    float base = 1.0f + 9.0f * (float)rand()/RAND_MAX;
+
+    int iexp;
+    do{
+        iexp = rand() % 13 - 6;
+    }while(iexp == 0);
+
+    float mn = powf(base, (float)iexp);
+
+    scilP_create_pattern_double(&dims, data, "constant", mn, 0.0f, 0.0f, 0.0f);
+}
+
+static void iterate_2_random_patterns(size_t count){
+
+    for (size_t i = 0; i < count; i++) {
+
+        random_constant();
+        random_random();
+        random_steps();
+        random_sin();
+        random_poly4();
+    }
 }
 
 static void iterate_1_dimensions(size_t count){
