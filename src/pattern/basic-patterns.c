@@ -36,7 +36,7 @@ static int steps(scil_dims * dims, double * buffer, float mn, float mx, float ar
     return SCIL_EINVAL;
   }
   int steps = (int) arg;
-  float step_width = (mx - mn) / (steps-1);
+  float step_width = (mx - mn) / (steps-1); // Possible division by 0
   size_t count = scil_get_data_count(dims);
   for (size_t i=0; i < count; i++){
     buffer[i] = mn + (i % steps) * step_width;
