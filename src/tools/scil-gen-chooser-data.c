@@ -131,7 +131,7 @@ double* data = NULL;
 scil_dims dims;
 
 scil_hints hints;
-scil_init_hints(&hints);
+//scil_init_hints(&hints);
 
 static int benchmark_data(const double* const data, const scil_dims* const dims){
 
@@ -378,9 +378,8 @@ static void iterate_4_algos(){
     for (uint8_t i = 0; i < count; ++i) {
 
         scil_init_hints(&hints);
-        hints.force_compression_methods = itoa(i);
+        snprintf(hints.force_compression_methods, 8, "%d", i);
     }
-
 }
 
 // Random params
@@ -478,9 +477,9 @@ static void iterate_1_dimensions(size_t count){
 
         data = (double*)malloc(scil_get_data_size(SCIL_TYPE_DOUBLE, &dims));
 
-        iterate_2_patterns();
+        iterate_2_random_patterns(1);
 
-        free(dims);
+        //free(dims);
         free(data);
     }
 }
@@ -491,7 +490,7 @@ static void iterate_0_datasize(){
     const size_t max_count = 100000001;
 
     for (size_t size = min_count; size < max_count; size *= 10) {
-        iterate_1_dimensions(size_t count);
+        iterate_1_dimensions(size);
     }
 }
 
