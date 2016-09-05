@@ -2,7 +2,6 @@
 
 #include <algo/algo-quantize.h>
 
-
 #include <scil-internal.h>
 
 #include <assert.h>
@@ -128,4 +127,51 @@ int scil_quantize_buffer_<DATATYPE>(uint64_t* const restrict dest,
 
     return scil_quantize_buffer_minmax_<DATATYPE>(dest, source, count, absolute_tolerance, minimum, maximum);
 }
+
+int scil_quantize_compress_<DATATYPE>(const scil_context_p ctx,
+                                      int64_t * restrict dest,
+                                      byte* restrict header,
+                                      int* header_size_out,
+                                      <DATATYPE>*restrict source,
+                                      const scil_dims* dims)
+{
+    size_t count = scil_get_data_count(dims);
+
+    <DATATYPE> minimum, maximum;
+    scil_find_minimum_maximum_<DATATYPE>(source, count, &minimum, &maximum);
+
+
+    *(double*)header  = (double)minimum;
+    header           += sizeof(double);
+
+    *(double*)header  = ctx->hints.absolute_tolerance;
+    header           += sizeof(double);
+
+    *header_size_out  = 16;
+
+    return scil_quantize_buffer_minmax_<DATATYPE>((uint64_t*)dest, source, count, ctx->hints.absolute_tolerance, minimum, maximum);
+}
+
+int scil_quantize_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
+                                        scil_dims* dims,
+                                        int64_t*restrict source,
+                                        byte* restrict header_end,
+                                        int* header_parsed_out)
+{
+    double minimum = *(double*)(header_end-15);
+    double abstol  = *(double*)(header_end-7);
+    *header_parsed_out = 16;
+
+    return scil_unquantize_buffer_<DATATYPE>(dest, (uint64_t*)source, scil_get_data_count(dims), abstol, minimum);
+}
 // End repeat
+
+scil_compression_algorithm algo_quantize = {
+    .c.Ctype = {
+        CREATE_INITIALIZER(scil_quantize)
+    },
+    "quantize",
+    9,
+    SCIL_COMPRESSOR_TYPE_DATATYPES_CONVERTER,
+    1
+};
