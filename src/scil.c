@@ -32,6 +32,7 @@
 #include <algo/algo-zfp-precision.h>
 #include <algo/lz4fast.h>
 #include <algo/precond-dummy.h>
+#include <algo/algo-quantize.h>
 
 // this file is automatically created
 #include "scil-dtypes.h"
@@ -47,6 +48,7 @@ static scil_compression_algorithm * algo_array[] = {
 	& algo_zfp_precision,
 	& algo_lz4fast,
 	& algo_precond_dummy,
+	& algo_quantize,
 	NULL
 };
 
@@ -207,20 +209,28 @@ int scilI_parse_compression_algorithms(scil_compression_chain_t* chain,
                 chain->precond_count++;
                 break;
             }
-            case (SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES): {
-                if (stage > 2) {
+			case (SCIL_COMPRESSOR_TYPE_DATATYPES_CONVERTER) : {
+				if (stage != 1) { // TODO: Check correctness, I guess?
                     return -1; // INVALID CHAIN
                 }
-                stage                  = 3;
-                chain->byte_compressor = algo;
+                stage                  = 2;
+                chain->data_compressor = algo;
                 break;
-            }
+			}
             case (SCIL_COMPRESSOR_TYPE_DATATYPES): {
                 if (stage != 1) {
                     return -1; // INVALID CHAIN
                 }
                 stage                  = 2;
                 chain->data_compressor = algo;
+                break;
+            }
+			case (SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES): {
+                if (stage > 2) {
+                    return -1; // INVALID CHAIN
+                }
+                stage                  = 3;
+                chain->byte_compressor = algo;
                 break;
             }
         }
