@@ -121,18 +121,6 @@ static int get_data_characteristics(const double* const data, size_t count,
 // # Data generation & Benchmark
 // #############################################################################
 
-typedef struct {
-    char* pattern_name;
-    float min_min,  max_max,  step;      // Minimum iteration commences by multiplying step to itervar
-    float arg_min,  arg_max,  arg_step;  // Arg1 iteration commences by summing step to itervar
-    float arg2_min, arg2_max, arg2_step; // Arg2 iteration commences by summing step to itervar
-} pattern_iterator_data_t;
-
-static pattern_iterator_data_t pid;
-pid.min_min  = 1e-6; pid.max_max  = 1.1e6; pid.step      = 10.0f;
-pid.arg_min  = 0.0f; pid.arg_max  = 10.1f; pid.arg_step  = 1.0f;
-pid.arg2_min = 0.0f; pid.arg2_max = 10.1f; pid.arg2_step = 1.0f;
-
 float negative_minimum = -1e6;
 float negative_limit   = 0.9e-6;
 float positive_minimum = 1e-6;
@@ -141,6 +129,9 @@ float factor_step      = 10.0f;
 
 double* data = NULL;
 scil_dims dims;
+
+scil_hints hints;
+scil_init_hints(&hints);
 
 static int benchmark_data(const double* const data, const scil_dims* const dims){
 
@@ -159,7 +150,7 @@ static int benchmark_data(const double* const data, const scil_dims* const dims)
     return 0;
 }
 
-// Systematic params
+/* Systematic params
 static void iterate_6_poly4_arg2(float mn, float mx, float arg){
 
     for (int arg2 = 1; arg2 < 33; arg2 *= 2){
@@ -379,17 +370,30 @@ static void iterate_2_patterns() {
     pid.name = "poly4";
     iterate_3_1_mn_mx();
 }
+*/
+
+static void iterate_4_algos(){
+
+    uint8_t count = scil_compressors_available();
+    for (uint8_t i = 0; i < count; ++i) {
+
+        scil_init_hints(&hints);
+        hints.force_compression_methods = itoa(i);
+    }
+
+}
 
 // Random params
-
-static void random_poly4(){
+static void iterate_3_random_poly4(){
 
     float seed = (float)rand();
     float points = 1.0f + (float)(rand() % 63);
 
     scilP_create_pattern_double(&dims, data, "poly4", 0.0f, 1.0f, seed, points); // min and max don't matter
+
+
 }
-static void random_sin(){
+static void iterate_3_random_sin(){
 
     int iexp;
     do{
@@ -401,7 +405,7 @@ static void random_sin(){
 
     scilP_create_pattern_double(&dims, data, "sin", 0.0f, 1.0f, height, octaves); // min and max don't matter
 }
-static void random_steps(){
+static void iterate_3_random_steps(){
 
     int iexp;
     do{
@@ -418,7 +422,7 @@ static void random_steps(){
 
     scilP_create_pattern_double(&dims, data, "steps", mn, mx, arg, 0.0f);
 }
-static void random_random(){
+static void iterate_3_random_random(){
 
     int iexp;
     do{
@@ -433,7 +437,7 @@ static void random_random(){
 
     scilP_create_pattern_double(&dims, data, "random", mn, mx, 0.0f, 0.0f);
 }
-static void random_constant(){
+static void iterate_3_random_constant(){
 
     float base = 1.0f + 9.0f * (float)rand()/RAND_MAX;
 
@@ -451,11 +455,11 @@ static void iterate_2_random_patterns(size_t count){
 
     for (size_t i = 0; i < count; i++) {
 
-        random_constant();
-        random_random();
-        random_steps();
-        random_sin();
-        random_poly4();
+        iterate_3_random_constant();
+        iterate_3_random_random();
+        iterate_3_random_steps();
+        iterate_3_random_sin();
+        iterate_3_random_poly4();
     }
 }
 
