@@ -108,16 +108,14 @@ int scil_unquantize_buffer_<DATATYPE>(<DATATYPE>* const restrict buf_out,
 
 int scil_quantize_compress_<DATATYPE>(const scil_context_p ctx,
                                       int64_t * restrict dest,
-                                      byte* restrict header,
-                                      int* header_size_out,
+                                      size_t* restrict out_size,
                                       <DATATYPE>*restrict source,
                                       const scil_dims* dims);
 
 int scil_quantize_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
                                         scil_dims* dims,
                                         int64_t*restrict source,
-                                        byte* restrict header_end,
-                                        int* header_parsed_out);
+                                        const size_t in_size);
 
 // End repeat
 

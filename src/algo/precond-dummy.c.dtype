@@ -43,11 +43,11 @@ int scil_dummy_precond_decompress_<DATATYPE>(<DATATYPE>*restrict data_out, scil_
 
 
 scil_compression_algorithm algo_precond_dummy = {
-    .c.Ptype = {
+    .c.PFtype = {
         CREATE_INITIALIZER(scil_dummy_precond)
     },
     "dummy-precond",
     8,
-    SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER,
+    SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER_FIRST,
     0
 };
