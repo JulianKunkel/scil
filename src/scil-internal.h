@@ -43,8 +43,9 @@
 #define PRECONDITIONER_LIMIT 10
 
 enum compressor_type{
-  SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER,
+  SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER_FIRST,
   SCIL_COMPRESSOR_TYPE_DATATYPES_CONVERTER,
+  SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER_SECOND,
   SCIL_COMPRESSOR_TYPE_DATATYPES,
   SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES
 };
@@ -139,11 +140,14 @@ typedef struct{
 
 // at most we support chaining of 10 preconditioners
 typedef struct {
-  scil_compression_algorithm * pre_cond[PRECONDITIONER_LIMIT]; // preconditioners
+  scil_compression_algorithm * pre_cond_first[PRECONDITIONER_LIMIT]; // preconditioners first stage
+  scil_compression_algorithm * converter;
+  scil_compression_algorithm * pre_cond_second[PRECONDITIONER_LIMIT]; // preconditioners second stage
   scil_compression_algorithm * data_compressor; // datatype compressor
   scil_compression_algorithm * byte_compressor; // byte compressor
 
-  char precond_count;
+  char precond_first_count;
+  char precond_second_count;
   char total_size; // includes data and byte compressors
   char is_lossy;
 } scil_compression_chain_t;

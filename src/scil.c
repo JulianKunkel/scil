@@ -188,9 +188,10 @@ int scilI_parse_compression_algorithms(scil_compression_chain_t* chain,
     strncpy(str, str_in, 4096);
     token = strtok_r(str, ",", &saveptr);
 
-    int stage            = 1; // pre-conditioner
-    chain->precond_count = 0;
-    chain->total_size    = 0;
+    int stage                   = 0; // first pre-conditioner
+    chain->precond_first_count  = 0;
+    chain->precond_second_count = 0;
+    chain->total_size           = 0;
 
     char lossy = 0;
     for (int i = 0; token != NULL; i++) {
@@ -201,24 +202,32 @@ int scilI_parse_compression_algorithms(scil_compression_chain_t* chain,
         chain->total_size++;
         lossy += algo->is_lossy;
         switch (algo->type) {
-            case (SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER): {
-                if (stage != 1) {
+            case (SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER_FIRST): {
+                if (stage != 0) {
                     return -1; // INVALID CHAIN 
                 }
-                chain->pre_cond[(int)chain->precond_count] = algo;
-                chain->precond_count++;
+                chain->pre_cond[(int)chain->precond_first_count] = algo;
+                chain->precond_first_count++;
                 break;
             }
 			case (SCIL_COMPRESSOR_TYPE_DATATYPES_CONVERTER) : {
-				if (stage != 1) { // TODO: Check correctness, I guess?
+				if (stage != 0) {
                     return -1; // INVALID CHAIN
                 }
-                stage                  = 2;
+                stage                  = 1;
                 chain->data_compressor = algo;
                 break;
 			}
-            case (SCIL_COMPRESSOR_TYPE_DATATYPES): {
+			case (SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER_FIRST): {
                 if (stage != 1) {
+                    return -1; // INVALID CHAIN 
+                }
+                chain->pre_cond_second[(int)chain->precond_second_count] = algo;
+                chain->precond_second_count++;
+                break;
+            }
+            case (SCIL_COMPRESSOR_TYPE_DATATYPES): {
+                if (stage > 1) {
                     return -1; // INVALID CHAIN
                 }
                 stage                  = 2;
@@ -236,7 +245,7 @@ int scilI_parse_compression_algorithms(scil_compression_chain_t* chain,
         }
         token = strtok_r(NULL, ",", &saveptr);
     }
-    chain->is_lossy = lossy > 0 ? 1 : 0;
+    chain->is_lossy = lossy > 0;
 
     // at least one algo should be set
     if (chain->total_size == 0) {
@@ -598,13 +607,13 @@ int scil_compress(byte* restrict dest,
 
     // process the compression chain
     // apply the pre-conditioners
-    if (chain->precond_count > 0) {
+    if (chain->precond_first_count > 0) {
         out_size += datatypes_size;
         // add the header at the end of the preconditioners
         byte* header = datatypes_size +
-			(byte*)pick_buffer(0, total_compressors, 1 + total_compressors - chain->precond_count, source, dest, buff_tmp, dest);
+			(byte*)pick_buffer(0, total_compressors, 1 + total_compressors - chain->precond_first_count, source, dest, buff_tmp, dest);
 
-        for (int i = 0; i < chain->precond_count; i++) {
+        for (int i = 0; i < chain->precond_first_count; i++) {
             int header_size_out;
             scil_compression_algorithm* algo = chain->pre_cond[i];
             void* src = pick_buffer(1, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
