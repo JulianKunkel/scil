@@ -139,13 +139,14 @@ int scil_quantize_compress_<DATATYPE>(const scil_context_p ctx,
     <DATATYPE> minimum, maximum;
     scil_find_minimum_maximum_<DATATYPE>(source, count, &minimum, &maximum);
 
-    //*(double*)header  = (double)minimum;
-    //header           += sizeof(double);
+    *(double*)dest = (double)minimum;
+    ++dest;
 
-    //*(double*)header  = ctx->hints.absolute_tolerance;
-    //header           += sizeof(double);
+    *(double*)dest = ctx->hints.absolute_tolerance;
+    ++dest;
 
-    //*header_size_out  = 16;
+    *out_size = 16;
+    *out_size += count * sizeof(int64_t) / sizeof(<DATATYPE>);
 
     return scil_quantize_buffer_minmax_<DATATYPE>((uint64_t*)dest, source, count, ctx->hints.absolute_tolerance, minimum, maximum);
 }
@@ -155,9 +156,11 @@ int scil_quantize_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
                                         int64_t*restrict source,
                                         const size_t in_size)
 {
-    double minimum = 0.0;//*(double*)(header_end-15);
-    double abstol  = 0.0;//*(double*)(header_end-7);
-    //*header_parsed_out = 16;
+    double minimum = *(double*)source;
+    ++source;
+
+    double abstol  = *(double*)source;
+    ++source;
 
     return scil_unquantize_buffer_<DATATYPE>(dest, (uint64_t*)source, scil_get_data_count(dims), abstol, minimum);
 }
