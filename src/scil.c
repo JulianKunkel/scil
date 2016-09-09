@@ -678,7 +678,7 @@ int scil_compress(byte* restrict dest,
         // set the output size to the expected buffer size
         out_size = (size_t)(datatypes_size * 2);
 
-        scil_compression_algorithm* algo = chain->data_compressor;
+        scil_compression_algorithm* algo = chain->converter;
         switch (ctx->datatype) {
             case (SCIL_TYPE_FLOAT):
                 ret = algo->c.Ctype.compress_float(ctx, (int64_t*)dst, &out_size, src, dims);
@@ -708,7 +708,7 @@ int scil_compress(byte* restrict dest,
             // we have to copy some header.
             debugI("Preserving %lld %lld\n", (long long)datatypes_size, (long long)input_size);
             const int preserve = input_size - datatypes_size;
-            memcpy((char*)dst + out_size, (char*)src + datatypes_size, preserve);
+            memcpy((char*)dst + out_size, (char*)src + datatypes_size, preserve); // TODO: potential error
             out_size += preserve;
             scilU_print_buffer(dst, out_size);
         }

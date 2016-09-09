@@ -146,7 +146,7 @@ int scil_quantize_compress_<DATATYPE>(const scil_context_p ctx,
     ++dest;
 
     *out_size = 16;
-    *out_size += count * sizeof(int64_t) / sizeof(<DATATYPE>);
+    *out_size += count * sizeof(int64_t);
 
     return scil_quantize_buffer_minmax_<DATATYPE>((uint64_t*)dest, source, count, ctx->hints.absolute_tolerance, minimum, maximum);
 }
