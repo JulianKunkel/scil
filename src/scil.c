@@ -226,7 +226,7 @@ int scilI_parse_compression_algorithms(scil_compression_chain_t* chain,
                     return -1; // INVALID CHAIN
                 }
                 stage                  = 1;
-                chain->data_compressor = algo;
+                chain->converter = algo;
                 break;
 			}
 			case (SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER_SECOND): {
