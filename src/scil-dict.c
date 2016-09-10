@@ -4,10 +4,16 @@
 #include <string.h>
 
 #define SCIL_DICT_SIZE 100
-static scil_dict_list_t* dict[SCIL_DICT_SIZE]; /* pointer table */
+
+static char* scil_dict_strdup(const char* const s) /* make a duplicate of s */
+{
+    char* p = (char*)malloc(strlen(s)+1); /* +1 for ’\0’ */
+    if (p != NULL) { strcpy(p, s); }
+    return p;
+}
 
 /* hash: form hash value for string s */
-unsigned scil_dict_hash(char* s)
+unsigned scil_dict_hash(const char* s)
 {
     unsigned hashval;
     for (hashval = 0; *s != '\0'; s++)
@@ -15,40 +21,41 @@ unsigned scil_dict_hash(char* s)
     return hashval % SCIL_DICT_SIZE;
 }
 
-char* scil_dict_strdup(char* s) /* make a duplicate of s */
+scil_dict_t scil_dict_create()
 {
-    char* p;
-    p = (char*)malloc(strlen(s)+1); /* +1 for ’\0’ */
-    if (p != NULL)
-       strcpy(p, s);
-    return p;
+
 }
 
-/* lookup: look for s in scil_dict */
-scil_dict_list_t* scil_dict_get(char* s)
+void scil_dict_destroy(scil_dict_t dict)
 {
-    scil_dict_list_t* np;
-    for (np = dict[scil_dict_hash(s)]; np != NULL; np = np->next)
-        if (strcmp(s, np->name) == 0)
-          return np; /* found */
+
+}
+
+/* lookup: look for s in dict */
+scil_dict_element_t* scil_dict_get(const scil_dict_t dict,
+                                   const char* const s)
+{
+    for (scil_dict_element_t* element = &dict[scil_dict_hash(s)]; element != NULL; element = element->next)
+        if (strcmp(s, element->name) == 0)
+          return element; /* found */
     return NULL; /* not found */
 }
 
 /* install: put (name, defn) in scil_dict */
-scil_dict_list_t* scil_dict_put(char* name, char* defn)
+scil_dict_element_t* scil_dict_put(const scil_dict_t dict, const char* const name, const char* const defn)
 {
-    scil_dict_list_t* np;
     unsigned hashval;
-    if ((np = scil_dict_get(name)) == NULL) { /* not found */
-        np = (scil_dict_list_t*)malloc(sizeof(*np));
-        if (np == NULL || (np->name = scil_dict_strdup(name)) == NULL)
+    scil_dict_element_t* element = scil_dict_get(dict, name);
+    if (element == NULL) { /* not found */
+        element = (scil_dict_t)malloc(sizeof(*element));
+        if (element == NULL || (element->name = scil_dict_strdup(name)) == NULL)
           return NULL;
         hashval = scil_dict_hash(name);
-        np->next = dict[hashval];
-        dict[hashval] = np;
+        element->next = &dict[hashval];
+        dict[hashval] = *element;
     } else /* already there */
-        free((void*) np->defn); /*free previous defn */
-    if ((np->defn = scil_dict_strdup(defn)) == NULL)
+        free((void*) element->defn); /*free previous defn */
+    if ((element->defn = scil_dict_strdup(defn)) == NULL)
        return NULL;
-    return np;
+    return element;
 }

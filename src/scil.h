@@ -73,6 +73,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <scil-dict.h>
+
 typedef unsigned char byte;
 typedef int8_t int8;
 typedef int16_t int16;

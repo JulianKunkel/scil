@@ -1,18 +1,20 @@
 #ifndef SCIL_DICT_H_
 #define SCIL_DICT_H_
 
-typedef struct scil_dict_list { /* table entry: */
-    struct scil_dict_list* next; /* next entry in chain */
+typedef struct scil_dict_element scil_dict_element_t;
+
+struct scil_dict_element { /* table entry: */
+    scil_dict_element_t* next; /* next entry in chain */
     char* name; /* defined name */
     char* defn; /* replacement text */
-} scil_dict_list_t;
+};
 
-unsigned scil_dict_hash(char* s);
+typedef scil_dict_element_t* scil_dict_t;
 
-char* scil_dict_strdup(char* s);
+unsigned scil_dict_hash(const char* s);
 
-scil_dict_list_t* scil_dict_get(char* s);
+scil_dict_element_t* scil_dict_get(const scil_dict_t dict, const char* const s);
 
-scil_dict_list_t* scil_dict_put(char* name, char* defn);
+scil_dict_element_t* scil_dict_put(const scil_dict_t dict, const char* const name, const char* const defn);
 
 #endif /* SCIL_DICT_H_ */

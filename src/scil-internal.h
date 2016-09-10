@@ -166,12 +166,15 @@ struct scil_context_t{
   enum SCIL_Datatype datatype;
   scil_hints hints;
 
-  /** special values are special values that must be preserved, we support a list of  values*/
+  /** \brief Special values are special values that must be preserved, we support a list of  values */
   int special_values_count;
   void * special_values;
 
-  // the last compressor used, could be used for debugging
+  /** \brief The last compressor used, could be used for debugging */
   scil_compression_chain_t chain;
+
+  /** \brief Dictionary for pipeline internal parameters */
+  scil_dict_t* pipeline_params;
 };
 
 int scilI_parse_compression_algorithms(scil_compression_chain_t * chain, char * str_in);
