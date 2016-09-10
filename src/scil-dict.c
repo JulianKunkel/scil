@@ -13,22 +13,36 @@ static char* scil_dict_strdup(const char* const s) /* make a duplicate of s */
 }
 
 /* hash: form hash value for string s */
-unsigned scil_dict_hash(const char* s)
+unsigned scil_dict_hash(const char* const s)
 {
     unsigned hashval;
-    for (hashval = 0; *s != '\0'; s++)
-      hashval = *s + 31 * hashval;
+    char* i;
+    strcpy(i, s);
+    for (hashval = 0; *i != '\0'; i++)
+      hashval = *i + 31 * hashval;
     return hashval % SCIL_DICT_SIZE;
 }
 
-scil_dict_t scil_dict_create()
+scil_dict_t* scil_dict_create()
 {
-
+    return (scil_dict_t*)malloc(SCIL_DICT_SIZE * sizeof(scil_dict_element_t*));
 }
 
-void scil_dict_destroy(scil_dict_t dict)
+void scil_dict_destroy(scil_dict_t* dict)
 {
+    for(unsigned i = 0; i < SCIL_DICT_SIZE; ++i)
+    {
+        if (dict[i] == NULL)
+            continue;
 
+        for (scil_dict_element_t* element = dict[i]; element != NULL;)
+        {
+            scil_dict_element_t* next = element->next;
+            free(element);
+            element = next;
+        }
+    }
+    free(dict);
 }
 
 /* lookup: look for s in dict */
@@ -39,6 +53,11 @@ scil_dict_element_t* scil_dict_get(const scil_dict_t dict,
         if (strcmp(s, element->name) == 0)
           return element; /* found */
     return NULL; /* not found */
+}
+
+int scil_dict_contains(const scil_dict_t dict, const char* const name)
+{
+    return scil_dict_get(dict, name) != NULL;
 }
 
 /* install: put (name, defn) in scil_dict */
@@ -58,4 +77,43 @@ scil_dict_element_t* scil_dict_put(const scil_dict_t dict, const char* const nam
     if ((element->defn = scil_dict_strdup(defn)) == NULL)
        return NULL;
     return element;
+}
+
+scil_dict_element_t* scil_dict_remove(const scil_dict_t dict, const char* const name)
+{
+    unsigned hashval = scil_dict_hash(name);
+    scil_dict_element_t* element = dict + hashval;
+
+    if (element == NULL)
+        return NULL;
+
+    scil_dict_element_t* ret = NULL;
+
+    // First element
+    if (strcmp(name, element->name) == 0){
+        dict[hashval] = *(element->next);
+        memcpy(ret, element, sizeof(scil_dict_element_t));
+        free(element);
+        return ret;
+    }
+
+    // The rest...
+    scil_dict_element_t* previous = element;
+    element = element->next;
+
+    for (; element != NULL; element = element->next)
+    {
+        if (strcmp(name, element->name) != 0) {
+            previous = element;
+            continue;
+        }
+
+        previous->next = element->next;
+
+        memcpy(ret, element, sizeof(scil_dict_element_t));
+        free(element);
+        return ret;
+    }
+
+    return NULL;
 }
