@@ -28,22 +28,23 @@ static uint8_t end_mask[9] = {
     255        //0b11111111
 };
 
+//Supported datatypes: int8 int16 int32 int64
 // Repeat for each data type
 
 // Can do negative right shifts!! (left shifts)
-static byte right_shift_64(<DATATYPE> value, int amount)
+static byte right_shift_64_<DATATYPE>(<DATATYPE> value, int amount)
 {
     return (byte)(amount >= 0 ? value >> amount : value << -amount);
 }
-static <DATATYPE> right_shift_8(byte value, int amount)
+static <DATATYPE> right_shift_8_<DATATYPE>(byte value, int amount)
 {
     return (amount >= 0 ? ((<DATATYPE>)value) >> amount : ((<DATATYPE>)value) << -amount);
 }
 
-static int scil_swage(byte* const restrict buf_out,
-                      const <DATATYPE>* const restrict buf_in,
-                      const size_t count,
-                      const uint8_t bits_per_value)
+static int scil_swage_<DATATYPE>(byte* const restrict buf_out,
+                                 const <DATATYPE>* const restrict buf_in,
+                                 const size_t count,
+                                 const uint8_t bits_per_value)
 {
     size_t bit_index = 0;
     for(size_t i = 0; i < count; ++i)
@@ -59,13 +60,13 @@ static int scil_swage(byte* const restrict buf_out,
         // Set remaining bits in start_byte to 0
         buf_out[start_byte] &= end_mask[bit_offset];
         // Write as much bits of number as possible to remaining bits
-        buf_out[start_byte] |= right_shift_64(buf_in[i], right_shifts);
+        buf_out[start_byte] |= right_shift_64_<DATATYPE>(buf_in[i], right_shifts);
 
         // Write to following bytes
         uint8_t k = 1;
         for(size_t j = start_byte + 1; j <= end_byte; ++j)
         {
-            buf_out[j] = right_shift_64(buf_in[i], right_shifts - k * 8);
+            buf_out[j] = right_shift_64_<DATATYPE>(buf_in[i], right_shifts - k * 8);
             ++k;
         }
 
@@ -75,10 +76,10 @@ static int scil_swage(byte* const restrict buf_out,
     return 0;
 }
 
-static int scil_unswage(<DATATYPE>* const restrict buf_out,
-                        const byte* const restrict buf_in,
-                        const size_t count,
-                        const uint8_t bits_per_value)
+static int scil_unswage_<DATATYPE>(<DATATYPE>* const restrict buf_out,
+                                   const byte* const restrict buf_in,
+                                   const size_t count,
+                                   const uint8_t bits_per_value)
 {
     size_t bit_index = 0;
     for(size_t i = 0; i < count; ++i)
@@ -92,18 +93,18 @@ static int scil_unswage(<DATATYPE>* const restrict buf_out,
         int8_t right_shifts = 8 - bits_per_value - bit_offset;
 
         // Read from start_byte
-        uint64_t intermed = right_shift_8(buf_in[start_byte] & start_mask[bit_offset], right_shifts); // Masks away first value-unrelated bits in start_byte and shifts related bits to final position
+        uint64_t intermed = right_shift_8_<DATATYPE>(buf_in[start_byte] & start_mask[bit_offset], right_shifts); // Masks away first value-unrelated bits in start_byte and shifts related bits to final position
         // Read from intermediate bytes
         uint8_t k = 1;
         for(size_t j = start_byte + 1; j < end_byte; ++j)
         {
-            intermed |= right_shift_8(buf_in[j], right_shifts + k * 8); // Shifts whole byte to final position and applies it
+            intermed |= right_shift_8_<DATATYPE>(buf_in[j], right_shifts + k * 8); // Shifts whole byte to final position and applies it
             ++k;
         }
         // Read from end_byte
         if(start_byte != end_byte)
         {
-            intermed |= right_shift_8(buf_in[end_byte], 8 - end_byte_bits); // Shifts out unrelated end bits in end_byte and applies value
+            intermed |= right_shift_8_<DATATYPE>(buf_in[end_byte], 8 - end_byte_bits); // Shifts out unrelated end bits in end_byte and applies value
         }
 
         // Write to output buffer
@@ -123,7 +124,7 @@ int scil_swage_compress_<DATATYPE>(const scil_context_p ctx,
 {
     uint8_t bits_per_value = 0; // Woher kriege ich den richtigen Wert?
 
-    if (scil_swage(dest, source, scil_get_data_count(dims), bits_per_value))
+    if (scil_swage_<DATATYPE>(dest, source, scil_get_data_count(dims), bits_per_value))
     {
         return 1;
     }
@@ -138,7 +139,7 @@ int scil_swage_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 {
     uint8_t bits_per_value = 0; // Woher kriege ich den richtigen Wert?
 
-    if (scil_unswage(dest, source, scil_get_data_count(dims), bits_per_value))
+    if (scil_unswage_<DATATYPE>(dest, source, scil_get_data_count(dims), bits_per_value))
     {
         return 1;
     }
