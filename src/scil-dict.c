@@ -12,6 +12,13 @@ static char* scil_dict_strdup(const char* s) /* make a duplicate of s */
     return p;
 }
 
+static void free_element(scil_dict_element_t* element)
+{
+    free(element->key);
+    free(element->value);
+    free(element);
+}
+
 /* hash: form hash value for string s */
 unsigned scil_dict_hash(const char* s)
 {
@@ -36,7 +43,7 @@ void scil_dict_destroy(scil_dict_t dict)
         for (scil_dict_element_t* element = dict[i]; element != NULL;)
         {
             scil_dict_element_t* next = element->next;
-            free(element);
+            free_element(element);
             element = next;
         }
     }
@@ -88,7 +95,7 @@ void scil_dict_remove(const scil_dict_t dict, const char* key)
     // First element
     if (strcmp(key, element->key) == 0){
         dict[hashval] = element->next;
-        free(element);
+        free_element(element);
         return;
     }
 
@@ -104,7 +111,7 @@ void scil_dict_remove(const scil_dict_t dict, const char* key)
         }
 
         previous->next = element->next;
-        free(element);
+        free_element(element);
         return;
     }
 
