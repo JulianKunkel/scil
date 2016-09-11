@@ -9,11 +9,11 @@ struct scil_dict_element { /* table entry: */
     char* defn; /* replacement text */
 };
 
-typedef scil_dict_element_t* scil_dict_t;
+typedef scil_dict_element_t** scil_dict_t;
 
 scil_dict_t scil_dict_create();
 
-void scil_dict_destroy(scil_dict_t* dict);
+void scil_dict_destroy(scil_dict_t dict);
 
 unsigned scil_dict_hash(const char* s);
 

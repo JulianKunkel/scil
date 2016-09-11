@@ -26,7 +26,7 @@ scil_dict_t scil_dict_create()
     return (scil_dict_t) malloc(SCIL_DICT_SIZE * sizeof(scil_dict_element_t*));
 }
 
-void scil_dict_destroy(scil_dict_t* dict)
+void scil_dict_destroy(scil_dict_t dict)
 {
     for(unsigned i = 0; i < SCIL_DICT_SIZE; ++i)
     {
@@ -46,7 +46,7 @@ void scil_dict_destroy(scil_dict_t* dict)
 /* lookup: look for s in dict */
 scil_dict_element_t* scil_dict_get(const scil_dict_t dict, const char* s)
 {
-    for (scil_dict_element_t* element = &dict[scil_dict_hash(s)]; element != NULL; element = element->next)
+    for (scil_dict_element_t* element = dict[scil_dict_hash(s)]; element != NULL; element = element->next)
         if (strcmp(s, element->name) == 0)
           return element; /* found */
     return NULL; /* not found */
@@ -63,12 +63,12 @@ scil_dict_element_t* scil_dict_put(const scil_dict_t dict, const char* name, con
     unsigned hashval;
     scil_dict_element_t* element = scil_dict_get(dict, name);
     if (element == NULL) { /* not found */
-        element = (scil_dict_t)malloc(sizeof(*element));
+        element = (scil_dict_element_t*)malloc(sizeof(*element));
         if (element == NULL || (element->name = scil_dict_strdup(name)) == NULL)
           return NULL;
         hashval = scil_dict_hash(name);
-        element->next = &dict[hashval];
-        dict[hashval] = *element;
+        element->next = dict[hashval];
+        dict[hashval] = element;
     } else /* already there */
         free((void*) element->defn); /*free previous defn */
     if ((element->defn = scil_dict_strdup(defn)) == NULL)
@@ -79,7 +79,7 @@ scil_dict_element_t* scil_dict_put(const scil_dict_t dict, const char* name, con
 scil_dict_element_t* scil_dict_remove(const scil_dict_t dict, const char* name)
 {
     unsigned hashval = scil_dict_hash(name);
-    scil_dict_element_t* element = dict + hashval;
+    scil_dict_element_t* element = dict[hashval];
 
     if (element == NULL)
         return NULL;
@@ -88,7 +88,7 @@ scil_dict_element_t* scil_dict_remove(const scil_dict_t dict, const char* name)
 
     // First element
     if (strcmp(name, element->name) == 0){
-        dict[hashval] = *(element->next);
+        dict[hashval] = element->next;
         memcpy(ret, element, sizeof(scil_dict_element_t));
         free(element);
         return ret;
