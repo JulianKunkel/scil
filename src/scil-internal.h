@@ -174,7 +174,7 @@ struct scil_context_t{
   scil_compression_chain_t chain;
 
   /** \brief Dictionary for pipeline internal parameters */
-  scil_dict_t* pipeline_params;
+  scil_dict_t pipeline_params;
 };
 
 int scilI_parse_compression_algorithms(scil_compression_chain_t * chain, char * str_in);
