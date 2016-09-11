@@ -4,6 +4,7 @@
 
 #include <scil-internal.h>
 
+#include <stdio.h>
 #include <assert.h>
 #include <math.h>
 
@@ -81,39 +82,24 @@ static uint64_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum,
     return (uint64_t)ceil( log2( 1.0 + (double)(maximum - minimum) / (2.0 * absolute_tolerance) ) );
 }
 
-static int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* const restrict dest,
+static int scil_quantize_buffer_<DATATYPE>(uint64_t* const restrict dest,
                                                   const <DATATYPE>* const restrict source,
                                                   size_t count,
                                                   double absolute_tolerance,
                                                   <DATATYPE> minimum,
-                                                  <DATATYPE> maximum)
+                                                  <DATATYPE> maximum,
+                                                  uint8_t bits_per_value)
 {
     assert(dest != NULL);
     assert(source != NULL);
 
-    if(scil_calculate_bits_needed_<DATATYPE>(minimum, maximum, absolute_tolerance) > 64){
-        return 1; // Quantizing would result in values bigger than UINT64_MAX
-    }
+
 
     for(size_t i = 0; i < count; ++i){
         dest[i] = scil_quantize_value_<DATATYPE>(source[i], absolute_tolerance, minimum);
     }
 
     return 0;
-}
-
-static int scil_quantize_buffer_<DATATYPE>(uint64_t* const restrict dest,
-                                           const <DATATYPE>* const restrict source,
-                                           size_t count,
-                                           double absolute_tolerance)
-{
-    assert(dest != NULL);
-    assert(source != NULL);
-
-    <DATATYPE> minimum, maximum;
-    scil_find_minimum_maximum_<DATATYPE>(source, count, &minimum, &maximum);
-
-    return scil_quantize_buffer_minmax_<DATATYPE>(dest, source, count, absolute_tolerance, minimum, maximum);
 }
 
 static int scil_unquantize_buffer_<DATATYPE>(<DATATYPE>* const restrict dest,
@@ -133,7 +119,7 @@ static int scil_unquantize_buffer_<DATATYPE>(<DATATYPE>* const restrict dest,
 }
 
 int scil_quantize_compress_<DATATYPE>(const scil_context_p ctx,
-                                      int64_t * restrict dest,
+                                      int64_t* restrict dest,
                                       size_t* restrict out_size,
                                       <DATATYPE>*restrict source,
                                       const scil_dims* dims)
@@ -142,6 +128,10 @@ int scil_quantize_compress_<DATATYPE>(const scil_context_p ctx,
 
     <DATATYPE> minimum, maximum;
     scil_find_minimum_maximum_<DATATYPE>(source, count, &minimum, &maximum);
+
+    uint8_t bits_per_value = scil_calculate_bits_needed_<DATATYPE>(minimum, maximum, ctx->hints.absolute_tolerance);
+    if (bits_per_value > 64)
+        return 1; // Quantizing would result in values bigger than UINT64_MAX
 
     *(double*)dest = (double)minimum;
     ++dest;
@@ -152,7 +142,11 @@ int scil_quantize_compress_<DATATYPE>(const scil_context_p ctx,
     *out_size = 16;
     *out_size += count * sizeof(int64_t);
 
-    return scil_quantize_buffer_minmax_<DATATYPE>((uint64_t*)dest, source, count, ctx->hints.absolute_tolerance, minimum, maximum);
+    char value[2];
+    snprintf(value, 2, "%u", bits_per_value);
+    scil_dict_put(ctx->pipeline_params, "bits_per_value", value);
+
+    return scil_quantize_buffer_<DATATYPE>((uint64_t*)dest, source, count, ctx->hints.absolute_tolerance, minimum, maximum, bits_per_value);
 }
 
 int scil_quantize_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
