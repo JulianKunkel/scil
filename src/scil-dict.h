@@ -5,8 +5,8 @@ typedef struct scil_dict_element scil_dict_element_t;
 
 struct scil_dict_element { /* table entry: */
     scil_dict_element_t* next; /* next entry in chain */
-    char* name; /* defined name */
-    char* defn; /* replacement text */
+    char* key; /* defined key */
+    char* value; /* replacement text */
 };
 
 typedef scil_dict_element_t** scil_dict_t;
@@ -19,10 +19,10 @@ unsigned scil_dict_hash(const char* s);
 
 scil_dict_element_t* scil_dict_get(const scil_dict_t dict, const char* s);
 
-int scil_dict_contains(const scil_dict_t dict, const char* name);
+int scil_dict_contains(const scil_dict_t dict, const char* key);
 
-scil_dict_element_t* scil_dict_put(const scil_dict_t dict, const char* name, const char* defn);
+scil_dict_element_t* scil_dict_put(const scil_dict_t dict, const char* key, const char* value);
 
-scil_dict_element_t* scil_dict_remove(const scil_dict_t dict, const char* name);
+void scil_dict_remove(const scil_dict_t dict, const char* key);
 
 #endif /* SCIL_DICT_H_ */

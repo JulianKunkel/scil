@@ -23,7 +23,7 @@ unsigned scil_dict_hash(const char* s)
 
 scil_dict_t scil_dict_create()
 {
-    return (scil_dict_t) malloc(SCIL_DICT_SIZE * sizeof(scil_dict_element_t*));
+    return (scil_dict_t) calloc(SCIL_DICT_SIZE, sizeof(scil_dict_element_t*));
 }
 
 void scil_dict_destroy(scil_dict_t dict)
@@ -46,52 +46,50 @@ void scil_dict_destroy(scil_dict_t dict)
 /* lookup: look for s in dict */
 scil_dict_element_t* scil_dict_get(const scil_dict_t dict, const char* s)
 {
-    for (scil_dict_element_t* element = dict[scil_dict_hash(s)]; element != NULL; element = element->next)
-        if (strcmp(s, element->name) == 0)
-          return element; /* found */
+    for (scil_dict_element_t* element = dict[scil_dict_hash(s)]; element != NULL; element = element->next) {
+        if (strcmp(s, element->key) == 0)
+            return element; /* found */
+    }
     return NULL; /* not found */
 }
 
-int scil_dict_contains(const scil_dict_t dict, const char* name)
+int scil_dict_contains(const scil_dict_t dict, const char* key)
 {
-    return scil_dict_get(dict, name) != NULL;
+    return scil_dict_get(dict, key) != NULL;
 }
 
-/* install: put (name, defn) in scil_dict */
-scil_dict_element_t* scil_dict_put(const scil_dict_t dict, const char* name, const char* defn)
+/* install: put (key, value) in scil_dict */
+scil_dict_element_t* scil_dict_put(const scil_dict_t dict, const char* key, const char* value)
 {
     unsigned hashval;
-    scil_dict_element_t* element = scil_dict_get(dict, name);
+    scil_dict_element_t* element = scil_dict_get(dict, key);
     if (element == NULL) { /* not found */
         element = (scil_dict_element_t*)malloc(sizeof(*element));
-        if (element == NULL || (element->name = scil_dict_strdup(name)) == NULL)
+        if (element == NULL || (element->key = scil_dict_strdup(key)) == NULL)
           return NULL;
-        hashval = scil_dict_hash(name);
+        hashval = scil_dict_hash(key);
         element->next = dict[hashval];
         dict[hashval] = element;
     } else /* already there */
-        free((void*) element->defn); /*free previous defn */
-    if ((element->defn = scil_dict_strdup(defn)) == NULL)
+        free((void*) element->value); /*free previous value */
+    if ((element->value = scil_dict_strdup(value)) == NULL)
        return NULL;
     return element;
 }
 
-scil_dict_element_t* scil_dict_remove(const scil_dict_t dict, const char* name)
+void scil_dict_remove(const scil_dict_t dict, const char* key)
 {
-    unsigned hashval = scil_dict_hash(name);
+    unsigned hashval = scil_dict_hash(key);
     scil_dict_element_t* element = dict[hashval];
 
     if (element == NULL)
-        return NULL;
-
-    scil_dict_element_t* ret = NULL;
+        return;
 
     // First element
-    if (strcmp(name, element->name) == 0){
+    if (strcmp(key, element->key) == 0){
         dict[hashval] = element->next;
-        memcpy(ret, element, sizeof(scil_dict_element_t));
         free(element);
-        return ret;
+        return;
     }
 
     // The rest...
@@ -100,17 +98,15 @@ scil_dict_element_t* scil_dict_remove(const scil_dict_t dict, const char* name)
 
     for (; element != NULL; element = element->next)
     {
-        if (strcmp(name, element->name) != 0) {
+        if (strcmp(key, element->key) != 0) {
             previous = element;
             continue;
         }
 
         previous->next = element->next;
-
-        memcpy(ret, element, sizeof(scil_dict_element_t));
         free(element);
-        return ret;
+        return;
     }
 
-    return NULL;
+    return;
 }
