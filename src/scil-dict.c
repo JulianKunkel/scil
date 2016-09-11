@@ -5,7 +5,7 @@
 
 #define SCIL_DICT_SIZE 100
 
-static char* scil_dict_strdup(const char* const s) /* make a duplicate of s */
+static char* scil_dict_strdup(const char* s) /* make a duplicate of s */
 {
     char* p = (char*)malloc(strlen(s)+1); /* +1 for ’\0’ */
     if (p != NULL) { strcpy(p, s); }
@@ -13,19 +13,17 @@ static char* scil_dict_strdup(const char* const s) /* make a duplicate of s */
 }
 
 /* hash: form hash value for string s */
-unsigned scil_dict_hash(const char* const s)
+unsigned scil_dict_hash(const char* s)
 {
-    unsigned hashval;
-    char* i;
-    strcpy(i, s);
-    for (hashval = 0; *i != '\0'; i++)
-      hashval = *i + 31 * hashval;
+    unsigned hashval = 0;
+    for (; *s != '\0'; s++)
+      hashval = *s + 31 * hashval;
     return hashval % SCIL_DICT_SIZE;
 }
 
-scil_dict_t* scil_dict_create()
+scil_dict_t scil_dict_create()
 {
-    return (scil_dict_t*)malloc(SCIL_DICT_SIZE * sizeof(scil_dict_element_t*));
+    return (scil_dict_t) malloc(SCIL_DICT_SIZE * sizeof(scil_dict_element_t*));
 }
 
 void scil_dict_destroy(scil_dict_t* dict)
@@ -46,8 +44,7 @@ void scil_dict_destroy(scil_dict_t* dict)
 }
 
 /* lookup: look for s in dict */
-scil_dict_element_t* scil_dict_get(const scil_dict_t dict,
-                                   const char* const s)
+scil_dict_element_t* scil_dict_get(const scil_dict_t dict, const char* s)
 {
     for (scil_dict_element_t* element = &dict[scil_dict_hash(s)]; element != NULL; element = element->next)
         if (strcmp(s, element->name) == 0)
@@ -55,13 +52,13 @@ scil_dict_element_t* scil_dict_get(const scil_dict_t dict,
     return NULL; /* not found */
 }
 
-int scil_dict_contains(const scil_dict_t dict, const char* const name)
+int scil_dict_contains(const scil_dict_t dict, const char* name)
 {
     return scil_dict_get(dict, name) != NULL;
 }
 
 /* install: put (name, defn) in scil_dict */
-scil_dict_element_t* scil_dict_put(const scil_dict_t dict, const char* const name, const char* const defn)
+scil_dict_element_t* scil_dict_put(const scil_dict_t dict, const char* name, const char* defn)
 {
     unsigned hashval;
     scil_dict_element_t* element = scil_dict_get(dict, name);
@@ -79,7 +76,7 @@ scil_dict_element_t* scil_dict_put(const scil_dict_t dict, const char* const nam
     return element;
 }
 
-scil_dict_element_t* scil_dict_remove(const scil_dict_t dict, const char* const name)
+scil_dict_element_t* scil_dict_remove(const scil_dict_t dict, const char* name)
 {
     unsigned hashval = scil_dict_hash(name);
     scil_dict_element_t* element = dict + hashval;
