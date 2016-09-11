@@ -122,7 +122,8 @@ int scil_swage_compress_<DATATYPE>(const scil_context_p ctx,
                                    <DATATYPE>*restrict source,
                                    const scil_dims* dims)
 {
-    uint8_t bits_per_value = 0; // Woher kriege ich den richtigen Wert?
+    char* bpv_str = scil_dict_get(ctx->pipeline_params, "bits_per_value")->value;
+    uint8_t bits_per_value = strtol(bpv_str, (char**)NULL, 10);
 
     if (scil_swage_<DATATYPE>(dest, source, scil_get_data_count(dims), bits_per_value))
     {
@@ -137,7 +138,8 @@ int scil_swage_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
                                      byte* restrict source,
                                      const size_t in_size)
 {
-    uint8_t bits_per_value = 0; // Woher kriege ich den richtigen Wert?
+    uint8_t bits_per_value = 0;
+
 
     if (scil_unswage_<DATATYPE>(dest, source, scil_get_data_count(dims), bits_per_value))
     {
