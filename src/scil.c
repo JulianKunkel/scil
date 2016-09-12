@@ -12,16 +12,10 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
-
-#include <ctype.h>
-#include <float.h>
-#include <math.h>
-#include <string.h>
-
 #include <scil-algo-chooser.h>
+#include <scil-error.h>
 #include <scil-hardware-limits.h>
 #include <scil-internal.h>
-#include <scil-error.h>
 
 // known algorithms:
 #include <algo/algo-abstol.h>
@@ -34,6 +28,11 @@
 #include <algo/lz4fast.h>
 #include <algo/precond-dummy.h>
 #include <algo/algo-quantize.h>
+
+#include <ctype.h>
+#include <float.h>
+#include <math.h>
+#include <string.h>
 
 // this file is automatically created
 #include "scil-dtypes.h"

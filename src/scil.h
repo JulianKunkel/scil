@@ -74,6 +74,7 @@
 #include <stdlib.h>
 
 #include <scil-dict.h>
+#include <scil-error.h>
 
 typedef unsigned char byte;
 typedef int8_t int8;
