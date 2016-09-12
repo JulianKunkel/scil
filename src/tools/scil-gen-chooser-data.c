@@ -130,7 +130,7 @@ float factor_step      = 10.0f;
 double* data = NULL;
 scil_dims dims;
 
-scil_hints hints;
+scil_user_params_t hints;
 //scil_init_hints(&hints);
 
 static int benchmark_data(const double* const data, const scil_dims* const dims){

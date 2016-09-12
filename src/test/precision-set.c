@@ -28,7 +28,7 @@ static void test(enum SCIL_Datatype type, int digits, int bits, int expected_dig
   printf("d: %d b: %d ed: %d eb: %d\n", digits, bits, expected_digits, expected_bits);
 
   int ret;
-  scil_hints h;
+  scil_user_params_t h;
   scil_init_hints(& h);
 
   h.significant_digits = digits;
@@ -38,9 +38,9 @@ static void test(enum SCIL_Datatype type, int digits, int bits, int expected_dig
   ret = scil_create_compression_context(& ctx, type, 0, NULL, & h);
   assert(ret == SCIL_NO_ERR);
   // retrieve effectively set hints:
-  scil_hints e = scil_retrieve_effective_hints(ctx);
+  scil_user_params_t e = scil_retrieve_effective_hints(ctx);
 
-  scil_hints_print(& e);
+  scil_user_params_t_print(& e);
 
   assert(e.significant_digits == expected_digits);
   assert(e.significant_bits == expected_bits);

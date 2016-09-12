@@ -26,7 +26,7 @@
 static double data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 static double data_check[] = {0,0,0,0,0,0,0,0,0,0};
 static scil_context_p ctx;
-static scil_hints hints;
+static scil_user_params_t hints;
 static scil_dims dims;
 static size_t size;
 static byte * buff;

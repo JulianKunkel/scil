@@ -5,7 +5,7 @@
 #include <scil.h>
 
 size_t count = 1000;
-scil_hints hints;
+scil_user_params_t hints;
 scil_dims dims;
 scil_context_p context;
 

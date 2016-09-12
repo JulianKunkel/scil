@@ -166,7 +166,7 @@ typedef struct
     /** \brief */
     char* force_compression_methods;
 
-} scil_hints;
+} scil_user_params_t;
 
 typedef struct scil_context_t* scil_context_p;
 
@@ -223,12 +223,12 @@ size_t scil_compress_buffer_size_bound(enum SCIL_Datatype datatype, const scil_d
  * \brief Initialize the data structure with the valid hints that are relaxed
  * TODO: refactor hints to be pointers such that these functions become more meaningful and manage memory as well.
  */
-void scil_init_hints(scil_hints * hints);
-void scil_copy_hints(scil_hints * out, const scil_hints* hints);
+void scil_init_hints(scil_user_params_t * hints);
+void scil_copy_hints(scil_user_params_t * out, const scil_user_params_t* hints);
 
-scil_hints scil_retrieve_effective_hints(scil_context_p ctx);
+scil_user_params_t scil_retrieve_effective_hints(scil_context_p ctx);
 
-void scil_hints_print(const scil_hints* hints);
+void scil_user_params_t_print(const scil_user_params_t* hints);
 
 /**
  * \brief Creation of a compression context
@@ -243,7 +243,7 @@ int scil_create_compression_context(scil_context_p* out_ctx,
                                     enum SCIL_Datatype datatype,
                                     int special_values_count,
                                     void * special_values,
-                                    const scil_hints* hints);
+                                    const scil_user_params_t* hints);
 
 int scil_destroy_compression_context(scil_context_p* out_ctx);
 
@@ -296,7 +296,7 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
                              const void* restrict data_2,
                              scil_dims* dims,
                              const double relative_err_finest_abs_tolerance,
-                             scil_hints* out_hints);
+                             scil_user_params_t* out_hints);
 
 /**
  \brief Test method: check if the conditions as specified by ctx are met by
@@ -310,6 +310,6 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
                               byte* restrict data_compressed,
                               const size_t compressed_size,
                               const scil_context_p ctx,
-                              scil_hints* out_accuracy);
+                              scil_user_params_t* out_accuracy);
 
 #endif

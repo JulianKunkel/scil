@@ -42,8 +42,8 @@ int test_correctness(const char* name, double* buffer_in, scil_dims dims)
     allocate(byte, tmp_buff, c_size);
 
     scil_context_p ctx;
-    scil_hints hints;
-    scil_hints out_accuracy;
+    scil_user_params_t hints;
+    scil_user_params_t out_accuracy;
 
     scil_init_hints(&hints);
     hints.absolute_tolerance = 0.01;

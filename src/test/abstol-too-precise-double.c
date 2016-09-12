@@ -20,7 +20,7 @@ int main(void)
     size_t dest_size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, &dims);
     byte* dest       = (byte*)SAFE_MALLOC(dest_size);
 
-    scil_hints hints;
+    scil_user_params_t hints;
     scil_init_hints(&hints);
     hints.force_compression_methods = "1";
     hints.absolute_tolerance        = 1e-300;
