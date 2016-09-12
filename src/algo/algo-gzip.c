@@ -15,6 +15,8 @@
 
 #include <algo/algo-gzip.h>
 
+#include <scil-error.h>
+
 #include <zlib.h>
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"

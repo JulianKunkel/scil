@@ -15,9 +15,12 @@
 
 //Supported datatypes: float double int8 int16 int32 int64
 
+#include <algo/precond-dummy.h>
+
+#include <scil-error.h>
+
 #include <string.h>
 
-#include <algo/precond-dummy.h>
 
 // Repeat for each data type
 #pragma GCC diagnostic ignored "-Wunused-parameter"

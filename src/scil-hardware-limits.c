@@ -13,11 +13,13 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <string.h>
-#include <stdio.h>
+#include <scil-hardware-limits.h>
 
 #include <scil.h>
-#include <scil-hardware-limits.h>
+#include <scil-error.h>
+
+#include <string.h>
+#include <stdio.h>
 
 static float hardware_limits[HARDWARE_MAX];
 static const char* hardware_names[] = {

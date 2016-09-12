@@ -1,7 +1,6 @@
-//#include <stdint.h>
-
-#include <scil-util.h>
 #include <scil.h>
+#include <scil-error.h>
+#include <scil-util.h>
 
 #include <scil-internal.h>
 #include <scil-patterns.h>

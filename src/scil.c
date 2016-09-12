@@ -21,6 +21,7 @@
 #include <scil-algo-chooser.h>
 #include <scil-hardware-limits.h>
 #include <scil-internal.h>
+#include <scil-error.h>
 
 // known algorithms:
 #include <algo/algo-abstol.h>

@@ -14,11 +14,12 @@
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
 // This file is the skeleton for each simple test.
+#include <scil.h>
+#include <scil-error.h>
+
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-
-#include <scil.h>
 
 #define SUCCESS 0
 

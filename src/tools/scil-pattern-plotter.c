@@ -12,14 +12,14 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
+#include <scil-error.h>
+#include <scil-patterns.h>
+#include <scil-util.h>
 
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-
-#include <scil-patterns.h>
-#include <scil-util.h>
 
 int main(int argc, char ** argv){
   if (argc == 1 || strcmp(argv[1], "-h") == 0 ){

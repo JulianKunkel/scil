@@ -13,13 +13,13 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <scil.h>
-#include <scil-swager.h>
-
 #include <algo/algo-sigbits.h>
 
+#include <scil.h>
 
+#include <scil-error.h>
 #include <scil-internal.h>
+#include <scil-swager.h>
 
 #include <math.h>
 

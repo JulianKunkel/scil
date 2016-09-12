@@ -13,12 +13,14 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <simplex-noise.h>
+
+#include <scil-error.h>
+#include <scil-util.h>
+
 #include <assert.h>
 
-#include <simplex-noise.h>
-#include <scil-util.h>
 #include <open-simplex-noise.h>
-
 
 static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float arg, float arg2){
   const int frequencyCount = (int) arg2;

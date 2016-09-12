@@ -13,13 +13,15 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <string.h>
-#include <stdarg.h>
 
 #include <scil-patterns.h>
 #include <scil-pattern-internal.h>
 
+#include <scil-error.h>
 #include <scil-internal.h>
+
+#include <string.h>
+#include <stdarg.h>
 
 #include <basic-patterns.h>
 #include <basic-mutators.h>

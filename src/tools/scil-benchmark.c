@@ -18,10 +18,11 @@
 #include <string.h>
 #include <errno.h>
 
-#include <scil-util.h>
 #include <scil-algo-chooser.h>
-#include <scil-patterns.h>
+#include <scil-error.h>
 #include <scil-internal.h>
+#include <scil-patterns.h>
+#include <scil-util.h>
 
 #define allocate(type, name, count) type* name = (type*)malloc(count * sizeof(type))
 

@@ -14,6 +14,8 @@
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <basic-patterns.h>
+
+#include <scil-error.h>
 #include <scil-util.h>
 
 #include <stdio.h>

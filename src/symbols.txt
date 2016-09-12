@@ -31,7 +31,7 @@ scil_sigbits_compress_double
 scil_sigbits_compress_float
 scil_sigbits_decompress_double
 scil_sigbits_decompress_float
-scil_strerr
+scil_error_get_message
 scilU_convert_significant_bits_to_decimals
 scilU_convert_significant_decimals_to_bits
 scilU_critical_error

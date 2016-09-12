@@ -13,15 +13,17 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <string.h>
-#include <float.h>
+#include <scil-algo-chooser.h>
 
 #include <scil-internal.h>
-#include <scil-algo-chooser.h>
 #include <scil-config.h>
 #include <scil-hardware-limits.h>
+#include <scil-error.h>
 
 #include <algo/lz4fast.h>
+
+#include <string.h>
+#include <float.h>
 
 float scilI_determine_randomness(void* source, size_t in_size, byte *restrict buffer, size_t buffer_size){
   // We may want to use https://en.wikipedia.org/wiki/Randomness_tests

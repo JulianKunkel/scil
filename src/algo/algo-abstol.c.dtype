@@ -13,15 +13,15 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <math.h>
-#include <string.h>
+#include <algo/algo-abstol.h>
 
 #include <scil.h>
+#include <scil-error.h>
 #include <scil-quantizer.h>
 #include <scil-swager.h>
 
-#include <algo/algo-abstol.h>
-
+#include <math.h>
+#include <string.h>
 
 #define SCIL_ABSTOL_HEADER_SIZE 17
 #define SCIL_SMALL 0.00000000000000000000001

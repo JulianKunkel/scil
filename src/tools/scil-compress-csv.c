@@ -16,16 +16,16 @@
 /*
  * This tool will compress / decompress a CSV
  */
+ #include <scil.h>
+ #include <scil-error.h>
+ #include <scil-option.h>
+ #include <scil-util.h>
 
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-
-#include <scil.h>
-#include <scil-util.h>
-#include <scil-option.h>
 
 static int validate = 0;
 static int verbose = 0;

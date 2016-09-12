@@ -83,9 +83,12 @@ execute_process(COMMAND ${DEV_DIR}/create-datatype-variants.py ${CMAKE_SOURCE_DI
 
 
 FILE(GLOB ALGO ${CMAKE_SOURCE_DIR}/algo/*.c ${CMAKE_BINARY_DIR}/algo/*.c)
+FILE(GLOB BINARY_DEPS ${CMAKE_BINARY_DIR}/scil-*.c)
+FILE(GLOB SOURCE_DEPS ${CMAKE_SOURCE_DIR}/scil-*.c)
+
 
 # MESSAGE( STATUS "Available algorithms: " ${ALGO})
-add_library(scil SHARED scil.c scil-util.c scil-errors.c scil-dummy.cpp scil-option.c scil-algo-chooser.c scil-hardware-limits.c scil-swager.c scil-dict.c ${CMAKE_BINARY_DIR}/scil-quantizer.c ${ALGO} ${DEPS_DIR}/open-simplex-noise-in-c/open-simplex-noise.c)
+add_library(scil SHARED scil.c scil-dummy.cpp ${SOURCE_DEPS} ${BINARY_DEPS} ${CMAKE_BINARY_DIR}/scil-quantizer.c ${ALGO} ${DEPS_DIR}/open-simplex-noise-in-c/open-simplex-noise.c)
 target_link_libraries(scil m)
 
 # for specific algorithms
