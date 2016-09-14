@@ -85,11 +85,11 @@ execute_process(COMMAND ${DEV_DIR}/create-datatype-variants.py ${CMAKE_SOURCE_DI
 FILE(GLOB ALGO ${CMAKE_SOURCE_DIR}/algo/*.c ${CMAKE_BINARY_DIR}/algo/*.c)
 
 # MESSAGE( STATUS "Available algorithms: " ${ALGO})
-add_library(scil SHARED scil.c scil-util.c scil-errors.c scil-dummy.cpp scil-option.c scil-algo-chooser.c scil-hardware-limits.c scil-swager.c scil-dict.c ${CMAKE_BINARY_DIR}/scil-quantizer.c ${ALGO} ${DEPS_DIR}/open-simplex-noise-in-c/open-simplex-noise.c)
+add_library(scil SHARED scil.c scil-util.c scil-errors.c scil-dummy.cpp scil-option.c scil-algo-chooser.c scil-hardware-limits.c scil-swager.c scil-dict.c ${CMAKE_BINARY_DIR}/scil-quantizer.c ${ALGO} ${DEPS_DIR}/open-simplex-noise-in-c/open-simplex-noise.c ${DEPS_DIR}/wavelet_code/alloc.c ${DEPS_DIR}/wavelet_code/wav_basic.c ${DEPS_DIR}/wavelet_code/wav_trf.c)
 target_link_libraries(scil m)
 
 # for specific algorithms
-include_directories(${CMAKE_BINARY_DIR} ${DEPS_DIR}/open-simplex-noise-in-c ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/pattern ${DEPS_DIR}/include/zfp ${DEPS_DIR}/include/fpzip ${OPENJPEG_INCLUDE_DIRS})
+include_directories(${CMAKE_BINARY_DIR} ${DEPS_DIR}/open-simplex-noise-in-c ${DEPS_DIR}/wavelet_code ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/pattern ${DEPS_DIR}/include/zfp ${DEPS_DIR}/include/fpzip ${OPENJPEG_INCLUDE_DIRS})
 
 target_link_libraries(scil z)
 target_link_libraries(scil

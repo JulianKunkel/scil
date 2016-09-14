@@ -33,6 +33,8 @@
 #include <algo/lz4fast.h>
 #include <algo/precond-dummy.h>
 #include <algo/algo-quantize.h>
+#include <algo/algo-swage.h>
+#include <algo/algo-wavelets.h>
 
 // this file is automatically created
 #include "scil-dtypes.h"
@@ -49,6 +51,8 @@ static scil_compression_algorithm * algo_array[] = {
 	& algo_lz4fast,
 	& algo_precond_dummy,
 	& algo_quantize,
+	& algo_swage,
+	& algo_wavelets,
 	NULL
 };
 
@@ -395,6 +399,7 @@ static void scil_check_if_initialized()
     for (scil_compression_algorithm **algo = algo_array; *algo != NULL;
          algo++, i++) {
         if ((*algo)->compressor_id != i) {
+					printf("id_%i i=%i",(*algo)->compressor_id,i);
             scilU_critical_error("compressor ID does not match!");
         }
         if ((*algo)->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES) {
