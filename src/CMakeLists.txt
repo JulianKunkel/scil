@@ -92,7 +92,7 @@ add_library(scil SHARED scil.c scil-dummy.cpp ${SOURCE_DEPS} ${BINARY_DEPS} ${CM
 target_link_libraries(scil m)
 
 # for specific algorithms
-include_directories(${CMAKE_BINARY_DIR} ${DEPS_DIR}/open-simplex-noise-in-c ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/pattern ${DEPS_DIR}/include/zfp ${DEPS_DIR}/include/fpzip ${OPENJPEG_INCLUDE_DIRS})
+include_directories(${CMAKE_BINARY_DIR} ${DEPS_DIR}/open-simplex-noise-in-c ${DEPS_DIR}/wavelet_code ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/pattern ${DEPS_DIR}/include/zfp ${DEPS_DIR}/include/fpzip ${OPENJPEG_INCLUDE_DIRS})
 
 target_link_libraries(scil z)
 target_link_libraries(scil

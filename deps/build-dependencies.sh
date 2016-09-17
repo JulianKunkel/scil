@@ -4,6 +4,7 @@ echo "Building dependencies for SCIL from third-party software"
 
 ZFP=zfp-0.5.0
 FPZIP=fpzip-1.1.0
+WAVELET=wavelet_code
 
 function download(){
 		if [[ ! -e $1 ]] ; then
@@ -14,6 +15,10 @@ function download(){
 
 download $FPZIP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download
 download $ZFP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download
+if [[ ! -e $WAVELET.zip ]] ; then
+	wget http://eeweb.poly.edu/~onur/wavelet_code.zip
+	unzip $WAVELET.zip -d $WAVELET
+fi
 
 BUILD=0
 
