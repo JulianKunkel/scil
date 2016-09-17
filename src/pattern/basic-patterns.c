@@ -38,12 +38,80 @@ static int steps(scil_dims * dims, double * buffer, float mn, float mx, float ar
     return SCIL_EINVAL;
   }
   int steps = (int) arg;
-  float step_width = (mx - mn) / (steps-1); // Possible division by 0
+  float step_height = (mx - mn) / (steps-1); // Possible division by 0
   size_t count = scil_get_data_count(dims);
   for (size_t i=0; i < count; i++){
-    buffer[i] = mn + (i % steps) * step_width;
+    buffer[i] = mn + (i % steps) * step_height;
   }
   return SCIL_NO_ERR;
+}
+
+static int steps2(scil_dims * dims, double * buffer, float mn, float mx, float arg, float arg2)
+{
+    size_t count      = scil_get_data_count(dims);
+    int steps_count   = arg;
+    int step_width    = count / steps_count;
+    float step_height = steps_count <= 1 ? 0 : (mx - mn) / (steps_count - 1);
+    for (size_t i = 0; i < count; ++i){
+        buffer[i] = mn + i / step_width * step_height;
+    }
+    return SCIL_NO_ERR;
+}
+
+static void rotate2d(float* a, float* b, float* c, float mn, float mx, size_t x_size, size_t y_size)
+{
+    float a_tmp = -*b * y_size / x_size;
+    float b_tmp = *a * x_size / y_size;
+    float c_tmp = mn + b * y_size;
+
+    *a = a_tmp;
+    *b = b_tmp;
+    *c = c_tmp;
+}
+
+static int linear1d(double* buffer, scil_dims* dims, float mn, float mx)
+{
+    size_t nmemb = scil_get_data_count(dims);
+    double r   = random() / RAND_MAX
+    float a    = r > 0.5 ? mn : mx;
+    float last = r > 0.5 ? mx : mn;
+    float b    = (last - a) / nmemb;
+    for (size_t x = 0; x < nmemb; x++) {
+        buffer[x] = a + b * x;
+    }
+    return SCIL_NO_ERR;
+}
+static int linear2d(double* buffer, scil_dims* dims, float mn, float mx)
+{
+    size_t x_size = dims->length[0];
+    size_t y_size = dims->length[1];
+    // a * x_size + b * y_size = mx - mn
+    // a < (mx - mn) / x_size
+    float r = random() / RAND_MAX;
+    float a = r * (mx - mn) / x_size;
+    float b = ((mx - mn) - a * x_size) / y_size;
+    float c = mn;
+
+    int r2 = random() % 4;
+    for (int i = 0; i < r2; ++i)
+        rotate(&a, &b, &c, mn, mx, x_size, y_size);
+
+    for (size_t y = 0; y < y_size; ++y){
+        for (size_t x = 0; x < x_size; ++x){}
+            size_t i = y*x_size + x;
+            buffer[i] = a * x + b * y + c;
+        }
+    }
+    return SCIL_NO_ERR;
+}
+static int linear(scil_dims * dims, double * buffer, float mn, float mx, float arg, float arg2)
+{
+    switch(dims->dims){
+    case 1: return linear1d(buffer, dims, mn, mx);
+    case 2: return linear2d(buffer, dims, mn, mx);
+    case 3: return linear3d(buffer, dims, mn, mx);
+    case 4: return linear4d(buffer, dims, mn, mx);
+    }
 }
 
 static int rnd(scil_dims * dims, double * buffer, float mn, float mx, float arg, float arg2){
