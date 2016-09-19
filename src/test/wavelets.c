@@ -21,6 +21,16 @@ int main(void){
     scil_context_p context;
     scil_create_compression_context(&context, SCIL_TYPE_FLOAT, 0, NULL, &hints);
 
+    //1D
+
+    //float* arr1d = (float*)malloc(4*sizeof(float));
+
+
+
+
+
+    //2D
+
     scil_dims dims;
     scil_init_dims_2d(&dims, count1, count2);
 
@@ -36,7 +46,7 @@ int main(void){
 
     for(i = 0; i < count1; ++i){
       for(j = 0; j < count2; ++j){
-        *(buffer_in+i*count2+j) = ((float)rand()/RAND_MAX - 0.5) * 200;
+        *(buffer_in+i*count2+j) = i+j;//((float)rand()/RAND_MAX - 0.5) * 200;
       }
     }
 
