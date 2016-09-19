@@ -88,7 +88,7 @@ FILE(GLOB SOURCE_DEPS ${CMAKE_SOURCE_DIR}/scil-*.c)
 
 
 # MESSAGE( STATUS "Available algorithms: " ${ALGO})
-add_library(scil SHARED scil.c scil-dummy.cpp ${SOURCE_DEPS} ${BINARY_DEPS} ${CMAKE_BINARY_DIR}/scil-quantizer.c ${ALGO} ${DEPS_DIR}/open-simplex-noise-in-c/open-simplex-noise.c)
+add_library(scil SHARED scil.c scil-dummy.cpp ${SOURCE_DEPS} ${BINARY_DEPS} ${CMAKE_BINARY_DIR}/scil-quantizer.c ${ALGO} ${DEPS_DIR}/open-simplex-noise-in-c/open-simplex-noise.c ${DEPS_DIR}/wavelet_code/alloc.c ${DEPS_DIR}/wavelet_code/wav_basic.c ${DEPS_DIR}/wavelet_code/wav_trf.c)
 target_link_libraries(scil m)
 
 # for specific algorithms
@@ -99,7 +99,6 @@ target_link_libraries(scil
   ${DEPS_DIR}/libfpzip.a
   ${DEPS_DIR}/libzfp.a
   lz4
-  ${OPENJPEG_LDFLAGS}
   )
 
 configure_file("${CMAKE_SOURCE_DIR}/scil-config.h.in" "scil-config.h" @ONLY)

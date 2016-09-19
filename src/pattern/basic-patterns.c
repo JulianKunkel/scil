@@ -62,7 +62,7 @@ static void rotate2d(float* a, float* b, float* c, float mn, float mx, size_t x_
 {
     float a_tmp = -*b * y_size / x_size;
     float b_tmp = *a * x_size / y_size;
-    float c_tmp = mn + b * y_size;
+    float c_tmp = mn + *b * y_size; //where is *c?
 
     *a = a_tmp;
     *b = b_tmp;
@@ -72,7 +72,7 @@ static void rotate2d(float* a, float* b, float* c, float mn, float mx, size_t x_
 static int linear1d(double* buffer, scil_dims* dims, float mn, float mx)
 {
     size_t nmemb = scil_get_data_count(dims);
-    double r   = random() / RAND_MAX
+    double r   = random() / RAND_MAX;
     float a    = r > 0.5 ? mn : mx;
     float last = r > 0.5 ? mx : mn;
     float b    = (last - a) / nmemb;
@@ -94,16 +94,27 @@ static int linear2d(double* buffer, scil_dims* dims, float mn, float mx)
 
     int r2 = random() % 4;
     for (int i = 0; i < r2; ++i)
-        rotate(&a, &b, &c, mn, mx, x_size, y_size);
+        rotate2d(&a, &b, &c, mn, mx, x_size, y_size);
 
     for (size_t y = 0; y < y_size; ++y){
-        for (size_t x = 0; x < x_size; ++x){}
+        for (size_t x = 0; x < x_size; ++x){
             size_t i = y*x_size + x;
             buffer[i] = a * x + b * y + c;
         }
     }
     return SCIL_NO_ERR;
 }
+
+static int linear3d(double* buffer, scil_dims* dims, float mn, float mx)
+{
+  return SCIL_NO_ERR;
+}
+
+static int linear4d(double* buffer, scil_dims* dims, float mn, float mx)
+{
+  return SCIL_NO_ERR;
+}
+
 static int linear(scil_dims * dims, double * buffer, float mn, float mx, float arg, float arg2)
 {
     switch(dims->dims){

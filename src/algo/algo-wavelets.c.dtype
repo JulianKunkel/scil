@@ -42,7 +42,7 @@ int scil_wavelets_compress_<DATATYPE>(const scil_context_p ctx,
   	int Nl,Nh;
   	float *lp,*hp;
 
-  	// Choose wavelet filter. List of filters is in wav_trf.c
+    // Choose wavelet filter. List of filters is in wav_trf.c
   	choose_filter('H',9);
 
   	// Main buffer for operations.
@@ -68,6 +68,92 @@ int scil_wavelets_compress_<DATATYPE>(const scil_context_p ctx,
 
   	// Free buffers.
   	free_2d_float(buffer_t,Ni);
+
+    /*int i,j;
+    int Ni = dims->length[1], Nj = dims->length[0];
+  	float **buffer_t;
+  	float **ctrf[4],**cim;
+  	float mse=0;
+  	const int levs=1;
+
+  	buffer_t=allocate_2d_float(Ni,Nj,0);
+
+  	for(i=0;i<4;i++)
+  		ctrf[i]=allocate_2d_float(Ni,Nj,0);
+
+  	// Copy "source" input to the buffer.
+    for(i=0;i<Ni;i++) {
+
+  		for(j=0;j<Nj;j++) {
+
+  			buffer_t[i][j]=(*(float*)(source+i*Nj+j));
+  		}
+  	}
+
+    printf("\nInput:");
+    for(i=0;i<Ni;i++) {
+  		for(j=0;j<Nj;j++) {
+  			printf(" %f", buffer_t[i][j]);
+  		}
+  	}
+
+  		// Forward transform.
+  		// Allocates components of ctrf.
+  		complex_wav_forw(buffer_t,ctrf,Ni,Nj,levs);
+
+      printf("\n\nFWT:");
+      for(int l =0; l<4;l++){
+        for(i=0;i<Ni;i++) {
+    		    for(j=0;j<Nj;j++) {
+    			       printf(" %f", ctrf[l][i][j]);
+            }
+        }
+        printf("\n>");
+      }
+
+  		// Inverse transform.
+  		// Allocates the temporary result array cim.
+  		cim=complex_wav_inv(ctrf,Ni,Nj,levs);
+
+      printf("\n\nINV:");
+      for(int l =0; l<4;l++){
+        for(i=0;i<Ni;i++) {
+    		    for(j=0;j<Nj;j++) {
+    			       printf(" %f", ctrf[l][i][j]);
+            }
+        }
+        printf("\n>");
+      }
+
+      printf("\n\nResult:");
+      for(i=0;i<Ni;i++) {
+    		for(j=0;j<Nj;j++) {
+    			printf(" %f", cim[i][j]);
+    		}
+    	}
+
+  	mse=0;
+  	for(i=0;i<Ni;i++)
+  		for(j=0;j<Nj;j++) {
+
+  			mse+=((*(source+i*Nj+j))-cim[i][j])*((*(source+i*Nj+j))-cim[i][j]);
+  		}
+  	mse/=Ni*Nj;
+
+  	printf("\nThe mse due to transformation and inverse transformation is: \n");
+  	printf("\t%8.4f, ( %8.4f dB)\n ",mse,10*log10(255*255/mse));
+  	printf("(Very small amount of mse is OK due to numerical errors.)\n");
+
+  	// Free ctrf components allocated.
+  	for(i=0;i<4;i++)
+  		free_2d_float(ctrf[i],Ni);
+
+  	// Free buffer.
+  	free_2d_float(buffer_t,Ni);
+
+  	// Free temporary storage for results.
+  	free_2d_float(cim,Ni);
+*/
 
     return 0;
 }
