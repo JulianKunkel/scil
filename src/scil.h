@@ -49,6 +49,7 @@ folder "src/" {
     component "data statistics" #Wheat
     component "data conversion" #Wheat
     component "dictionary" #Wheat
+    component "grid iterators" #Wheat
   }
 
 
@@ -166,6 +167,16 @@ folder "Install directory"{
     artifact [libscil.so] #PowderBlue
     artifact [libhdf5-filter-scil.so] #PowderBlue
   }
+
+  folder "bin/"{
+    artifact [scil-benchmark] #LightGreen
+    artifact [scil-gen-chooser-data] #LightGreen
+    artifact [scil-compress-csv] #LightGreen
+    artifact [scil-pattern-plotter] #LightGreen
+    artifact [scil-add-noise-csv] #LightGreen
+    artifact [scil-plot-csv.R] #LightGreen
+    artifact [scil-plot-csv.py] #LightGreen
+  }
 }
 \enduml
 
@@ -200,7 +211,6 @@ folder "Install directory"{
 
    folder "Install directory"{
      artifact [scil.conf]
-     artifact [scil.pc]
    }
 
    [scil-benchmark]..> [scil.conf] : creates
