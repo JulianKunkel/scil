@@ -19,53 +19,204 @@
  * \author Armin Schaare <3schaare@informatik.uni-hamburg.de>
 
 \startuml{scil-components.png}
-  title Components of SCIL
+title Components of SCIL
 
-  folder "Core in src/" {
+folder "src/" {
 
-    frame "libscil" {
-        'component X #PowderBlue
-        interface "scil.h" #Orange
-        component "scil-algo-chooser" #Wheat
+  folder "compression" {
+    component "algo-chooser" #Wheat
+    component "chain execution" #Wheat
+  }
 
-        'note left of X
-        'end note
-        '[Thread] ..> [SIOX-LL] : use
-      }
+  folder "util"{
+    component "print" #Wheat
+    component "accuracy" #Wheat
+    component "validate" #Wheat
+    component "error" #Wheat
+  }
 
-    folder "tools" {
-      artifact [scil-benchmark]
+  folder "prepare"{
+    component "memory-allocation" #Wheat
+    component "user hints" #Wheat
+    component "context" #Wheat
+    component "dims" #Wheat
+  }
+
+  folder "internals"{
+    component "memory" #Wheat
+    component "timer" #Wheat
+    component "marshalling" #Wheat
+    component "data statistics" #Wheat
+    component "data conversion" #Wheat
+    component "dictionary" #Wheat
+  }
+
+
+  folder "algo"{
+    frame "FP Preconditoner"{
     }
-
-    folder "pattern"{
-      frame "libscil-patterns"{
-        interface "scil-patterns.h" #Purple
-      }
+    frame "FP Converter INT"{
+    }
+    frame "INT Preconditioner"{
+    }
+    frame "DATATYPE Byte"{
+    }
+    frame "Byte"{
     }
   }
 
-  actor admin
-  admin --> [scil-benchmark] : runs
+  folder "pattern"{
+      interface "constant" #Blue
+      interface "random" #Blue
+      interface "steps" #Blue
+      interface "sin" #Blue
+      interface "simplex_noise" #Blue
+      interface "poly4" #Blue
 
-  folder "Install directory"{
+    frame "mutators"{
+      ' Mutators are only applicable to double
+      interface "interpolator" #Orange
+      interface "repeater" #Orange
+
+      interface "noise" #Orange
+    }
+
+    frame "noise" #white{
+      'They are implemented using mutators
+      interface "white" #green
+      interface "brownian/red" #green
+      interface "pink" #green
+    }
+  }
+
+  folder "tools" {
+    artifact [scil-benchmark]
+    artifact [scil-pattern-plotter]
+    artifact [scil-compress-csv]
+    artifact [scil-compress-csv]
+    artifact [scil-gen-chooser-data]
+    artifact [scil-plot-csv.py]
+    artifact [scil-plot-csv.R]
+  }
+
+  folder "test"{
+    folder "complex"{
+    }
+    'note left of complex: Advanced test suite, not run automatically
+  }
+  'note left of test: Tests that are run automatically, they do not depend on arguments
+}
+
+folder "Additional tools in tools/"{
+  folder "hdf5-plugin"{
+    component [libhdf5-filter-scil]
+  }
+}
+\enduml
+\startuml{scil-public-interfaces.png}
+title Interfaces of SCIL
+
+folder "src/" {
+
+  frame "libscil-patterns"{
+    interface "scil-pattern.h" #Purple
+    interface "scil-mutators.h" #Purple
+    interface "scil-noise.h" #Purple
+  }
+
+  frame "libscil" {
+      interface "scil.h" #Orange
+      interface "scil-compression.h" #Orange
+      interface "scil-util.h" #Orange
+      interface "scil-prepare.h" #Orange
+
+      frame "internals" #LightYellow{
+        interface "scil-internal-memory.h"
+        interface "scil-internal-timer.h"
+        interface "scil-internal-marshalling.h"
+        interface "scil-internal-conversion.h"
+        interface "scil-internal-dictionary.h"
+      }
+  }
+}
+
+
+folder "Install directory"{
+
+  folder "share/scil/"{
     artifact [scil.conf]
+  }
+  folder "lib/pkgconfig"{
     artifact [scil.pc]
   }
 
-  [scil-benchmark]..> [scil.conf] : creates
-  [scil-algo-chooser]..> [scil.conf] : reads
+  folder "include/"{
+  artifact [ scil.h]
+  artifact [ scil-compression.h]
+  artifact [ scil-util.h]
+  artifact [ scil-prepare.h]
 
-  [scil-algo-chooser]-->[scil-patterns.h] : use
-
-  folder "Additional tools in tools/"{
-    folder "hdf5-plugin"{
-      component [libhdf5-filter-scil]
-    }
+  artifact [ scil-pattern.h]
+  artifact [ scil-mutators.h]
+  artifact [ scil-noise.h]
   }
 
-  [libhdf5-filter-scil] --> [scil.h] : use
+  folder "lib/"{
+    artifact [libscil-patterns.so] #PowderBlue
+    artifact [libscil.so] #PowderBlue
+    artifact [libhdf5-filter-scil.so] #PowderBlue
+  }
+}
 \enduml
- */
+
+\startuml{scil-public-artefacts.png}
+   title Interfaces of SCIL
+
+   folder "Core in src/" {
+
+     folder "pattern"{
+       frame "libscil-patterns"{
+         interface "scil-patterns.h" #Purple
+       }
+     }
+
+     frame "libscil" {
+         'component X #PowderBlue
+         interface "scil.h" #Orange
+         component "scil-algo-chooser" #Wheat
+
+         'note left of X
+         'end note
+         '[Thread] ..> [SIOX-LL] : use
+       }
+
+     folder "tools" {
+       artifact [scil-benchmark]
+     }
+   }
+
+   actor admin
+   admin --> [scil-benchmark] : runs
+
+   folder "Install directory"{
+     artifact [scil.conf]
+     artifact [scil.pc]
+   }
+
+   [scil-benchmark]..> [scil.conf] : creates
+   [scil-algo-chooser]..> [scil.conf] : reads
+
+   [scil-algo-chooser]-->[scil-patterns.h] : use
+
+   folder "Additional tools in tools/"{
+     folder "hdf5-plugin"{
+       component [libhdf5-filter-scil]
+     }
+   }
+
+   [libhdf5-filter-scil] --> [scil.h] : use
+ \enduml
+  */
 
 #ifndef SCIL_HEADER_
 #define SCIL_HEADER_
