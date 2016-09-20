@@ -137,6 +137,7 @@ folder "src/" {
         interface "scil-internal-marshalling.h"
         interface "scil-internal-conversion.h"
         interface "scil-internal-dictionary.h"
+        interface "scil-internal-grid.h"
       }
   }
 }
