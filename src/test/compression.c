@@ -22,6 +22,8 @@
 #include <time.h>
 
 #include <scil.h>
+#include <scil-prepare.h>
+#include <scil-user-hints.h>
 #include <scil-util.h>
 
 char* read_data(const char* path){

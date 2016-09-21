@@ -56,15 +56,6 @@ static scil_compression_algorithm * algo_array[] = {
 	NULL
 };
 
-static char * performance_units[] = {
-	"IGNORE",
-	"MiB",
-	"GiB",
-	"NetworkSpeed",
-	"NodeLocalStorageSpeed",
-	"SingleStreamSharedStorageSpeed"
-};
-
 int scil_compressors_available(){
 	static int count = -1;
 	if (count > 0){
@@ -325,48 +316,6 @@ size_t scil_get_data_size(enum SCIL_Datatype datatype, const scil_dims* dims)
         result *= dims->length[i];
     }
     return result * DATATYPE_LENGTH(datatype);
-}
-
-void scilPr_initialize_user_hints(scilPr_user_hints_t* hints)
-{
-    memset(hints, 0, sizeof(scilPr_user_hints_t));
-    hints->relative_tolerance_percent        = SCIL_ACCURACY_DBL_IGNORE;
-    hints->relative_err_finest_abs_tolerance = SCIL_ACCURACY_DBL_IGNORE;
-    hints->absolute_tolerance                = SCIL_ACCURACY_DBL_IGNORE;
-
-    hints->comp_speed.unit   = SCIL_PERFORMANCE_IGNORE;
-    hints->decomp_speed.unit = SCIL_PERFORMANCE_IGNORE;
-}
-
-void scilPr_copy_user_hints(scilPr_user_hints_t * oh, const scilPr_user_hints_t* hints){
-	memcpy(oh, hints, sizeof(scilPr_user_hints_t));
-	/*if(hints->force_compression_methods != NULL){
-		oh->force_compression_methods = NULL;
-	}
-	*/
-}
-
-
-static void print_performance_hint(const char* name, const scilPr_performance_hint_t p)
-{
-    printf("\t%s: %f * %s\n", name, (double)p.multiplier, performance_units[p.unit]);
-}
-
-void scilPr_print_user_hints(const scilPr_user_hints_t* h)
-{
-    printf(
-        "Precision hints: \n\trelative_tolerance_percent: %g "
-        "\n\trelative_err_finest_abs_tolerance: %g\n\tabsolute_tolerance: %g "
-        "\n\tsignificant_digits: %d \n\tsignificant_bits (in the mantissa): "
-        "%d\n",
-        h->relative_tolerance_percent,
-        h->relative_err_finest_abs_tolerance,
-        h->absolute_tolerance,
-        h->significant_digits,
-        h->significant_bits);
-    printf("Performance hints:\n");
-    print_performance_hint("Compression", h->comp_speed);
-    print_performance_hint("Decompression", h->decomp_speed);
 }
 
 int scil_destroy_compression_context(scil_context_p* out_ctx)

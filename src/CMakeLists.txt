@@ -83,16 +83,17 @@ execute_process(COMMAND ${DEV_DIR}/create-datatype-variants.py ${CMAKE_SOURCE_DI
 
 
 FILE(GLOB ALGO ${CMAKE_SOURCE_DIR}/algo/*.c ${CMAKE_BINARY_DIR}/algo/*.c)
-FILE(GLOB BINARY_DEPS ${CMAKE_BINARY_DIR}/scil-*.c)
 FILE(GLOB SOURCE_DEPS ${CMAKE_SOURCE_DIR}/scil-*.c)
+FILE(GLOB SOURCE_PREPARE_DEPS ${CMAKE_SOURCE_DIR}/prepare/*.c)
 
+FILE(GLOB BINARY_DEPS ${CMAKE_BINARY_DIR}/scil-*.c)
 
 # MESSAGE( STATUS "Available algorithms: " ${ALGO})
-add_library(scil SHARED scil.c scil-dummy.cpp ${SOURCE_DEPS} ${BINARY_DEPS} ${CMAKE_BINARY_DIR}/scil-quantizer.c ${ALGO} ${DEPS_DIR}/open-simplex-noise-in-c/open-simplex-noise.c ${DEPS_DIR}/wavelet_code/alloc.c ${DEPS_DIR}/wavelet_code/wav_basic.c ${DEPS_DIR}/wavelet_code/wav_trf.c)
+add_library(scil SHARED scil.c scil-dummy.cpp ${SOURCE_DEPS} ${SOURCE_PREPARE_DEPS} ${BINARY_DEPS} ${CMAKE_BINARY_DIR}/scil-quantizer.c ${ALGO} ${DEPS_DIR}/open-simplex-noise-in-c/open-simplex-noise.c ${DEPS_DIR}/wavelet_code/alloc.c ${DEPS_DIR}/wavelet_code/wav_basic.c ${DEPS_DIR}/wavelet_code/wav_trf.c)
 target_link_libraries(scil m)
 
 # for specific algorithms
-include_directories(${CMAKE_BINARY_DIR} ${DEPS_DIR}/open-simplex-noise-in-c ${DEPS_DIR}/wavelet_code ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/pattern ${DEPS_DIR}/include/zfp ${DEPS_DIR}/include/fpzip ${OPENJPEG_INCLUDE_DIRS})
+include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/prepare ${CMAKE_BINARY_DIR} ${DEPS_DIR}/open-simplex-noise-in-c ${DEPS_DIR}/wavelet_code ${CMAKE_SOURCE_DIR}/pattern ${DEPS_DIR}/include/zfp ${DEPS_DIR}/include/fpzip ${OPENJPEG_INCLUDE_DIRS})
 
 target_link_libraries(scil z)
 target_link_libraries(scil
@@ -144,6 +145,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/scil.pc"  DESTINATION "${CMAKE_INSTAL
 install(TARGETS scil LIBRARY DESTINATION lib)
 install(FILES scil.h DESTINATION include)
 install(FILES scil-util.h DESTINATION include)
+install(FILES scil-prepare.h DESTINATION include)
 
 ##
 feature_summary(WHAT ALL)
