@@ -18,7 +18,9 @@
  * \author Julian Kunkel <juliankunkel@googlemail.com>
  * \author Armin Schaare <3schaare@informatik.uni-hamburg.de>
 
-\startuml{scil-components.png}
+\mainpage Blablabla
+
+@startuml{scil-components.png}
 title Components of SCIL
 
 folder "src/" {
@@ -113,8 +115,9 @@ folder "Additional tools in tools/"{
     component [libhdf5-filter-scil]
   }
 }
-\enduml
-\startuml{scil-public-interfaces.png}
+@enduml
+
+@startuml{scil-public-interfaces.png}
 title Interfaces of SCIL
 
 folder "src/" {
@@ -179,9 +182,9 @@ folder "Install directory"{
     artifact [scil-plot-csv.py] #LightGreen
   }
 }
-\enduml
+@enduml
 
-\startuml{scil-public-artefacts.png}
+@startuml{scil-public-artefacts.png}
    title Interfaces of SCIL
 
    folder "Core in src/" {
@@ -226,7 +229,7 @@ folder "Install directory"{
    }
 
    [libhdf5-filter-scil] --> [scil.h] : use
- \enduml
+ @enduml
   */
 
 #ifndef SCIL_HEADER_
