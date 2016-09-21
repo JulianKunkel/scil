@@ -93,9 +93,7 @@ const char* scil_compressor_name(int num)
         return SCIL_BUFFER_ERR;                          \
     }
 
-void scil_compression_sprint_last_algorithm_chain(scil_context_p ctx,
-                                                  char* out,
-                                                  int buff_length)
+void scil_compression_sprint_last_algorithm_chain(scil_context_p ctx, char* out, int buff_length)
 {
     int ret                      = 0;
     scil_compression_chain_t* lc = &ctx->chain;
@@ -195,8 +193,7 @@ scil_compression_algorithm* scilI_find_compressor_by_name(const char* name)
     }
 }
 
-int scilI_parse_compression_algorithms(scil_compression_chain_t* chain,
-                                       char* str_in)
+int scilI_parse_compression_algorithms(scil_compression_chain_t* chain, char* str_in)
 {
     char *saveptr, *token;
     char str[4096];
@@ -350,8 +347,7 @@ void scil_copy_hints(scil_user_params_t * oh, const scil_user_params_t* hints){
 }
 
 
-static void print_performance_hint(const char* name,
-                                   const scil_performance_hint_t p)
+static void print_performance_hint(const char* name, const scil_performance_hint_t p)
 {
     printf("\t%s: %f * %s\n", name, (double)p.multiplier, performance_units[p.unit]);
 }

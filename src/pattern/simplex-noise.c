@@ -29,9 +29,10 @@ static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float 
   if( scilU_float_equal(mn, mx) || frequencyCount <= 0 ){
     return SCIL_EINVAL;
   }
-	struct osn_context *ctx;
+
+  struct osn_context *ctx;
   int64_t seed = 4711;
-	open_simplex_noise(seed, &ctx);
+  open_simplex_noise(seed, &ctx);
 
   int64_t max_potenz = 1<<frequencyCount;
   size_t * len = dims->length;
