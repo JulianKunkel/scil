@@ -18,7 +18,7 @@
  * \author Julian Kunkel <juliankunkel@googlemail.com>
  * \author Armin Schaare <3schaare@informatik.uni-hamburg.de>
 
-\mainpage Blablabla
+\mainpage SCIL - Scientific Compression Interface Library
 
 @startuml{scil-components.png}
 title Components of SCIL
