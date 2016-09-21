@@ -5,7 +5,7 @@
 #include <scil.h>
 
 size_t count = 1000;
-scil_user_params_t hints;
+scilPr_user_hints_t hints;
 scil_dims dims;
 scil_context_p context;
 
@@ -96,7 +96,7 @@ int main(void){
 
     srand((unsigned)time(NULL));
 
-    scil_init_hints(&hints);
+    scilPr_initialize_user_hints(&hints);
     hints.absolute_tolerance = 0.05;
     hints.force_compression_methods = "9";
 

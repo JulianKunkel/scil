@@ -26,7 +26,7 @@
 static double data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 static double data_check[] = {0,0,0,0,0,0,0,0,0,0};
 static scil_context_p ctx;
-static scil_user_params_t hints;
+static scilPr_user_hints_t hints;
 static scil_dims dims;
 static size_t size;
 static byte * buff;
@@ -69,7 +69,7 @@ void test(char * name, size_t expected_size, int check_compressed_output){
 }
 
 int main(){
-  scil_init_hints(& hints);
+  scilPr_initialize_user_hints(& hints);
   hints.absolute_tolerance = SCIL_ACCURACY_DBL_FINEST;
 
   scil_init_dims_1d(& dims, 10);

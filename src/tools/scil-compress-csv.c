@@ -218,11 +218,11 @@ void writeData(){
 
 int main(int argc, char ** argv){
   scil_context_p ctx;
-  scil_user_params_t hints;
+  scilPr_user_hints_t hints;
 
   int ret;
 
-  scil_init_hints(&hints);
+  scilPr_initialize_user_hints(&hints);
 
   option_help known_args[] = {
     {'i', "in_file", "Input file (file format depends on mode)", OPTION_REQUIRED_ARGUMENT, 's', & in_file},
@@ -263,8 +263,8 @@ int main(int argc, char ** argv){
 
   if (print_hints){
     printf("Effective hints (only needed for compression)\n");
-    scil_user_params_t e = scil_retrieve_effective_hints(ctx);
-    scil_user_params_t_print(& e);
+    scilPr_user_hints_t e = scil_retrieve_effective_hints(ctx);
+    scilPr_print_user_hints(& e);
   }
 
   if (compress || cycle){

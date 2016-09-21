@@ -159,7 +159,7 @@ int scil_compressor_num_by_name(const char* name)
 
 static int check_compress_lossless_needed(scil_context_p ctx)
 {
-    const scil_user_params_t hints = ctx->hints;
+    const scilPr_user_hints_t hints = ctx->hints;
 
     if ((hints.absolute_tolerance != SCIL_ACCURACY_DBL_IGNORE &&
          hints.absolute_tolerance <= SCIL_ACCURACY_DBL_FINEST) ||
@@ -327,9 +327,9 @@ size_t scil_get_data_size(enum SCIL_Datatype datatype, const scil_dims* dims)
     return result * DATATYPE_LENGTH(datatype);
 }
 
-void scil_init_hints(scil_user_params_t* hints)
+void scilPr_initialize_user_hints(scilPr_user_hints_t* hints)
 {
-    memset(hints, 0, sizeof(scil_user_params_t));
+    memset(hints, 0, sizeof(scilPr_user_hints_t));
     hints->relative_tolerance_percent        = SCIL_ACCURACY_DBL_IGNORE;
     hints->relative_err_finest_abs_tolerance = SCIL_ACCURACY_DBL_IGNORE;
     hints->absolute_tolerance                = SCIL_ACCURACY_DBL_IGNORE;
@@ -338,8 +338,8 @@ void scil_init_hints(scil_user_params_t* hints)
     hints->decomp_speed.unit = SCIL_PERFORMANCE_IGNORE;
 }
 
-void scil_copy_hints(scil_user_params_t * oh, const scil_user_params_t* hints){
-	memcpy(oh, hints, sizeof(scil_user_params_t));
+void scilPr_copy_user_hints(scilPr_user_hints_t * oh, const scilPr_user_hints_t* hints){
+	memcpy(oh, hints, sizeof(scilPr_user_hints_t));
 	/*if(hints->force_compression_methods != NULL){
 		oh->force_compression_methods = NULL;
 	}
@@ -347,12 +347,12 @@ void scil_copy_hints(scil_user_params_t * oh, const scil_user_params_t* hints){
 }
 
 
-static void print_performance_hint(const char* name, const scil_performance_hint_t p)
+static void print_performance_hint(const char* name, const scilPr_performance_hint_t p)
 {
     printf("\t%s: %f * %s\n", name, (double)p.multiplier, performance_units[p.unit]);
 }
 
-void scil_user_params_t_print(const scil_user_params_t* h)
+void scilPr_print_user_hints(const scilPr_user_hints_t* h)
 {
     printf(
         "Precision hints: \n\trelative_tolerance_percent: %g "
@@ -377,7 +377,7 @@ int scil_destroy_compression_context(scil_context_p* out_ctx)
     return SCIL_NO_ERR;
 }
 
-scil_user_params_t scil_retrieve_effective_hints(scil_context_p ctx)
+scilPr_user_hints_t scil_retrieve_effective_hints(scil_context_p ctx)
 {
     return ctx->hints;
 }
@@ -413,7 +413,7 @@ int scil_create_compression_context(scil_context_p* out_ctx,
                                     enum SCIL_Datatype datatype,
                                     int special_values_count,
                                     void * special_values,
-                                    const scil_user_params_t* hints)
+                                    const scilPr_user_hints_t* hints)
 {
     scil_check_if_initialized();
 
@@ -432,9 +432,9 @@ int scil_create_compression_context(scil_context_p* out_ctx,
 			ctx->special_values = NULL;
 		}
 
-    scil_user_params_t* oh;
+    scilPr_user_hints_t* oh;
     oh = & ctx->hints;
-	scil_copy_hints(oh, hints);
+	scilPr_copy_user_hints(oh, hints);
 
 	// adjust accuracy needed
 	switch(datatype){
@@ -596,7 +596,7 @@ int scil_compress(byte* restrict dest,
     }
 
 	// Set local copies of hints and compression chain
-    const scil_user_params_t* hints         = &ctx->hints;
+    const scilPr_user_hints_t* hints         = &ctx->hints;
     scil_compression_chain_t* chain = &ctx->chain;
 
 	// Check whether automatic compressor decision can be skipped because of a user forced chain
@@ -1052,9 +1052,9 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
                              const void* restrict data_2,
                              scil_dims* dims,
                              const double relative_err_finest_abs_tolerance,
-                             scil_user_params_t* out_hints) {
-    scil_user_params_t a;
-    scil_init_hints(&a);
+                             scilPr_user_hints_t* out_hints) {
+    scilPr_user_hints_t a;
+    scilPr_initialize_user_hints(&a);
 
     a.absolute_tolerance                = 0;
     a.relative_err_finest_abs_tolerance = 0;
@@ -1127,13 +1127,13 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
                               byte* restrict data_compressed,
                               const size_t compressed_size,
                               const scil_context_p ctx,
-                              scil_user_params_t* out_accuracy) {
+                              scilPr_user_hints_t* out_accuracy) {
     const uint64_t length = scil_compress_buffer_size_bound(datatype, dims);
     byte* data_out        = (byte*)malloc(length);
     if (data_out == NULL) {
         return SCIL_MEMORY_ERR;
     }
-    scil_user_params_t a;
+    scilPr_user_hints_t a;
 
     memset(data_out, -1, length);
 
@@ -1175,7 +1175,7 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
                                 ctx->hints.relative_err_finest_abs_tolerance,
                                 &a);
 
-        const scil_user_params_t h = ctx->hints;
+        const scilPr_user_hints_t h = ctx->hints;
 
         // check if tolerance level is met:
         ret = 0;

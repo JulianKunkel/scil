@@ -13,13 +13,13 @@ scil_fpzip_decompress_float
 scil_get_data_count
 scil_gzip_compress
 scil_gzip_decompress
-scil_user_params_t_print
+scilPr_print_user_hints
 scil_init_dims_1d
 scil_init_dims_2d
 scil_init_dims_3d
 scil_init_dims_4d
 scil_init_dims_array
-scil_init_hints
+scilPr_initialize_user_hints
 scil_lz4fast_compress
 scil_lz4fast_decompress
 scil_memcopy_compress

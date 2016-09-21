@@ -19,8 +19,8 @@ int main()
     size_t dest_size = scil_compress_buffer_size_bound(SCIL_TYPE_FLOAT, &dims);
     byte* dest       = (byte*)SAFE_MALLOC(dest_size);
 
-    scil_user_params_t hints;
-    scil_init_hints(&hints);
+    scilPr_user_hints_t hints;
+    scilPr_initialize_user_hints(&hints);
     hints.force_compression_methods = "3";
     hints.significant_bits          = 32;
 

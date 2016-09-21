@@ -164,7 +164,7 @@ typedef struct {
 struct scil_context_t{
   int lossless_compression_needed;
   enum SCIL_Datatype datatype;
-  scil_user_params_t hints;
+  scilPr_user_hints_t hints;
 
   /** \brief Special values are special values that must be preserved, we support a list of  values */
   int special_values_count;

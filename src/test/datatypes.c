@@ -12,8 +12,8 @@ void test(int datatype, void * source){
   scil_init_dims_1d(&dims, count);
   size_t dest_size = scil_compress_buffer_size_bound(datatype, &dims);
   byte* dest       = (byte*) SAFE_MALLOC(dest_size);
-  scil_user_params_t hints;
-  scil_init_hints(&hints);
+  scilPr_user_hints_t hints;
+  scilPr_initialize_user_hints(&hints);
   hints.absolute_tolerance        = 1;
 
   scil_context_p ctx;
@@ -21,10 +21,10 @@ void test(int datatype, void * source){
   scil_create_compression_context(&ctx, datatype, 0, NULL, &hints);
 
   ret = scil_compress(dest, dest_size, source, &dims, &compressed_size, ctx);
-  scil_user_params_t out_accuracy;
+  scilPr_user_hints_t out_accuracy;
   ret = scil_validate_compression(datatype, source, & dims, dest, compressed_size,  ctx, & out_accuracy);
 
-  scil_user_params_t_print(& out_accuracy);
+  scilPr_print_user_hints(& out_accuracy);
 
   assert( ret == 0);
 

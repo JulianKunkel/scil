@@ -624,7 +624,7 @@ int main_alt(int argc, char** argv) {
 	return 0;
 }*/
 
-static int write_to_csv(const double bias, const double discountFactor, const scil_user_params_t hints, const size_t uncompressed_size, const size_t compressed_size, const double compression_ratio, const double seconds){
+static int write_to_csv(const double bias, const double discountFactor, const scilPr_user_hints_t hints, const size_t uncompressed_size, const size_t compressed_size, const double compression_ratio, const double seconds){
 
 	char path[128];
 	sprintf(path, "performance_data_%.2f_%.2f.csv", bias, discountFactor);
@@ -712,9 +712,9 @@ int test_performance(double bias, double discountFactor){
 	scil_init_dims_1d(& dims, variableSize);
 
   scil_context_p ctx;
-  scil_user_params_t hints;
+  scilPr_user_hints_t hints;
 
-  scil_init_hints(&hints);
+  scilPr_initialize_user_hints(&hints);
 
   hints.force_compression_methods = "0";
 	hints.absolute_tolerance = 0.5;

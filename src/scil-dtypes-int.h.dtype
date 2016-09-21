@@ -2,13 +2,13 @@
 // Repeat for each data type
 
 #pragma GCC diagnostic ignored "-Wfloat-equal"
-static void scil_determine_accuracy_<DATATYPE>(const <DATATYPE> *data_1, const <DATATYPE> *data_2, const size_t length, const double relative_err_finest_abs_tolerance, scil_user_params_t * a){
+static void scil_determine_accuracy_<DATATYPE>(const <DATATYPE> *data_1, const <DATATYPE> *data_2, const size_t length, const double relative_err_finest_abs_tolerance, scilPr_user_hints_t * a){
 	for(size_t i = 0; i < length; i++ ){
 		const <DATATYPE> c1 = data_1[i];
 		const <DATATYPE> c2 = data_2[i];
 		const <DATATYPE> err = c2 > c1 ? c2 - c1 : c1 - c2;
 
-		scil_user_params_t cur;
+		scilPr_user_hints_t cur;
 		cur.absolute_tolerance = err;
 		// determine significant digits
 		{

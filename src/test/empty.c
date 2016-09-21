@@ -25,11 +25,11 @@
 int main(){
 
   scil_context_p ctx;
-  scil_user_params_t hints;
+  scilPr_user_hints_t hints;
   scil_dims dims;
   int ret;
 
-  scil_init_hints(& hints);
+  scilPr_initialize_user_hints(& hints);
   hints.force_compression_methods = "dummy-precond";
   ret = scil_create_compression_context(& ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
   assert(ret == SCIL_NO_ERR);

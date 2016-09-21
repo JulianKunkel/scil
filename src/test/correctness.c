@@ -42,10 +42,10 @@ int test_correctness(const char* name, double* buffer_in, scil_dims dims)
     allocate(byte, tmp_buff, c_size);
 
     scil_context_p ctx;
-    scil_user_params_t hints;
-    scil_user_params_t out_accuracy;
+    scilPr_user_hints_t hints;
+    scilPr_user_hints_t out_accuracy;
 
-    scil_init_hints(&hints);
+    scilPr_initialize_user_hints(&hints);
     hints.absolute_tolerance = 0.01;
 
     double r = (double)scilI_determine_randomness( buffer_in, variableSize * sizeof(double), tmp_buff, c_size);

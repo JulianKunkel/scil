@@ -26,8 +26,8 @@
 int main(){
   int ret;
 
-  scil_user_params_t h;
-  scil_init_hints(& h);
+  scilPr_user_hints_t h;
+  scilPr_initialize_user_hints(& h);
 
   // hints for the precision
   h.relative_tolerance_percent = 10;
@@ -39,7 +39,7 @@ int main(){
 
   // hints for the performance
   // we want to use it for improving network speed, therefore, unit is NETWORK
-  h.comp_speed = (scil_performance_hint_t) { .unit = SCIL_PERFORMANCE_NETWORK, .multiplier = 1.5 };
+  h.comp_speed = (scilPr_performance_hint_t) { .unit = SCIL_PERFORMANCE_NETWORK, .multiplier = 1.5 };
 
   // for decompression we set a fixed performance
   h.decomp_speed.unit = SCIL_PERFORMANCE_GIB;
@@ -50,8 +50,8 @@ int main(){
   assert(ret == SCIL_NO_ERR);
 
   // retrieve effectively set hints:
-  scil_user_params_t e = scil_retrieve_effective_hints(ctx);
-  scil_user_params_t_print(& e);
+  scilPr_user_hints_t e = scil_retrieve_effective_hints(ctx);
+  scilPr_print_user_hints(& e);
 
   // now you can compress/decompress
 

@@ -130,8 +130,8 @@ float factor_step      = 10.0f;
 double* data = NULL;
 scil_dims dims;
 
-scil_user_params_t hints;
-//scil_init_hints(&hints);
+scilPr_user_hints_t hints;
+//scilPr_initialize_user_hints(&hints);
 
 static int benchmark_data(const double* const data, const scil_dims* const dims){
 
@@ -377,7 +377,7 @@ static void iterate_4_algos(){
     uint8_t count = scil_compressors_available();
     for (uint8_t i = 0; i < count; ++i) {
 
-        scil_init_hints(&hints);
+        scilPr_initialize_user_hints(&hints);
         snprintf(hints.force_compression_methods, 8, "%d", i);
     }
 }

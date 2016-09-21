@@ -44,7 +44,7 @@ folder "src/" {
     component "dims" #Wheat
   }
 
-  folder "internals"{
+  folder "internal"{
     component "memory" #Wheat
     component "timer" #Wheat
     component "marshalling" #Wheat
@@ -53,7 +53,6 @@ folder "src/" {
     component "dictionary" #Wheat
     component "grid iterators" #Wheat
   }
-
 
   folder "algo"{
     frame "FP Preconditoner"{

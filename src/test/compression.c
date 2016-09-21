@@ -82,10 +82,10 @@ void print_bits_uint8(uint8_t a){
 
 int main(){
 	scil_context_p ctx;
-	scil_user_params_t hints;
+	scilPr_user_hints_t hints;
 	int ret;
 
-	scil_init_hints(& hints);
+	scilPr_initialize_user_hints(& hints);
 	hints.force_compression_methods = "1";
 	hints.absolute_tolerance = 0.5;
 	//hints.relative_tolerance_percent = 1.0;
@@ -127,7 +127,7 @@ int main(){
 		printf("%f ", data_out[i]);
 	}
 	printf("\n");
-	scil_user_params_t accuracy;
+	scilPr_user_hints_t accuracy;
 
 	printf("Testing accuracy first\n");
 
@@ -138,15 +138,15 @@ int main(){
 	scil_init_dims_1d(&dims1, 1);
 
 	scil_determine_accuracy(SCIL_TYPE_DOUBLE, & f1, &f2, & dims1, 0.01, & accuracy);
-	scil_user_params_t_print(& accuracy);
+	scilPr_print_user_hints(& accuracy);
 
 	scil_determine_accuracy(SCIL_TYPE_DOUBLE, & f1, &f2, & dims1, 0.51, & accuracy);
-	scil_user_params_t_print(& accuracy);
+	scilPr_print_user_hints(& accuracy);
 
 	ret = scil_validate_compression(SCIL_TYPE_DOUBLE, u_buf, & dims, c_buf, c_buf_size, ctx, & accuracy);
 
 	printf("\nscil_validate_compression returned %s\n", ret == 0 ? "OK" : "ERROR");
-	scil_user_params_t_print(& accuracy);
+	scilPr_print_user_hints(& accuracy);
 
 	free(c_buf);
 	free(data_out);
