@@ -141,7 +141,7 @@ void writeCSVData(){
     printf("Could not open %s for write\n", out_file);
     exit(1);
   }
-  double * buffer_in = (double *) output_data;
+  float * buffer_in = (float*)output_data;
   if(dims.dims == 1){
     if (output_header)
       fprintf(f, "%zu\n", dims.length[0]);
@@ -203,8 +203,13 @@ void writeData(){
     printf("Could not open %s for write\n", out_file);
     exit(1);
   }
+  size_t buffer_in_size = 0;
+  if(data_type_float){
+    buffer_in_size = dims.length[0] * sizeof(float);
+  }else{
+    buffer_in_size = dims.length[0] * sizeof(double);
+  }
 
-  size_t buffer_in_size = dims.length[0] * sizeof(double);
   fwrite(&dims.dims, sizeof(dims.dims), 1, f);
   fwrite(&dims.length, sizeof(dims.length[0]), dims.dims, f);
   for (size_t i = 1; i < dims.dims; i++){
@@ -287,7 +292,11 @@ int main(int argc, char ** argv){
     printf("...compression and decompression\n");
     byte* result = (byte*) SAFE_MALLOC(input_size);
 
-    ret = scil_compress(result, input_size, (double*)input_data, & dims, & buff_size, ctx);
+    if(data_type_float){
+      ret = scil_compress(result, input_size, (float*)input_data, & dims, & buff_size, ctx);
+    }else{
+      ret = scil_compress(result, input_size, (double*)input_data, & dims, & buff_size, ctx);
+    }
     assert(ret == SCIL_NO_ERR);
     ret = scil_destroy_compression_context(& ctx);
     assert(ret == SCIL_NO_ERR);
@@ -299,7 +308,11 @@ int main(int argc, char ** argv){
 
   } else if (compress){
     printf("...compression\n");
-    ret = scil_compress(output_data, input_size, (double*)input_data, & dims, & buff_size, ctx);
+    if(data_type_float){
+      ret = scil_compress(output_data, input_size, (float*)input_data, & dims, & buff_size, ctx);
+    }else{
+      ret = scil_compress(output_data, input_size, (double*)input_data, & dims, & buff_size, ctx);
+    }
     assert(ret == SCIL_NO_ERR);
     ret = scil_destroy_compression_context(& ctx);
     assert(ret == SCIL_NO_ERR);
