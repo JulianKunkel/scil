@@ -14,15 +14,15 @@
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <scil-algo-chooser.h>
+
 #include <scil-compression-chain.h>
 #include <scil-config.h>
 #include <scil-data-characteristics.h>
-#include <scil-error.h>
 #include <scil-hardware-limits.h>
 #include <scil-internal.h>
 
+#include <stdio.h>
 #include <string.h>
-#include <float.h>
 
 typedef struct{
   scil_compression_chain_t chain;
