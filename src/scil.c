@@ -30,7 +30,7 @@
 #include "scil-dtypes-int.h"
 
 #define CHECK_COMPRESSOR_ID(compressor_id)               \
-    if (compressor_id >= scil_compressors_available()) { \
+    if (compressor_id >= scilU_get_available_compressor_count()) { \
         return SCIL_BUFFER_ERR;                          \
     }
 

@@ -723,7 +723,7 @@ int test_performance(double bias, double discountFactor){
 	char pipeline[100];
 
 	hints.force_compression_methods = pipeline;
-	for(int i=0; i < scil_compressors_available(); i++ ){
+	for(int i=0; i < scilU_get_available_compressor_count(); i++ ){
 		sprintf(pipeline, "%d", i);
 
 		double abs_tol = 0.5;

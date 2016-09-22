@@ -60,12 +60,12 @@ int test_correctness(const char* name, double* buffer_in, scil_dims dims)
         "Compressed size, Compression factor, CSpeed MiB/s, DSpeed MiB/s, "
         "Algo\n");
 
-    for (int i = -1; i < scil_compressors_available(); i++) {
+    for (int i = -1; i < scilU_get_available_compressor_count(); i++) {
         char compression_name[1024];
         if (i == -1) {
             hints.force_compression_methods = NULL;
         } else {
-            sprintf(compression_name, "%s", scil_compressor_name(i));
+            sprintf(compression_name, "%s", scilU_get_compressor_name(i));
             hints.force_compression_methods = compression_name;
         }
 

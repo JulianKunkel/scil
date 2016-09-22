@@ -22,10 +22,10 @@ extern scil_compression_algorithm_t* algo_array[];
 /*
  \brief Returns the number of available compression schemes.
  */
-int scil_compressors_available();
+int scilU_get_available_compressor_count();
 
-const char* scil_compressor_name(int num);
+const char* scilU_get_compressor_name(int number);
 
-int scil_compressor_num_by_name(const char* name);
+int scilU_get_compressor_number(const char* const name);
 
 #endif // SCIL_ALGOS_H

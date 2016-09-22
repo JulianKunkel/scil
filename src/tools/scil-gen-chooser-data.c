@@ -375,7 +375,7 @@ static void iterate_2_patterns() {
 
 static void iterate_4_algos(){
 
-    uint8_t count = scil_compressors_available();
+    uint8_t count = scilU_get_available_compressor_count();
     for (uint8_t i = 0; i < count; ++i) {
 
         scilPr_initialize_user_hints(&hints);

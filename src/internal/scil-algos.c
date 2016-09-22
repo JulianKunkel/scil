@@ -20,7 +20,8 @@ scil_compression_algorithm_t* algo_array[] = {
 	NULL
 };
 
-int scil_compressors_available(){
+int scilU_get_available_compressor_count()
+{
 	static int count = -1;
 	if (count > 0){
 		return count;
@@ -37,13 +38,13 @@ int scil_compressors_available(){
 	return count;
 }
 
-const char* scil_compressor_name(int num)
+const char* scilU_get_compressor_name(int number)
 {
-    assert(num < scil_compressors_available());
-    return algo_array[num]->name;
+    assert(number < scilU_get_available_compressor_count());
+    return algo_array[number]->name;
 }
 
-int scil_compressor_num_by_name(const char* name)
+int scilU_get_compressor_number(const char* const name)
 {
     scil_compression_algorithm_t** cur = algo_array;
     int count                        = 0;
