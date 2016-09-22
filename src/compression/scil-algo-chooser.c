@@ -14,29 +14,15 @@
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <scil-algo-chooser.h>
-
-#include <scil-internal.h>
-#include <scil-config.h>
-#include <scil-hardware-limits.h>
-#include <scil-error.h>
-
 #include <scil-compression-chain.h>
-
-#include <algo/lz4fast.h>
+#include <scil-config.h>
+#include <scil-data-characteristics.h>
+#include <scil-error.h>
+#include <scil-hardware-limits.h>
+#include <scil-internal.h>
 
 #include <string.h>
 #include <float.h>
-
-float scilI_determine_randomness(void* source, size_t in_size, byte *restrict buffer, size_t buffer_size){
-  // We may want to use https://en.wikipedia.org/wiki/Randomness_tests
-  int ret = scil_lz4fast_compress(NULL, buffer, &buffer_size, source, in_size);
-  if (ret == 0){
-    double rnd = buffer_size * 100.0 / in_size ;
-    return rnd;
-  }else{
-    critical("lz4fast error to determine randomness: %d\n", ret);
-  }
-}
 
 typedef struct{
   scil_compression_chain_t chain;

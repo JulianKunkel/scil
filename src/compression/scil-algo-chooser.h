@@ -21,6 +21,4 @@
 void scilI_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_context_p ctx);
 void scilI_compression_algo_chooser_init();
 
-float scilI_determine_randomness(void* source, size_t in_size, byte *restrict buffer, size_t buffer_size);
-
 #endif

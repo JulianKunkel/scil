@@ -16,7 +16,7 @@
 #include <scil-error.h>
 
 #include <scil-compressors.h>
-#include <scil-algo-chooser.h>
+#include <scil-data-characteristics.h>
 #include <scil-patterns.h>
 #include <scil-prepare.h>
 #include <scil-util.h>

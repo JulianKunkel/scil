@@ -19,7 +19,7 @@
 #include <errno.h>
 
 #include <scil-compressors.h>
-#include <scil-algo-chooser.h>
+#include <scil-data-characteristics.h>
 #include <scil-error.h>
 #include <scil-internal.h>
 #include <scil-patterns.h>
