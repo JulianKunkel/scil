@@ -6,7 +6,7 @@ int main(void){
 
     size_t count = 10000;
 
-    scilPr_user_hints_t hints;
+    scil_user_hints_t hints;
     scilPr_initialize_user_hints(&hints);
     hints.absolute_tolerance = 0.005;
     hints.force_compression_methods = "1";

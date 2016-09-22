@@ -20,6 +20,7 @@
 #include <scil-error.h>
 #include <scil-internal.h>
 #include <scil-swager.h>
+#include <scil-util.h>
 
 #include <math.h>
 
@@ -414,7 +415,7 @@ int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 
 // End repeat
 
-scil_compression_algorithm algo_sigbits = {
+scil_compression_algorithm_t algo_sigbits = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_sigbits)
     },

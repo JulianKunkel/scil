@@ -19,6 +19,7 @@
 
 #include <scil-error.h>
 #include <scil-internal.h>
+#include <scil-util.h>
 
 #include <string.h>
 #include <stdarg.h>

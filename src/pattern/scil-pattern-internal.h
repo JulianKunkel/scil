@@ -16,7 +16,7 @@
 #ifndef SCIL_PATTERN_INTERNAL_LIB_H
 #define SCIL_PATTERN_INTERNAL_LIB_H
 
-#include <scil.h>
+#include <scil-dims.h>
 
 typedef struct {
   int (*create)(scil_dims * dims, double * buffer, float mn, float mx, float arg, float arg2);

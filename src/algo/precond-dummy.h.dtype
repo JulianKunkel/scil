@@ -16,8 +16,8 @@
 
 #ifndef SCIL_DUMMY_H_
 #define SCIL_DUMMY_H_
-#include <scil-internal.h>
+#include <scil-compression-algorithm.h>
 
-extern scil_compression_algorithm algo_precond_dummy;
+extern scil_compression_algorithm_t algo_precond_dummy;
 
 #endif

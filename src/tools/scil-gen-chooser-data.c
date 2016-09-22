@@ -21,10 +21,11 @@
 #include <float.h>
 #include <math.h>
 
-#include <scil-util.h>
+#include <scil-compressors.h>
 #include <scil-algo-chooser.h>
-#include <scil-patterns.h>
 #include <scil-internal.h>
+#include <scil-patterns.h>
+#include <scil-util.h>
 
 #define allocate(type, name, count) type* name = (type*)malloc(count * sizeof(type))
 
@@ -130,7 +131,7 @@ float factor_step      = 10.0f;
 double* data = NULL;
 scil_dims dims;
 
-scilPr_user_hints_t hints;
+scil_user_hints_t hints;
 //scilPr_initialize_user_hints(&hints);
 
 static int benchmark_data(const double* const data, const scil_dims* const dims){
@@ -374,7 +375,7 @@ static void iterate_2_patterns() {
 
 static void iterate_4_algos(){
 
-    uint8_t count = scil_compressors_available();
+    uint8_t count = scilU_get_available_compressor_count();
     for (uint8_t i = 0; i < count; ++i) {
 
         scilPr_initialize_user_hints(&hints);

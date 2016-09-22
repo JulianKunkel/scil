@@ -119,7 +119,7 @@ int scil_zfp_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
 
 // End repeat
 
-scil_compression_algorithm algo_zfp_abstol = {
+scil_compression_algorithm_t algo_zfp_abstol = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_zfp_abstol)
     },

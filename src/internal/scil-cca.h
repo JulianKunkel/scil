@@ -1,46 +1,46 @@
-// This file is part of SCIL.
-//
-// SCIL is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Lesser General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// SCIL is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU Lesser General Public License
-// along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
+#ifndef SCIL_CCA_H
+#define SCIL_CCA_H
 
-#ifndef SCIL_INTERNAL_HEADER_
-#define SCIL_INTERNAL_HEADER_
+#include <scil-datatypes.h>
+#include <scil-user-hints.h>
+#include <scil-dict.h>
+#include <scil-dims.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <assert.h>
-
-#include <scil.h>
-#include <scil-util.h>
-
-#ifdef DEBUG
-  #define debug(...) fprintf(stderr, "[SCIL DEBUG] "__VA_ARGS__);
-#else
-  #define debug(...)
-#endif
-
-#ifdef DEBUG_INTERNALS
-  #define debugI(...) fprintf(stderr, "[SCIL DEBUG I] "__VA_ARGS__);
-#else
-  #define debugI(...)
-#endif
-
-#define critical(...) { fprintf(stderr, "[SCIL CRITICAL] "__VA_ARGS__); exit(1); }
-#define warn(...) fprintf(stderr, "[SCIL WARN] "__VA_ARGS__);
-
-#define FUNC_START debug("CALL %s\n", __PRETTY_FUNCTION__);
-
+// at most we support chaining of 10 preconditioners
 #define PRECONDITIONER_LIMIT 10
+
+struct scil_compression_algorithm;
+
+typedef struct scil_compression_chain {
+  struct scil_compression_algorithm* pre_cond_first[PRECONDITIONER_LIMIT]; // preconditioners first stage
+  struct scil_compression_algorithm* converter;
+  struct scil_compression_algorithm* pre_cond_second[PRECONDITIONER_LIMIT]; // preconditioners second stage
+  struct scil_compression_algorithm* data_compressor; // datatype compressor
+  struct scil_compression_algorithm* byte_compressor; // byte compressor
+
+  char precond_first_count;
+  char precond_second_count;
+  char total_size; // includes data and byte compressors
+  char is_lossy;
+} scil_compression_chain_t;
+
+typedef struct scil_context {
+  int lossless_compression_needed;
+  enum SCIL_Datatype datatype;
+  scil_user_hints_t hints;
+
+  /** \brief Special values are special values that must be preserved, we support a list of  values */
+  int special_values_count;
+  void * special_values;
+
+  /** \brief The last compressor used, could be used for debugging */
+  scil_compression_chain_t chain;
+
+  /** \brief Dictionary for pipeline internal parameters */
+  scil_dict_t pipeline_params;
+} scil_context_t;
+
+typedef scil_context_t* scil_context_p;
 
 enum compressor_type{
   SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER_FIRST,
@@ -53,7 +53,7 @@ enum compressor_type{
 /*
  An algorithm implementation can be sure that the compression output buffer is at least 2x the size of the input data.
  */
-typedef struct{
+typedef struct scil_compression_algorithm {
   union{
     struct{
       // for a preconditioner first stage, we expect that the input buffer points only to the ND data, the output data contains
@@ -138,46 +138,11 @@ typedef struct{
     } ICOtype;
   } c;
 
-
   const char * name;
   byte compressor_id;
 
   enum compressor_type type;
   char is_lossy; // byte compressors are expected to be lossless anyway
-} scil_compression_algorithm;
+} scil_compression_algorithm_t;
 
-// at most we support chaining of 10 preconditioners
-typedef struct {
-  scil_compression_algorithm * pre_cond_first[PRECONDITIONER_LIMIT]; // preconditioners first stage
-  scil_compression_algorithm * converter;
-  scil_compression_algorithm * pre_cond_second[PRECONDITIONER_LIMIT]; // preconditioners second stage
-  scil_compression_algorithm * data_compressor; // datatype compressor
-  scil_compression_algorithm * byte_compressor; // byte compressor
-
-  char precond_first_count;
-  char precond_second_count;
-  char total_size; // includes data and byte compressors
-  char is_lossy;
-} scil_compression_chain_t;
-
-
-struct scil_context_t{
-  int lossless_compression_needed;
-  enum SCIL_Datatype datatype;
-  scilPr_user_hints_t hints;
-
-  /** \brief Special values are special values that must be preserved, we support a list of  values */
-  int special_values_count;
-  void * special_values;
-
-  /** \brief The last compressor used, could be used for debugging */
-  scil_compression_chain_t chain;
-
-  /** \brief Dictionary for pipeline internal parameters */
-  scil_dict_t pipeline_params;
-};
-
-int scilI_parse_compression_algorithms(scil_compression_chain_t * chain, char * str_in);
-scil_compression_algorithm * scilI_find_compressor_by_name(const char * name);
-
-#endif
+#endif // SCIL_CCA_H

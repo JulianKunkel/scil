@@ -22,6 +22,7 @@
 #include <time.h>
 
 #include <scil.h>
+#include <scil-prepare.h>
 #include <scil-util.h>
 
 char* read_data(const char* path){
@@ -82,7 +83,7 @@ void print_bits_uint8(uint8_t a){
 
 int main(){
 	scil_context_p ctx;
-	scilPr_user_hints_t hints;
+	scil_user_hints_t hints;
 	int ret;
 
 	scilPr_initialize_user_hints(& hints);
@@ -127,7 +128,7 @@ int main(){
 		printf("%f ", data_out[i]);
 	}
 	printf("\n");
-	scilPr_user_hints_t accuracy;
+	scil_user_hints_t accuracy;
 
 	printf("Testing accuracy first\n");
 

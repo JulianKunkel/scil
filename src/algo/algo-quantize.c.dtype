@@ -164,7 +164,7 @@ int scil_quantize_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 }
 // End repeat
 
-scil_compression_algorithm algo_quantize = {
+scil_compression_algorithm_t algo_quantize = {
     .c.Ctype = {
         CREATE_INITIALIZER(scil_quantize)
     },

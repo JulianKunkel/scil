@@ -624,7 +624,7 @@ int main_alt(int argc, char** argv) {
 	return 0;
 }*/
 
-static int write_to_csv(const double bias, const double discountFactor, const scilPr_user_hints_t hints, const size_t uncompressed_size, const size_t compressed_size, const double compression_ratio, const double seconds){
+static int write_to_csv(const double bias, const double discountFactor, const scil_user_hints_t hints, const size_t uncompressed_size, const size_t compressed_size, const double compression_ratio, const double seconds){
 
 	char path[128];
 	sprintf(path, "performance_data_%.2f_%.2f.csv", bias, discountFactor);
@@ -712,7 +712,7 @@ int test_performance(double bias, double discountFactor){
 	scil_init_dims_1d(& dims, variableSize);
 
   scil_context_p ctx;
-  scilPr_user_hints_t hints;
+  scil_user_hints_t hints;
 
   scilPr_initialize_user_hints(&hints);
 
@@ -723,7 +723,7 @@ int test_performance(double bias, double discountFactor){
 	char pipeline[100];
 
 	hints.force_compression_methods = pipeline;
-	for(int i=0; i < scil_compressors_available(); i++ ){
+	for(int i=0; i < scilU_get_available_compressor_count(); i++ ){
 		sprintf(pipeline, "%d", i);
 
 		double abs_tol = 0.5;

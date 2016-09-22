@@ -15,11 +15,11 @@
 
 #include <algo/algo-abstol.h>
 
-#include <scil.h>
-#include <scil-error.h>
 #include <scil-quantizer.h>
 #include <scil-swager.h>
+#include <scil-util.h>
 
+#include <assert.h>
 #include <math.h>
 #include <string.h>
 
@@ -165,7 +165,7 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
 
 
 
-scil_compression_algorithm algo_abstol = {
+scil_compression_algorithm_t algo_abstol = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_abstol)
     },

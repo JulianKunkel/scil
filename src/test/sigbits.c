@@ -7,7 +7,7 @@ int main(void){
 
     size_t count = 1000;
 
-    scilPr_user_hints_t hints;
+    scil_user_hints_t hints;
     scilPr_initialize_user_hints(&hints);
     //hints.relative_tolerance_percent = 5.0;
     hints.significant_bits = 11;

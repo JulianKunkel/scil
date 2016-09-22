@@ -26,7 +26,7 @@
 int main(){
   int ret;
 
-  scilPr_user_hints_t h;
+  scil_user_hints_t h;
   scilPr_initialize_user_hints(& h);
 
   // hints for the precision
@@ -50,7 +50,7 @@ int main(){
   assert(ret == SCIL_NO_ERR);
 
   // retrieve effectively set hints:
-  scilPr_user_hints_t e = scil_retrieve_effective_hints(ctx);
+  scil_user_hints_t e = scil_retrieve_effective_hints(ctx);
   scilPr_print_user_hints(& e);
 
   // now you can compress/decompress

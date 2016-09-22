@@ -218,7 +218,7 @@ void writeData(){
 
 int main(int argc, char ** argv){
   scil_context_p ctx;
-  scilPr_user_hints_t hints;
+  scil_user_hints_t hints;
 
   int ret;
 
@@ -263,7 +263,7 @@ int main(int argc, char ** argv){
 
   if (print_hints){
     printf("Effective hints (only needed for compression)\n");
-    scilPr_user_hints_t e = scil_retrieve_effective_hints(ctx);
+    scil_user_hints_t e = scil_retrieve_effective_hints(ctx);
     scilPr_print_user_hints(& e);
   }
 

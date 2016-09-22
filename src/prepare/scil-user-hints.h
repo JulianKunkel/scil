@@ -39,7 +39,7 @@ typedef struct
 } scilPr_performance_hint_t;
 
 // ############################################################################
-// ## scilPr_user_hints_t
+// ## scil_user_hints_t
 // ############################################################################
 
 // These values define that the particular metrics is not of interest
@@ -89,12 +89,12 @@ typedef struct
     /** \brief */
     char* force_compression_methods;
 
-} scilPr_user_hints_t;
+} scil_user_hints_t;
 
-void scilPr_initialize_user_hints(scilPr_user_hints_t * hints);
+void scilPr_initialize_user_hints(scil_user_hints_t * hints);
 
-void scilPr_copy_user_hints(scilPr_user_hints_t * out, const scilPr_user_hints_t* hints);
+void scilPr_copy_user_hints(scil_user_hints_t * out, const scil_user_hints_t* hints);
 
-void scilPr_print_user_hints(const scilPr_user_hints_t* hints);
+void scilPr_print_user_hints(const scil_user_hints_t* hints);
 
 #endif // SCIL_USER_HINTS_H

@@ -18,7 +18,8 @@
 #include <string.h>
 #include <errno.h>
 
-#include <scil-algo-chooser.h>
+#include <scil-compressors.h>
+#include <scil-data-characteristics.h>
 #include <scil-error.h>
 #include <scil-internal.h>
 #include <scil-patterns.h>
@@ -39,7 +40,7 @@ void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double 
 	allocate(byte, tmp_buff, buff_size);
 
     scil_context_p ctx;
-    scilPr_user_hints_t hints;
+    scil_user_hints_t hints;
 
     scilPr_initialize_user_hints(&hints);
 	hints.absolute_tolerance = SCIL_ACCURACY_DBL_FINEST;
@@ -49,9 +50,9 @@ void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double 
 	char * outputFiles = getenv("SCIL_BENCHMARK_OUTPUT");
 	const size_t buffer_size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, & dims);
 
-	for(int i=0; i < scil_compressors_available(); i++ ){
+	for(int i=0; i < scilU_get_available_compressor_count(); i++ ){
 		char compression_name[1024];
-		sprintf(compression_name, "%s", scil_compressor_name(i));
+		sprintf(compression_name, "%s", scilU_get_compressor_name(i));
 		hints.force_compression_methods = compression_name;
 
 		int ret = scil_create_compression_context(& ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);

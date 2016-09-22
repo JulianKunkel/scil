@@ -138,11 +138,11 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 	assert(sizeof(size_t) == sizeof(hsize_t) );
 	scil_init_dims_array(& cfg_p->dims, rank, (const size_t*) chunkSize);
 
-  scilPr_user_hints_t * h;
-	scilPr_user_hints_t hints_new;
+  scil_user_hints_t * h;
+	scil_user_hints_t hints_new;
 	// TODO set the hints (accuracy) according to the property lists in HDF5
 	// H5Tget_precision ?
-	int ret = H5Pget_scilPr_user_hints_t(pList, & h);
+	int ret = H5Pget_scil_user_hints_t(pList, & h);
 	if(ret != 0 || h == NULL){
 		h = & hints_new;
 		scilPr_initialize_user_hints(h);
@@ -251,10 +251,10 @@ static size_t compressorFilter(unsigned int flags, size_t cd_nelmts, const unsig
   return out_size; // 0 means error.
 }
 
-#define H5P_SCIL_HINT "scilPr_user_hints_t"
+#define H5P_SCIL_HINT "scil_user_hints_t"
 
 
-herr_t H5Pset_scilPr_user_hints_t(hid_t dcpl, scilPr_user_hints_t * hints){
+herr_t H5Pset_scil_user_hints_t(hid_t dcpl, scil_user_hints_t * hints){
 	unsigned cd_values[2];
 	//printf("set %p \n", old_hints);
 	memcpy(& cd_values[0], & hints, sizeof(void *));
@@ -263,7 +263,7 @@ herr_t H5Pset_scilPr_user_hints_t(hid_t dcpl, scilPr_user_hints_t * hints){
 	return H5Pmodify_filter( dcpl, SCIL_ID, H5Z_FLAG_MANDATORY, 2, (unsigned*) cd_values );
 }
 
-herr_t H5Pget_scilPr_user_hints_t(hid_t dcpl, scilPr_user_hints_t ** out_hints){
+herr_t H5Pget_scil_user_hints_t(hid_t dcpl, scil_user_hints_t ** out_hints){
 	unsigned int *flags = NULL;
 	size_t cd_nelmts = 2;
 

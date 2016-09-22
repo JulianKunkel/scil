@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef SCIL_UTIL_H
+#define SCIL_UTIL_H
 
 /**
  * \file
@@ -30,7 +30,6 @@
 #include <time.h>
 
 #include <scil.h>
-
 
 /**
  * \brief Makro to make sure off_t is 64-bit unsigned integer
@@ -268,4 +267,4 @@ void scilU_plot(const char* name, scil_dims dims, double * buffer_in);
 
 #endif
 
-#endif /* UTIL_H */
+#endif /* SCIL_UTIL_H */
