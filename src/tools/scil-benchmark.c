@@ -18,7 +18,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include <scil-algos.h>
+#include <scil-compressors.h>
 #include <scil-algo-chooser.h>
 #include <scil-error.h>
 #include <scil-internal.h>

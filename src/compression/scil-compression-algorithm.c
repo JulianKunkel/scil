@@ -1,6 +1,6 @@
 #include <scil-compression-algorithm.h>
 
-#include <scil-algos.h>
+#include <scil-compressors.h>
 
 scil_compression_algorithm_t* scilI_find_compressor_by_name(const char* name)
 {

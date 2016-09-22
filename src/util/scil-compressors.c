@@ -1,4 +1,4 @@
-#include <scil-algos.h>
+#include <scil-compressors.h>
 
 #include <assert.h>
 #include <ctype.h>

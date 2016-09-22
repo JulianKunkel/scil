@@ -21,7 +21,7 @@
 #include <float.h>
 #include <math.h>
 
-#include <scil-algos.h>
+#include <scil-compressors.h>
 #include <scil-algo-chooser.h>
 #include <scil-internal.h>
 #include <scil-patterns.h>

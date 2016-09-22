@@ -18,7 +18,7 @@
 #include <scil-internal.h>
 #include <scil-context.h>
 
-#include <scil-algos.h>
+#include <scil-compressors.h>
 
 #include <ctype.h>
 #include <float.h>

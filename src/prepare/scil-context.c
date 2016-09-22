@@ -1,6 +1,6 @@
 #include <scil-context.h>
 
-#include <scil-algos.h>
+#include <scil-compressors.h>
 #include <scil-algo-chooser.h>
 #include <scil-compression-chain.h>
 #include <scil-hardware-limits.h>
