@@ -13,12 +13,13 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SCIL_ALGO_CHOOSER_H__
-#define SCIL_ALGO_CHOOSER_H__
+#ifndef SCIL_ALGO_CHOOSER_H
+#define SCIL_ALGO_CHOOSER_H
 
-#include <scil.h>
+#include <scil-context.h>
+#include <scil-dims.h>
 
 void scilI_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_context_p ctx);
 void scilI_compression_algo_chooser_init();
 
-#endif
+#endif // SCIL_ALGO_CHOOSER_H
