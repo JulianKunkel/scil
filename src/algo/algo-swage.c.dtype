@@ -150,7 +150,7 @@ int scil_swage_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 }
 // End repeat
 
-scil_compression_algorithm algo_swage = {
+scil_compression_algorithm_t algo_swage = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_swage)
     },

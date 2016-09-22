@@ -12,12 +12,30 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
-// This file contains an example for a preconditioner
 
-#ifndef SCIL_DUMMY_H_
-#define SCIL_DUMMY_H_
-#include <scil-compression-algorithm.h>
+#ifndef SCIL_INTERNAL_H
+#define SCIL_INTERNAL_H
 
-extern scil_compression_algorithm_t algo_precond_dummy;
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <assert.h>
 
+#ifdef DEBUG
+  #define debug(...) fprintf(stderr, "[SCIL DEBUG] "__VA_ARGS__);
+#else
+  #define debug(...)
 #endif
+
+#ifdef DEBUG_INTERNALS
+  #define debugI(...) fprintf(stderr, "[SCIL DEBUG I] "__VA_ARGS__);
+#else
+  #define debugI(...)
+#endif
+
+#define critical(...) { fprintf(stderr, "[SCIL CRITICAL] "__VA_ARGS__); exit(1); }
+#define warn(...) fprintf(stderr, "[SCIL WARN] "__VA_ARGS__);
+
+#define FUNC_START debug("CALL %s\n", __PRETTY_FUNCTION__);
+
+#endif // SCIL_INTERNAL_H

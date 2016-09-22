@@ -103,7 +103,7 @@ int  scil_fpzip_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
 }
 // End repeat
 
-scil_compression_algorithm algo_fpzip = {
+scil_compression_algorithm_t algo_fpzip = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_fpzip)
     },

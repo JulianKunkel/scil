@@ -16,7 +16,7 @@
 #ifndef SCIL_ALGO_MEMCOPY_H_
 #define SCIL_ALGO_MEMCOPY_H_
 
-#include <scil-internal.h>
+#include <scil-compression-algorithm.h>
 
 /**
  * \brief Trivial memcopy compression function
@@ -40,6 +40,6 @@ int scil_memcopy_compress(const scil_context_p ctx, byte* restrict dest, size_t 
  */
 int scil_memcopy_decompress(byte*restrict data_out, size_t buff_size, const byte*restrict compressed_buf_in, const size_t in_size, size_t * uncomp_size_out);
 
-extern scil_compression_algorithm algo_memcopy;
+extern scil_compression_algorithm_t algo_memcopy;
 
 #endif

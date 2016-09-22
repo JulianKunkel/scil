@@ -118,7 +118,7 @@ int scil_zfp_precision_decompress_<DATATYPE>(   <DATATYPE>*restrict data_out,
 
 // End repeat
 
-scil_compression_algorithm algo_zfp_precision = {
+scil_compression_algorithm_t algo_zfp_precision = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_zfp_precision)
     },

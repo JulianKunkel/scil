@@ -24,7 +24,7 @@
 #ifndef SCIL_ABSTOL_H_
 #define SCIL_ABSTOL_H_
 
-#include <scil-internal.h>
+#include <scil-compression-algorithm.h>
 
 //Repeat for each data type
 //Supported datatypes:double float
@@ -58,6 +58,6 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
                                       size_t in_size);
 // End repeat
 
-extern scil_compression_algorithm algo_abstol;
+extern scil_compression_algorithm_t algo_abstol;
 
 #endif /* SCIL_ABSTOL_H_<DATATYPE> */

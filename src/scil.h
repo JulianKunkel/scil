@@ -240,98 +240,15 @@ folder "Install directory"{
 #include <scil-dict.h>
 #include <scil-error.h>
 
-#include <scil-prepare.h>
+#include <scil-context.h>
+#include <scil-dims.h>
+#include <scil-user-hints.h>
 
-typedef unsigned char byte;
-typedef int8_t int8;
-typedef int16_t int16;
-typedef int32_t int32;
-typedef int64_t int64;
-
-enum SCIL_Datatype {
-  SCIL_TYPE_FLOAT = 0,
-  SCIL_TYPE_DOUBLE,
-  SCIL_TYPE_INT8,
-  SCIL_TYPE_INT16,
-  SCIL_TYPE_INT32,
-  SCIL_TYPE_INT64,
-  SCIL_TYPE_STRING
-};
-
-/*
- This amount of data may be needed for a block header.
- */
-#define SCIL_BLOCK_HEADER_MAX_SIZE 1024
-
-typedef struct scil_context_t* scil_context_p;
-
-/** \brief Struct to contain the dimensional configuration of data. */
-typedef struct
-{
-    /** \brief Number of dimensions. */
-    uint8_t dims;
-
-    // dimensions as long as they are <= 4
-    size_t length[4];
-} scil_dims;
-
-/*
- \brief Returns the number of available compression schemes.
- */
-int scil_compressors_available();
-const char* scil_compressor_name(int num);
-int scil_compressor_num_by_name(const char* name);
+#include <scil-datatypes.h>
 
 void scil_compression_sprint_last_algorithm_chain(scil_context_p ctx,
                                                   char* out,
                                                   int buff_length);
-
-void scil_init_dims_1d(scil_dims* dims, size_t dim1);
-void scil_init_dims_2d(scil_dims* dims, size_t dim1, size_t dim2);
-void scil_init_dims_3d(scil_dims* dims, size_t dim1, size_t dim2, size_t dim3);
-void scil_init_dims_4d(scil_dims* dims, size_t dim1, size_t dim2, size_t dim3, size_t dim4);
-
-/*
- */
-void scil_init_dims_array(scil_dims* dims,
-                          uint8_t dimensions_count,
-                          const size_t* dimensions_length);
-
-void scil_copy_dims_array(scil_dims* out_dims, scil_dims in_dims);
-
-/*
- * \brief Method to get the number of actual data points in multidimensional
- * data.
- * \param dims Information about the dimensional configuration of the data
- * \return Number of data points in the data
- */
-size_t scil_get_data_count(const scil_dims* dims);
-
-size_t scil_get_data_size(enum SCIL_Datatype type, const scil_dims* dims);
-
-/*
- * \brief Return the minimum size of the compression buffer needed.
- */
-size_t scil_compress_buffer_size_bound(enum SCIL_Datatype datatype, const scil_dims* dims);
-
-scilPr_user_hints_t scil_retrieve_effective_hints(scil_context_p ctx);
-
-/**
- * \brief Creation of a compression context
- * \param datatype The datatype of the data (float, double, etc...)
- * \param out_ctx reference to the created context
- * \param hints information on the tolerable error margin
- * \pre hints != NULL
- * \param special values are special values that must be preserved, we support a list of  values
- * \return success state of the creation
- */
-int scil_create_compression_context(scil_context_p* out_ctx,
-                                    enum SCIL_Datatype datatype,
-                                    int special_values_count,
-                                    void * special_values,
-                                    const scilPr_user_hints_t* hints);
-
-int scil_destroy_compression_context(scil_context_p* out_ctx);
 
 /**
  * \brief Method to compress a data buffer

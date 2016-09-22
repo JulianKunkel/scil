@@ -16,7 +16,7 @@
 #ifndef SCIL_PATTERN_LIB_H
 #define SCIL_PATTERN_LIB_H
 
-#include <scil.h>
+#include <scil-dims.h>
 
 int scilP_available_patterns_count();
 char * scilP_available_patterns_name(int p);
