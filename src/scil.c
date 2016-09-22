@@ -37,7 +37,7 @@
 void scil_compression_sprint_last_algorithm_chain(scil_context_p ctx, char* out, int buff_length)
 {
     int ret                      = 0;
-    scil_compression_chain_t* lc = ctx->chain;
+    scil_compression_chain_t* lc = &ctx->chain;
     for (int i = 0; i < PRECONDITIONER_LIMIT; i++) {
         if (lc->pre_cond_first[i] == NULL) break;
         ret = snprintf(out, buff_length, "%s,", lc->pre_cond_first[i]->name);
@@ -155,8 +155,8 @@ int scil_compress(byte* restrict dest,
     }
 
 	// Set local copies of hints and compression chain
-    const scilPr_user_hints_t* hints         = &ctx->hints;
-    scil_compression_chain_t* chain = ctx->chain;
+    const scilPr_user_hints_t* hints = &ctx->hints;
+    scil_compression_chain_t* chain  = &ctx->chain;
 
 	// Check whether automatic compressor decision can be skipped because of a user forced chain
     if (hints->force_compression_methods == NULL) {

@@ -145,7 +145,7 @@ int scil_create_compression_context(scil_context_p* out_ctx,
 
     if (oh->force_compression_methods != NULL) {
         // now we can prefill the compression pipeline
-        ret = scilI_parse_compression_algorithms(ctx->chain, hints->force_compression_methods);
+        ret = scilI_parse_compression_algorithms(&ctx->chain, hints->force_compression_methods);
 
         oh->force_compression_methods = strdup(oh->force_compression_methods);
     }

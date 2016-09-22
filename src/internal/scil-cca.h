@@ -9,7 +9,20 @@
 // at most we support chaining of 10 preconditioners
 #define PRECONDITIONER_LIMIT 10
 
-struct scil_compression_chain;
+struct scil_compression_algorithm;
+
+typedef struct scil_compression_chain {
+  struct scil_compression_algorithm* pre_cond_first[PRECONDITIONER_LIMIT]; // preconditioners first stage
+  struct scil_compression_algorithm* converter;
+  struct scil_compression_algorithm* pre_cond_second[PRECONDITIONER_LIMIT]; // preconditioners second stage
+  struct scil_compression_algorithm* data_compressor; // datatype compressor
+  struct scil_compression_algorithm* byte_compressor; // byte compressor
+
+  char precond_first_count;
+  char precond_second_count;
+  char total_size; // includes data and byte compressors
+  char is_lossy;
+} scil_compression_chain_t;
 
 typedef struct scil_context {
   int lossless_compression_needed;
@@ -21,7 +34,7 @@ typedef struct scil_context {
   void * special_values;
 
   /** \brief The last compressor used, could be used for debugging */
-  struct scil_compression_chain* chain;
+  scil_compression_chain_t chain;
 
   /** \brief Dictionary for pipeline internal parameters */
   scil_dict_t pipeline_params;
@@ -131,18 +144,5 @@ typedef struct scil_compression_algorithm {
   enum compressor_type type;
   char is_lossy; // byte compressors are expected to be lossless anyway
 } scil_compression_algorithm_t;
-
-typedef struct scil_compression_chain {
-  scil_compression_algorithm_t* pre_cond_first[PRECONDITIONER_LIMIT]; // preconditioners first stage
-  scil_compression_algorithm_t* converter;
-  scil_compression_algorithm_t* pre_cond_second[PRECONDITIONER_LIMIT]; // preconditioners second stage
-  scil_compression_algorithm_t* data_compressor; // datatype compressor
-  scil_compression_algorithm_t* byte_compressor; // byte compressor
-
-  char precond_first_count;
-  char precond_second_count;
-  char total_size; // includes data and byte compressors
-  char is_lossy;
-} scil_compression_chain_t;
 
 #endif // SCIL_CCA_H

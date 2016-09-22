@@ -145,7 +145,7 @@ void scilI_compression_algo_chooser_init(){
 }
 
 void scilI_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_context_p ctx){
-  scil_compression_chain_t * chain = ctx->chain;
+  scil_compression_chain_t * chain = &ctx->chain;
   int ret;
 
   // at the moment we only set the compression algorith once
