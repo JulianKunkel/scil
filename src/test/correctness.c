@@ -13,11 +13,9 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <scil-error.h>
-
 #include <scil-algo-chooser.h>
+#include <scil-error.h>
 #include <scil-patterns.h>
-#include <scil-prepare.h>
 #include <scil-util.h>
 
 #include <assert.h>

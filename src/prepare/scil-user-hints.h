@@ -19,6 +19,15 @@ enum scil_performance_unit {
                                                  // Lustre
 };
 
+static const char * performance_units[] = {
+	"IGNORE",
+	"MiB",
+	"GiB",
+	"NetworkSpeed",
+	"NodeLocalStorageSpeed",
+	"SingleStreamSharedStorageSpeed"
+};
+
 /**
  * \brief Structure, describing the required performance.
  * It consists of a base unit and a multiplier, the result is "multiplier * unit".
@@ -28,8 +37,6 @@ typedef struct
     enum scil_performance_unit unit;
     float multiplier;
 } scilPr_performance_hint_t;
-
-void scilPr_print_performance_hint(const char* const name, const scilPr_performance_hint_t p);
 
 // ############################################################################
 // ## scilPr_user_hints_t
@@ -84,10 +91,10 @@ typedef struct
 
 } scilPr_user_hints_t;
 
-void scilPr_initialize_user_hints(scilPr_user_hints_t* const hints);
+void scilPr_initialize_user_hints(scilPr_user_hints_t * hints);
 
-void scilPr_copy_user_hints(scilPr_user_hints_t * out, const scilPr_user_hints_t* const hints);
+void scilPr_copy_user_hints(scilPr_user_hints_t * out, const scilPr_user_hints_t* hints);
 
-void scilPr_print_user_hints(const scilPr_user_hints_t* const hints);
+void scilPr_print_user_hints(const scilPr_user_hints_t* hints);
 
 #endif // SCIL_USER_HINTS_H
