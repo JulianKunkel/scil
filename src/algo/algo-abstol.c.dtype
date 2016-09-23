@@ -165,7 +165,7 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
 
 
 
-scil_compression_algorithm_t algo_abstol = {
+scilI_algorithm_t algo_abstol = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_abstol)
     },

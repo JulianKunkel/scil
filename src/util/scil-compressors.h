@@ -15,9 +15,9 @@
 #include <algo/algo-swage.h>
 #include <algo/algo-wavelets.h>
 
-#include <scil-compression-algorithm.h>
+#include <scil-algorithm.h>
 
-extern scil_compression_algorithm_t* algo_array[];
+extern scilI_algorithm_t* algo_array[];
 
 /*
  \brief Returns the number of available compression schemes.

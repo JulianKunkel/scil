@@ -37,7 +37,7 @@
 void scil_compression_sprint_last_algorithm_chain(scil_context_t* ctx, char* out, int buff_length)
 {
     int ret                      = 0;
-    scil_compression_chain_t* lc = &ctx->chain;
+    scilI_chain_t* lc = &ctx->chain;
     for (int i = 0; i < PRECONDITIONER_LIMIT; i++) {
         if (lc->pre_cond_first[i] == NULL) break;
         ret = snprintf(out, buff_length, "%s,", lc->pre_cond_first[i]->name);
@@ -156,7 +156,7 @@ int scil_compress(byte* restrict dest,
 
 	// Set local copies of hints and compression chain
     const scil_user_hints_t* hints = &ctx->hints;
-    scil_compression_chain_t* chain  = &ctx->chain;
+    scilI_chain_t* chain  = &ctx->chain;
 
 	// Check whether automatic compressor decision can be skipped because of a user forced chain
     if (hints->force_compression_methods == NULL) {
@@ -185,7 +185,7 @@ int scil_compress(byte* restrict dest,
 
         for (int i = 0; i < chain->precond_first_count; i++) {
             int header_size_out;
-            scil_compression_algorithm_t* algo = chain->pre_cond_first[i];
+            scilI_algorithm_t* algo = chain->pre_cond_first[i];
             void* src = pick_buffer(1, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
             void* dst = pick_buffer(0, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
 
@@ -238,7 +238,7 @@ int scil_compress(byte* restrict dest,
         // set the output size to the expected buffer size
         out_size = (size_t)(datatypes_size * 2);
 
-        scil_compression_algorithm_t* algo = chain->converter;
+        scilI_algorithm_t* algo = chain->converter;
         switch (ctx->datatype) {
             case (SCIL_TYPE_FLOAT):
                 ret = algo->c.Ctype.compress_float(ctx, (int64_t*)dst, &out_size, src, dims);
@@ -291,7 +291,7 @@ int scil_compress(byte* restrict dest,
 
         for (int i = 0; i < chain->precond_second_count; i++) {
             int header_size_out;
-            scil_compression_algorithm_t* algo = chain->pre_cond_second[i];
+            scilI_algorithm_t* algo = chain->pre_cond_second[i];
             void* src = pick_buffer(1, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
             void* dst = pick_buffer(0, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
 
@@ -322,7 +322,7 @@ int scil_compress(byte* restrict dest,
         // set the output size to the expected buffer size
         out_size = (size_t)(datatypes_size * 2);
 
-        scil_compression_algorithm_t* algo = chain->data_compressor;
+        scilI_algorithm_t* algo = chain->data_compressor;
         switch (ctx->datatype) {
             case (SCIL_TYPE_FLOAT):
                 ret = algo->c.DNtype.compress_float(ctx, dst, &out_size, src, dims);
@@ -424,7 +424,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
     CHECK_COMPRESSOR_ID(compressor_id)
     // printf("SCHUH %d %lld\n", compressor_id, source_size);
 
-    scil_compression_algorithm_t* algo = algo_array[compressor_id];
+    scilI_algorithm_t* algo = algo_array[compressor_id];
     byte* header                     = &src_adj[src_size - 1];
 
     if (algo->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES) {

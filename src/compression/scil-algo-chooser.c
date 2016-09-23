@@ -15,7 +15,7 @@
 
 #include <scil-algo-chooser.h>
 
-#include <scil-compression-chain.h>
+#include <scil-chain.h>
 #include <scil-config.h>
 #include <scil-data-characteristics.h>
 #include <scil-error.h>
@@ -26,7 +26,7 @@
 #include <string.h>
 
 typedef struct{
-  scil_compression_chain_t chain;
+  scilI_chain_t chain;
   float randomness;
   float c_speed;
   float d_speed;
@@ -135,7 +135,7 @@ void scilC_algo_chooser_execute(const void* const restrict source,
                                 const scil_dims* const dims,
                                 scil_context_t* const ctx)
 {
-  scil_compression_chain_t * chain = &ctx->chain;
+  scilI_chain_t * chain = &ctx->chain;
   int ret;
 
   // at the moment we only set the compression algorith once

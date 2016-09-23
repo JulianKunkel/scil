@@ -2,7 +2,7 @@
 
 #include <scil-compressors.h>
 #include <scil-algo-chooser.h>
-#include <scil-compression-chain.h>
+#include <scil-chain.h>
 #include <scil-hardware-limits.h>
 #include <scil-util.h>
 
@@ -21,7 +21,7 @@ static void initialize()
 
     // verify correctness of algo_array
     int i = 0;
-    for (scil_compression_algorithm_t **algo = algo_array; *algo != NULL;
+    for (scilI_algorithm_t **algo = algo_array; *algo != NULL;
          algo++, i++) {
         if ((*algo)->compressor_id != i) {
 					printf("id_%i i=%i",(*algo)->compressor_id,i);

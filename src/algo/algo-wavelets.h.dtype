@@ -25,7 +25,7 @@
 #ifndef SCIL_WAVELETS_H_
 #define SCIL_WAVELETS_H_
 
-#include <scil-compression-algorithm.h>
+#include <scil-algorithm.h>
 
 // Repeat for each data type
 
@@ -53,6 +53,6 @@ int scil_wavelets_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_dims
 // End repeat
 
 
-extern scil_compression_algorithm_t algo_wavelets;
+extern scilI_algorithm_t algo_wavelets;
 
 #endif

@@ -45,7 +45,7 @@ int scil_dummy_precond_decompress_<DATATYPE>(<DATATYPE>*restrict data_out, scil_
 // End repeat
 
 
-scil_compression_algorithm_t algo_precond_dummy = {
+scilI_algorithm_t algo_precond_dummy = {
     .c.PFtype = {
         CREATE_INITIALIZER(scil_dummy_precond)
     },

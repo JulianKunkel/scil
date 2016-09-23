@@ -22,7 +22,7 @@ typedef struct scil_compression_chain {
   char precond_second_count;
   char total_size; // includes data and byte compressors
   char is_lossy;
-} scil_compression_chain_t;
+} scilI_chain_t;
 
 typedef struct scil_context {
   int lossless_compression_needed;
@@ -34,7 +34,7 @@ typedef struct scil_context {
   void * special_values;
 
   /** \brief The last compressor used, could be used for debugging */
-  scil_compression_chain_t chain;
+  scilI_chain_t chain;
 
   /** \brief Dictionary for pipeline internal parameters */
   scil_dict_t pipeline_params;
@@ -141,6 +141,6 @@ typedef struct scil_compression_algorithm {
 
   enum compressor_type type;
   char is_lossy; // byte compressors are expected to be lossless anyway
-} scil_compression_algorithm_t;
+} scilI_algorithm_t;
 
 #endif // SCIL_CCA_H

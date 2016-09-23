@@ -415,7 +415,7 @@ int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 
 // End repeat
 
-scil_compression_algorithm_t algo_sigbits = {
+scilI_algorithm_t algo_sigbits = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_sigbits)
     },

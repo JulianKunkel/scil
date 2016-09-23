@@ -22,7 +22,7 @@
 #ifndef SCIL_SIGBITS_H_
 #define SCIL_SIGBITS_H_
 
-#include <scil-compression-algorithm.h>
+#include <scil-algorithm.h>
 
 // Repeat for each data type
 
@@ -51,6 +51,6 @@ int scil_sigbits_decompress_<DATATYPE>( <DATATYPE>*restrict dest, scil_dims* dim
 // End repeat
 
 
-extern scil_compression_algorithm_t algo_sigbits;
+extern scilI_algorithm_t algo_sigbits;
 
 #endif /* SCIL_SIGBITS_H_ */

@@ -50,7 +50,7 @@ int scil_gzip_decompress(byte*restrict data_out, size_t buff_size,  const byte*r
   return ret;
 }
 
-scil_compression_algorithm_t algo_gzip = {
+scilI_algorithm_t algo_gzip = {
     .c.Btype = {
         scil_gzip_compress,
         scil_gzip_decompress

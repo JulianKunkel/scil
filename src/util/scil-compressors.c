@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include <string.h>
 
-scil_compression_algorithm_t* algo_array[] = {
+scilI_algorithm_t* algo_array[] = {
 	& algo_memcopy,
 	& algo_abstol,
 	& algo_gzip,
@@ -27,7 +27,7 @@ int scilU_get_available_compressor_count()
 		return count;
 	}
 
-	scil_compression_algorithm_t ** cur = algo_array;
+	scilI_algorithm_t ** cur = algo_array;
 	count = 0;
 	// count
 	while(*cur != NULL){
@@ -46,7 +46,7 @@ const char* scilU_get_compressor_name(int number)
 
 int scilU_get_compressor_number(const char* const name)
 {
-    scil_compression_algorithm_t** cur = algo_array;
+    scilI_algorithm_t** cur = algo_array;
     int count                        = 0;
 
     // check if this is a number

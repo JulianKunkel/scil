@@ -1,11 +1,11 @@
-#include <scil-compression-chain.h>
+#include <scil-chain.h>
 
-#include <scil-compression-algorithm.h>
+#include <scil-algorithm.h>
 #include <scil-error.h>
 
 #include <string.h>
 
-int scilI_parse_compression_algorithms(scil_compression_chain_t* chain, char* str_in)
+int scilI_parse_compression_algorithms(scilI_chain_t* chain, char* str_in)
 {
     char *saveptr, *token;
     char str[4096];
@@ -19,7 +19,7 @@ int scilI_parse_compression_algorithms(scil_compression_chain_t* chain, char* st
 
     char lossy = 0;
     for (int i = 0; token != NULL; i++) {
-        scil_compression_algorithm_t* algo = scilI_find_compressor_by_name(token);
+        scilI_algorithm_t* algo = scilI_find_compressor_by_name(token);
         if (algo == NULL) {
             return SCIL_EINVAL;
         }
