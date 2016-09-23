@@ -1,3 +1,7 @@
+
+// This header is needed to remove the cyclic dependenncies of scil-context,
+// scil-algorithm and scil-chain
+
 #ifndef SCIL_CCA_H
 #define SCIL_CCA_H
 
