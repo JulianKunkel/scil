@@ -38,7 +38,7 @@
  * \param dims Dimensional configuration of uncompressed buffer
  * \return Success state of the compression
  */
-int scil_wavelets_compress_<DATATYPE>(const scil_context_t* ctx, byte* restrict dest, size_t* restrict dest_size, <DATATYPE>*restrict source, const scil_dims* dims);
+int scil_wavelets_compress_<DATATYPE>(const scil_context_t* ctx, byte* restrict dest, size_t* restrict dest_size, <DATATYPE>*restrict source, const scil_dims_t* dims);
 
 /**
  * \brief Decompression function of wavelets
@@ -48,7 +48,7 @@ int scil_wavelets_compress_<DATATYPE>(const scil_context_t* ctx, byte* restrict 
  * \param in_size Byte size of compressed buffer
  * \return Success state of the compression
  */
-int scil_wavelets_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_dims* dims, byte*restrict compressed_buf_in, const size_t in_size);
+int scil_wavelets_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_dims_t* dims, byte*restrict compressed_buf_in, const size_t in_size);
 
 // End repeat
 

@@ -12,12 +12,12 @@ int main(void)
 
     float* source = (float*)SAFE_MALLOC(count * sizeof(float));
 
-    scil_dims dims;
-    scil_init_dims_1d(&dims, count);
+    scil_dims_t dims;
+    scilPr_initialize_dims_1d(&dims, count);
 
     scilPa_create_pattern_float(source, &dims, "random", -100.0f, 100.0f, 0.0f, 0.0f);
 
-    size_t dest_size = scil_compress_buffer_size_bound(SCIL_TYPE_FLOAT, &dims);
+    size_t dest_size = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_FLOAT);
     byte* dest       = (byte*)SAFE_MALLOC(dest_size);
 
     scil_user_hints_t hints;

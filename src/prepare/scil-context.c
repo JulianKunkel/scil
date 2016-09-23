@@ -67,7 +67,7 @@ static void fix_double_setting(double* dbl)
 int scilPr_create_context(scil_context_t** out_ctx,
                           enum SCIL_Datatype datatype,
                           int special_values_count,
-                          void * special_values,
+                          void* special_values,
                           const scil_user_hints_t* hints)
 {
     initialize();

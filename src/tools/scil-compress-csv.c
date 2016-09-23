@@ -44,7 +44,7 @@ static int print_hints = 0;
 
 // data we process
 
-static scil_dims dims;
+static scil_dims_t dims;
 static int datatype = SCIL_TYPE_DOUBLE;
 static byte * input_data = NULL;
 static byte * output_data = NULL;
@@ -95,12 +95,12 @@ void readCSVData(){
   printf("Read file %s: %d %d\n", in_file, x, y);
 
   if(y > 1){
-    scil_init_dims_2d(& dims, x, y);
+    scilPr_initialize_dims_2d(& dims, x, y);
   }else{
-    scil_init_dims_1d(& dims, x);
+    scilPr_initialize_dims_1d(& dims, x);
   }
 
-  input_data = (byte*) malloc(scil_compress_buffer_size_bound(datatype, & dims));
+  input_data = (byte*) malloc(scilPr_get_compressed_data_size_limit(&dims, datatype));
 
   fd = fopen(in_file, "r");
   if (ignore_header){
@@ -180,9 +180,9 @@ void readData(){
 
   if(rows > 1){
     fread(&y, sizeof(size_t), 1, f);
-    scil_init_dims_2d(&dims, x, y);
+    scilPr_initialize_dims_2d(&dims, x, y);
   }else{
-    scil_init_dims_1d(&dims, x);
+    scilPr_initialize_dims_1d(&dims, x);
   }
 
   curr_pos = ftell(f);
@@ -282,7 +282,7 @@ int main(int argc, char ** argv){
 
   size_t buff_size, input_size;
 
-  input_size = scil_compress_buffer_size_bound(datatype, & dims);
+  input_size = scilPr_get_compressed_data_size_limit(&dims, datatype);
   output_data = (byte*) SAFE_MALLOC(input_size);
 
 	scil_timer timer;

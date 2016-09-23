@@ -26,7 +26,7 @@ int main(){
 
   scil_context_t* ctx;
   scil_user_hints_t hints;
-  scil_dims dims;
+  scil_dims_t dims;
   int ret;
 
   scilPr_initialize_user_hints(& hints);
@@ -37,8 +37,8 @@ int main(){
   size_t size;
   byte * buff;
 
-  scil_init_dims_1d(& dims, 0);
-  size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, & dims);
+  scilPr_initialize_dims_1d(& dims, 0);
+  size = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
   buff = malloc(size);
 
   double data[] = {1};

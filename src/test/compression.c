@@ -110,8 +110,8 @@ int main(){
 	size_t c_buf_size = u_buf_size + SCIL_BLOCK_HEADER_MAX_SIZE;
 	byte * c_buf = (byte*)SAFE_MALLOC(c_buf_size*4);
 
-	scil_dims dims;
-	scil_init_dims_1d(& dims, count);
+	scil_dims_t dims;
+	scilPr_initialize_dims_1d(& dims, count);
 
 	ret = scil_compress(c_buf, c_buf_size, u_buf, & dims, &c_buf_size, ctx);
 
@@ -135,8 +135,8 @@ int main(){
 	double f1 = 10.0;
 	double f2 = 10.5;
 
-	scil_dims dims1;
-	scil_init_dims_1d(&dims1, 1);
+	scil_dims_t dims1;
+	scilPr_initialize_dims_1d(&dims1, 1);
 
 	scil_determine_accuracy(SCIL_TYPE_DOUBLE, & f1, &f2, & dims1, 0.01, & accuracy);
 	scilPr_print_user_hints(& accuracy);

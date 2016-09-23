@@ -1,3 +1,4 @@
+
 // This file is part of SCIL.
 //
 // SCIL is free software: you can redistribute it and/or modify
@@ -30,16 +31,16 @@ typedef struct interpolator_data_1D {
   int l; // interpolation length
 } interpolator_data_1D_t;
 
-static void m_interpolator_func(double* data, const scil_dims* pos, const scil_dims* size, int* iter, const void* user_ptr)
+static void m_interpolator_func(double* data, const scil_dims_t* pos, const scil_dims_t* size, int* iter, const void* user_ptr)
 {
   interpolator_data_1D_t* up = (interpolator_data_1D_t*) user_ptr;
   const int d = up->dim;
   const int l = up->l;
 
-  scil_dims start;
-  scil_dims end;
-  scil_copy_dims_array(& end, *pos);
-  scil_copy_dims_array(& start, *pos);
+  scil_dims_t start;
+  scil_dims_t end;
+  scilPr_copy_dims(&end, pos);
+  scilPr_copy_dims(&start, pos);
 
   start.length[d] = start.length[d] / l * l;
   end.length[d] = (end.length[d]) / l * l + l;
@@ -64,17 +65,17 @@ static void m_interpolator_func(double* data, const scil_dims* pos, const scil_d
   data[scilG_data_pos(pos, size)] = val;
 }
 
-static void m_interpolator(double* data, const scil_dims* dims, float arg){
+static void m_interpolator(double* data, const scil_dims_t* dims, float arg){
   const int l = (int) arg;
   assert(l > 1);
 
-  scil_dims ende;
-  scil_copy_dims_array(& ende, *dims);
-  scil_dims final;
-  scil_copy_dims_array(& final, *dims);
+  scil_dims_t ende;
+  scilPr_copy_dims(&ende, dims);
+  scil_dims_t final;
+  scilPr_copy_dims(&final, dims);
 
-  scil_dims pos;
-  scil_copy_dims_array(& pos, *dims);
+  scil_dims_t pos;
+  scilPr_copy_dims(&pos, dims);
   memset(pos.length, 0, sizeof(size_t)*pos.dims);
 
   int stride[pos.dims];
@@ -99,15 +100,15 @@ static void m_interpolator(double* data, const scil_dims* dims, float arg){
 
 scilPa_mutator scilPa_interpolator = &m_interpolator;
 
-static void m_repeater_func_i(double* data, const scil_dims* pos, const scil_dims* size, int* iter, const void* user_ptr){
+static void m_repeater_func_i(double* data, const scil_dims_t* pos, const scil_dims_t* size, int* iter, const void* user_ptr){
   data[scilG_data_pos(pos, size)] = *((double*) user_ptr);
 }
 
-static void m_repeater_func(double* data, const scil_dims* pos, const scil_dims* size, int* iter, const void* user_ptr){
+static void m_repeater_func(double* data, const scil_dims_t* pos, const scil_dims_t* size, int* iter, const void* user_ptr){
   int l = *((int *) user_ptr);
 
   double val = data[scilG_data_pos(pos, size)];
-  scil_dims extend;
+  scil_dims_t extend;
   for(int j=0; j < pos->dims; j++){
     if (pos->length[j] + l < size->length[j] ){
       extend.length[j] = pos->length[j] + l;
@@ -118,12 +119,12 @@ static void m_repeater_func(double* data, const scil_dims* pos, const scil_dims*
   scilG_iter(data, size, pos, &extend, NULL, & m_repeater_func_i, & val );
 }
 
-static void m_repeater(double* data, const scil_dims* dims, float arg){
+static void m_repeater(double* data, const scil_dims_t* dims, float arg){
   int l = (int) arg;
   assert(l > 1);
 
-  scil_dims pos;
-  scil_copy_dims_array(& pos, *dims);
+  scil_dims_t pos;
+  scilPr_copy_dims(&pos, dims);
   memset(pos.length, 0, sizeof(size_t)*pos.dims);
 
   int stride[pos.dims];

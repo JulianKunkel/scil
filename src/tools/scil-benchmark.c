@@ -30,11 +30,11 @@
 static int error_occured = 0;
 static double * buffer_uncompressed;
 
-void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double * buffer_in, scil_dims dims){
+void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double * buffer_in, scil_dims_t dims){
 	size_t out_c_size;
 
-	const size_t buff_size = scil_compress_buffer_size_bound(datatype, &dims);
-	const size_t data_size = scil_get_data_size(datatype, &dims);
+	const size_t buff_size = scilPr_get_compressed_data_size_limit(&dims, datatype);
+	const size_t data_size = scilPr_get_dims_size(&dims, datatype);
 
 	allocate(byte, buffer_out, buff_size);
 	allocate(byte, tmp_buff, buff_size);
@@ -48,7 +48,7 @@ void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double 
 	double r = (double) scilI_get_data_randomness(buffer_in, data_size, tmp_buff, buff_size);
 
 	char * outputFiles = getenv("SCIL_BENCHMARK_OUTPUT");
-	const size_t buffer_size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, & dims);
+	const size_t buffer_size = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
 
 	for(int i=0; i < scilU_get_available_compressor_count(); i++ ){
 		char compression_name[1024];
@@ -115,18 +115,18 @@ void scilU_check_std_err(char const * what, int ret){
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int main(int argc, char** argv){
 	int ret;
-	scil_dims dims;
+	scil_dims_t dims;
 
 	if (argc != 1){
 	  switch(argc - 1){
 	    case (1):{
-	  	  scil_init_dims_1d(& dims, atol(argv[1]));
+	  	  scilPr_initialize_dims_1d(& dims, atol(argv[1]));
 	      break;
 	    }case (2):{
-	      scil_init_dims_2d(& dims, atol(argv[1]), atol(argv[2]));
+	      scilPr_initialize_dims_2d(& dims, atol(argv[1]), atol(argv[2]));
 	      break;
 	    }case (3):{
-	      scil_init_dims_3d(& dims, atol(argv[1]), atol(argv[2]), atol(argv[3]));
+	      scilPr_initialize_dims_3d(& dims, atol(argv[1]), atol(argv[2]), atol(argv[3]));
 	      break;
 	    }default:{
 	      printf("Error will only benchmark up to 3D\n");
@@ -134,10 +134,10 @@ int main(int argc, char** argv){
 	    }
 	  }
 	}else{
-		scil_init_dims_1d(& dims, 1024*1024);
+		scilPr_initialize_dims_1d(& dims, 1024*1024);
 	}
 
-	int bufferSize = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, & dims);
+	int bufferSize = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
 	double * buffer_in = (double*) malloc(bufferSize);
 	buffer_uncompressed = malloc(bufferSize);
 

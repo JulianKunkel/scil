@@ -27,17 +27,17 @@ int main(int argc, char ** argv){
     exit(1);
   }
   int ret;
-	scil_dims dims;
+	scil_dims_t dims;
 
   switch(argc - 1){
     case (1):{
-  	  scil_init_dims_1d(& dims, atol(argv[1]));
+  	  scilPr_initialize_dims_1d(& dims, atol(argv[1]));
       break;
     }case (2):{
-      scil_init_dims_2d(& dims, atol(argv[1]), atol(argv[2]));
+      scilPr_initialize_dims_2d(& dims, atol(argv[1]), atol(argv[2]));
       break;
     }case (3):{
-      scil_init_dims_3d(& dims, atol(argv[1]), atol(argv[2]), atol(argv[3]));
+      scilPr_initialize_dims_3d(& dims, atol(argv[1]), atol(argv[2]), atol(argv[3]));
       break;
     }default:{
       printf("Error can only plot up to 3D\n");
@@ -45,12 +45,12 @@ int main(int argc, char ** argv){
     }
   }
 
-  double * buffer_in = (double*) malloc(scil_get_data_size(SCIL_TYPE_DOUBLE, & dims));
+  double* buffer_in = (double*) malloc(scilPr_get_dims_size(&dims, SCIL_TYPE_DOUBLE));
 
-  char * check_pattern = getenv("SCIL_PATTERN_TO_USE");
+  char* check_pattern = getenv("SCIL_PATTERN_TO_USE");
 
   for(int i=0; i < scilPa_get_pattern_library_size(); i++){
-	char * name = scilPa_get_library_pattern_name(i);
+	char* name = scilPa_get_library_pattern_name(i);
 
     if( check_pattern != NULL && strcmp(name, check_pattern) != 0){
       printf("Skipping %s\n", name);

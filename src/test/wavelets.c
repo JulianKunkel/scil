@@ -31,13 +31,13 @@ int main(void){
 
     //2D
 
-    scil_dims dims;
-    scil_init_dims_2d(&dims, count1, count2);
+    scil_dims_t dims;
+    scilPr_initialize_dims_2d(&dims, count1, count2);
 
     printf("TEST WAVELETS\n>COMPRESSION\n");
 
-    size_t uncompressed_size = scil_get_data_size(SCIL_TYPE_FLOAT, &dims);
-    size_t compressed_size   = scil_compress_buffer_size_bound(SCIL_TYPE_FLOAT, &dims);
+    size_t uncompressed_size = scilPr_get_dims_size(&dims, SCIL_TYPE_FLOAT);
+    size_t compressed_size   = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_FLOAT);
 
     float* buffer_in  = (float*)malloc(uncompressed_size);
     byte* buffer_out   = (byte*)malloc(compressed_size);

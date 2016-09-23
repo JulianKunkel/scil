@@ -33,12 +33,12 @@ static int decomp_error_occured = 0;
 static int val_error_occured = 0;
 static double* buffer_uncompressed;
 
-int test_correctness(const char* name, double* buffer_in, scil_dims dims)
+int test_correctness(const char* name, double* buffer_in, scil_dims_t dims)
 {
     size_t out_c_size;
-    size_t variableSize = scil_get_data_count(&dims);
+    size_t variableSize = scilPr_get_dims_count(&dims);
 
-    const size_t c_size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, &dims);
+    const size_t c_size = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
 
     allocate(byte, buffer_out, c_size);
     allocate(byte, tmp_buff, c_size);
@@ -149,8 +149,8 @@ int main(int argc, char** argv)
 
     buffer_uncompressed = malloc(variableSize * 4 * sizeof(double));
 
-    scil_dims dims;
-    scil_init_dims_1d(&dims, variableSize);
+    scil_dims_t dims;
+    scilPr_initialize_dims_1d(&dims, variableSize);
 
     for (int i = 0; i < scilPa_get_pattern_library_size(); i++) {
         char* name = scilPa_get_library_pattern_name(i);

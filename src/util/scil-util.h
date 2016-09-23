@@ -169,7 +169,7 @@ typedef union {
  * \pre dest != NULL
  * \return Byte size consumed of destination buffer
  */
-size_t scilU_write_dims_to_buffer(void* dest, const scil_dims* dims);
+size_t scilU_write_dims_to_buffer(void* dest, const scil_dims_t* dims);
 
 /**
  * \brief Reads dimensional information from buffer.
@@ -177,7 +177,7 @@ size_t scilU_write_dims_to_buffer(void* dest, const scil_dims* dims);
  * \pre dest != NULL
  * \return Dimensional configuration of compressed data
  */
-void scilU_read_dims_from_buffer(scil_dims* dims, void* dest);
+void scilU_read_dims_from_buffer(scil_dims_t* dims, void* dest);
 
 ////////////// TIMER MANAGEMENT /////////////////////
 
@@ -229,15 +229,15 @@ int scilU_float_equal(float val1, float val2);
 /* Tools to iterate over the 1D buffer as a multi-dimensional data space */
 
 typedef void(*scilG_iterfunc)(double* data,
-                              const scil_dims* pos,
-                              const scil_dims* size,
+                              const scil_dims_t* pos,
+                              const scil_dims_t* size,
                               int* iter,
                               const void* user_ptr);
 
 /*
  * \brief Convert the current position in a ND array to the position of the original 1D data array.
  */
-size_t scilG_data_pos(const scil_dims* pos, const scil_dims* size);
+size_t scilG_data_pos(const scil_dims_t* pos, const scil_dims_t* size);
 
 
 /*
@@ -245,16 +245,16 @@ size_t scilG_data_pos(const scil_dims* pos, const scil_dims* size);
  * For each element the function func is invoked with the user_ptr as argument.
  */
 void scilG_iter(double* data,
-                const scil_dims* dims,
-                const scil_dims* offset,
-                const scil_dims* end,
+                const scil_dims_t* dims,
+                const scil_dims_t* offset,
+                const scil_dims_t* end,
                 int* iter,
                 scilG_iterfunc func,
                 const void* user_ptr);
 
-void scilU_print_dims(scil_dims dims);
+void scilU_print_dims(scil_dims_t dims);
 
-void scilU_plot(const char* name, scil_dims dims, double * buffer_in);
+void scilU_plot(const char* name, scil_dims_t dims, double * buffer_in);
 
 // like memcopy but swaps the order
 #define scilU_reverse_copy(buffer, src, size) do { char * _o = (char*) buffer; char * _s = ((char *) src) + size - 1; for(int _c=size; _c > 0; _c-- ) { *_o = *_s ; _s--; _o++; } } while(0)

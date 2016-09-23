@@ -132,7 +132,7 @@ void scilC_algo_chooser_initialize(){
 }
 
 void scilC_algo_chooser_execute(const void* restrict source,
-                                const scil_dims* dims,
+                                const scil_dims_t* dims,
                                 scil_context_t* ctx)
 {
   scilI_chain_t * chain = &ctx->chain;
@@ -154,7 +154,7 @@ void scilC_algo_chooser_execute(const void* restrict source,
       return;
     }
   }
-  const size_t count = scil_get_data_count(dims);
+  const size_t count = scilPr_get_dims_count(dims);
 
   if (count < 10){
     // always use memcopy for small data

@@ -129,18 +129,18 @@ float positive_limit   = 1.1e6;
 float factor_step      = 10.0f;
 
 double* data = NULL;
-scil_dims dims;
+scil_dims_t dims;
 
 scil_user_hints_t hints;
 //scilPr_initialize_user_hints(&hints);
 
-static int benchmark_data(const double* data, const scil_dims* dims){
+static int benchmark_data(const double* data, const scil_dims_t* dims){
 
     double minimum, maximum;
     double mean, median;
     double std_deviation;
 
-    get_data_characteristics(data          , scil_get_data_count(dims),
+    get_data_characteristics(data          , scilPr_get_dims_count(dims),
                              &minimum      , &maximum,
                              &mean         , &median,
                              &std_deviation);
@@ -470,13 +470,13 @@ static void iterate_1_dimensions(size_t count){
         size_t count_per_dim = (size_t)(pow((double)count, 1.0 / d_size));
 
         switch (d_size) {
-        case 1: scil_init_dims_1d(&dims, count_per_dim); break;
-        case 2: scil_init_dims_2d(&dims, count_per_dim, count_per_dim); break;
-        case 3: scil_init_dims_3d(&dims, count_per_dim, count_per_dim, count_per_dim); break;
-        case 4: scil_init_dims_4d(&dims, count_per_dim, count_per_dim, count_per_dim, count_per_dim); break;
+        case 1: scilPr_initialize_dims_1d(&dims, count_per_dim); break;
+        case 2: scilPr_initialize_dims_2d(&dims, count_per_dim, count_per_dim); break;
+        case 3: scilPr_initialize_dims_3d(&dims, count_per_dim, count_per_dim, count_per_dim); break;
+        case 4: scilPr_initialize_dims_4d(&dims, count_per_dim, count_per_dim, count_per_dim, count_per_dim); break;
         }
 
-        data = (double*)malloc(scil_get_data_size(SCIL_TYPE_DOUBLE, &dims));
+        data = (double*)malloc(scilPr_get_dims_size(&dims, SCIL_TYPE_DOUBLE));
 
         iterate_2_random_patterns(1);
 

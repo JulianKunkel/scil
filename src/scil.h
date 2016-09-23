@@ -269,7 +269,7 @@ void scil_compression_sprint_last_algorithm_chain(scil_context_t* ctx,
 int scil_compress(byte* restrict dest,
                   size_t dest_size,
                   void* restrict source,
-                  scil_dims* dims,
+                  scil_dims_t* dims,
                   size_t* restrict out_size,
                   scil_context_t* ctx);
 
@@ -283,12 +283,12 @@ int scil_compress(byte* restrict dest,
  * \pre datatype == 0 || datatype == 1
  * \pre dest != NULL
  * \pre source != NULL
- * \pre tmp_buff != NULL with a size of scil_compress_buffer_size_bound() / 2
+ * \pre tmp_buff != NULL with a size of scilPr_get_compressed_data_size_limit() / 2
  * \return Success state of the decompression
  */
 int scil_decompress(enum SCIL_Datatype datatype,
                     void* restrict dest,
-                    scil_dims* expected_dims,
+                    scil_dims_t* expected_dims,
                     byte* restrict source,
                     const size_t source_size,
                     byte* restrict tmp_buff);
@@ -296,7 +296,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
 void scil_determine_accuracy(enum SCIL_Datatype datatype,
                              const void* restrict data_1,
                              const void* restrict data_2,
-                             scil_dims* dims,
+                             scil_dims_t* dims,
                              const double relative_err_finest_abs_tolerance,
                              scil_user_hints_t* out_hints);
 
@@ -308,7 +308,7 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
  */
 int scil_validate_compression(enum SCIL_Datatype datatype,
                               const void* restrict data_uncompressed,
-                              scil_dims* dims,
+                              scil_dims_t* dims,
                               byte* restrict data_compressed,
                               const size_t compressed_size,
                               const scil_context_t* ctx,

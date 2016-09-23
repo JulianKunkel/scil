@@ -107,7 +107,7 @@ typedef struct {
 typedef struct {
 	plugin_compress_config * cfg;
 
-	scil_dims dims;
+	scil_dims_t dims;
 	enum SCIL_Datatype type;
 } plugin_config_persisted;
 
@@ -136,7 +136,7 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 	if(chunkRank > rank) return -2;
 
 	assert(sizeof(size_t) == sizeof(hsize_t) );
-	scil_init_dims_array(& cfg_p->dims, rank, (const size_t*) chunkSize);
+	scilPr_initialize_dims_array(& cfg_p->dims, rank, (const size_t*) chunkSize);
 
   scil_user_hints_t * h;
 	scil_user_hints_t hints_new;
@@ -200,7 +200,7 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 
 	assert(ret == SCIL_NO_ERR);
 
-	config->dst_size = scil_compress_buffer_size_bound(cfg_p->type, & cfg_p->dims);
+	config->dst_size = scilPr_get_compressed_data_size_limit(cfg_p->type, & cfg_p->dims);
 
 	// now we store the options with the dataset, this is actually not needed...
 	return H5Pmodify_filter( pList, SCIL_ID, H5Z_FLAG_MANDATORY, cd_size, cd_values );
@@ -216,7 +216,7 @@ static size_t compressorFilter(unsigned int flags, size_t cd_nelmts, const unsig
 		// uncompress
 		plugin_config_persisted* cfg_p = ((plugin_config_persisted *) cd_values);
 
-		const size_t buff_size = scil_compress_buffer_size_bound(cfg_p->type, & cfg_p->dims);
+		const size_t buff_size = scilPr_get_compressed_data_size_limit(cfg_p->type, & cfg_p->dims);
 		byte * buffer = (byte*) malloc(buff_size);
 
 		byte * in_buf = ((byte**) buf)[0];

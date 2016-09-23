@@ -10,10 +10,10 @@ int main(void)
 
     double source[] = {0, 1, 2, 3,4,5,6,7,8,9};
 
-    scil_dims dims;
-    scil_init_dims_1d(&dims, count);
+    scil_dims_t dims;
+    scilPr_initialize_dims_1d(&dims, count);
 
-    size_t dest_size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, &dims);
+    size_t dest_size = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
     byte* dest       = (byte*) SAFE_MALLOC(dest_size);
 
     scil_user_hints_t hints;

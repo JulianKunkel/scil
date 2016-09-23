@@ -8,9 +8,9 @@ const size_t count = 10;
 
 void test(int datatype, void * source){
   int ret;
-  scil_dims dims;
-  scil_init_dims_1d(&dims, count);
-  size_t dest_size = scil_compress_buffer_size_bound(datatype, &dims);
+  scil_dims_t dims;
+  scilPr_initialize_dims_1d(&dims, count);
+  size_t dest_size = scilPr_get_compressed_data_size_limit(&dims, datatype);
   byte* dest       = (byte*) SAFE_MALLOC(dest_size);
   scil_user_hints_t hints;
   scilPr_initialize_user_hints(&hints);

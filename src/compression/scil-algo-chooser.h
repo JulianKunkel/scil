@@ -22,7 +22,7 @@
 void scilC_algo_chooser_initialize();
 
 void scilC_algo_chooser_execute(const void* restrict source,
-                                const scil_dims* dims,
+                                const scil_dims_t* dims,
                                 scil_context_t* ctx);
 
 #endif // SCIL_ALGO_CHOOSER_H

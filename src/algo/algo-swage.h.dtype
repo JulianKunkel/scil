@@ -9,10 +9,10 @@ int scil_swage_compress_<DATATYPE>(const scil_context_t* ctx,
                                    byte * restrict dest,
                                    size_t* restrict out_size,
                                    <DATATYPE>*restrict source,
-                                   const scil_dims* dims);
+                                   const scil_dims_t* dims);
 
 int scil_swage_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
-                                     scil_dims* dims,
+                                     scil_dims_t* dims,
                                      byte*restrict source,
                                      const size_t in_size);
 

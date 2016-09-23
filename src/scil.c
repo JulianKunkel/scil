@@ -126,7 +126,7 @@ A datatype compressor terminates the chain of preconditioners.
 int scil_compress(byte* restrict dest,
                   size_t in_dest_size,
                   void* restrict source,
-                  scil_dims* dims,
+                  scil_dims_t* dims,
                   size_t* restrict out_size_p,
                   scil_context_t* ctx) {
 
@@ -138,7 +138,7 @@ int scil_compress(byte* restrict dest,
 	int ret = SCIL_NO_ERR;
 
 	// Get byte size of input data
-    size_t input_size           = scil_get_data_size(ctx->datatype, dims);
+    size_t input_size           = scilPr_get_dims_size(dims, ctx->datatype);
     const size_t datatypes_size = input_size;
 
 	// Skip the compression if input size is 0 and set destination buffer to a single 0 and size 1
@@ -390,7 +390,7 @@ int scil_compress(byte* restrict dest,
 
 int scil_decompress(enum SCIL_Datatype datatype,
                     void* restrict dest,
-                    scil_dims* dims,
+                    scil_dims_t* dims,
                     byte* restrict source,
                     const size_t source_size,
                     byte* restrict buff_tmp1) {
@@ -411,7 +411,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
     size_t src_size        = source_size - 1;
     int ret;
 
-    const size_t output_size = scil_get_data_size(datatype, dims);
+    const size_t output_size = scilPr_get_dims_size(dims, datatype);
     byte* restrict buff_tmp2 = &buff_tmp1[(int)(output_size * 2 + 10)];
 
     // for(int i=0; i < chain_size; i++){
@@ -609,7 +609,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
 void scil_determine_accuracy(enum SCIL_Datatype datatype,
                              const void* restrict data_1,
                              const void* restrict data_2,
-                             scil_dims* dims,
+                             scil_dims_t* dims,
                              const double relative_err_finest_abs_tolerance,
                              scil_user_hints_t* out_hints) {
     scil_user_hints_t a;
@@ -624,7 +624,7 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
         a.significant_bits = MANTISSA_LENGTH_DOUBLE; // in bits
         scil_determine_accuracy_double((double*)data_1,
                                        (double*)data_2,
-                                       scil_get_data_count(dims),
+                                       scilPr_get_dims_count(dims),
                                        relative_err_finest_abs_tolerance,
                                        &a);
 				break;
@@ -633,7 +633,7 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
         a.significant_bits = MANTISSA_LENGTH_FLOAT; // in bits
         scil_determine_accuracy_float((float*)data_1,
                                       (float*)data_2,
-                                      scil_get_data_count(dims),
+                                      scilPr_get_dims_count(dims),
                                       relative_err_finest_abs_tolerance,
                                       &a);
     		break;
@@ -642,24 +642,24 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
 			a.significant_bits = 8;
 			scil_determine_accuracy_int8((int8*)data_1,
 															(int8*)data_2,
-															scil_get_data_count(dims),
+															scilPr_get_dims_count(dims),
 															relative_err_finest_abs_tolerance,
 															&a);
 			break;
 		}
 		case(SCIL_TYPE_INT16):{
 			a.significant_bits = 16;
-			scil_determine_accuracy_int16((int16*)data_1, (int16*)data_2, scil_get_data_count(dims), relative_err_finest_abs_tolerance, &a);
+			scil_determine_accuracy_int16((int16*)data_1, (int16*)data_2, scilPr_get_dims_count(dims), relative_err_finest_abs_tolerance, &a);
 			break;
 		}
 		case(SCIL_TYPE_INT32):{
 			a.significant_bits = 32;
-			scil_determine_accuracy_int32((int32*)data_1, (int32*)data_2, scil_get_data_count(dims), relative_err_finest_abs_tolerance, &a);
+			scil_determine_accuracy_int32((int32*)data_1, (int32*)data_2, scilPr_get_dims_count(dims), relative_err_finest_abs_tolerance, &a);
 			break;
 		}
 		case(SCIL_TYPE_INT64):{
 			a.significant_bits = 64;
-			scil_determine_accuracy_int64((int64*)data_1, (int64*)data_2, scil_get_data_count(dims), relative_err_finest_abs_tolerance, &a);
+			scil_determine_accuracy_int64((int64*)data_1, (int64*)data_2, scilPr_get_dims_count(dims), relative_err_finest_abs_tolerance, &a);
 			break;
 		}
 		case(SCIL_TYPE_STRING):{
@@ -682,12 +682,12 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
 
 int scil_validate_compression(enum SCIL_Datatype datatype,
                               const void* restrict data_uncompressed,
-                              scil_dims* dims,
+                              scil_dims_t* dims,
                               byte* restrict data_compressed,
                               const size_t compressed_size,
                               const scil_context_t* ctx,
                               scil_user_hints_t* out_accuracy) {
-    const uint64_t length = scil_compress_buffer_size_bound(datatype, dims);
+    const uint64_t length = scilPr_get_compressed_data_size_limit(dims, datatype);
     byte* data_out        = (byte*)malloc(length);
     if (data_out == NULL) {
         return SCIL_MEMORY_ERR;

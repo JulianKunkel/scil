@@ -139,7 +139,7 @@
 	scilPr_create_context(&ctx, &hints);
 
 	size_t* lengths = (size_t*)malloc(100 * sizeof(double));
-	scil_dims_t dims = scil_init_dims(1, lengths);
+	scil_dims_t_t dims = scil_init_dims(1, lengths);
 	...
 	\end{lstlisting}
 

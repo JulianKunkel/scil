@@ -708,8 +708,8 @@ int test_performance(double bias, double discountFactor){
 	allocate(byte, buffer_out, c_size);
 	if(!buffer_out) return kErrNoMem;
 
-	scil_dims dims;
-	scil_init_dims_1d(& dims, variableSize);
+	scil_dims_t dims;
+	scilPr_initialize_dims_1d(& dims, variableSize);
 
   scil_context_t* ctx;
   scil_user_hints_t hints;

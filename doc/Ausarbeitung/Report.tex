@@ -354,7 +354,7 @@ scilPr_create_context(&context, &hints);
 // Writing dimensional layout (1D, 100 elements)
 size_t* lengths = (size_t*)malloc(sizeof(size_t));
 lenghts[0] = 100;
-scil_dims_t dimensions = scil_init_dims(1, lengths);
+scil_dims_t_t dimensions = scil_init_dims(1, lengths);
 
 // Allocating destination and source buffer
 double* source = (double*)malloc(100 * sizeof(double));
@@ -383,7 +383,7 @@ size_t source_size = ... ;
 
 // Providing structure for dimensional configuration
 size_t* lengths = (size_t*)malloc(sizeof(size_t));
-scil_dims_t dimensions = scil_init_dims(1, lengths);
+scil_dims_t_t dimensions = scil_init_dims(1, lengths);
 
 // How many values are compressed in the source buffer
 size_t element_count = 100;
