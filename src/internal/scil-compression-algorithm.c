@@ -2,7 +2,7 @@
 
 #include <scil-compressors.h>
 
-scil_compression_algorithm_t* scilI_find_compressor_by_name(const char* name)
+scil_compression_algorithm_t* scilI_find_compressor_by_name(const char* const name)
 {
     int num = scilU_get_compressor_number(name);
     if (num < 0 || num >= scilU_get_available_compressor_count()) {
