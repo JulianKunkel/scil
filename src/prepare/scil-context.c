@@ -11,11 +11,11 @@
 #include <stdio.h>
 #include <string.h>
 
-static int scil_initialized = 0;
+static int initialized = 0;
 
-static void scil_check_if_initialized()
+static void initialize()
 {
-    if (scil_initialized) {
+    if (initialized) {
         return;
     }
 
@@ -70,7 +70,7 @@ int scil_create_compression_context(scil_context_p* out_ctx,
                                     void * special_values,
                                     const scil_user_hints_t* hints)
 {
-    scil_check_if_initialized();
+    initialize();
 
     int ret = SCIL_NO_ERR;
     scil_context_p ctx;
