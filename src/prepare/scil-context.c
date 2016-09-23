@@ -34,7 +34,7 @@ static void scil_check_if_initialized()
     }
 
     scilI_init_hardware_limits();
-    scilI_compression_algo_chooser_init();
+    scilC_algo_chooser_initialize();
     scil_initialized = 1;
 }
 

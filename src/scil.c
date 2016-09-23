@@ -160,7 +160,7 @@ int scil_compress(byte* restrict dest,
 
 	// Check whether automatic compressor decision can be skipped because of a user forced chain
     if (hints->force_compression_methods == NULL) {
-        scilI_compression_algo_chooser(source, dims, ctx);
+        scilC_algo_chooser_execute(source, dims, ctx);
     }
 
     size_t out_size = 0;

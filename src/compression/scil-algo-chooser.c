@@ -52,7 +52,7 @@ static void parse_losless_list(){
   config_list_lossless = (config_file_entry_t**) realloc(config_list_lossless, config_list_lossless_size * sizeof(void*));
 }
 
-void scilI_compression_algo_chooser_init(){
+void scilC_algo_chooser_initialize(){
   int ret;
   char * filename = getenv("SCIL_SYSTEM_CHARACTERISTICS_FILE");
   if(filename == NULL){
@@ -131,7 +131,7 @@ void scilI_compression_algo_chooser_init(){
   parse_losless_list();
 }
 
-void scilI_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_context_p ctx){
+void scilC_algo_chooser_execute(void*restrict source, scil_dims* dims, scil_context_p ctx){
   scil_compression_chain_t * chain = &ctx->chain;
   int ret;
 

@@ -19,7 +19,8 @@
 #include <scil-context.h>
 #include <scil-dims.h>
 
-void scilI_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_context_p ctx);
-void scilI_compression_algo_chooser_init();
+void scilC_algo_chooser_initialize();
+
+void scilC_algo_chooser_execute(void*restrict source, scil_dims* dims, scil_context_p ctx);
 
 #endif // SCIL_ALGO_CHOOSER_H
