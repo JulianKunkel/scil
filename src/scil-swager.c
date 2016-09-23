@@ -36,8 +36,8 @@ static uint64_t right_shift_8(byte value, int amount){
         ((uint64_t)value) << -amount);
 }
 
-int scil_swage(byte* const restrict buf_out,
-               const uint64_t* const restrict buf_in,
+int scil_swage(byte* restrict buf_out,
+               const uint64_t* restrict buf_in,
                const size_t count,
                const uint8_t bits_per_value)
 {
@@ -71,8 +71,8 @@ int scil_swage(byte* const restrict buf_out,
     return 0;
 }
 
-int scil_unswage(uint64_t* const restrict buf_out,
-                 const byte* const restrict buf_in,
+int scil_unswage(uint64_t* restrict buf_out,
+                 const byte* restrict buf_in,
                  const size_t count,
                  const uint8_t bits_per_value)
 {

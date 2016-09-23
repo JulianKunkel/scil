@@ -30,7 +30,7 @@ typedef struct interpolator_data_1D {
   int l; // interpolation length
 } interpolator_data_1D_t;
 
-static void m_interpolator_func(double* const data, const scil_dims* const pos, const scil_dims* const size, int* iter, const void* const user_ptr)
+static void m_interpolator_func(double* data, const scil_dims* pos, const scil_dims* size, int* iter, const void* user_ptr)
 {
   interpolator_data_1D_t* up = (interpolator_data_1D_t*) user_ptr;
   const int d = up->dim;
@@ -64,7 +64,7 @@ static void m_interpolator_func(double* const data, const scil_dims* const pos, 
   data[scilG_data_pos(pos, size)] = val;
 }
 
-static void m_interpolator(double* const data, const scil_dims* const dims, float arg){
+static void m_interpolator(double* data, const scil_dims* dims, float arg){
   const int l = (int) arg;
   assert(l > 1);
 
@@ -99,11 +99,11 @@ static void m_interpolator(double* const data, const scil_dims* const dims, floa
 
 scilPa_mutator scilPa_interpolator = &m_interpolator;
 
-static void m_repeater_func_i(double* const data, const scil_dims* const pos, const scil_dims* const size, int* iter, const void* const user_ptr){
+static void m_repeater_func_i(double* data, const scil_dims* pos, const scil_dims* size, int* iter, const void* user_ptr){
   data[scilG_data_pos(pos, size)] = *((double*) user_ptr);
 }
 
-static void m_repeater_func(double* data, const scil_dims* const pos, const scil_dims* const size, int* iter, const void* const user_ptr){
+static void m_repeater_func(double* data, const scil_dims* pos, const scil_dims* size, int* iter, const void* user_ptr){
   int l = *((int *) user_ptr);
 
   double val = data[scilG_data_pos(pos, size)];
@@ -118,7 +118,7 @@ static void m_repeater_func(double* data, const scil_dims* const pos, const scil
   scilG_iter(data, size, pos, &extend, NULL, & m_repeater_func_i, & val );
 }
 
-static void m_repeater(double* const data, const scil_dims* const dims, float arg){
+static void m_repeater(double* data, const scil_dims* dims, float arg){
   int l = (int) arg;
   assert(l > 1);
 

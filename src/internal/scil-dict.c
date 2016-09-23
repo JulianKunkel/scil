@@ -51,7 +51,7 @@ void scilI_dict_destroy(scilI_dict_t* dict)
 }
 
 /* lookup: look for s in dict */
-scilI_dict_element_t* scilI_dict_get(const scilI_dict_t* const dict, const char* s)
+scilI_dict_element_t* scilI_dict_get(const scilI_dict_t* dict, const char* s)
 {
     for (scilI_dict_element_t* element = dict[scilI_dict_hash(s)]; element != NULL; element = element->next) {
         if (strcmp(s, element->key) == 0)
@@ -60,13 +60,13 @@ scilI_dict_element_t* scilI_dict_get(const scilI_dict_t* const dict, const char*
     return NULL; /* not found */
 }
 
-int scilI_dict_contains(const scilI_dict_t* const dict, const char* key)
+int scilI_dict_contains(const scilI_dict_t* dict, const char* key)
 {
     return scilI_dict_get(dict, key) != NULL;
 }
 
 /* install: put (key, value) in scilI_dict */
-scilI_dict_element_t* scilI_dict_put(scilI_dict_t* const dict, const char* key, const char* value)
+scilI_dict_element_t* scilI_dict_put(scilI_dict_t* dict, const char* key, const char* value)
 {
     unsigned hashval;
     scilI_dict_element_t* element = scilI_dict_get(dict, key);
@@ -84,7 +84,7 @@ scilI_dict_element_t* scilI_dict_put(scilI_dict_t* const dict, const char* key, 
     return element;
 }
 
-void scilI_dict_remove(scilI_dict_t* const dict, const char* key)
+void scilI_dict_remove(scilI_dict_t* dict, const char* key)
 {
     unsigned hashval = scilI_dict_hash(key);
     scilI_dict_element_t* element = dict[hashval];

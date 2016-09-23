@@ -41,8 +41,8 @@ static <DATATYPE> right_shift_8_<DATATYPE>(byte value, int amount)
     return (amount >= 0 ? ((<DATATYPE>)value) >> amount : ((<DATATYPE>)value) << -amount);
 }
 
-static int scil_swage_<DATATYPE>(byte* const restrict buf_out,
-                                 const <DATATYPE>* const restrict buf_in,
+static int scil_swage_<DATATYPE>(byte* restrict buf_out,
+                                 const <DATATYPE>* restrict buf_in,
                                  const size_t count,
                                  const uint8_t bits_per_value)
 {
@@ -76,8 +76,8 @@ static int scil_swage_<DATATYPE>(byte* const restrict buf_out,
     return 0;
 }
 
-static int scil_unswage_<DATATYPE>(<DATATYPE>* const restrict buf_out,
-                                   const byte* const restrict buf_in,
+static int scil_unswage_<DATATYPE>(<DATATYPE>* restrict buf_out,
+                                   const byte* restrict buf_in,
                                    const size_t count,
                                    const uint8_t bits_per_value)
 {

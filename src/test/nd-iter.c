@@ -21,11 +21,11 @@
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-static void printVarDimsOffsets(double* const data, const scil_dims* const pos, const scil_dims* const size, int* iter, const void* const user_ptr){
+static void printVarDimsOffsets(double* data, const scil_dims* pos, const scil_dims* size, int* iter, const void* user_ptr){
   scilU_print_dims(*pos);
 }
 
-static void initVarDims(double* const data, const scil_dims* const pos, const scil_dims* const size, int* iter, const void* const user_ptr){
+static void initVarDims(double* data, const scil_dims* pos, const scil_dims* size, int* iter, const void* user_ptr){
   double val = 0;
   for(int i=0; i < pos->dims; i++){
     val = val * 10 + pos->length[i];
@@ -33,12 +33,12 @@ static void initVarDims(double* const data, const scil_dims* const pos, const sc
   data[scilG_data_pos(pos, size)] = val;
 }
 
-static void addVarDims(double* const data, const scil_dims* const pos, const scil_dims* const size, int* iter, const void* const user_ptr){
+static void addVarDims(double* data, const scil_dims* pos, const scil_dims* size, int* iter, const void* user_ptr){
   double* val = (double*) user_ptr;
   *val += data[scilG_data_pos(pos, size)];
 }
 
-static void printVarDims(double* const data, const scil_dims* const pos, const scil_dims* const size, int* iter, const void* const user_ptr){
+static void printVarDims(double* data, const scil_dims* pos, const scil_dims* size, int* iter, const void* user_ptr){
   printf("%.0f ", data[scilG_data_pos(pos, size)]);
   size_t x = pos->dims - 1;
   if (pos->length[x] == size->length[x] - 1){

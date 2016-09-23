@@ -82,7 +82,7 @@ char* scilPa_get_pattern_name(int index)
     return patterns[index]->name;
 }
 
-int scilPa_get_pattern_index(const char* const name)
+int scilPa_get_pattern_index(const char* name)
 {
     for(int i=0; i < scilPa_get_available_patterns_count(); i++){
         if(strcmp(name, patterns[i]->name) == 0){
@@ -92,7 +92,7 @@ int scilPa_get_pattern_index(const char* const name)
     return -1;
 }
 
-int scilPa_create_pattern_double(double* const buffer, const scil_dims* const dims, const char* const name, float mn, float mx, float arg, float arg2)
+int scilPa_create_pattern_double(double* buffer, const scil_dims* dims, const char* name, float mn, float mx, float arg, float arg2)
 {
   if (name == NULL){
     return SCIL_EINVAL;
@@ -104,7 +104,7 @@ int scilPa_create_pattern_double(double* const buffer, const scil_dims* const di
   return patterns[num]->create(buffer, dims, mn, mx, arg, arg2);
 }
 
-int scilPa_create_pattern_float(float* const buffer, const scil_dims* const dims, const char* const name, float mn, float mx, float arg, float arg2)
+int scilPa_create_pattern_float(float* buffer, const scil_dims* dims, const char* name, float mn, float mx, float arg, float arg2)
 {
   size_t count = scil_get_data_count(dims);
   double * buf = (double*) malloc(count * sizeof(double));
@@ -186,7 +186,7 @@ char * scilPa_get_library_pattern_name(int p){
   return library[p].name;
 }
 
-int scilPa_create_library_pattern_double(double* const buffer, const scil_dims* const dims, int pattern_index)
+int scilPa_create_library_pattern_double(double* buffer, const scil_dims* dims, int pattern_index)
 {
   create_library_patterns_if_needed();
   assert(pattern_index <= library_size && pattern_index >= 0);
@@ -204,7 +204,7 @@ int scilPa_create_library_pattern_double(double* const buffer, const scil_dims* 
   return ret;
 }
 
-int scilPa_create_library_pattern_float (float* const buffer, const scil_dims* const dims, int pattern_index){
+int scilPa_create_library_pattern_float (float* buffer, const scil_dims* dims, int pattern_index){
   create_library_patterns_if_needed();
   assert(pattern_index <= library_size && pattern_index >= 0);
   size_t size = scil_get_data_size(SCIL_TYPE_DOUBLE, dims);
@@ -220,7 +220,7 @@ int scilPa_create_library_pattern_float (float* const buffer, const scil_dims* c
   return SCIL_NO_ERR;
 }
 
-void scilPI_change_data_scale(double* const buffer, const scil_dims* const dims, float mn, float mx){
+void scilPI_change_data_scale(double* buffer, const scil_dims* dims, float mn, float mx){
   // fix min + max, first identify min/max
   size_t count = scil_get_data_count(dims);
   double mn_o = 1e308, mx_o=-1e308;

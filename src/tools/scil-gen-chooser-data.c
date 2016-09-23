@@ -36,7 +36,7 @@
 // # Data Characteristics Aquisition
 // #############################################################################
 
-static double get_data_minimum(const double* const data, size_t count){
+static double get_data_minimum(const double* data, size_t count){
 
     double min = INFINITY;
 
@@ -47,7 +47,7 @@ static double get_data_minimum(const double* const data, size_t count){
     return min;
 }
 
-static double get_data_maximum(const double* const data, size_t count){
+static double get_data_maximum(const double* data, size_t count){
 
     double max = -INFINITY;
 
@@ -58,7 +58,7 @@ static double get_data_maximum(const double* const data, size_t count){
     return max;
 }
 
-static double get_data_mean(const double* const data, size_t count){
+static double get_data_mean(const double* data, size_t count){
 
       double mn = 0.0;
 
@@ -75,7 +75,7 @@ static int compdblp(const void* a, const void* b){
     if (*(double*)a < *(double*)b){ return -1; }
     return 0;
 }
-static double get_data_median(const double* const data, size_t count){
+static double get_data_median(const double* data, size_t count){
 
     allocate(double, tmp_buf, count);
     memcpy(tmp_buf, data, count * sizeof(double));
@@ -92,7 +92,7 @@ static double get_data_median(const double* const data, size_t count){
     return median;
 }
 
-static double get_data_std_deviation(const double* const data, size_t count, double mean){
+static double get_data_std_deviation(const double* data, size_t count, double mean){
 
     double variance_sum = 0.0;
 
@@ -104,10 +104,10 @@ static double get_data_std_deviation(const double* const data, size_t count, dou
     return sqrt(variance_sum / count);
 }
 
-static int get_data_characteristics(const double* const data, size_t count,
-                                    double* const minimum   , double* const maximum,
-                                    double* const mean      , double* const median,
-                                    double* const std_deviation){
+static int get_data_characteristics(const double* data, size_t count,
+                                    double* minimum   , double* maximum,
+                                    double* mean      , double* median,
+                                    double* std_deviation){
 
     *minimum       = get_data_minimum(data, count);
     *maximum       = get_data_maximum(data, count);
@@ -134,7 +134,7 @@ scil_dims dims;
 scil_user_hints_t hints;
 //scilPr_initialize_user_hints(&hints);
 
-static int benchmark_data(const double* const data, const scil_dims* const dims){
+static int benchmark_data(const double* data, const scil_dims* dims){
 
     double minimum, maximum;
     double mean, median;

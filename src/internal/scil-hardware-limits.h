@@ -24,7 +24,7 @@ enum hardware_limit_e{
 
 void scilI_initialize_hardware_limits();
 
-int scilI_add_hardware_limit(const char* const name, const char* const str);
+int scilI_add_hardware_limit(const char* name, const char* str);
 
 
 #endif // SCIL_HARDWARE_LIMITS_H

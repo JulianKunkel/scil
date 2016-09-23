@@ -25,7 +25,7 @@
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-static int constant(double* const buffer, const scil_dims* const dims, float mn, float mx, float arg, float arg2){
+static int constant(double* buffer, const scil_dims* dims, float mn, float mx, float arg, float arg2){
   size_t count = scil_get_data_count(dims);
   for (size_t i=0; i < count; i++){
     buffer[i] = mn;
@@ -33,7 +33,7 @@ static int constant(double* const buffer, const scil_dims* const dims, float mn,
   return SCIL_NO_ERR;
 }
 
-static int steps(double* const buffer, const scil_dims* const dims, float mn, float mx, float arg, float arg2){
+static int steps(double* buffer, const scil_dims* dims, float mn, float mx, float arg, float arg2){
   if(arg <= 0 || scilU_float_equal(mn, mx) ){
     return SCIL_EINVAL;
   }
@@ -46,7 +46,7 @@ static int steps(double* const buffer, const scil_dims* const dims, float mn, fl
   return SCIL_NO_ERR;
 }
 
-static int steps2(double* const buffer, const scil_dims* const dims, float mn, float mx, float arg, float arg2)
+static int steps2(double* buffer, const scil_dims* dims, float mn, float mx, float arg, float arg2)
 {
     size_t count      = scil_get_data_count(dims);
     int steps_count   = arg;
@@ -58,7 +58,7 @@ static int steps2(double* const buffer, const scil_dims* const dims, float mn, f
     return SCIL_NO_ERR;
 }
 
-static void rotate2d(float* const a, float* const b, float* const c, float mn, float mx, size_t x_size, size_t y_size)
+static void rotate2d(float* a, float* b, float* c, float mn, float mx, size_t x_size, size_t y_size)
 {
     float a_tmp = -*b * y_size / x_size;
     float b_tmp = *a * x_size / y_size;
@@ -69,7 +69,7 @@ static void rotate2d(float* const a, float* const b, float* const c, float mn, f
     *c = c_tmp;
 }
 
-static int linear1d(double* const buffer, const scil_dims* const dims, float mn, float mx)
+static int linear1d(double* buffer, const scil_dims* dims, float mn, float mx)
 {
     size_t nmemb = scil_get_data_count(dims);
     double r   = random() / RAND_MAX;
@@ -81,7 +81,7 @@ static int linear1d(double* const buffer, const scil_dims* const dims, float mn,
     }
     return SCIL_NO_ERR;
 }
-static int linear2d(double* const buffer, const scil_dims* const dims, float mn, float mx)
+static int linear2d(double* buffer, const scil_dims* dims, float mn, float mx)
 {
     size_t x_size = dims->length[0];
     size_t y_size = dims->length[1];
@@ -105,17 +105,17 @@ static int linear2d(double* const buffer, const scil_dims* const dims, float mn,
     return SCIL_NO_ERR;
 }
 
-static int linear3d(double* buffer, const scil_dims* const dims, float mn, float mx)
+static int linear3d(double* buffer, const scil_dims* dims, float mn, float mx)
 {
   return SCIL_NO_ERR;
 }
 
-static int linear4d(double* buffer, const scil_dims* const dims, float mn, float mx)
+static int linear4d(double* buffer, const scil_dims* dims, float mn, float mx)
 {
   return SCIL_NO_ERR;
 }
 
-static int linear(double* const buffer, const scil_dims* const dims, float mn, float mx, float arg, float arg2)
+static int linear(double* buffer, const scil_dims* dims, float mn, float mx, float arg, float arg2)
 {
     switch(dims->dims){
     case 1: return linear1d(buffer, dims, mn, mx);
@@ -125,7 +125,7 @@ static int linear(double* const buffer, const scil_dims* const dims, float mn, f
     }
 }
 
-static int rnd(double* const buffer, const scil_dims* const dims, float mn, float mx, float arg, float arg2){
+static int rnd(double* buffer, const scil_dims* dims, float mn, float mx, float arg, float arg2){
   srand((int) arg);
   size_t count = scil_get_data_count(dims);
   double delta = (mx - mn);
@@ -135,7 +135,7 @@ static int rnd(double* const buffer, const scil_dims* const dims, float mn, floa
   return SCIL_NO_ERR;
 }
 
-static int p_sin(double* const buffer, const scil_dims* const dims, float mn, float mx, float arg, float arg2){
+static int p_sin(double* buffer, const scil_dims* dims, float mn, float mx, float arg, float arg2){
   const int frequencyCount = (int) arg2;
   double highFrequency = (double)arg;
 
@@ -144,7 +144,7 @@ static int p_sin(double* const buffer, const scil_dims* const dims, float mn, fl
   }
   int64_t max_potenz = 1<<frequencyCount;
   const double pi = highFrequency*M_PI*2;
-  const size_t* const len = dims->length;
+  const size_t* len = dims->length;
 
   switch(dims->dims){
     case (1):{
@@ -224,11 +224,11 @@ typedef struct{
   double * values;
 } poly4_data;
 
-static void m_poly_func(double* const data,
-                        const scil_dims* const pos,
-                        const scil_dims* const size,
+static void m_poly_func(double* data,
+                        const scil_dims* pos,
+                        const scil_dims* size,
                         int* iter,
-                        const void* const user_ptr)
+                        const void* user_ptr)
 {
   poly4_data * usr = (poly4_data*) user_ptr;
   double val = 0;
@@ -245,7 +245,7 @@ static void m_poly_func(double* const data,
 }
 
 
-static int poly4(double* const data, const scil_dims* const dims, float mn, float mx, float arg, float arg2){
+static int poly4(double* data, const scil_dims* dims, float mn, float mx, float arg, float arg2){
   scil_dims pos;
   scil_copy_dims_array(& pos, *dims);
   memset(pos.length, 0, sizeof(size_t)*pos.dims);

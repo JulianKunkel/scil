@@ -20,6 +20,6 @@ int scilPr_create_context(scil_context_t** out_ctx,
 
 int scilPr_destroy_context(scil_context_t* out_ctx);
 
-scil_user_hints_t scilPr_get_effective_hints(const scil_context_t* const ctx);
+scil_user_hints_t scilPr_get_effective_hints(const scil_context_t* ctx);
 
 #endif // SCIL_CONTEXT_H

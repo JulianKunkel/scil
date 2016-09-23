@@ -245,7 +245,7 @@ int scilU_float_equal(float val1, float val2){
 /*
 \brief Convert the current position in a ND array to the position of the original 1D data array.
  */
-size_t scilG_data_pos(const scil_dims* const pos, const scil_dims* const size){
+size_t scilG_data_pos(const scil_dims* pos, const scil_dims* size){
   assert(size->dims == pos->dims);
   size_t cur = pos->length[size->dims - 1];
   if(size->dims == 0){
@@ -259,13 +259,13 @@ size_t scilG_data_pos(const scil_dims* const pos, const scil_dims* const size){
 }
 
 
-void scilG_iter(double* const data,
-                const scil_dims* const dims,
-                const scil_dims* const offset,
-                const scil_dims* const ende,
+void scilG_iter(double* data,
+                const scil_dims* dims,
+                const scil_dims* offset,
+                const scil_dims* ende,
                 int* iter,
                 scilG_iterfunc func,
-                const void* const user_ptr)
+                const void* user_ptr)
 {
   assert(dims->dims > 0);
   // check arguments further

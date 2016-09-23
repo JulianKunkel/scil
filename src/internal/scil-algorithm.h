@@ -3,6 +3,6 @@
 
 #include <scil-cca.h>
 
-scilI_algorithm_t* scilI_find_compressor_by_name(const char* const name);
+scilI_algorithm_t* scilI_find_compressor_by_name(const char* name);
 
 #endif // SCIL_COMPRESSION_ALGORITHM_H

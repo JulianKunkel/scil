@@ -26,6 +26,6 @@ int scilU_get_available_compressor_count();
 
 const char* scilU_get_compressor_name(int number);
 
-int scilU_get_compressor_number(const char* const name);
+int scilU_get_compressor_number(const char* name);
 
 #endif // SCIL_ALGOS_H

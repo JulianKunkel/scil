@@ -390,7 +390,7 @@ int scil_compress(byte* restrict dest,
 
 int scil_decompress(enum SCIL_Datatype datatype,
                     void* restrict dest,
-                    scil_dims* const dims,
+                    scil_dims* dims,
                     byte* restrict source,
                     const size_t source_size,
                     byte* restrict buff_tmp1) {

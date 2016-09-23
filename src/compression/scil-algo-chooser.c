@@ -131,9 +131,9 @@ void scilC_algo_chooser_initialize(){
   parse_losless_list();
 }
 
-void scilC_algo_chooser_execute(const void* const restrict source,
-                                const scil_dims* const dims,
-                                scil_context_t* const ctx)
+void scilC_algo_chooser_execute(const void* restrict source,
+                                const scil_dims* dims,
+                                scil_context_t* ctx)
 {
   scilI_chain_t * chain = &ctx->chain;
   int ret;

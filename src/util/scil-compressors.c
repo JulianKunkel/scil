@@ -44,7 +44,7 @@ const char* scilU_get_compressor_name(int number)
     return algo_array[number]->name;
 }
 
-int scilU_get_compressor_number(const char* const name)
+int scilU_get_compressor_number(const char* name)
 {
     scilI_algorithm_t** cur = algo_array;
     int count                        = 0;

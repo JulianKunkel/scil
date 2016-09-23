@@ -228,29 +228,29 @@ int scilU_float_equal(float val1, float val2);
 
 /* Tools to iterate over the 1D buffer as a multi-dimensional data space */
 
-typedef void(*scilG_iterfunc)(double* const data,
-                              const scil_dims* const pos,
-                              const scil_dims* const size,
+typedef void(*scilG_iterfunc)(double* data,
+                              const scil_dims* pos,
+                              const scil_dims* size,
                               int* iter,
-                              const void* const user_ptr);
+                              const void* user_ptr);
 
 /*
  * \brief Convert the current position in a ND array to the position of the original 1D data array.
  */
-size_t scilG_data_pos(const scil_dims* const pos, const scil_dims* const size);
+size_t scilG_data_pos(const scil_dims* pos, const scil_dims* size);
 
 
 /*
  * \brief iterate over the ND array of dimensions dims starting from offset to end in steps based on the array iter.
  * For each element the function func is invoked with the user_ptr as argument.
  */
-void scilG_iter(double* const data,
-                const scil_dims* const dims,
-                const scil_dims* const offset,
-                const scil_dims* const end,
+void scilG_iter(double* data,
+                const scil_dims* dims,
+                const scil_dims* offset,
+                const scil_dims* end,
                 int* iter,
                 scilG_iterfunc func,
-                const void* const user_ptr);
+                const void* user_ptr);
 
 void scilU_print_dims(scil_dims dims);
 

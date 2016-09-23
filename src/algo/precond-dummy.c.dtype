@@ -32,7 +32,7 @@ int scil_dummy_precond_compress_<DATATYPE>(const scil_context_t* ctx, <DATATYPE>
   return SCIL_NO_ERR;
 }
 
-int scil_dummy_precond_decompress_<DATATYPE>(<DATATYPE>*restrict data_out, scil_dims*const dims, <DATATYPE>*restrict compressed_buf_in, byte*restrict header, int * header_parsed_out){
+int scil_dummy_precond_decompress_<DATATYPE>(<DATATYPE>*restrict data_out, scil_dims* dims, <DATATYPE>*restrict compressed_buf_in, byte*restrict header, int * header_parsed_out){
   size_t size = scil_get_data_size(SCIL_TYPE_<DATATYPE_UPPER>, dims);
   memcpy(data_out, compressed_buf_in, size);
   if (memcmp(header-4, "DUMMY", 5) != 0){

@@ -16,8 +16,8 @@
  * \pre buf_in != NULL
  * \return scil error code
  */
-int scil_swage(byte* const restrict buf_out,
-               const uint64_t* const restrict buf_in,
+int scil_swage(byte* restrict buf_out,
+               const uint64_t* restrict buf_in,
                const size_t count,
                const uint8_t bits_per_value);
 
@@ -31,8 +31,8 @@ int scil_swage(byte* const restrict buf_out,
  * \pre buf_in != NULL
  * \return scil error code
  */
-int scil_unswage(uint64_t* const restrict buf_out,
-                 const byte* const restrict buf_in,
+int scil_unswage(uint64_t* restrict buf_out,
+                 const byte* restrict buf_in,
                  const size_t count,
                  const uint8_t bits_per_value);
 

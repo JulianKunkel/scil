@@ -167,7 +167,7 @@ int scilPr_destroy_context(scil_context_t* out_ctx)
     return SCIL_NO_ERR;
 }
 
-scil_user_hints_t scilPr_get_effective_hints(const scil_context_t* const ctx)
+scil_user_hints_t scilPr_get_effective_hints(const scil_context_t* ctx)
 {
     return ctx->hints;
 }

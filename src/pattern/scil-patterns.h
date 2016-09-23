@@ -20,22 +20,22 @@
 
 int   scilPa_get_available_patterns_count();
 char* scilPa_get_pattern_name(int index);
-int   scilPa_get_pattern_index(const char* const name);
+int   scilPa_get_pattern_index(const char* name);
 
 /*
  * Create the pattern selected by num with the arguments
  */
-int scilPa_create_pattern_double(double* const buffer,
-                                 const scil_dims* const dims,
-                                 const char* const name,
+int scilPa_create_pattern_double(double* buffer,
+                                 const scil_dims* dims,
+                                 const char* name,
                                  float mn,
                                  float mx,
                                  float arg,
                                  float arg2);
 
 int scilPa_create_pattern_float (float*  const buffer,
-                                 const scil_dims* const dims,
-                                 const char* const name,
+                                 const scil_dims* dims,
+                                 const char* name,
                                  float mn,
                                  float mx,
                                  float arg,
@@ -47,7 +47,7 @@ int scilPa_create_pattern_float (float*  const buffer,
 int scilPa_get_pattern_library_size();
 char* scilPa_get_library_pattern_name(int pattern);
 
-int scilPa_create_library_pattern_double(double* const buffer, const scil_dims* const dims, int pattern);
-int scilPa_create_library_pattern_float (float*  const buffer, const scil_dims* const dims, int pattern);
+int scilPa_create_library_pattern_double(double* buffer, const scil_dims* dims, int pattern);
+int scilPa_create_library_pattern_float (float*  const buffer, const scil_dims* dims, int pattern);
 
 #endif // SCIL_PATTERN_H

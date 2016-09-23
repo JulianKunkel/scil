@@ -35,10 +35,10 @@ static uint64_t round_up_byte(const uint64_t bits){
 }
 
 static void read_header(const byte* source,
-                        size_t* const source_size,
-                        double* const minimum,
-                        double* const absolute_tolerance,
-                        uint8_t* const bits_per_value){
+                        size_t* source_size,
+                        double* minimum,
+                        double* absolute_tolerance,
+                        uint8_t* bits_per_value){
 
     *minimum = *((double*)source);
     source += 8;
