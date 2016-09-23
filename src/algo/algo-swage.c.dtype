@@ -116,7 +116,7 @@ static int scil_unswage_<DATATYPE>(<DATATYPE>* const restrict buf_out,
     return 0;
 }
 
-int scil_swage_compress_<DATATYPE>(const scil_context_p ctx,
+int scil_swage_compress_<DATATYPE>(const scil_context_t* ctx,
                                    byte* restrict dest,
                                    size_t* restrict out_size,
                                    <DATATYPE>*restrict source,

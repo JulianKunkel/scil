@@ -23,7 +23,7 @@ int main(void)
     hints.force_compression_methods = "3";
     hints.significant_bits          = 64;
 
-    scil_context_p ctx;
+    scil_context_t* ctx;
     scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
 
     int ret = scil_compress(dest, dest_size, source, &dims, &dest_size, ctx);

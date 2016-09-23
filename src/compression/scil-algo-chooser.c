@@ -133,7 +133,7 @@ void scilC_algo_chooser_initialize(){
 
 void scilC_algo_chooser_execute(const void* const restrict source,
                                 const scil_dims* const dims,
-                                scil_context_p ctx)
+                                scil_context_t* ctx)
 {
   scil_compression_chain_t * chain = &ctx->chain;
   int ret;

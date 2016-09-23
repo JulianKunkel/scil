@@ -43,7 +43,7 @@ int test_correctness(const char* name, double* buffer_in, scil_dims dims)
     allocate(byte, buffer_out, c_size);
     allocate(byte, tmp_buff, c_size);
 
-    scil_context_p ctx;
+    scil_context_t* ctx;
     scil_user_hints_t hints;
     scil_user_hints_t out_accuracy;
 

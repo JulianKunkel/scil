@@ -245,7 +245,7 @@ folder "Install directory"{
 
 #include <scil-datatypes.h>
 
-void scil_compression_sprint_last_algorithm_chain(scil_context_p ctx,
+void scil_compression_sprint_last_algorithm_chain(scil_context_t* ctx,
                                                   char* out,
                                                   int buff_length);
 
@@ -271,7 +271,7 @@ int scil_compress(byte* restrict dest,
                   void* restrict source,
                   scil_dims* dims,
                   size_t* restrict out_size,
-                  scil_context_p ctx);
+                  scil_context_t* ctx);
 
 /**
  * \brief Method to decompress a data buffer
@@ -311,7 +311,7 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
                               scil_dims* dims,
                               byte* restrict data_compressed,
                               const size_t compressed_size,
-                              const scil_context_p ctx,
+                              const scil_context_t* ctx,
                               scil_user_hints_t* out_accuracy);
 
 #endif

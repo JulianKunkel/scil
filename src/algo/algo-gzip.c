@@ -21,7 +21,7 @@
 #include <zlib.h>
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_gzip_compress(const scil_context_p ctx, byte* restrict dest, size_t* restrict dest_size, const byte*restrict source, const size_t source_size){
+int scil_gzip_compress(const scil_context_t* ctx, byte* restrict dest, size_t* restrict dest_size, const byte*restrict source, const size_t source_size){
   *dest_size = 2*source_size;
   int ret = compress( (Bytef*)dest, dest_size, (Bytef*)source, (uLong)(source_size) );
   if (ret == Z_OK){

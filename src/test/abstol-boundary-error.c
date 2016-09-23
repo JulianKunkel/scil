@@ -21,7 +21,7 @@ int main(void)
     hints.force_compression_methods = "abstol";
     hints.absolute_tolerance        = 1;
 
-    scil_context_p ctx;
+    scil_context_t* ctx;
     size_t compressed_size;
     scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
 

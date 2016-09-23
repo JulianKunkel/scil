@@ -25,7 +25,7 @@
 // Repeat for each data type
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_p ctx,
+int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
                         <DATATYPE>*restrict source,

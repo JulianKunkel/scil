@@ -100,7 +100,7 @@ static htri_t compressorCanCompress(hid_t dcpl_id, hid_t type_id, hid_t space_id
 }
 
 typedef struct {
-	scil_context_p ctx;
+	scil_context_t* ctx;
 	size_t dst_size; // the size of the buffer
 } plugin_compress_config;
 

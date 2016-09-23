@@ -16,7 +16,7 @@ void test(int datatype, void * source){
   scilPr_initialize_user_hints(&hints);
   hints.absolute_tolerance        = 1;
 
-  scil_context_p ctx;
+  scil_context_t* ctx;
   size_t compressed_size;
   scilPr_create_context(&ctx, datatype, 0, NULL, &hints);
 

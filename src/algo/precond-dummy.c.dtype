@@ -24,7 +24,7 @@
 
 // Repeat for each data type
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_dummy_precond_compress_<DATATYPE>(const scil_context_p ctx, <DATATYPE>* restrict data_out, byte*restrict header, int * header_size_out, <DATATYPE>*restrict data_in, const scil_dims* dims){
+int scil_dummy_precond_compress_<DATATYPE>(const scil_context_t* ctx, <DATATYPE>* restrict data_out, byte*restrict header, int * header_size_out, <DATATYPE>*restrict data_in, const scil_dims* dims){
   size_t size = scil_get_data_size(SCIL_TYPE_<DATATYPE_UPPER>, dims);
   memcpy(data_out, data_in, size);
   memcpy(header, "DUMMY", 5);

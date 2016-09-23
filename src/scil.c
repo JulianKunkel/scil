@@ -34,7 +34,7 @@
         return SCIL_BUFFER_ERR;                          \
     }
 
-void scil_compression_sprint_last_algorithm_chain(scil_context_p ctx, char* out, int buff_length)
+void scil_compression_sprint_last_algorithm_chain(scil_context_t* ctx, char* out, int buff_length)
 {
     int ret                      = 0;
     scil_compression_chain_t* lc = &ctx->chain;
@@ -128,7 +128,7 @@ int scil_compress(byte* restrict dest,
                   void* restrict source,
                   scil_dims* dims,
                   size_t* restrict out_size_p,
-                  scil_context_p ctx) {
+                  scil_context_t* ctx) {
 
 	assert(ctx != NULL);
 	assert(dest != NULL);
@@ -685,7 +685,7 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
                               scil_dims* dims,
                               byte* restrict data_compressed,
                               const size_t compressed_size,
-                              const scil_context_p ctx,
+                              const scil_context_t* ctx,
                               scil_user_hints_t* out_accuracy) {
     const uint64_t length = scil_compress_buffer_size_bound(datatype, dims);
     byte* data_out        = (byte*)malloc(length);

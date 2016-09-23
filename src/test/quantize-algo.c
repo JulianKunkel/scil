@@ -7,7 +7,7 @@
 size_t count = 1000;
 scil_user_hints_t hints;
 scil_dims dims;
-scil_context_p context;
+scil_context_t* context;
 
 int test_quantize_float(){
 

@@ -45,7 +45,7 @@ int main(){
   h.decomp_speed.unit = SCIL_PERFORMANCE_GIB;
   h.decomp_speed.multiplier = 3.5;
 
-  scil_context_p ctx;
+  scil_context_t* ctx;
   ret = scilPr_create_context(& ctx, SCIL_TYPE_DOUBLE, 0, NULL, & h);
   assert(ret == SCIL_NO_ERR);
 

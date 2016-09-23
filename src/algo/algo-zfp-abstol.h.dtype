@@ -36,7 +36,7 @@
  * \param source_count Element count of uncompressed buffer
  * \return Success state of the compression
  */
-int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_p ctx, byte* restrict dest, size_t* restrict dest_size, <DATATYPE>*restrict source, const scil_dims* dims);
+int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_t* ctx, byte* restrict dest, size_t* restrict dest_size, <DATATYPE>*restrict source, const scil_dims* dims);
 
 /**
  * \brief Decompression function of zfp with absolute error tolerance

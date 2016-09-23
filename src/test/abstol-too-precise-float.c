@@ -25,7 +25,7 @@ int main(void)
     hints.force_compression_methods = "1";
     hints.absolute_tolerance        = 1e-100;
 
-    scil_context_p ctx;
+    scil_context_t* ctx;
     scilPr_create_context(&ctx, SCIL_TYPE_FLOAT, 0, NULL, &hints);
 
     //printf("%s\n", ctx->chain.byte_compressor->name);

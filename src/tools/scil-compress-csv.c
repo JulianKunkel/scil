@@ -222,7 +222,7 @@ void writeData(){
 }
 
 int main(int argc, char ** argv){
-  scil_context_p ctx;
+  scil_context_t* ctx;
   scil_user_hints_t hints;
 
   int ret;

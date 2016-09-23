@@ -302,7 +302,7 @@ static int decompress_buffer_<DATATYPE>(<DATATYPE>* const restrict dest,
     return SCIL_NO_ERR;
 }
 
-int scil_sigbits_compress_<DATATYPE>(const scil_context_p ctx,
+int scil_sigbits_compress_<DATATYPE>(const scil_context_t* ctx,
                                      byte * restrict dest,
                                      size_t* dest_size,
                                      <DATATYPE>*restrict source,

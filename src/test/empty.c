@@ -24,7 +24,7 @@
 
 int main(){
 
-  scil_context_p ctx;
+  scil_context_t* ctx;
   scil_user_hints_t hints;
   scil_dims dims;
   int ret;

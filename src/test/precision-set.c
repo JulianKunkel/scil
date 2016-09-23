@@ -34,7 +34,7 @@ static void test(enum SCIL_Datatype type, int digits, int bits, int expected_dig
   h.significant_digits = digits;
   h.significant_bits = bits;
 
-  scil_context_p ctx;
+  scil_context_t* ctx;
   ret = scilPr_create_context(& ctx, type, 0, NULL, & h);
   assert(ret == SCIL_NO_ERR);
   // retrieve effectively set hints:

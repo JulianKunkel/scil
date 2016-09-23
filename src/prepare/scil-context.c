@@ -38,7 +38,7 @@ static void initialize()
     initialized = 1;
 }
 
-static int check_compress_lossless_needed(scil_context_p ctx)
+static int check_compress_lossless_needed(scil_context_t* ctx)
 {
     const scil_user_hints_t hints = ctx->hints;
 
@@ -64,7 +64,7 @@ static void fix_double_setting(double* dbl)
     }
 }
 
-int scilPr_create_context(scil_context_p* out_ctx,
+int scilPr_create_context(scil_context_t** out_ctx,
                                     enum SCIL_Datatype datatype,
                                     int special_values_count,
                                     void * special_values,
@@ -73,10 +73,10 @@ int scilPr_create_context(scil_context_p* out_ctx,
     initialize();
 
     int ret = SCIL_NO_ERR;
-    scil_context_p ctx;
+    scil_context_t* ctx;
     *out_ctx = NULL;
 
-    ctx = (scil_context_p)SAFE_MALLOC(sizeof(scil_context_t));
+    ctx = (scil_context_t*)SAFE_MALLOC(sizeof(scil_context_t));
     memset(&ctx->chain, 0, sizeof(ctx->chain));
     ctx->datatype = datatype;
 		ctx->special_values_count = special_values_count;
@@ -159,7 +159,7 @@ int scilPr_create_context(scil_context_p* out_ctx,
     return ret;
 }
 
-int scilPr_destroy_context(scil_context_p* out_ctx)
+int scilPr_destroy_context(scil_context_t** out_ctx)
 {
     free(*out_ctx);
     *out_ctx = NULL;
@@ -167,7 +167,7 @@ int scilPr_destroy_context(scil_context_p* out_ctx)
     return SCIL_NO_ERR;
 }
 
-scil_user_hints_t scilPr_get_effective_hints(scil_context_p ctx)
+scil_user_hints_t scilPr_get_effective_hints(scil_context_t* ctx)
 {
     return ctx->hints;
 }

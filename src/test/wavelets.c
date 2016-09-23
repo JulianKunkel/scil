@@ -18,7 +18,7 @@ int main(void){
     hints.absolute_tolerance = 0.005;
     hints.force_compression_methods = "11";
 
-    scil_context_p context;
+    scil_context_t* context;
     scilPr_create_context(&context, SCIL_TYPE_FLOAT, 0, NULL, &hints);
 
     //1D

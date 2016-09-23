@@ -13,7 +13,7 @@ int main(void){
     hints.significant_bits = 11;
     hints.force_compression_methods = "3";
 
-    scil_context_p context;
+    scil_context_t* context;
     scilPr_create_context(&context, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
 
     scil_dims dims;
