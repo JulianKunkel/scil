@@ -19,14 +19,7 @@ enum scil_performance_unit {
                                                  // Lustre
 };
 
-static const char * performance_units[] = {
-	"IGNORE",
-	"MiB",
-	"GiB",
-	"NetworkSpeed",
-	"NodeLocalStorageSpeed",
-	"SingleStreamSharedStorageSpeed"
-};
+extern const char * performance_units[];
 
 /**
  * \brief Structure, describing the required performance.

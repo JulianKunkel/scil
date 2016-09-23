@@ -22,7 +22,7 @@
 
 #include <open-simplex-noise.h>
 
-static int simplex(const scil_dims* const dims, double * buffer, float mn, float mx, float arg, float arg2){
+static int simplex(double* const buffer, const scil_dims* const dims, float mn, float mx, float arg, float arg2){
   const int frequencyCount = (int) arg2;
   double highFrequency = (double)arg;
 

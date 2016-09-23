@@ -3,6 +3,15 @@
 #include <stdio.h>
 #include <string.h>
 
+const char * performance_units[] = {
+	"IGNORE",
+	"MiB",
+	"GiB",
+	"NetworkSpeed",
+	"NodeLocalStorageSpeed",
+	"SingleStreamSharedStorageSpeed"
+};
+
 static void print_performance_hint(const char* name, const scilPr_performance_hint_t p)
 {
     printf("\t%s: %f * %s\n", name, (double)p.multiplier, performance_units[p.unit]);
