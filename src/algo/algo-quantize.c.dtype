@@ -144,7 +144,7 @@ int scil_quantize_compress_<DATATYPE>(const scil_context_t* ctx,
 
     char value[2];
     snprintf(value, 2, "%u", bits_per_value);
-    scil_dict_put(ctx->pipeline_params, "bits_per_value", value);
+    scilI_dict_put(ctx->pipeline_params, "bits_per_value", value);
 
     return scil_quantize_buffer_<DATATYPE>((uint64_t*)dest, source, count, ctx->hints.absolute_tolerance, minimum, maximum, bits_per_value);
 }

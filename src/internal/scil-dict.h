@@ -1,28 +1,28 @@
-#ifndef SCIL_DICT_H_
-#define SCIL_DICT_H_
+#ifndef SCIL_DICT_H
+#define SCIL_DICT_H
 
-typedef struct scil_dict_element scil_dict_element_t;
+typedef struct scilI_dict_element scilI_dict_element_t;
 
-struct scil_dict_element { /* table entry: */
-    scil_dict_element_t* next; /* next entry in chain */
+struct scilI_dict_element { /* table entry: */
+    scilI_dict_element_t* next; /* next entry in chain */
     char* key; /* defined key */
     char* value; /* replacement text */
 };
 
-typedef scil_dict_element_t** scil_dict_t;
+typedef scilI_dict_element_t* scilI_dict_t;
 
-scil_dict_t scil_dict_create();
+scilI_dict_t* scilI_dict_create();
 
-void scil_dict_destroy(scil_dict_t dict);
+void scilI_dict_destroy(scilI_dict_t* dict);
 
-unsigned scil_dict_hash(const char* s);
+unsigned scilI_dict_hash(const char* s);
 
-scil_dict_element_t* scil_dict_get(const scil_dict_t dict, const char* s);
+scilI_dict_element_t* scilI_dict_get(const scilI_dict_t* const dict, const char* s);
 
-int scil_dict_contains(const scil_dict_t dict, const char* key);
+int scilI_dict_contains(const scilI_dict_t* const dict, const char* key);
 
-scil_dict_element_t* scil_dict_put(const scil_dict_t dict, const char* key, const char* value);
+scilI_dict_element_t* scilI_dict_put(scilI_dict_t* const dict, const char* key, const char* value);
 
-void scil_dict_remove(const scil_dict_t dict, const char* key);
+void scilI_dict_remove(scilI_dict_t* const dict, const char* key);
 
-#endif /* SCIL_DICT_H_ */
+#endif // SCIL_DICT_H
