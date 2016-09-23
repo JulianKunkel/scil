@@ -2,9 +2,9 @@ scil_compress
 scilU_get_compressor_name
 scilU_get_compressor_number
 scilU_get_available_compressor_count
-scil_create_compression_context
+scilPr_create_context
 scil_decompress
-scil_destroy_compression_context
+scilPr_destroy_context
 scil_determine_accuracy
 scil_fpzip_compress_double
 scil_fpzip_compress_float
@@ -26,7 +26,7 @@ scil_memcopy_compress
 scil_memcopy_decompress
 scil_opj_compress
 scil_opj_decompress
-scil_retrieve_effective_hints
+scilPr_get_effective_hints
 scil_sigbits_compress_double
 scil_sigbits_compress_float
 scil_sigbits_decompress_double

@@ -19,7 +19,7 @@ int main(void){
     hints.force_compression_methods = "11";
 
     scil_context_p context;
-    scil_create_compression_context(&context, SCIL_TYPE_FLOAT, 0, NULL, &hints);
+    scilPr_create_context(&context, SCIL_TYPE_FLOAT, 0, NULL, &hints);
 
     //1D
 
@@ -92,7 +92,7 @@ int main(void){
     free(buffer_tmp);
     free(buffer_end);
 
-    //scil_destroy_compression_context(&context);
+    //scilPr_destroy_context(&context);
 
     return 0;
 }

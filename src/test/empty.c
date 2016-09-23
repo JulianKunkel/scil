@@ -31,7 +31,7 @@ int main(){
 
   scilPr_initialize_user_hints(& hints);
   hints.force_compression_methods = "dummy-precond";
-  ret = scil_create_compression_context(& ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+  ret = scilPr_create_context(& ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
   assert(ret == SCIL_NO_ERR);
 
   size_t size;
@@ -48,7 +48,7 @@ int main(){
   assert(ret == SCIL_NO_ERR);
   assert(out_size == 1);
 
-  scil_destroy_compression_context(& ctx);
+  scilPr_destroy_context(& ctx);
 
   free(buff);
 

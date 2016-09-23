@@ -18,7 +18,7 @@ void test(int datatype, void * source){
 
   scil_context_p ctx;
   size_t compressed_size;
-  scil_create_compression_context(&ctx, datatype, 0, NULL, &hints);
+  scilPr_create_context(&ctx, datatype, 0, NULL, &hints);
 
   ret = scil_compress(dest, dest_size, source, &dims, &compressed_size, ctx);
   scil_user_hints_t out_accuracy;

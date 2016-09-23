@@ -263,12 +263,12 @@ int main(int argc, char ** argv){
     datatype = SCIL_TYPE_FLOAT;
   }
 
-  ret = scil_create_compression_context(& ctx, datatype, 0, NULL, &hints);
+  ret = scilPr_create_context(& ctx, datatype, 0, NULL, &hints);
   assert(ret == SCIL_NO_ERR);
 
   if (print_hints){
     printf("Effective hints (only needed for compression)\n");
-    scil_user_hints_t e = scil_retrieve_effective_hints(ctx);
+    scil_user_hints_t e = scilPr_get_effective_hints(ctx);
     scilPr_print_user_hints(& e);
   }
 
@@ -298,7 +298,7 @@ int main(int argc, char ** argv){
       ret = scil_compress(result, input_size, (double*)input_data, & dims, & buff_size, ctx);
     }
     assert(ret == SCIL_NO_ERR);
-    ret = scil_destroy_compression_context(& ctx);
+    ret = scilPr_destroy_context(& ctx);
     assert(ret == SCIL_NO_ERR);
 
     byte* tmp_buff = (byte*) SAFE_MALLOC(buff_size);
@@ -314,7 +314,7 @@ int main(int argc, char ** argv){
       ret = scil_compress(output_data, input_size, (double*)input_data, & dims, & buff_size, ctx);
     }
     assert(ret == SCIL_NO_ERR);
-    ret = scil_destroy_compression_context(& ctx);
+    ret = scilPr_destroy_context(& ctx);
     assert(ret == SCIL_NO_ERR);
 
   } else if (uncompress){

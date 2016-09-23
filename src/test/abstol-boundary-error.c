@@ -23,7 +23,7 @@ int main(void)
 
     scil_context_p ctx;
     size_t compressed_size;
-    scil_create_compression_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+    scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
 
     int ret = scil_compress(dest, dest_size, source, &dims, &compressed_size, ctx);
     // scil_decompress();

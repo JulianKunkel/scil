@@ -46,16 +46,16 @@ int main(){
   h.decomp_speed.multiplier = 3.5;
 
   scil_context_p ctx;
-  ret = scil_create_compression_context(& ctx, SCIL_TYPE_DOUBLE, 0, NULL, & h);
+  ret = scilPr_create_context(& ctx, SCIL_TYPE_DOUBLE, 0, NULL, & h);
   assert(ret == SCIL_NO_ERR);
 
   // retrieve effectively set hints:
-  scil_user_hints_t e = scil_retrieve_effective_hints(ctx);
+  scil_user_hints_t e = scilPr_get_effective_hints(ctx);
   scilPr_print_user_hints(& e);
 
   // now you can compress/decompress
 
-  ret = scil_destroy_compression_context(& ctx);
+  ret = scilPr_destroy_context(& ctx);
   assert(ret == SCIL_NO_ERR);
 
   printf("OK\n");

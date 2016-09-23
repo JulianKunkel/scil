@@ -11,7 +11,7 @@ scil_context_p context;
 
 int test_quantize_float(){
 
-    scil_create_compression_context(&context, SCIL_TYPE_FLOAT, 0, NULL, &hints);
+    scilPr_create_context(&context, SCIL_TYPE_FLOAT, 0, NULL, &hints);
 
     size_t uncompressed_size = scil_get_data_size(SCIL_TYPE_FLOAT, &dims);
     size_t compressed_size   = scil_compress_buffer_size_bound(SCIL_TYPE_FLOAT, &dims);
@@ -52,7 +52,7 @@ int test_quantize_float(){
 }
 int test_quantize_double(){
 
-    scil_create_compression_context(&context, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+    scilPr_create_context(&context, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
 
     size_t uncompressed_size = scil_get_data_size(SCIL_TYPE_DOUBLE, &dims);
     size_t compressed_size   = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, &dims);

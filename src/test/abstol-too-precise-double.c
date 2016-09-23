@@ -26,7 +26,7 @@ int main(void)
     hints.absolute_tolerance        = 1e-300;
 
     scil_context_p ctx;
-    scil_create_compression_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+    scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
 
     int ret = scil_compress(dest, dest_size, source, &dims, &dest_size, ctx);
     printf("%d %d\n", ret, SCIL_PRECISION_ERR);

@@ -1,4 +1,4 @@
-This flowchart shows the internal work flow of the scil_create_compression_context
+This flowchart shows the internal work flow of the scilPr_create_context
 function.
 
 [1] Datatype

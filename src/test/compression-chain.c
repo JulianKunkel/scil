@@ -37,7 +37,7 @@ void test(char * name, size_t expected_size, int check_compressed_output){
   int ret;
   printf("Running %s\n", name);
   hints.force_compression_methods = name;
-  ret = scil_create_compression_context(& ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+  ret = scilPr_create_context(& ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
   assert(ret == SCIL_NO_ERR);
 
   size_t out_size = -1;
@@ -50,7 +50,7 @@ void test(char * name, size_t expected_size, int check_compressed_output){
     assert( memcmp(& buff[1], data, sizeof(data)) == 0);
   }
 
-  ret = scil_destroy_compression_context(& ctx);
+  ret = scilPr_destroy_context(& ctx);
   assert(ret == SCIL_NO_ERR);
 
   memset(data_check, 0, sizeof(data_check));

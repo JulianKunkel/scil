@@ -734,7 +734,7 @@ int test_performance(double bias, double discountFactor){
 			hints.absolute_tolerance = abs_tol;
 			hints.significant_bits = r;
 
-			scil_create_compression_context(&ctx, SCIL_TYPE_DOUBLE, &hints);
+			scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, &hints);
 			size_t out_c_size = c_size;
 
 			double seconds = 0;

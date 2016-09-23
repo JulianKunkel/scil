@@ -349,7 +349,7 @@ hints.significant_bits = 5;
 
 // Creating compression context
 scil_context* context;
-scil_create_compression_context(&context, &hints);
+scilPr_create_context(&context, &hints);
 
 // Writing dimensional layout (1D, 100 elements)
 size_t* lengths = (size_t*)malloc(sizeof(size_t));

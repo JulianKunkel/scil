@@ -35,17 +35,17 @@ static void test(enum SCIL_Datatype type, int digits, int bits, int expected_dig
   h.significant_bits = bits;
 
   scil_context_p ctx;
-  ret = scil_create_compression_context(& ctx, type, 0, NULL, & h);
+  ret = scilPr_create_context(& ctx, type, 0, NULL, & h);
   assert(ret == SCIL_NO_ERR);
   // retrieve effectively set hints:
-  scil_user_hints_t e = scil_retrieve_effective_hints(ctx);
+  scil_user_hints_t e = scilPr_get_effective_hints(ctx);
 
   scilPr_print_user_hints(& e);
 
   assert(e.significant_digits == expected_digits);
   assert(e.significant_bits == expected_bits);
 
-  ret = scil_destroy_compression_context(& ctx);
+  ret = scilPr_destroy_context(& ctx);
   assert(ret == SCIL_NO_ERR);
 }
 
