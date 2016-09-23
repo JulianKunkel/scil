@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SCIL_PATTERN_LIB_H
-#define SCIL_PATTERN_LIB_H
+#ifndef SCIL_PATTERN_H
+#define SCIL_PATTERN_H
 
 #include <scil-dims.h>
 
@@ -50,4 +50,4 @@ char* scilPa_get_library_pattern_name(int pattern);
 int scilPa_create_library_pattern_double(double* const buffer, const scil_dims* const dims, int pattern);
 int scilPa_create_library_pattern_float (float*  const buffer, const scil_dims* const dims, int pattern);
 
-#endif
+#endif // SCIL_PATTERN_H
