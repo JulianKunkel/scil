@@ -49,8 +49,8 @@ int main(int argc, char ** argv){
 
   char * check_pattern = getenv("SCIL_PATTERN_TO_USE");
 
-  for(int i=0; i < scilPa_library_size(); i++){
-	char * name = scilPa_library_pattern_name(i);
+  for(int i=0; i < scilPa_get_pattern_library_size(); i++){
+	char * name = scilPa_get_library_pattern_name(i);
 
     if( check_pattern != NULL && strcmp(name, check_pattern) != 0){
       printf("Skipping %s\n", name);
@@ -61,7 +61,7 @@ int main(int argc, char ** argv){
     sprintf(fullName, "%s.csv", name);
 
     printf("Processing %s\n", name);
-	ret = scilPa_library_create_pattern_double(buffer_in, & dims, i);
+	ret = scilPa_create_library_pattern_double(buffer_in, & dims, i);
 	assert( ret == SCIL_NO_ERR);
     scilU_plot(fullName, dims, buffer_in);
   }

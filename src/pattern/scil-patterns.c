@@ -174,19 +174,19 @@ static void create_library_patterns_if_needed(){
   library_add("simplexNoise", "simplex206", -1, 1, 3.0, 6, 0); // 6 passes, 3 hills
 }
 
-int scilPa_library_size(){
+int scilPa_get_pattern_library_size(){
   create_library_patterns_if_needed();
   return library_size;
 }
 
-char * scilPa_library_pattern_name(int p){
+char * scilPa_get_library_pattern_name(int p){
   create_library_patterns_if_needed();
   assert( p <= library_size && p >= 0);
 
   return library[p].name;
 }
 
-int scilPa_library_create_pattern_double(double* const buffer, const scil_dims* const dims, int pattern_index)
+int scilPa_create_library_pattern_double(double* const buffer, const scil_dims* const dims, int pattern_index)
 {
   create_library_patterns_if_needed();
   assert(pattern_index <= library_size && pattern_index >= 0);
@@ -204,12 +204,12 @@ int scilPa_library_create_pattern_double(double* const buffer, const scil_dims* 
   return ret;
 }
 
-int scilPa_library_create_pattern_float (float* const buffer, const scil_dims* const dims, int pattern_index){
+int scilPa_create_library_pattern_float (float* const buffer, const scil_dims* const dims, int pattern_index){
   create_library_patterns_if_needed();
   assert(pattern_index <= library_size && pattern_index >= 0);
   size_t size = scil_get_data_size(SCIL_TYPE_DOUBLE, dims);
   double* buf = (double*) malloc(size);
-  int ret = scilPa_library_create_pattern_double(buf, dims, pattern_index);
+  int ret = scilPa_create_library_pattern_double(buf, dims, pattern_index);
   if (ret != SCIL_NO_ERR){
     return ret;
   }
