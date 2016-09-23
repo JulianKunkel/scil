@@ -156,7 +156,7 @@ static void iterate_6_poly4_arg2(float mn, float mx, float arg){
 
     for (int arg2 = 1; arg2 < 33; arg2 *= 2){
 
-        scilP_create_pattern_double(&dims, data, "sin", mn, mx, arg, arg2);
+        scilPa_create_pattern_double(&dims, data, "sin", mn, mx, arg, arg2);
     }
 }
 static void iterate_5_poly4_arg(float mn, float mx){
@@ -210,7 +210,7 @@ static void iterate_5_sin_arg(){
 
     for (int arg = 1; arg < arg_maximum; ++arg) {
 
-        scilP_create_pattern_double(&dims, data, "sin", mn, mx, arg, 0.0f);
+        scilPa_create_pattern_double(&dims, data, "sin", mn, mx, arg, 0.0f);
     }
 }
 static void iterate_4_sin_mx_negative(float mn){
@@ -257,7 +257,7 @@ static void iterate_5_step_arg(float mn, float mx) {
 
     for (int arg = 1; arg < 65; arg *= 2) {
 
-        scilP_create_pattern_double(&dims, data, "step", mn, mx, arg, 0.0f);
+        scilPa_create_pattern_double(&dims, data, "step", mn, mx, arg, 0.0f);
     }
 }
 static void iterate_4_step_mx_negative(float mn) {
@@ -304,18 +304,18 @@ static void iterate_4_random_mx_negative(float mn) {
 
     for (float mx = min; mx < negative_limit; mx /= factor_step) {
 
-        scilP_create_pattern_double(&dims, data, "random", mn, mx, 0.0f, 0.0f);
+        scilPa_create_pattern_double(&dims, data, "random", mn, mx, 0.0f, 0.0f);
     }
 }
 static void iterate_4_random_mx_zero(float mn) {
 
-    scilP_create_pattern_double(&dims, data, "random", mn, 0.0f, 0.0f, 0.0f);
+    scilPa_create_pattern_double(&dims, data, "random", mn, 0.0f, 0.0f, 0.0f);
 }
 static void iterate_4_random_mx_positive(float mn) {
 
     for (float mx = positive_minimum; mx < positive_limit; mx *= factor_step) {
 
-        scilP_create_pattern_double(&dims, data, "random", mn, mx, 0.0f, 0.0f);
+        scilPa_create_pattern_double(&dims, data, "random", mn, mx, 0.0f, 0.0f);
     }
 }
 static void iterate_3_random_mn() {
@@ -346,15 +346,15 @@ static void iterate_3_constant_mn(){
 
     // Negative constant
     for (float mn = negative_minimum; mn < negative_limit; mn /= factor_step) {
-        scilP_create_pattern_double(&dims, data, "constant", mn, 0.0f, 0.0f, 0.0f);
+        scilPa_create_pattern_double(&dims, data, "constant", mn, 0.0f, 0.0f, 0.0f);
     }
 
     // Zero constant
-    scilP_create_pattern_double(&dims, data, "constant", 0.0f, 0.0f, 0.0f, 0.0f);
+    scilPa_create_pattern_double(&dims, data, "constant", 0.0f, 0.0f, 0.0f, 0.0f);
 
     // Positive constant
     for (float mn = positive_minimum; mn < positive_limit; mn *= factor_step) {
-        scilP_create_pattern_double(&dims, data, "constant", mn, 0.0f, 0.0f, 0.0f);
+        scilPa_create_pattern_double(&dims, data, "constant", mn, 0.0f, 0.0f, 0.0f);
     }
 }
 
@@ -389,7 +389,7 @@ static void iterate_3_random_poly4(){
     float seed = (float)rand();
     float points = 1.0f + (float)(rand() % 63);
 
-    scilP_create_pattern_double(&dims, data, "poly4", 0.0f, 1.0f, seed, points); // min and max don't matter
+    scilPa_create_pattern_double(&dims, data, "poly4", 0.0f, 1.0f, seed, points); // min and max don't matter
 
 
 }
@@ -403,7 +403,7 @@ static void iterate_3_random_sin(){
 
     float octaves = 1.0f + (float)(rand() % 10);
 
-    scilP_create_pattern_double(&dims, data, "sin", 0.0f, 1.0f, height, octaves); // min and max don't matter
+    scilPa_create_pattern_double(&dims, data, "sin", 0.0f, 1.0f, height, octaves); // min and max don't matter
 }
 static void iterate_3_random_steps(){
 
@@ -420,7 +420,7 @@ static void iterate_3_random_steps(){
 
     float arg = 2.0f + 98.0f * (float)rand()/RAND_MAX;
 
-    scilP_create_pattern_double(&dims, data, "steps", mn, mx, arg, 0.0f);
+    scilPa_create_pattern_double(&dims, data, "steps", mn, mx, arg, 0.0f);
 }
 static void iterate_3_random_random(){
 
@@ -435,7 +435,7 @@ static void iterate_3_random_random(){
     float mn = powf(mn_base, (float)iexp) + offset;
     float mx = powf(mx_base, (float)iexp) + offset;
 
-    scilP_create_pattern_double(&dims, data, "random", mn, mx, 0.0f, 0.0f);
+    scilPa_create_pattern_double(&dims, data, "random", mn, mx, 0.0f, 0.0f);
 }
 static void iterate_3_random_constant(){
 
@@ -448,7 +448,7 @@ static void iterate_3_random_constant(){
 
     float mn = powf(base, (float)iexp);
 
-    scilP_create_pattern_double(&dims, data, "constant", mn, 0.0f, 0.0f, 0.0f);
+    scilPa_create_pattern_double(&dims, data, "constant", mn, 0.0f, 0.0f, 0.0f);
 }
 
 static void iterate_2_random_patterns(size_t count){

@@ -39,7 +39,7 @@ static scil_pattern * patterns[] ={
 };
 
 typedef struct{
-  scilP_mutator call;
+  scilPa_mutator call;
   float arg;
 } mutator_config;
 
@@ -59,7 +59,7 @@ static library_pattern * library = NULL;
 static int library_size = 0;
 static int library_capacity = 100;
 
-int scilP_available_patterns_count(){
+int scilPa_available_patterns_count(){
   static int count = -1;
   if(count == -1){
     for(count = 0; ; count++){
@@ -71,15 +71,15 @@ int scilP_available_patterns_count(){
   return count;
 }
 
-char * scilP_available_patterns_name(int i){
-  if (i >= 0 && i < scilP_available_patterns_count()){
+char * scilPa_available_patterns_name(int i){
+  if (i >= 0 && i < scilPa_available_patterns_count()){
     return patterns[i]->name;
   }
   return NULL;
 }
 
-int scilP_patterns_by_name(char * name){
-  for(int i=0; i < scilP_available_patterns_count(); i++){
+int scilPa_patterns_by_name(char * name){
+  for(int i=0; i < scilPa_available_patterns_count(); i++){
     if(strcmp(name, patterns[i]->name) == 0){
       return i;
     }
@@ -88,22 +88,22 @@ int scilP_patterns_by_name(char * name){
   return -1;
 }
 
-int scilP_create_pattern_double(scil_dims * dims, double * buf, char * name, float mn, float mx, float arg, float arg2){
+int scilPa_create_pattern_double(scil_dims * dims, double * buf, char * name, float mn, float mx, float arg, float arg2){
 
   if (name == NULL){
     return SCIL_EINVAL;
   }
-  int num = scilP_patterns_by_name(name);
+  int num = scilPa_patterns_by_name(name);
   if (num == -1){
     return SCIL_EINVAL;
   }
   return patterns[num]->create(dims, buf, mn, mx, arg, arg2);
 }
 
-int scilP_create_pattern_float (scil_dims * dims, float * buffer, char * name,  float mn, float mx, float arg, float arg2){
+int scilPa_create_pattern_float (scil_dims * dims, float * buffer, char * name,  float mn, float mx, float arg, float arg2){
   size_t count = scil_get_data_count(dims);
   double * buf = (double*) malloc(count * sizeof(double));
-  int ret = scilP_create_pattern_double(dims, buf, name, mn, mx, arg, arg2);
+  int ret = scilPa_create_pattern_double(dims, buf, name, mn, mx, arg, arg2);
   if (ret != SCIL_NO_ERR){
     return ret;
   }
@@ -125,7 +125,7 @@ static void library_add(char * pattern, char * name, float mn, float mx, float a
     va_start(vl,mutator_count);
     m = (mutator_config*) malloc(sizeof(mutator_config) * mutator_count);
     for(int i=0; i < mutator_count; i++){
-      m[i].call = va_arg(vl, scilP_mutator);
+      m[i].call = va_arg(vl, scilPa_mutator);
       m[i].arg = (float) va_arg(vl, double);
     }
     va_end(vl);
@@ -145,8 +145,8 @@ static void create_library_patterns_if_needed(){
   initialized = 1;
   library = malloc(sizeof(library_pattern) * library_capacity);
 
-  library_add("random", "randomRep10-100", 1, 100, -1, 0,     1, scilP_repeater, 10.0);
-  library_add("random", "randomIpol10-100", 1, 100, -1, 0,   1, scilP_interpolator, 10.0);
+  library_add("random", "randomRep10-100", 1, 100, -1, 0,     1, scilPa_repeater, 10.0);
+  library_add("random", "randomIpol10-100", 1, 100, -1, 0,   1, scilPa_interpolator, 10.0);
 
   library_add("constant", "constant0", 0, -1, -1, 0, 0);
   library_add("constant", "constant35", 35.3335353, -1, -1, 0, 0);
@@ -169,24 +169,24 @@ static void create_library_patterns_if_needed(){
   library_add("simplexNoise", "simplex206", -1, 1, 3.0, 6, 0); // 6 passes, 3 hills
 }
 
-int scilP_library_size(){
+int scilPa_library_size(){
   create_library_patterns_if_needed();
   return library_size;
 }
 
-char * scilP_library_pattern_name(int p){
+char * scilPa_library_pattern_name(int p){
   create_library_patterns_if_needed();
   assert( p <= library_size && p >= 0);
 
   return library[p].name;
 }
 
-int scilP_library_create_pattern_double(int p, scil_dims * dims, double * buffer){
+int scilPa_library_create_pattern_double(int p, scil_dims * dims, double * buffer){
   create_library_patterns_if_needed();
   assert( p <= library_size && p >= 0);
   library_pattern * l = & library[p];
   int ret;
-  ret = scilP_create_pattern_double(dims, buffer, l->pattern, l->mn, l->mx, l->arg, l->arg2);
+  ret = scilPa_create_pattern_double(dims, buffer, l->pattern, l->mn, l->mx, l->arg, l->arg2);
   if (ret != SCIL_NO_ERR){
     return ret;
   }
@@ -198,12 +198,12 @@ int scilP_library_create_pattern_double(int p, scil_dims * dims, double * buffer
   return ret;
 }
 
-int scilP_library_create_pattern_float (int p, scil_dims * dims, float * buffer){
+int scilPa_library_create_pattern_float (int p, scil_dims * dims, float * buffer){
   create_library_patterns_if_needed();
   assert( p <= library_size && p >= 0);
   size_t size = scil_get_data_size(SCIL_TYPE_DOUBLE, dims);
   double * buf = (double*) malloc(size);
-  int ret = scilP_library_create_pattern_double(p, dims, buf);
+  int ret = scilPa_library_create_pattern_double(p, dims, buf);
   if (ret != SCIL_NO_ERR){
     return ret;
   }

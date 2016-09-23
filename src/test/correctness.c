@@ -152,10 +152,10 @@ int main(int argc, char** argv)
     scil_dims dims;
     scil_init_dims_1d(&dims, variableSize);
 
-    for (int i = 0; i < scilP_library_size(); i++) {
-        char* name = scilP_library_pattern_name(i);
+    for (int i = 0; i < scilPa_library_size(); i++) {
+        char* name = scilPa_library_pattern_name(i);
         printf("processing: %s\n", name);
-        scilP_library_create_pattern_double(i, &dims, buffer_in);
+        scilPa_library_create_pattern_double(i, &dims, buffer_in);
         assert(ret == SCIL_NO_ERR);
         test_correctness(name, buffer_in, dims);
     }

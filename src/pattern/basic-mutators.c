@@ -96,7 +96,7 @@ static void m_interpolator(scil_dims * dims, double * data, float arg){
   }
 }
 
-scilP_mutator scilP_interpolator = & m_interpolator;
+scilPa_mutator scilPa_interpolator = & m_interpolator;
 
 static void m_repeater_func_i(double * data, scil_dims pos, scil_dims size, int * iter, void * user_ptr){
   data[scilG_data_pos(& pos, & size)] = *((double*) user_ptr);
@@ -133,4 +133,4 @@ static void m_repeater(scil_dims * dims, double * data, float arg){
   scilG_iter(data, *dims, pos, *dims, stride, & m_repeater_func, & l );
 }
 
-scilP_mutator scilP_repeater = & m_repeater;
+scilPa_mutator scilPa_repeater = & m_repeater;

@@ -18,22 +18,22 @@
 
 #include <scil-dims.h>
 
-int scilP_available_patterns_count();
-char * scilP_available_patterns_name(int p);
+int scilPa_available_patterns_count();
+char * scilPa_available_patterns_name(int p);
 
 /*
  * Create the pattern selected by num with the arguments
  */
-int scilP_create_pattern_double(scil_dims * dims, double * buffer, char * name, float mn, float mx, float arg, float arg2);
-int scilP_create_pattern_float (scil_dims * dims, float * buffer, char * name, float mn, float mx, float arg, float arg2);
+int scilPa_create_pattern_double(scil_dims * dims, double * buffer, char * name, float mn, float mx, float arg, float arg2);
+int scilPa_create_pattern_float (scil_dims * dims, float * buffer, char * name, float mn, float mx, float arg, float arg2);
 
 /*
  * The pattern library contains a list of useful patterns.
  */
-int scilP_library_size();
-char * scilP_library_pattern_name(int pattern);
+int scilPa_library_size();
+char * scilPa_library_pattern_name(int pattern);
 
-int scilP_library_create_pattern_double(int pattern, scil_dims * dims, double * buffer);
-int scilP_library_create_pattern_float (int pattern, scil_dims * dims, float * buffer);
+int scilPa_library_create_pattern_double(int pattern, scil_dims * dims, double * buffer);
+int scilPa_library_create_pattern_float (int pattern, scil_dims * dims, float * buffer);
 
 #endif

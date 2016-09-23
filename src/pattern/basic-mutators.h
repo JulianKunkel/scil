@@ -18,7 +18,7 @@
 
 #include <scil-pattern-internal.h>
 
-extern scilP_mutator scilP_interpolator;
-extern scilP_mutator scilP_repeater;
+extern scilPa_mutator scilPa_interpolator;
+extern scilPa_mutator scilPa_repeater;
 
 #endif
