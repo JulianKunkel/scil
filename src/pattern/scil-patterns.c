@@ -59,48 +59,52 @@ static library_pattern * library = NULL;
 static int library_size = 0;
 static int library_capacity = 100;
 
-int scilPa_available_patterns_count(){
-  static int count = -1;
-  if(count == -1){
+int scilPa_get_available_patterns_count()
+{
+    static int count = -1;
+
+    if (count != -1)
+        return count;
+
     for(count = 0; ; count++){
-      if(patterns[count] == NULL){
-        break;
-      }
+        if(patterns[count] == NULL){
+            break;
+        }
     }
-  }
-  return count;
+    return count;
 }
 
-char * scilPa_available_patterns_name(int i){
-  if (i >= 0 && i < scilPa_available_patterns_count()){
-    return patterns[i]->name;
-  }
-  return NULL;
+char* scilPa_get_pattern_name(int index)
+{
+    if (index < 0 || index >= scilPa_get_available_patterns_count())
+        return NULL;
+
+    return patterns[index]->name;
 }
 
-int scilPa_patterns_by_name(char * name){
-  for(int i=0; i < scilPa_available_patterns_count(); i++){
-    if(strcmp(name, patterns[i]->name) == 0){
-      return i;
+int scilPa_get_pattern_index(const char* const name)
+{
+    for(int i=0; i < scilPa_get_available_patterns_count(); i++){
+        if(strcmp(name, patterns[i]->name) == 0){
+            return i;
+        }
     }
-  }
-
-  return -1;
+    return -1;
 }
 
-int scilPa_create_pattern_double(scil_dims * dims, double * buf, char * name, float mn, float mx, float arg, float arg2){
+int scilPa_create_pattern_double(const scil_dims* const dims, double * buf, char * name, float mn, float mx, float arg, float arg2){
 
   if (name == NULL){
     return SCIL_EINVAL;
   }
-  int num = scilPa_patterns_by_name(name);
+  int num = scilPa_get_pattern_index(name);
   if (num == -1){
     return SCIL_EINVAL;
   }
   return patterns[num]->create(dims, buf, mn, mx, arg, arg2);
 }
 
-int scilPa_create_pattern_float (scil_dims * dims, float * buffer, char * name,  float mn, float mx, float arg, float arg2){
+int scilPa_create_pattern_float (const scil_dims* const dims, float * buffer, char * name,  float mn, float mx, float arg, float arg2){
   size_t count = scil_get_data_count(dims);
   double * buf = (double*) malloc(count * sizeof(double));
   int ret = scilPa_create_pattern_double(dims, buf, name, mn, mx, arg, arg2);
@@ -214,7 +218,7 @@ int scilPa_library_create_pattern_float (int p, scil_dims * dims, float * buffer
   return SCIL_NO_ERR;
 }
 
-void scilPI_fix_min_max(double * buffer, scil_dims * dims, float mn, float mx){
+void scilPI_fix_min_max(double * buffer, const scil_dims* const dims, float mn, float mx){
   // fix min + max, first identify min/max
   size_t count = scil_get_data_count(dims);
   double mn_o = 1e308, mx_o=-1e308;

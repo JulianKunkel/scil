@@ -18,14 +18,15 @@
 
 #include <scil-dims.h>
 
-int scilPa_available_patterns_count();
-char * scilPa_available_patterns_name(int p);
+int   scilPa_get_available_patterns_count();
+char* scilPa_get_pattern_name(int index);
+int   scilPa_get_pattern_index(const char* const name);
 
 /*
  * Create the pattern selected by num with the arguments
  */
-int scilPa_create_pattern_double(scil_dims * dims, double * buffer, char * name, float mn, float mx, float arg, float arg2);
-int scilPa_create_pattern_float (scil_dims * dims, float * buffer, char * name, float mn, float mx, float arg, float arg2);
+int scilPa_create_pattern_double(const scil_dims* const dims, double * buffer, char * name, float mn, float mx, float arg, float arg2);
+int scilPa_create_pattern_float (const scil_dims* const dims, float * buffer, char * name, float mn, float mx, float arg, float arg2);
 
 /*
  * The pattern library contains a list of useful patterns.
