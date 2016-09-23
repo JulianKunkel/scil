@@ -108,7 +108,7 @@ void scilC_algo_chooser_initialize(){
       continue;
     }
     name[strlen(name)-1] = 0;
-    ret = scilI_parse_compression_algorithms(& e->chain, name);
+    ret = scilI_create_chain(& e->chain, name);
     if (ret != SCIL_NO_ERR){
       warn("Parsing configuration line \"%s\"; could not parse compressor chain \"%s\"\n", buff, name);
       continue;
@@ -147,7 +147,7 @@ void scilC_algo_chooser_execute(const void* const restrict source,
     if (strcmp(chainEnv, "lossless") == 0){
       ctx->lossless_compression_needed = 1;
     }else{
-      ret = scilI_parse_compression_algorithms(chain, chainEnv);
+      ret = scilI_create_chain(chain, chainEnv);
       if (ret != SCIL_NO_ERR){
         critical("The environment variable SCIL_FORCE_COMPRESSION_CHAIN is invalid with \"%s\"\n", chainEnv);
       }
@@ -158,7 +158,7 @@ void scilC_algo_chooser_execute(const void* const restrict source,
 
   if (count < 10){
     // always use memcopy for small data
-    ret = scilI_parse_compression_algorithms(chain, "memcopy");
+    ret = scilI_create_chain(chain, "memcopy");
     return;
   }
 
@@ -176,9 +176,9 @@ void scilC_algo_chooser_execute(const void* const restrict source,
   // TODO: pick the best algorithm for the settings given in ctx...
 
   if (r > 95){
-    ret = scilI_parse_compression_algorithms(chain, "memcopy");
+    ret = scilI_create_chain(chain, "memcopy");
   }else{
-    ret = scilI_parse_compression_algorithms(chain, "lz4");
+    ret = scilI_create_chain(chain, "lz4");
   }
   assert(ret == SCIL_NO_ERR);
 }

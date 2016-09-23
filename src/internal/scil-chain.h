@@ -1,8 +1,8 @@
-#ifndef SCIL_COMPRESSION_CHAIN_H
-#define SCIL_COMPRESSION_CHAIN_H
+#ifndef SCIL_CHAIN_H
+#define SCIL_CHAIN_H
 
 #include <scil-cca.h>
 
-int scilI_parse_compression_algorithms(scilI_chain_t * chain, char * str_in);
+int scilI_create_chain(scilI_chain_t* const chain, const char* const str_in);
 
-#endif // SCIL_COMPRESSION_CHAIN_H
+#endif // SCIL_CHAIN_H
