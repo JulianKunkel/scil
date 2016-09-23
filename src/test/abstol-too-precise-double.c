@@ -15,7 +15,7 @@ int main(void)
     scil_dims dims;
     scil_init_dims_1d(&dims, count);
 
-    scil_pattern_t_rnd.create(source, &dims, -100.0f, 100.0f, 0.0f, 0.0f);
+    scil_pattern_rnd.create(source, &dims, -100.0f, 100.0f, 0.0f, 0.0f);
 
     size_t dest_size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, &dims);
     byte* dest       = (byte*)SAFE_MALLOC(dest_size);

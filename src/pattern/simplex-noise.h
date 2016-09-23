@@ -18,6 +18,6 @@
 
 #include <scil-pattern-internal.h>
 
-extern scil_pattern_t scil_pattern_t_simplex_noise;
+extern scil_pattern_t scil_pattern_simplex_noise;
 
 #endif
