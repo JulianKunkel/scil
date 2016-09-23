@@ -214,7 +214,7 @@ static int p_sin(double* const buffer, const scil_dims* const dims, float mn, fl
       assert(0);
   }
 
-  scilPI_change_scale(buffer, dims, mn, mx);
+  scilPI_change_data_scale(buffer, dims, mn, mx);
 
   return SCIL_NO_ERR;
 }
@@ -275,7 +275,7 @@ static int poly4(double* const data, const scil_dims* const dims, float mn, floa
   scilG_iter(data, dims, &pos, dims, NULL, & m_poly_func, &usr );
   free(usr.values);
 
-  scilPI_change_scale(data, dims, mn, mx);
+  scilPI_change_data_scale(data, dims, mn, mx);
 
   return SCIL_NO_ERR;
 }

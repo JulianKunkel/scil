@@ -109,7 +109,7 @@ static int simplex(double* const buffer, const scil_dims* const dims, float mn, 
   }
 
   // fix min + max, first identify min/max
-  scilPI_change_scale(buffer, dims, mn, mx);
+  scilPI_change_data_scale(buffer, dims, mn, mx);
 
   open_simplex_noise_free(ctx);
 

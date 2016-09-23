@@ -25,6 +25,6 @@ typedef struct scil_pattern {
 
 typedef void (*scilPa_mutator)(double* const buffer, const scil_dims* const dims, float arg);
 
-void scilPI_change_scale(double* const buffer, const scil_dims* const dims, float mn, float mx);
+void scilPI_change_data_scale(double* const buffer, const scil_dims* const dims, float mn, float mx);
 
 #endif // SCIL_PATTERN_INTERNAL_H

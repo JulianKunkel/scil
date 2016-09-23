@@ -220,7 +220,7 @@ int scilPa_create_library_pattern_float (float* const buffer, const scil_dims* c
   return SCIL_NO_ERR;
 }
 
-void scilPI_change_scale(double* const buffer, const scil_dims* const dims, float mn, float mx){
+void scilPI_change_data_scale(double* const buffer, const scil_dims* const dims, float mn, float mx){
   // fix min + max, first identify min/max
   size_t count = scil_get_data_count(dims);
   double mn_o = 1e308, mx_o=-1e308;
