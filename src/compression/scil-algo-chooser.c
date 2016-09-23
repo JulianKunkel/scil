@@ -169,7 +169,7 @@ void scilC_algo_chooser_execute(const void* const restrict source,
     in_size = count;
   }
 
-  float r = scilI_determine_randomness(source, in_size, buffer, out_size);
+  float r = scilI_get_data_randomness(source, in_size, buffer, out_size);
   if (ctx->lossless_compression_needed){
       // we can only select byte compressors compress because data must be accurate!
   }

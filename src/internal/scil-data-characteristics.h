@@ -5,6 +5,6 @@
 
 #include <stdlib.h>
 
-float scilI_determine_randomness(const void* const source, size_t in_size, byte *restrict buffer, size_t buffer_size);
+float scilI_get_data_randomness(const void* const source, size_t in_size, byte* restrict const buffer, size_t buffer_size);
 
 #endif // SCIL_DATA_CHARACTERISTICS_H

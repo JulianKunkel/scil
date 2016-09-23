@@ -50,7 +50,7 @@ int test_correctness(const char* name, double* buffer_in, scil_dims dims)
     scilPr_initialize_user_hints(&hints);
     hints.absolute_tolerance = 0.01;
 
-    double r = (double)scilI_determine_randomness( buffer_in, variableSize * sizeof(double), tmp_buff, c_size);
+    double r = (double)scilI_get_data_randomness( buffer_in, variableSize * sizeof(double), tmp_buff, c_size);
 
     printf("Pattern %s randomness: %.1f%%\n", name, r);
 

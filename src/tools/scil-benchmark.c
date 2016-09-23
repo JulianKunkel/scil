@@ -45,7 +45,7 @@ void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double 
     scilPr_initialize_user_hints(&hints);
 	hints.absolute_tolerance = SCIL_ACCURACY_DBL_FINEST;
 
-	double r = (double) scilI_determine_randomness(buffer_in, data_size, tmp_buff, buff_size);
+	double r = (double) scilI_get_data_randomness(buffer_in, data_size, tmp_buff, buff_size);
 
 	char * outputFiles = getenv("SCIL_BENCHMARK_OUTPUT");
 	const size_t buffer_size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, & dims);
