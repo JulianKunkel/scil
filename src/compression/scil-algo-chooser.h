@@ -21,6 +21,6 @@
 
 void scilC_algo_chooser_initialize();
 
-void scilC_algo_chooser_execute(void*restrict source, scil_dims* dims, scil_context_p ctx);
+void scilC_algo_chooser_execute(const void* const restrict source, scil_dims* dims, scil_context_p ctx);
 
 #endif // SCIL_ALGO_CHOOSER_H
