@@ -13,8 +13,8 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SCIL_PATTERN_INTERNAL_LIB_H
-#define SCIL_PATTERN_INTERNAL_LIB_H
+#ifndef SCIL_PATTERN_INTERNAL_H
+#define SCIL_PATTERN_INTERNAL_H
 
 #include <scil-dims.h>
 
@@ -27,4 +27,4 @@ typedef void (*scilPa_mutator)(double* const buffer, const scil_dims* const dims
 
 void scilPI_change_scale(double* const buffer, const scil_dims* const dims, float mn, float mx);
 
-#endif
+#endif // SCIL_PATTERN_INTERNAL_H
