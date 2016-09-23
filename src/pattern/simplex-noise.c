@@ -116,4 +116,4 @@ static int simplex(double* const buffer, const scil_dims* const dims, float mn, 
   return SCIL_NO_ERR;
 }
 
-scil_pattern scil_pattern_simplex_noise = { &simplex, "simplexNoise" };
+scil_pattern_t scil_pattern_t_simplex_noise = { &simplex, "simplexNoise" };

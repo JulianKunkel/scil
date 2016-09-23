@@ -281,8 +281,8 @@ static int poly4(double* const data, const scil_dims* const dims, float mn, floa
 }
 
 
-scil_pattern scil_pattern_constant = { &constant, "constant" };
-scil_pattern scil_pattern_steps = { &steps , "steps" };
-scil_pattern scil_pattern_rnd = { &rnd , "random" };
-scil_pattern scil_pattern_sin = { &p_sin , "sin" };
-scil_pattern scil_pattern_poly4 = {&poly4, "poly4"};
+scil_pattern_t scil_pattern_t_constant = { &constant, "constant" };
+scil_pattern_t scil_pattern_t_steps = { &steps , "steps" };
+scil_pattern_t scil_pattern_t_rnd = { &rnd , "random" };
+scil_pattern_t scil_pattern_t_sin = { &p_sin , "sin" };
+scil_pattern_t scil_pattern_t_poly4 = {&poly4, "poly4"};

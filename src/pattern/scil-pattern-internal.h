@@ -18,10 +18,10 @@
 
 #include <scil-dims.h>
 
-typedef struct {
+typedef struct scil_pattern {
     int (*create)(double* const buffer, const scil_dims* const dims, float mn, float mx, float arg, float arg2);
   char * name;
-} scil_pattern;
+} scil_pattern_t;
 
 typedef void (*scilPa_mutator)(double* const buffer, const scil_dims* const dims, float arg);
 

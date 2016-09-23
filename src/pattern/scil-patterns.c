@@ -28,13 +28,13 @@
 #include <basic-mutators.h>
 #include <simplex-noise.h>
 
-static scil_pattern * patterns[] ={
-  & scil_pattern_constant,
-  & scil_pattern_rnd,
-  & scil_pattern_steps,
-  & scil_pattern_sin,
-  & scil_pattern_simplex_noise,
-  & scil_pattern_poly4,
+static scil_pattern_t * patterns[] ={
+  & scil_pattern_t_constant,
+  & scil_pattern_t_rnd,
+  & scil_pattern_t_steps,
+  & scil_pattern_t_sin,
+  & scil_pattern_t_simplex_noise,
+  & scil_pattern_t_poly4,
   NULL
 };
 
