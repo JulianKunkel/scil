@@ -24,15 +24,15 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 
-typedef struct {
+typedef struct interpolator_data_1D {
   int dim; // current dim
   int * stride;
   int l; // interpolation length
-} interpolator_data_1D;
+} interpolator_data_1D_t;
 
 static void m_interpolator_func(double* const data, const scil_dims* const pos, const scil_dims* const size, int* iter, const void* const user_ptr)
 {
-  interpolator_data_1D* up = (interpolator_data_1D*) user_ptr;
+  interpolator_data_1D_t* up = (interpolator_data_1D_t*) user_ptr;
   const int d = up->dim;
   const int l = up->l;
 
@@ -86,7 +86,7 @@ static void m_interpolator(double* const data, const scil_dims* const dims, floa
   for(int i = pos.dims - 1 ; i >= 0; i--){
     stride[i] = 1;
 
-    interpolator_data_1D inter_data = {i, stride, l};
+    interpolator_data_1D_t inter_data = {i, stride, l};
     scilG_iter(data, dims, &pos, &final, stride, & m_interpolator_func, & inter_data );
 
     for(int j=0; j < pos.dims; j++){

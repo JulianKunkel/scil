@@ -160,7 +160,7 @@ int main(int argc, char** argv){
 			continue;
 		}
 
-		ret = scilPa_library_create_pattern_double(buffer_in, & dims, i);
+		ret = scilPa_library_create_pattern_double(buffer_in, &dims, i);
 		assert( ret == SCIL_NO_ERR);
 		benchmark(f, SCIL_TYPE_DOUBLE, name, buffer_in, dims);
 	}
