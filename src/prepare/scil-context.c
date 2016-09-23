@@ -33,7 +33,7 @@ static void initialize()
         }
     }
 
-    scilI_init_hardware_limits();
+    scilI_initialize_hardware_limits();
     scilC_algo_chooser_initialize();
     initialized = 1;
 }
