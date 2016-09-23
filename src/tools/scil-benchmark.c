@@ -55,7 +55,7 @@ void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double 
 		sprintf(compression_name, "%s", scilU_get_compressor_name(i));
 		hints.force_compression_methods = compression_name;
 
-		int ret = scilPr_create_context(& ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+		int ret = scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
 		if (ret != 0){
 			printf("Invalid combination %s\n", compression_name);
 			continue;

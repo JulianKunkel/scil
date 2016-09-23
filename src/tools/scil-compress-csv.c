@@ -263,7 +263,7 @@ int main(int argc, char ** argv){
     datatype = SCIL_TYPE_FLOAT;
   }
 
-  ret = scilPr_create_context(& ctx, datatype, 0, NULL, &hints);
+  ret = scilPr_create_context(&ctx, datatype, 0, NULL, &hints);
   assert(ret == SCIL_NO_ERR);
 
   if (print_hints){

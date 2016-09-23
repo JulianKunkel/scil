@@ -193,7 +193,7 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 		}
 	}
 
-  ret = scilPr_create_context(& config->ctx, cfg_p->type, special_cnt, special_values, h);
+  ret = scilPr_create_context(&config->ctx, cfg_p->type, special_cnt, special_values, h);
 	if(special_values != NULL){
 		free(special_values);
 	}

@@ -65,10 +65,10 @@ static void fix_double_setting(double* dbl)
 }
 
 int scilPr_create_context(scil_context_t** out_ctx,
-                                    enum SCIL_Datatype datatype,
-                                    int special_values_count,
-                                    void * special_values,
-                                    const scil_user_hints_t* hints)
+                          enum SCIL_Datatype datatype,
+                          int special_values_count,
+                          void * special_values,
+                          const scil_user_hints_t* hints)
 {
     initialize();
 
@@ -167,7 +167,7 @@ int scilPr_destroy_context(scil_context_t* out_ctx)
     return SCIL_NO_ERR;
 }
 
-scil_user_hints_t scilPr_get_effective_hints(scil_context_t* ctx)
+scil_user_hints_t scilPr_get_effective_hints(const scil_context_t* const ctx)
 {
     return ctx->hints;
 }

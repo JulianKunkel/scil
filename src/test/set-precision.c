@@ -46,7 +46,7 @@ int main(){
   h.decomp_speed.multiplier = 3.5;
 
   scil_context_t* ctx;
-  ret = scilPr_create_context(& ctx, SCIL_TYPE_DOUBLE, 0, NULL, & h);
+  ret = scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, & h);
   assert(ret == SCIL_NO_ERR);
 
   // retrieve effectively set hints:
