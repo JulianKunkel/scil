@@ -45,7 +45,7 @@ static void test(enum SCIL_Datatype type, int digits, int bits, int expected_dig
   assert(e.significant_digits == expected_digits);
   assert(e.significant_bits == expected_bits);
 
-  ret = scilPr_destroy_context(& ctx);
+  ret = scilPr_destroy_context(ctx);
   assert(ret == SCIL_NO_ERR);
 }
 

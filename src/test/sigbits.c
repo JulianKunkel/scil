@@ -57,7 +57,7 @@ int main(void){
     free(buffer_tmp);
     free(buffer_end);
 
-    //scilPr_destroy_context(&context);
+    //scilPr_destroy_context(context);
 
     return 0;
 }

@@ -48,7 +48,7 @@ int main(){
   assert(ret == SCIL_NO_ERR);
   assert(out_size == 1);
 
-  scilPr_destroy_context(& ctx);
+  scilPr_destroy_context(ctx);
 
   free(buff);
 

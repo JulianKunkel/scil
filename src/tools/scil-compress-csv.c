@@ -298,7 +298,7 @@ int main(int argc, char ** argv){
       ret = scil_compress(result, input_size, (double*)input_data, & dims, & buff_size, ctx);
     }
     assert(ret == SCIL_NO_ERR);
-    ret = scilPr_destroy_context(& ctx);
+    ret = scilPr_destroy_context(ctx);
     assert(ret == SCIL_NO_ERR);
 
     byte* tmp_buff = (byte*) SAFE_MALLOC(buff_size);
@@ -314,7 +314,7 @@ int main(int argc, char ** argv){
       ret = scil_compress(output_data, input_size, (double*)input_data, & dims, & buff_size, ctx);
     }
     assert(ret == SCIL_NO_ERR);
-    ret = scilPr_destroy_context(& ctx);
+    ret = scilPr_destroy_context(ctx);
     assert(ret == SCIL_NO_ERR);
 
   } else if (uncompress){

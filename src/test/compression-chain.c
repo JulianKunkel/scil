@@ -50,7 +50,7 @@ void test(char * name, size_t expected_size, int check_compressed_output){
     assert( memcmp(& buff[1], data, sizeof(data)) == 0);
   }
 
-  ret = scilPr_destroy_context(& ctx);
+  ret = scilPr_destroy_context(ctx);
   assert(ret == SCIL_NO_ERR);
 
   memset(data_check, 0, sizeof(data_check));

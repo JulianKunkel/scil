@@ -55,7 +55,7 @@ int main(){
 
   // now you can compress/decompress
 
-  ret = scilPr_destroy_context(& ctx);
+  ret = scilPr_destroy_context(ctx);
   assert(ret == SCIL_NO_ERR);
 
   printf("OK\n");
