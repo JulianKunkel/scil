@@ -25,11 +25,11 @@
 // Repeat for each data type
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_p ctx,
+int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
                         <DATATYPE>*restrict source,
-                        const scil_dims* dims)
+                        const scil_dims_t* dims)
 {
     int ret = 0;
 
@@ -46,7 +46,7 @@ int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_p ctx,
         case 1: field = zfp_field_1d(source, zfp_type_<DATATYPE>, dims->length[0]); break;
         case 2: field = zfp_field_2d(source, zfp_type_<DATATYPE>, dims->length[0], dims->length[1]); break;
         case 3: field = zfp_field_3d(source, zfp_type_<DATATYPE>, dims->length[0], dims->length[1], dims->length[2]); break;
-        default: field = zfp_field_1d(source, zfp_type_<DATATYPE>, scil_get_data_count(dims));
+        default: field = zfp_field_1d(source, zfp_type_<DATATYPE>, scilPr_get_dims_count(dims));
     }
 
     zfp_stream* zfp = zfp_stream_open(NULL);
@@ -75,7 +75,7 @@ int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_p ctx,
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_zfp_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
-                            scil_dims* dims,
+                            scil_dims_t* dims,
                             byte*restrict compressed_buf_in,
                             const size_t in_size)
 {
@@ -91,7 +91,7 @@ int scil_zfp_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
         case 1: field = zfp_field_1d(data_out, zfp_type_<DATATYPE>, dims->length[0]); break;
         case 2: field = zfp_field_2d(data_out, zfp_type_<DATATYPE>, dims->length[0], dims->length[1]); break;
         case 3: field = zfp_field_3d(data_out, zfp_type_<DATATYPE>, dims->length[0], dims->length[1], dims->length[2]); break;
-        default: field = zfp_field_1d(data_out, zfp_type_<DATATYPE>, scil_get_data_count(dims));
+        default: field = zfp_field_1d(data_out, zfp_type_<DATATYPE>, scilPr_get_dims_count(dims));
     }
 
     zfp_stream* zfp = zfp_stream_open(NULL);
@@ -119,7 +119,7 @@ int scil_zfp_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
 
 // End repeat
 
-scil_compression_algorithm algo_zfp_abstol = {
+scilI_algorithm_t algo_zfp_abstol = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_zfp_abstol)
     },

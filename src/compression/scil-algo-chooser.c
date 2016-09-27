@@ -15,29 +15,18 @@
 
 #include <scil-algo-chooser.h>
 
-#include <scil-internal.h>
+#include <scil-chain.h>
 #include <scil-config.h>
-#include <scil-hardware-limits.h>
+#include <scil-data-characteristics.h>
 #include <scil-error.h>
+#include <scil-hardware-limits.h>
+#include <scil-internal.h>
 
-#include <algo/lz4fast.h>
-
+#include <stdio.h>
 #include <string.h>
-#include <float.h>
-
-float scilI_determine_randomness(void* source, size_t in_size, byte *restrict buffer, size_t buffer_size){
-  // We may want to use https://en.wikipedia.org/wiki/Randomness_tests
-  int ret = scil_lz4fast_compress(NULL, buffer, &buffer_size, source, in_size);
-  if (ret == 0){
-    double rnd = buffer_size * 100.0 / in_size ;
-    return rnd;
-  }else{
-    critical("lz4fast error to determine randomness: %d\n", ret);
-  }
-}
 
 typedef struct{
-  scil_compression_chain_t chain;
+  scilI_chain_t chain;
   float randomness;
   float c_speed;
   float d_speed;
@@ -63,7 +52,7 @@ static void parse_losless_list(){
   config_list_lossless = (config_file_entry_t**) realloc(config_list_lossless, config_list_lossless_size * sizeof(void*));
 }
 
-void scilI_compression_algo_chooser_init(){
+void scilC_algo_chooser_initialize(){
   int ret;
   char * filename = getenv("SCIL_SYSTEM_CHARACTERISTICS_FILE");
   if(filename == NULL){
@@ -119,7 +108,7 @@ void scilI_compression_algo_chooser_init(){
       continue;
     }
     name[strlen(name)-1] = 0;
-    ret = scilI_parse_compression_algorithms(& e->chain, name);
+    ret = scilI_create_chain(& e->chain, name);
     if (ret != SCIL_NO_ERR){
       warn("Parsing configuration line \"%s\"; could not parse compressor chain \"%s\"\n", buff, name);
       continue;
@@ -142,8 +131,11 @@ void scilI_compression_algo_chooser_init(){
   parse_losless_list();
 }
 
-void scilI_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_context_p ctx){
-  scil_compression_chain_t * chain = & ctx->chain;
+void scilC_algo_chooser_execute(const void* restrict source,
+                                const scil_dims_t* dims,
+                                scil_context_t* ctx)
+{
+  scilI_chain_t * chain = &ctx->chain;
   int ret;
 
   // at the moment we only set the compression algorith once
@@ -155,18 +147,18 @@ void scilI_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_
     if (strcmp(chainEnv, "lossless") == 0){
       ctx->lossless_compression_needed = 1;
     }else{
-      ret = scilI_parse_compression_algorithms(chain, chainEnv);
+      ret = scilI_create_chain(chain, chainEnv);
       if (ret != SCIL_NO_ERR){
         critical("The environment variable SCIL_FORCE_COMPRESSION_CHAIN is invalid with \"%s\"\n", chainEnv);
       }
       return;
     }
   }
-  const size_t count = scil_get_data_count(dims);
+  const size_t count = scilPr_get_dims_count(dims);
 
   if (count < 10){
     // always use memcopy for small data
-    ret = scilI_parse_compression_algorithms(chain, "memcopy");
+    ret = scilI_create_chain(chain, "memcopy");
     return;
   }
 
@@ -177,16 +169,16 @@ void scilI_compression_algo_chooser(void*restrict source, scil_dims* dims, scil_
     in_size = count;
   }
 
-  float r = scilI_determine_randomness(source, in_size, buffer, out_size);
+  float r = scilI_get_data_randomness(source, in_size, buffer, out_size);
   if (ctx->lossless_compression_needed){
       // we can only select byte compressors compress because data must be accurate!
   }
   // TODO: pick the best algorithm for the settings given in ctx...
 
   if (r > 95){
-    ret = scilI_parse_compression_algorithms(chain, "memcopy");
+    ret = scilI_create_chain(chain, "memcopy");
   }else{
-    ret = scilI_parse_compression_algorithms(chain, "lz4");
+    ret = scilI_create_chain(chain, "lz4");
   }
   assert(ret == SCIL_NO_ERR);
 }

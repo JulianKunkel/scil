@@ -19,6 +19,7 @@
 
 #include <scil-error.h>
 #include <scil-internal.h>
+#include <scil-util.h>
 
 #include <string.h>
 #include <stdarg.h>
@@ -27,7 +28,7 @@
 #include <basic-mutators.h>
 #include <simplex-noise.h>
 
-static scil_pattern * patterns[] ={
+static scil_pattern_t * patterns[] ={
   & scil_pattern_constant,
   & scil_pattern_rnd,
   & scil_pattern_steps,
@@ -38,7 +39,7 @@ static scil_pattern * patterns[] ={
 };
 
 typedef struct{
-  scilP_mutator call;
+  scilPa_mutator call;
   float arg;
 } mutator_config;
 
@@ -58,51 +59,56 @@ static library_pattern * library = NULL;
 static int library_size = 0;
 static int library_capacity = 100;
 
-int scilP_available_patterns_count(){
-  static int count = -1;
-  if(count == -1){
+int scilPa_get_available_patterns_count()
+{
+    static int count = -1;
+
+    if (count != -1)
+        return count;
+
     for(count = 0; ; count++){
-      if(patterns[count] == NULL){
-        break;
-      }
+        if(patterns[count] == NULL){
+            break;
+        }
     }
-  }
-  return count;
+    return count;
 }
 
-char * scilP_available_patterns_name(int i){
-  if (i >= 0 && i < scilP_available_patterns_count()){
-    return patterns[i]->name;
-  }
-  return NULL;
+char* scilPa_get_pattern_name(int index)
+{
+    if (index < 0 || index >= scilPa_get_available_patterns_count())
+        return NULL;
+
+    return patterns[index]->name;
 }
 
-int scilP_patterns_by_name(char * name){
-  for(int i=0; i < scilP_available_patterns_count(); i++){
-    if(strcmp(name, patterns[i]->name) == 0){
-      return i;
+int scilPa_get_pattern_index(const char* name)
+{
+    for(int i=0; i < scilPa_get_available_patterns_count(); i++){
+        if(strcmp(name, patterns[i]->name) == 0){
+            return i;
+        }
     }
-  }
-
-  return -1;
+    return -1;
 }
 
-int scilP_create_pattern_double(scil_dims * dims, double * buf, char * name, float mn, float mx, float arg, float arg2){
-
+int scilPa_create_pattern_double(double* buffer, const scil_dims_t* dims, const char* name, float mn, float mx, float arg, float arg2)
+{
   if (name == NULL){
     return SCIL_EINVAL;
   }
-  int num = scilP_patterns_by_name(name);
+  int num = scilPa_get_pattern_index(name);
   if (num == -1){
     return SCIL_EINVAL;
   }
-  return patterns[num]->create(dims, buf, mn, mx, arg, arg2);
+  return patterns[num]->create(buffer, dims, mn, mx, arg, arg2);
 }
 
-int scilP_create_pattern_float (scil_dims * dims, float * buffer, char * name,  float mn, float mx, float arg, float arg2){
-  size_t count = scil_get_data_count(dims);
+int scilPa_create_pattern_float(float* buffer, const scil_dims_t* dims, const char* name, float mn, float mx, float arg, float arg2)
+{
+  size_t count = scilPr_get_dims_count(dims);
   double * buf = (double*) malloc(count * sizeof(double));
-  int ret = scilP_create_pattern_double(dims, buf, name, mn, mx, arg, arg2);
+  int ret = scilPa_create_pattern_double(buf, dims, name, mn, mx, arg, arg2);
   if (ret != SCIL_NO_ERR){
     return ret;
   }
@@ -124,7 +130,7 @@ static void library_add(char * pattern, char * name, float mn, float mx, float a
     va_start(vl,mutator_count);
     m = (mutator_config*) malloc(sizeof(mutator_config) * mutator_count);
     for(int i=0; i < mutator_count; i++){
-      m[i].call = va_arg(vl, scilP_mutator);
+      m[i].call = va_arg(vl, scilPa_mutator);
       m[i].arg = (float) va_arg(vl, double);
     }
     va_end(vl);
@@ -144,8 +150,8 @@ static void create_library_patterns_if_needed(){
   initialized = 1;
   library = malloc(sizeof(library_pattern) * library_capacity);
 
-  library_add("random", "randomRep10-100", 1, 100, -1, 0,     1, scilP_repeater, 10.0);
-  library_add("random", "randomIpol10-100", 1, 100, -1, 0,   1, scilP_interpolator, 10.0);
+  library_add("random", "randomRep10-100", 1, 100, -1, 0,     1, scilPa_repeater, 10.0);
+  library_add("random", "randomIpol10-100", 1, 100, -1, 0,   1, scilPa_interpolator, 10.0);
 
   library_add("constant", "constant0", 0, -1, -1, 0, 0);
   library_add("constant", "constant35", 35.3335353, -1, -1, 0, 0);
@@ -168,41 +174,42 @@ static void create_library_patterns_if_needed(){
   library_add("simplexNoise", "simplex206", -1, 1, 3.0, 6, 0); // 6 passes, 3 hills
 }
 
-int scilP_library_size(){
+int scilPa_get_pattern_library_size(){
   create_library_patterns_if_needed();
   return library_size;
 }
 
-char * scilP_library_pattern_name(int p){
+char * scilPa_get_library_pattern_name(int p){
   create_library_patterns_if_needed();
   assert( p <= library_size && p >= 0);
 
   return library[p].name;
 }
 
-int scilP_library_create_pattern_double(int p, scil_dims * dims, double * buffer){
+int scilPa_create_library_pattern_double(double* buffer, const scil_dims_t* dims, int pattern_index)
+{
   create_library_patterns_if_needed();
-  assert( p <= library_size && p >= 0);
-  library_pattern * l = & library[p];
+  assert(pattern_index <= library_size && pattern_index >= 0);
+  library_pattern* l = &library[pattern_index];
   int ret;
-  ret = scilP_create_pattern_double(dims, buffer, l->pattern, l->mn, l->mx, l->arg, l->arg2);
+  ret = scilPa_create_pattern_double(buffer, dims, l->pattern, l->mn, l->mx, l->arg, l->arg2);
   if (ret != SCIL_NO_ERR){
     return ret;
   }
   for(int i=0; i < l->mutator_count; i++){
-    mutator_config * m = & l->mutators[i];
-    m->call(dims, buffer, m->arg);
+    mutator_config* m = &l->mutators[i];
+    m->call(buffer, dims, m->arg);
   }
 
   return ret;
 }
 
-int scilP_library_create_pattern_float (int p, scil_dims * dims, float * buffer){
+int scilPa_create_library_pattern_float (float* buffer, const scil_dims_t* dims, int pattern_index){
   create_library_patterns_if_needed();
-  assert( p <= library_size && p >= 0);
-  size_t size = scil_get_data_size(SCIL_TYPE_DOUBLE, dims);
-  double * buf = (double*) malloc(size);
-  int ret = scilP_library_create_pattern_double(p, dims, buf);
+  assert(pattern_index <= library_size && pattern_index >= 0);
+  size_t size = scilPr_get_dims_size(dims, SCIL_TYPE_DOUBLE);
+  double* buf = (double*) malloc(size);
+  int ret = scilPa_create_library_pattern_double(buf, dims, pattern_index);
   if (ret != SCIL_NO_ERR){
     return ret;
   }
@@ -213,16 +220,16 @@ int scilP_library_create_pattern_float (int p, scil_dims * dims, float * buffer)
   return SCIL_NO_ERR;
 }
 
-void scilPI_fix_min_max(double * buffer, scil_dims * dims, float mn, float mx){
+void scilPI_change_data_scale(double* buffer, const scil_dims_t* dims, float mn, float mx){
   // fix min + max, first identify min/max
-  size_t count = scil_get_data_count(dims);
+  size_t count = scilPr_get_dims_count(dims);
   double mn_o = 1e308, mx_o=-1e308;
   for (size_t i=0; i < count; i++){
     mn_o = min(mn_o, buffer[i]);
     mx_o = max(mx_o, buffer[i]);
   }
 
-  double scaling = (double)(mx - mn) / (mx_o-mn_o); // intended min/max
+  double scaling = (double)(mx - mn) / (mx_o - mn_o); // intended min/max
   // rescale
   for (size_t i=0; i < count; i++){
     buffer[i] = (double) mn + (buffer[i]-mn_o) *scaling;

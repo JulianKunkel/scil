@@ -13,16 +13,29 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SCIL_HARDWARE_LIMITS_H
-#define SCIL_HARDWARE_LIMITS_H
+#ifndef SCIL_INTERNAL_H
+#define SCIL_INTERNAL_H
 
-enum hardware_limit_e{
-  NETWORK = 0,
-  STORAGE = 1,
-  HARDWARE_MAX
-};
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <assert.h>
 
-int scilI_add_hardware_limit(const char * name, const char * str);
-void scilI_init_hardware_limits();
-
+#ifdef DEBUG
+  #define debug(...) fprintf(stderr, "[SCIL DEBUG] "__VA_ARGS__);
+#else
+  #define debug(...)
 #endif
+
+#ifdef DEBUG_INTERNALS
+  #define debugI(...) fprintf(stderr, "[SCIL DEBUG I] "__VA_ARGS__);
+#else
+  #define debugI(...)
+#endif
+
+#define critical(...) { fprintf(stderr, "[SCIL CRITICAL] "__VA_ARGS__); exit(1); }
+#define warn(...) fprintf(stderr, "[SCIL WARN] "__VA_ARGS__);
+
+#define FUNC_START debug("CALL %s\n", __PRETTY_FUNCTION__);
+
+#endif // SCIL_INTERNAL_H

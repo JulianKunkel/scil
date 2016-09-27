@@ -24,7 +24,7 @@
 #ifndef SCIL_ABSTOL_H_
 #define SCIL_ABSTOL_H_
 
-#include <scil-internal.h>
+#include <scil-algorithm.h>
 
 //Repeat for each data type
 //Supported datatypes:double float
@@ -38,11 +38,11 @@
  * \param source_count Element count of uncompressed buffer
  * \return Success state of the compression
  */
-int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
+int scil_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
                                     byte* restrict dest,
                                     size_t* restrict dest_size,
                                     <DATATYPE>* restrict source,
-                                    const scil_dims* dims);
+                                    const scil_dims_t* dims);
 
 /**
  * \brief Decompression function of abstol
@@ -53,11 +53,11 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
  * \return Success state of the compression
  */
 int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
-                                      scil_dims* dims,
+                                      scil_dims_t* dims,
                                       byte* restrict source,
                                       size_t in_size);
 // End repeat
 
-extern scil_compression_algorithm algo_abstol;
+extern scilI_algorithm_t algo_abstol;
 
 #endif /* SCIL_ABSTOL_H_<DATATYPE> */

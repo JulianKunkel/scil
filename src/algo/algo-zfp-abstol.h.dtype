@@ -23,7 +23,7 @@
 #ifndef SCIL_ZFP_ABSTOL_H_
 #define SCIL_ZFP_ABSTOL_H_
 
-#include <scil-internal.h>
+#include <scil-algorithm.h>
 
 //Supported datatypes: float double
 // Repeat for each data type
@@ -36,7 +36,7 @@
  * \param source_count Element count of uncompressed buffer
  * \return Success state of the compression
  */
-int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_p ctx, byte* restrict dest, size_t* restrict dest_size, <DATATYPE>*restrict source, const scil_dims* dims);
+int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_t* ctx, byte* restrict dest, size_t* restrict dest_size, <DATATYPE>*restrict source, const scil_dims_t* dims);
 
 /**
  * \brief Decompression function of zfp with absolute error tolerance
@@ -46,11 +46,11 @@ int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_p ctx, byte* restrict
  * \param in_size Byte size of compressed_buf_in
  * \return Success state of the compression
  */
-int scil_zfp_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_dims* dims, byte*restrict compressed_buf_in, const size_t in_size);
+int scil_zfp_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_dims_t* dims, byte*restrict compressed_buf_in, const size_t in_size);
 
 // End repeat
 
 
-extern scil_compression_algorithm algo_zfp_abstol;
+extern scilI_algorithm_t algo_zfp_abstol;
 
 #endif /* SCIL_ZFP_ABSTOL_H_<DATATYPE> */

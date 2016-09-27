@@ -16,11 +16,12 @@
 #include <algo/algo-gzip.h>
 
 #include <scil-error.h>
+#include <scil-internal.h>
 
 #include <zlib.h>
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_gzip_compress(const scil_context_p ctx, byte* restrict dest, size_t* restrict dest_size, const byte*restrict source, const size_t source_size){
+int scil_gzip_compress(const scil_context_t* ctx, byte* restrict dest, size_t* restrict dest_size, const byte*restrict source, const size_t source_size){
   *dest_size = 2*source_size;
   int ret = compress( (Bytef*)dest, dest_size, (Bytef*)source, (uLong)(source_size) );
   if (ret == Z_OK){
@@ -49,7 +50,7 @@ int scil_gzip_decompress(byte*restrict data_out, size_t buff_size,  const byte*r
   return ret;
 }
 
-scil_compression_algorithm algo_gzip = {
+scilI_algorithm_t algo_gzip = {
     .c.Btype = {
         scil_gzip_compress,
         scil_gzip_decompress

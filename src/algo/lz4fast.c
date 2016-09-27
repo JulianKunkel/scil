@@ -19,7 +19,7 @@
 #include <lz4.h>
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_lz4fast_compress(const scil_context_p ctx, byte* restrict dest, size_t * restrict out_size, const byte*restrict source, const size_t source_size){
+int scil_lz4fast_compress(const scil_context_t* ctx, byte* restrict dest, size_t * restrict out_size, const byte*restrict source, const size_t source_size){
     int size;
     // store the size of the data
     *((int*) dest) = source_size;
@@ -44,7 +44,7 @@ int scil_lz4fast_decompress(byte*restrict dest, size_t buff_size, const byte*res
     return 0;
 }
 
-scil_compression_algorithm algo_lz4fast = {
+scilI_algorithm_t algo_lz4fast = {
     .c.Btype = {
         scil_lz4fast_compress,
         scil_lz4fast_decompress

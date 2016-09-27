@@ -44,7 +44,7 @@ static int print_hints = 0;
 
 // data we process
 
-static scil_dims dims;
+static scil_dims_t dims;
 static int datatype = SCIL_TYPE_DOUBLE;
 static byte * input_data = NULL;
 static byte * output_data = NULL;
@@ -95,12 +95,12 @@ void readCSVData(){
   printf("Read file %s: %d %d\n", in_file, x, y);
 
   if(y > 1){
-    scil_init_dims_2d(& dims, x, y);
+    scilPr_initialize_dims_2d(& dims, x, y);
   }else{
-    scil_init_dims_1d(& dims, x);
+    scilPr_initialize_dims_1d(& dims, x);
   }
 
-  input_data = (byte*) malloc(scil_compress_buffer_size_bound(datatype, & dims));
+  input_data = (byte*) malloc(scilPr_get_compressed_data_size_limit(&dims, datatype));
 
   fd = fopen(in_file, "r");
   if (ignore_header){
@@ -141,7 +141,7 @@ void writeCSVData(){
     printf("Could not open %s for write\n", out_file);
     exit(1);
   }
-  double * buffer_in = (double *) output_data;
+  float * buffer_in = (float*)output_data;
   if(dims.dims == 1){
     if (output_header)
       fprintf(f, "%zu\n", dims.length[0]);
@@ -180,9 +180,9 @@ void readData(){
 
   if(rows > 1){
     fread(&y, sizeof(size_t), 1, f);
-    scil_init_dims_2d(&dims, x, y);
+    scilPr_initialize_dims_2d(&dims, x, y);
   }else{
-    scil_init_dims_1d(&dims, x);
+    scilPr_initialize_dims_1d(&dims, x);
   }
 
   curr_pos = ftell(f);
@@ -203,8 +203,13 @@ void writeData(){
     printf("Could not open %s for write\n", out_file);
     exit(1);
   }
+  size_t buffer_in_size = 0;
+  if(data_type_float){
+    buffer_in_size = dims.length[0] * sizeof(float);
+  }else{
+    buffer_in_size = dims.length[0] * sizeof(double);
+  }
 
-  size_t buffer_in_size = dims.length[0] * sizeof(double);
   fwrite(&dims.dims, sizeof(dims.dims), 1, f);
   fwrite(&dims.length, sizeof(dims.length[0]), dims.dims, f);
   for (size_t i = 1; i < dims.dims; i++){
@@ -217,12 +222,12 @@ void writeData(){
 }
 
 int main(int argc, char ** argv){
-  scil_context_p ctx;
-  scil_user_params_t hints;
+  scil_context_t* ctx;
+  scil_user_hints_t hints;
 
   int ret;
 
-  scil_init_hints(&hints);
+  scilPr_initialize_user_hints(&hints);
 
   option_help known_args[] = {
     {'i', "in_file", "Input file (file format depends on mode)", OPTION_REQUIRED_ARGUMENT, 's', & in_file},
@@ -258,13 +263,13 @@ int main(int argc, char ** argv){
     datatype = SCIL_TYPE_FLOAT;
   }
 
-  ret = scil_create_compression_context(& ctx, datatype, 0, NULL, &hints);
+  ret = scilPr_create_context(&ctx, datatype, 0, NULL, &hints);
   assert(ret == SCIL_NO_ERR);
 
   if (print_hints){
     printf("Effective hints (only needed for compression)\n");
-    scil_user_params_t e = scil_retrieve_effective_hints(ctx);
-    scil_user_params_t_print(& e);
+    scil_user_hints_t e = scilPr_get_effective_hints(ctx);
+    scilPr_print_user_hints(& e);
   }
 
   if (compress || cycle){
@@ -277,7 +282,7 @@ int main(int argc, char ** argv){
 
   size_t buff_size, input_size;
 
-  input_size = scil_compress_buffer_size_bound(datatype, & dims);
+  input_size = scilPr_get_compressed_data_size_limit(&dims, datatype);
   output_data = (byte*) SAFE_MALLOC(input_size);
 
 	scil_timer timer;
@@ -287,9 +292,13 @@ int main(int argc, char ** argv){
     printf("...compression and decompression\n");
     byte* result = (byte*) SAFE_MALLOC(input_size);
 
-    ret = scil_compress(result, input_size, (double*)input_data, & dims, & buff_size, ctx);
+    if(data_type_float){
+      ret = scil_compress(result, input_size, (float*)input_data, & dims, & buff_size, ctx);
+    }else{
+      ret = scil_compress(result, input_size, (double*)input_data, & dims, & buff_size, ctx);
+    }
     assert(ret == SCIL_NO_ERR);
-    ret = scil_destroy_compression_context(& ctx);
+    ret = scilPr_destroy_context(ctx);
     assert(ret == SCIL_NO_ERR);
 
     byte* tmp_buff = (byte*) SAFE_MALLOC(buff_size);
@@ -299,9 +308,13 @@ int main(int argc, char ** argv){
 
   } else if (compress){
     printf("...compression\n");
-    ret = scil_compress(output_data, input_size, (double*)input_data, & dims, & buff_size, ctx);
+    if(data_type_float){
+      ret = scil_compress(output_data, input_size, (float*)input_data, & dims, & buff_size, ctx);
+    }else{
+      ret = scil_compress(output_data, input_size, (double*)input_data, & dims, & buff_size, ctx);
+    }
     assert(ret == SCIL_NO_ERR);
-    ret = scil_destroy_compression_context(& ctx);
+    ret = scilPr_destroy_context(ctx);
     assert(ret == SCIL_NO_ERR);
 
   } else if (uncompress){

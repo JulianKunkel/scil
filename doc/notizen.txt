@@ -7,6 +7,6 @@ compression-chain.c:
         (vielleicht einmal mit anderem tool komprimieren?)
     => das geht bei mir.
 
-scilI_determine_randomness:
+scilI_get_data_randomness:
     - Ist es sinnvoll die randomness von Daten mit lz4 zu berechnen?
     - Wäre es nicht besser allgemein benutzte Größen wie z.B. Standardabweichung dafür zu verwenden?

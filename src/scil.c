@@ -16,20 +16,9 @@
 #include <scil-error.h>
 #include <scil-hardware-limits.h>
 #include <scil-internal.h>
+#include <scil-context.h>
 
-// known algorithms:
-#include <algo/algo-abstol.h>
-#include <algo/algo-fpzip.h>
-#include <algo/algo-gzip.h>
-#include <algo/algo-memcopy.h>
-#include <algo/algo-sigbits.h>
-#include <algo/algo-zfp-abstol.h>
-#include <algo/algo-zfp-precision.h>
-#include <algo/lz4fast.h>
-#include <algo/precond-dummy.h>
-#include <algo/algo-quantize.h>
-#include <algo/algo-swage.h>
-#include <algo/algo-wavelets.h>
+#include <scil-compressors.h>
 
 #include <ctype.h>
 #include <float.h>
@@ -40,65 +29,15 @@
 #include "scil-dtypes.h"
 #include "scil-dtypes-int.h"
 
-static scil_compression_algorithm * algo_array[] = {
-	& algo_memcopy,
-	& algo_abstol,
-	& algo_gzip,
-	& algo_sigbits,
-	& algo_fpzip,
-	& algo_zfp_abstol,
-	& algo_zfp_precision,
-	& algo_lz4fast,
-	& algo_precond_dummy,
-	& algo_quantize,
-	& algo_swage,
-	& algo_wavelets,
-	NULL
-};
-
-static char * performance_units[] = {
-	"IGNORE",
-	"MiB",
-	"GiB",
-	"NetworkSpeed",
-	"NodeLocalStorageSpeed",
-	"SingleStreamSharedStorageSpeed"
-};
-
-int scil_compressors_available(){
-	static int count = -1;
-	if (count > 0){
-		return count;
-	}
-
-	scil_compression_algorithm ** cur = algo_array;
-	count = 0;
-	// count
-	while(*cur != NULL){
-		count++;
-		cur++;
-	}
-
-	return count;
-}
-
-const char* scil_compressor_name(int num)
-{
-    assert(num < scil_compressors_available());
-    return algo_array[num]->name;
-}
-
 #define CHECK_COMPRESSOR_ID(compressor_id)               \
-    if (compressor_id >= scil_compressors_available()) { \
+    if (compressor_id >= scilU_get_available_compressor_count()) { \
         return SCIL_BUFFER_ERR;                          \
     }
 
-void scil_compression_sprint_last_algorithm_chain(scil_context_p ctx,
-                                                  char* out,
-                                                  int buff_length)
+void scil_compression_sprint_last_algorithm_chain(scil_context_t* ctx, char* out, int buff_length)
 {
     int ret                      = 0;
-    scil_compression_chain_t* lc = &ctx->chain;
+    scilI_chain_t* lc = &ctx->chain;
     for (int i = 0; i < PRECONDITIONER_LIMIT; i++) {
         if (lc->pre_cond_first[i] == NULL) break;
         ret = snprintf(out, buff_length, "%s,", lc->pre_cond_first[i]->name);
@@ -130,384 +69,6 @@ void scil_compression_sprint_last_algorithm_chain(scil_context_p ctx,
     out[-1] = 0;
 }
 
-int scil_compressor_num_by_name(const char* name)
-{
-    scil_compression_algorithm** cur = algo_array;
-    int count                        = 0;
-
-    // check if this is a number
-    int num = 1;
-    for (unsigned i = 0; i < strlen(name); i++) {
-        if (!isdigit(name[i])) {
-            num = 0;
-            break;
-        }
-    }
-    if (num) {
-        return atoi(name);
-    }
-
-    // count
-    while (*cur != NULL) {
-        if (strcmp((*cur)->name, name) == 0) {
-            return count;
-        }
-        count++;
-        cur++;
-    }
-
-    return -1;
-}
-
-static int check_compress_lossless_needed(scil_context_p ctx)
-{
-    const scil_user_params_t hints = ctx->hints;
-
-    if ((hints.absolute_tolerance != SCIL_ACCURACY_DBL_IGNORE &&
-         hints.absolute_tolerance <= SCIL_ACCURACY_DBL_FINEST) ||
-        (hints.relative_err_finest_abs_tolerance <= SCIL_ACCURACY_DBL_FINEST &&
-         hints.relative_err_finest_abs_tolerance != SCIL_ACCURACY_DBL_IGNORE) ||
-        (hints.relative_tolerance_percent <= SCIL_ACCURACY_DBL_FINEST &&
-         hints.relative_tolerance_percent != SCIL_ACCURACY_DBL_IGNORE) ||
-        (hints.significant_digits == SCIL_ACCURACY_INT_FINEST) ||
-        (hints.significant_bits == SCIL_ACCURACY_INT_FINEST)) {
-        return 1;
-    }
-    return 0;
-}
-
-// This function is useful as it changes the sensitivity of the maximum double
-// value
-static void fix_double_setting(double* dbl)
-{
-    if (*dbl == SCIL_ACCURACY_DBL_IGNORE) {
-        *dbl = DBL_MAX;
-    }
-}
-
-scil_compression_algorithm* scilI_find_compressor_by_name(const char* name)
-{
-    int num = scil_compressor_num_by_name(name);
-    if (num < 0 || num >= scil_compressors_available()) {
-        return NULL;
-    } else {
-        return algo_array[num];
-    }
-}
-
-int scilI_parse_compression_algorithms(scil_compression_chain_t* chain,
-                                       char* str_in)
-{
-    char *saveptr, *token;
-    char str[4096];
-    strncpy(str, str_in, 4096);
-    token = strtok_r(str, ",", &saveptr);
-
-    int stage                   = 0; // first pre-conditioner
-    chain->precond_first_count  = 0;
-    chain->precond_second_count = 0;
-    chain->total_size           = 0;
-
-    char lossy = 0;
-    for (int i = 0; token != NULL; i++) {
-        scil_compression_algorithm* algo = scilI_find_compressor_by_name(token);
-        if (algo == NULL) {
-            return SCIL_EINVAL;
-        }
-        chain->total_size++;
-        lossy += algo->is_lossy;
-        switch (algo->type) {
-            case (SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER_FIRST): {
-                if (stage != 0) {
-                    return -1; // INVALID CHAIN 
-                }
-                chain->pre_cond_first[(int)chain->precond_first_count] = algo;
-                chain->precond_first_count++;
-                break;
-            }
-			case (SCIL_COMPRESSOR_TYPE_DATATYPES_CONVERTER) : {
-				if (stage != 0) {
-                    return -1; // INVALID CHAIN
-                }
-                stage                  = 1;
-                chain->converter = algo;
-                break;
-			}
-			case (SCIL_COMPRESSOR_TYPE_DATATYPES_PRECONDITIONER_SECOND): {
-                if (stage != 1) {
-                    return -1; // INVALID CHAIN 
-                }
-                chain->pre_cond_second[(int)chain->precond_second_count] = algo;
-                chain->precond_second_count++;
-                break;
-            }
-            case (SCIL_COMPRESSOR_TYPE_DATATYPES): {
-                if (stage > 1) {
-                    return -1; // INVALID CHAIN
-                }
-                stage                  = 2;
-                chain->data_compressor = algo;
-                break;
-            }
-			case (SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES): {
-                if (stage > 2) {
-                    return -1; // INVALID CHAIN
-                }
-                stage                  = 3;
-                chain->byte_compressor = algo;
-                break;
-            }
-        }
-        token = strtok_r(NULL, ",", &saveptr);
-    }
-    chain->is_lossy = lossy > 0;
-
-    // at least one algo should be set
-    if (chain->total_size == 0) {
-        return SCIL_EINVAL;
-    }
-
-    return SCIL_NO_ERR;
-}
-
-void scil_init_dims_1d(scil_dims* dims, size_t dim1)
-{
-    dims->dims      = 1;
-    dims->length[0] = dim1;
-}
-void scil_init_dims_2d(scil_dims* dims, size_t dim1, size_t dim2)
-{
-    dims->dims      = 2;
-    dims->length[0] = dim1;
-    dims->length[1] = dim2;
-}
-
-void scil_init_dims_3d(scil_dims* dims, size_t dim1, size_t dim2, size_t dim3){
-	dims->dims = 3;
-	dims->length[0] = dim1;
-	dims->length[1] = dim2;
-	dims->length[2] = dim3;
-}
-
-void scil_init_dims_4d(scil_dims* dims, size_t dim1, size_t dim2, size_t dim3, size_t dim4){
-	dims->dims = 4;
-	dims->length[0] = dim1;
-	dims->length[1] = dim2;
-	dims->length[2] = dim3;
-	dims->length[3] = dim4;
-}
-
-void scil_copy_dims_array(scil_dims* out_dims, scil_dims in_dims){
-	out_dims->dims = in_dims.dims;
-	memcpy(out_dims->length, & in_dims.length, sizeof(size_t)* in_dims.dims);
-}
-
-void scil_init_dims_array(scil_dims* dims, uint8_t count, const size_t* length)
-{
-    dims->dims = count;
-    assert(count <= 4);
-    memcpy(&dims->length, length, count * sizeof(size_t));
-}
-
-size_t scil_get_data_count(const scil_dims* dims)
-{
-    size_t result = 1;
-    for (uint8_t i = 0; i < dims->dims; ++i) {
-        result *= dims->length[i];
-    }
-    return result;
-}
-
-size_t scil_get_data_size(enum SCIL_Datatype datatype, const scil_dims* dims)
-{
-    if (dims->dims == 0) {
-        return 0;
-    }
-    size_t result = 1;
-    for (uint8_t i = 0; i < dims->dims; ++i) {
-        result *= dims->length[i];
-    }
-    return result * DATATYPE_LENGTH(datatype);
-}
-
-void scil_init_hints(scil_user_params_t* hints)
-{
-    memset(hints, 0, sizeof(scil_user_params_t));
-    hints->relative_tolerance_percent        = SCIL_ACCURACY_DBL_IGNORE;
-    hints->relative_err_finest_abs_tolerance = SCIL_ACCURACY_DBL_IGNORE;
-    hints->absolute_tolerance                = SCIL_ACCURACY_DBL_IGNORE;
-
-    hints->comp_speed.unit   = SCIL_PERFORMANCE_IGNORE;
-    hints->decomp_speed.unit = SCIL_PERFORMANCE_IGNORE;
-}
-
-void scil_copy_hints(scil_user_params_t * oh, const scil_user_params_t* hints){
-	memcpy(oh, hints, sizeof(scil_user_params_t));
-	/*if(hints->force_compression_methods != NULL){
-		oh->force_compression_methods = NULL;
-	}
-	*/
-}
-
-
-static void print_performance_hint(const char* name,
-                                   const scil_performance_hint_t p)
-{
-    printf("\t%s: %f * %s\n", name, (double)p.multiplier, performance_units[p.unit]);
-}
-
-void scil_user_params_t_print(const scil_user_params_t* h)
-{
-    printf(
-        "Precision hints: \n\trelative_tolerance_percent: %g "
-        "\n\trelative_err_finest_abs_tolerance: %g\n\tabsolute_tolerance: %g "
-        "\n\tsignificant_digits: %d \n\tsignificant_bits (in the mantissa): "
-        "%d\n",
-        h->relative_tolerance_percent,
-        h->relative_err_finest_abs_tolerance,
-        h->absolute_tolerance,
-        h->significant_digits,
-        h->significant_bits);
-    printf("Performance hints:\n");
-    print_performance_hint("Compression", h->comp_speed);
-    print_performance_hint("Decompression", h->decomp_speed);
-}
-
-int scil_destroy_compression_context(scil_context_p* out_ctx)
-{
-    free(*out_ctx);
-    *out_ctx = NULL;
-
-    return SCIL_NO_ERR;
-}
-
-scil_user_params_t scil_retrieve_effective_hints(scil_context_p ctx)
-{
-    return ctx->hints;
-}
-
-static int scil_initialized = 0;
-
-static void scil_check_if_initialized()
-{
-    if (scil_initialized) {
-        return;
-    }
-
-    // verify correctness of algo_array
-    int i = 0;
-    for (scil_compression_algorithm **algo = algo_array; *algo != NULL;
-         algo++, i++) {
-        if ((*algo)->compressor_id != i) {
-					printf("id_%i i=%i",(*algo)->compressor_id,i);
-            scilU_critical_error("compressor ID does not match!");
-        }
-        if ((*algo)->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES) {
-            // we expect that all byte compressors are lossless
-            (*algo)->is_lossy = 0;
-        }
-    }
-
-    scilI_init_hardware_limits();
-    scilI_compression_algo_chooser_init();
-    scil_initialized = 1;
-}
-
-int scil_create_compression_context(scil_context_p* out_ctx,
-                                    enum SCIL_Datatype datatype,
-                                    int special_values_count,
-                                    void * special_values,
-                                    const scil_user_params_t* hints)
-{
-    scil_check_if_initialized();
-
-    int ret = SCIL_NO_ERR;
-    scil_context_p ctx;
-    *out_ctx = NULL;
-
-    ctx = (scil_context_p)SAFE_MALLOC(sizeof(struct scil_context_t));
-    memset(&ctx->chain, 0, sizeof(ctx->chain));
-    ctx->datatype = datatype;
-		ctx->special_values_count = special_values_count;
-		if (ctx->special_values_count > 0){
-			assert(special_values != NULL);
-			ctx->special_values = special_values;
-		}else{
-			ctx->special_values = NULL;
-		}
-
-    scil_user_params_t* oh;
-    oh = & ctx->hints;
-	scil_copy_hints(oh, hints);
-
-	// adjust accuracy needed
-	switch(datatype){
-	case (SCIL_TYPE_FLOAT) : {
-        if ((oh->significant_digits > 6) || (oh->significant_bits > 23)) {
-            oh->significant_digits = SCIL_ACCURACY_INT_FINEST;
-            oh->significant_bits   = SCIL_ACCURACY_INT_FINEST;
-        }
-		break;
-	}
-	case (SCIL_TYPE_DOUBLE) : {
-        if ((oh->significant_digits > 15) || (oh->significant_bits > 52)) {
-            oh->significant_digits = SCIL_ACCURACY_INT_FINEST;
-            oh->significant_bits   = SCIL_ACCURACY_INT_FINEST;
-        }
-		break;
-	}
-	default:
-    	oh->significant_digits = SCIL_ACCURACY_INT_IGNORE;
-    	oh->significant_bits   = SCIL_ACCURACY_INT_IGNORE;
-	}
-
-	// Convert between significat digits and bits
-	if(	oh->significant_digits != SCIL_ACCURACY_INT_IGNORE &&
-	   	oh->significant_bits   == SCIL_ACCURACY_INT_IGNORE ){
-
-		// If bits are ignored by user, just calculate them from provided digits
-	    oh->significant_bits = scilU_convert_significant_decimals_to_bits(oh->significant_digits);
-	}
-	else if( oh->significant_digits == SCIL_ACCURACY_INT_IGNORE &&
-	   		 oh->significant_bits   != SCIL_ACCURACY_INT_IGNORE ){
-
-		// If digits are ignored by user, just calculate them from provided bits
-		oh->significant_digits = scilU_convert_significant_bits_to_decimals(oh->significant_bits);
-	}
-	else if( oh->significant_digits != SCIL_ACCURACY_INT_IGNORE &&
-	   		 oh->significant_bits   != SCIL_ACCURACY_INT_IGNORE ){
-
-		// If the user provided both, calculate each other and take the finer ones
-	    int new_sig_digits = scilU_convert_significant_bits_to_decimals(oh->significant_bits);
-	    int new_sig_bits   = scilU_convert_significant_decimals_to_bits(oh->significant_digits);
-
-		oh->significant_digits = max(new_sig_digits, oh->significant_digits);
-		oh->significant_bits   = max(new_sig_bits,   oh->significant_bits);
-	}
-
-    ctx->lossless_compression_needed = check_compress_lossless_needed(ctx);
-    fix_double_setting(&oh->relative_tolerance_percent);
-    fix_double_setting(&oh->relative_err_finest_abs_tolerance);
-    fix_double_setting(&oh->absolute_tolerance);
-    // TODO handle float differently.
-	// Why? hints can be double while compressing float-data.
-
-    if (oh->force_compression_methods != NULL) {
-        // now we can prefill the compression pipeline
-        ret = scilI_parse_compression_algorithms(&ctx->chain, hints->force_compression_methods);
-
-        oh->force_compression_methods = strdup(oh->force_compression_methods);
-    }
-
-    if (ret == SCIL_NO_ERR) {
-        *out_ctx = ctx;
-    } else {
-        free(ctx);
-    }
-
-    return ret;
-}
-
 static inline void* pick_buffer(int is_src,
                                 int total,
                                 int remain,
@@ -527,12 +88,6 @@ static inline void* pick_buffer(int is_src,
     } else {
         return buff2;
     }
-}
-
-size_t scil_compress_buffer_size_bound(enum SCIL_Datatype datatype,
-                                       const scil_dims* dims)
-{
-    return scil_get_data_size(datatype, dims) * 4 + SCIL_BLOCK_HEADER_MAX_SIZE;
 }
 
 /*
@@ -571,9 +126,9 @@ A datatype compressor terminates the chain of preconditioners.
 int scil_compress(byte* restrict dest,
                   size_t in_dest_size,
                   void* restrict source,
-                  scil_dims* dims,
+                  scil_dims_t* dims,
                   size_t* restrict out_size_p,
-                  scil_context_p ctx) {
+                  scil_context_t* ctx) {
 
 	assert(ctx != NULL);
 	assert(dest != NULL);
@@ -583,7 +138,7 @@ int scil_compress(byte* restrict dest,
 	int ret = SCIL_NO_ERR;
 
 	// Get byte size of input data
-    size_t input_size           = scil_get_data_size(ctx->datatype, dims);
+    size_t input_size           = scilPr_get_dims_size(dims, ctx->datatype);
     const size_t datatypes_size = input_size;
 
 	// Skip the compression if input size is 0 and set destination buffer to a single 0 and size 1
@@ -600,12 +155,12 @@ int scil_compress(byte* restrict dest,
     }
 
 	// Set local copies of hints and compression chain
-    const scil_user_params_t* hints         = &ctx->hints;
-    scil_compression_chain_t* chain = &ctx->chain;
+    const scil_user_hints_t* hints = &ctx->hints;
+    scilI_chain_t* chain  = &ctx->chain;
 
 	// Check whether automatic compressor decision can be skipped because of a user forced chain
     if (hints->force_compression_methods == NULL) {
-        scilI_compression_algo_chooser(source, dims, ctx);
+        scilC_algo_chooser_execute(source, dims, ctx);
     }
 
     size_t out_size = 0;
@@ -630,7 +185,7 @@ int scil_compress(byte* restrict dest,
 
         for (int i = 0; i < chain->precond_first_count; i++) {
             int header_size_out;
-            scil_compression_algorithm* algo = chain->pre_cond_first[i];
+            scilI_algorithm_t* algo = chain->pre_cond_first[i];
             void* src = pick_buffer(1, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
             void* dst = pick_buffer(0, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
 
@@ -683,7 +238,7 @@ int scil_compress(byte* restrict dest,
         // set the output size to the expected buffer size
         out_size = (size_t)(datatypes_size * 2);
 
-        scil_compression_algorithm* algo = chain->converter;
+        scilI_algorithm_t* algo = chain->converter;
         switch (ctx->datatype) {
             case (SCIL_TYPE_FLOAT):
                 ret = algo->c.Ctype.compress_float(ctx, (int64_t*)dst, &out_size, src, dims);
@@ -736,7 +291,7 @@ int scil_compress(byte* restrict dest,
 
         for (int i = 0; i < chain->precond_second_count; i++) {
             int header_size_out;
-            scil_compression_algorithm* algo = chain->pre_cond_second[i];
+            scilI_algorithm_t* algo = chain->pre_cond_second[i];
             void* src = pick_buffer(1, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
             void* dst = pick_buffer(0, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
 
@@ -767,7 +322,7 @@ int scil_compress(byte* restrict dest,
         // set the output size to the expected buffer size
         out_size = (size_t)(datatypes_size * 2);
 
-        scil_compression_algorithm* algo = chain->data_compressor;
+        scilI_algorithm_t* algo = chain->data_compressor;
         switch (ctx->datatype) {
             case (SCIL_TYPE_FLOAT):
                 ret = algo->c.DNtype.compress_float(ctx, dst, &out_size, src, dims);
@@ -835,7 +390,7 @@ int scil_compress(byte* restrict dest,
 
 int scil_decompress(enum SCIL_Datatype datatype,
                     void* restrict dest,
-                    scil_dims* const dims,
+                    scil_dims_t* dims,
                     byte* restrict source,
                     const size_t source_size,
                     byte* restrict buff_tmp1) {
@@ -856,7 +411,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
     size_t src_size        = source_size - 1;
     int ret;
 
-    const size_t output_size = scil_get_data_size(datatype, dims);
+    const size_t output_size = scilPr_get_dims_size(dims, datatype);
     byte* restrict buff_tmp2 = &buff_tmp1[(int)(output_size * 2 + 10)];
 
     // for(int i=0; i < chain_size; i++){
@@ -869,7 +424,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
     CHECK_COMPRESSOR_ID(compressor_id)
     // printf("SCHUH %d %lld\n", compressor_id, source_size);
 
-    scil_compression_algorithm* algo = algo_array[compressor_id];
+    scilI_algorithm_t* algo = algo_array[compressor_id];
     byte* header                     = &src_adj[src_size - 1];
 
     if (algo->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES) {
@@ -1054,11 +609,11 @@ int scil_decompress(enum SCIL_Datatype datatype,
 void scil_determine_accuracy(enum SCIL_Datatype datatype,
                              const void* restrict data_1,
                              const void* restrict data_2,
-                             scil_dims* dims,
+                             scil_dims_t* dims,
                              const double relative_err_finest_abs_tolerance,
-                             scil_user_params_t* out_hints) {
-    scil_user_params_t a;
-    scil_init_hints(&a);
+                             scil_user_hints_t* out_hints) {
+    scil_user_hints_t a;
+    scilPr_initialize_user_hints(&a);
 
     a.absolute_tolerance                = 0;
     a.relative_err_finest_abs_tolerance = 0;
@@ -1069,7 +624,7 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
         a.significant_bits = MANTISSA_LENGTH_DOUBLE; // in bits
         scil_determine_accuracy_double((double*)data_1,
                                        (double*)data_2,
-                                       scil_get_data_count(dims),
+                                       scilPr_get_dims_count(dims),
                                        relative_err_finest_abs_tolerance,
                                        &a);
 				break;
@@ -1078,7 +633,7 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
         a.significant_bits = MANTISSA_LENGTH_FLOAT; // in bits
         scil_determine_accuracy_float((float*)data_1,
                                       (float*)data_2,
-                                      scil_get_data_count(dims),
+                                      scilPr_get_dims_count(dims),
                                       relative_err_finest_abs_tolerance,
                                       &a);
     		break;
@@ -1087,24 +642,24 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
 			a.significant_bits = 8;
 			scil_determine_accuracy_int8((int8*)data_1,
 															(int8*)data_2,
-															scil_get_data_count(dims),
+															scilPr_get_dims_count(dims),
 															relative_err_finest_abs_tolerance,
 															&a);
 			break;
 		}
 		case(SCIL_TYPE_INT16):{
 			a.significant_bits = 16;
-			scil_determine_accuracy_int16((int16*)data_1, (int16*)data_2, scil_get_data_count(dims), relative_err_finest_abs_tolerance, &a);
+			scil_determine_accuracy_int16((int16*)data_1, (int16*)data_2, scilPr_get_dims_count(dims), relative_err_finest_abs_tolerance, &a);
 			break;
 		}
 		case(SCIL_TYPE_INT32):{
 			a.significant_bits = 32;
-			scil_determine_accuracy_int32((int32*)data_1, (int32*)data_2, scil_get_data_count(dims), relative_err_finest_abs_tolerance, &a);
+			scil_determine_accuracy_int32((int32*)data_1, (int32*)data_2, scilPr_get_dims_count(dims), relative_err_finest_abs_tolerance, &a);
 			break;
 		}
 		case(SCIL_TYPE_INT64):{
 			a.significant_bits = 64;
-			scil_determine_accuracy_int64((int64*)data_1, (int64*)data_2, scil_get_data_count(dims), relative_err_finest_abs_tolerance, &a);
+			scil_determine_accuracy_int64((int64*)data_1, (int64*)data_2, scilPr_get_dims_count(dims), relative_err_finest_abs_tolerance, &a);
 			break;
 		}
 		case(SCIL_TYPE_STRING):{
@@ -1127,17 +682,17 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
 
 int scil_validate_compression(enum SCIL_Datatype datatype,
                               const void* restrict data_uncompressed,
-                              scil_dims* dims,
+                              scil_dims_t* dims,
                               byte* restrict data_compressed,
                               const size_t compressed_size,
-                              const scil_context_p ctx,
-                              scil_user_params_t* out_accuracy) {
-    const uint64_t length = scil_compress_buffer_size_bound(datatype, dims);
+                              const scil_context_t* ctx,
+                              scil_user_hints_t* out_accuracy) {
+    const uint64_t length = scilPr_get_compressed_data_size_limit(dims, datatype);
     byte* data_out        = (byte*)malloc(length);
     if (data_out == NULL) {
         return SCIL_MEMORY_ERR;
     }
-    scil_user_params_t a;
+    scil_user_hints_t a;
 
     memset(data_out, -1, length);
 
@@ -1179,7 +734,7 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
                                 ctx->hints.relative_err_finest_abs_tolerance,
                                 &a);
 
-        const scil_user_params_t h = ctx->hints;
+        const scil_user_hints_t h = ctx->hints;
 
         // check if tolerance level is met:
         ret = 0;

@@ -22,23 +22,24 @@
 
 #include <open-simplex-noise.h>
 
-static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float arg, float arg2){
+static int simplex(double* buffer, const scil_dims_t* dims, float mn, float mx, float arg, float arg2){
   const int frequencyCount = (int) arg2;
   double highFrequency = (double)arg;
 
   if( scilU_float_equal(mn, mx) || frequencyCount <= 0 ){
     return SCIL_EINVAL;
   }
-	struct osn_context *ctx;
+
+  struct osn_context *ctx;
   int64_t seed = 4711;
-	open_simplex_noise(seed, &ctx);
+  open_simplex_noise(seed, &ctx);
 
   int64_t max_potenz = 1<<frequencyCount;
-  size_t * len = dims->length;
+  const size_t* len = dims->length;
 
   switch(dims->dims){
     case (1):{
-      size_t count = scil_get_data_count(dims);
+      size_t count = scilPr_get_dims_count(dims);
       for (size_t i=0; i < count; i++){
         buffer[i] = 0;
         int64_t potenz = max_potenz;
@@ -108,11 +109,11 @@ static int simplex(scil_dims * dims, double * buffer, float mn, float mx, float 
   }
 
   // fix min + max, first identify min/max
-  scilPI_fix_min_max(buffer, dims, mn, mx);
+  scilPI_change_data_scale(buffer, dims, mn, mx);
 
   open_simplex_noise_free(ctx);
 
   return SCIL_NO_ERR;
 }
 
-scil_pattern scil_pattern_simplex_noise = { &simplex, "simplexNoise" };
+scil_pattern_t scil_pattern_simplex_noise = { &simplex, "simplexNoise" };

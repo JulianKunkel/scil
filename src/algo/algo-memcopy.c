@@ -18,7 +18,7 @@
 #include <string.h>
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_memcopy_compress(const scil_context_p ctx, byte* restrict dest, size_t * restrict out_size, const byte*restrict source, const size_t source_size){
+int scil_memcopy_compress(const scil_context_t* ctx, byte* restrict dest, size_t * restrict out_size, const byte*restrict source, const size_t source_size){
     // TODO check if out_size is sufficently large
     *out_size = source_size;
     memcpy(dest, source, source_size);
@@ -33,7 +33,7 @@ int scil_memcopy_decompress(byte*restrict dest, size_t buff_size, const byte*res
     return 0;
 }
 
-scil_compression_algorithm algo_memcopy = {
+scilI_algorithm_t algo_memcopy = {
     .c.Btype = {
         scil_memcopy_compress,
         scil_memcopy_decompress

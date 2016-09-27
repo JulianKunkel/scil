@@ -13,8 +13,10 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <scil-algo-chooser.h>
 #include <scil-error.h>
+
+#include <scil-compressors.h>
+#include <scil-data-characteristics.h>
 #include <scil-patterns.h>
 #include <scil-util.h>
 
@@ -31,24 +33,24 @@ static int decomp_error_occured = 0;
 static int val_error_occured = 0;
 static double* buffer_uncompressed;
 
-int test_correctness(const char* name, double* buffer_in, scil_dims dims)
+int test_correctness(const char* name, double* buffer_in, scil_dims_t dims)
 {
     size_t out_c_size;
-    size_t variableSize = scil_get_data_count(&dims);
+    size_t variableSize = scilPr_get_dims_count(&dims);
 
-    const size_t c_size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, &dims);
+    const size_t c_size = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
 
     allocate(byte, buffer_out, c_size);
     allocate(byte, tmp_buff, c_size);
 
-    scil_context_p ctx;
-    scil_user_params_t hints;
-    scil_user_params_t out_accuracy;
+    scil_context_t* ctx;
+    scil_user_hints_t hints;
+    scil_user_hints_t out_accuracy;
 
-    scil_init_hints(&hints);
+    scilPr_initialize_user_hints(&hints);
     hints.absolute_tolerance = 0.01;
 
-    double r = (double)scilI_determine_randomness( buffer_in, variableSize * sizeof(double), tmp_buff, c_size);
+    double r = (double)scilI_get_data_randomness( buffer_in, variableSize * sizeof(double), tmp_buff, c_size);
 
     printf("Pattern %s randomness: %.1f%%\n", name, r);
 
@@ -57,16 +59,16 @@ int test_correctness(const char* name, double* buffer_in, scil_dims dims)
         "Compressed size, Compression factor, CSpeed MiB/s, DSpeed MiB/s, "
         "Algo\n");
 
-    for (int i = -1; i < scil_compressors_available(); i++) {
+    for (int i = -1; i < scilU_get_available_compressor_count(); i++) {
         char compression_name[1024];
         if (i == -1) {
             hints.force_compression_methods = NULL;
         } else {
-            sprintf(compression_name, "%s", scil_compressor_name(i));
+            sprintf(compression_name, "%s", scilU_get_compressor_name(i));
             hints.force_compression_methods = compression_name;
         }
 
-        int ret = scil_create_compression_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+        int ret = scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
         if (ret != 0) {
             printf("Invalid combination %s\n", compression_name);
             continue;
@@ -147,13 +149,13 @@ int main(int argc, char** argv)
 
     buffer_uncompressed = malloc(variableSize * 4 * sizeof(double));
 
-    scil_dims dims;
-    scil_init_dims_1d(&dims, variableSize);
+    scil_dims_t dims;
+    scilPr_initialize_dims_1d(&dims, variableSize);
 
-    for (int i = 0; i < scilP_library_size(); i++) {
-        char* name = scilP_library_pattern_name(i);
+    for (int i = 0; i < scilPa_get_pattern_library_size(); i++) {
+        char* name = scilPa_get_library_pattern_name(i);
         printf("processing: %s\n", name);
-        scilP_library_create_pattern_double(i, &dims, buffer_in);
+        scilPa_create_library_pattern_double(buffer_in, &dims, i);
         assert(ret == SCIL_NO_ERR);
         test_correctness(name, buffer_in, dims);
     }

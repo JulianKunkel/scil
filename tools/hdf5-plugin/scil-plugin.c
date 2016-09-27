@@ -100,14 +100,14 @@ static htri_t compressorCanCompress(hid_t dcpl_id, hid_t type_id, hid_t space_id
 }
 
 typedef struct {
-	scil_context_p ctx;
+	scil_context_t* ctx;
 	size_t dst_size; // the size of the buffer
 } plugin_compress_config;
 
 typedef struct {
 	plugin_compress_config * cfg;
 
-	scil_dims dims;
+	scil_dims_t dims;
 	enum SCIL_Datatype type;
 } plugin_config_persisted;
 
@@ -136,16 +136,16 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 	if(chunkRank > rank) return -2;
 
 	assert(sizeof(size_t) == sizeof(hsize_t) );
-	scil_init_dims_array(& cfg_p->dims, rank, (const size_t*) chunkSize);
+	scilPr_initialize_dims_array(& cfg_p->dims, rank, (const size_t*) chunkSize);
 
-  scil_user_params_t * h;
-	scil_user_params_t hints_new;
+  scil_user_hints_t * h;
+	scil_user_hints_t hints_new;
 	// TODO set the hints (accuracy) according to the property lists in HDF5
 	// H5Tget_precision ?
-	int ret = H5Pget_scil_user_params_t(pList, & h);
+	int ret = H5Pget_scil_user_hints_t(pList, & h);
 	if(ret != 0 || h == NULL){
 		h = & hints_new;
-		scil_init_hints(h);
+		scilPr_initialize_user_hints(h);
 	}
 
 
@@ -193,14 +193,14 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 		}
 	}
 
-  ret = scil_create_compression_context(& config->ctx, cfg_p->type, special_cnt, special_values, h);
+  ret = scilPr_create_context(&config->ctx, cfg_p->type, special_cnt, special_values, h);
 	if(special_values != NULL){
 		free(special_values);
 	}
 
 	assert(ret == SCIL_NO_ERR);
 
-	config->dst_size = scil_compress_buffer_size_bound(cfg_p->type, & cfg_p->dims);
+	config->dst_size = scilPr_get_compressed_data_size_limit(cfg_p->type, & cfg_p->dims);
 
 	// now we store the options with the dataset, this is actually not needed...
 	return H5Pmodify_filter( pList, SCIL_ID, H5Z_FLAG_MANDATORY, cd_size, cd_values );
@@ -216,7 +216,7 @@ static size_t compressorFilter(unsigned int flags, size_t cd_nelmts, const unsig
 		// uncompress
 		plugin_config_persisted* cfg_p = ((plugin_config_persisted *) cd_values);
 
-		const size_t buff_size = scil_compress_buffer_size_bound(cfg_p->type, & cfg_p->dims);
+		const size_t buff_size = scilPr_get_compressed_data_size_limit(cfg_p->type, & cfg_p->dims);
 		byte * buffer = (byte*) malloc(buff_size);
 
 		byte * in_buf = ((byte**) buf)[0];
@@ -251,10 +251,10 @@ static size_t compressorFilter(unsigned int flags, size_t cd_nelmts, const unsig
   return out_size; // 0 means error.
 }
 
-#define H5P_SCIL_HINT "scil_user_params_t"
+#define H5P_SCIL_HINT "scil_user_hints_t"
 
 
-herr_t H5Pset_scil_user_params_t(hid_t dcpl, scil_user_params_t * hints){
+herr_t H5Pset_scil_user_hints_t(hid_t dcpl, scil_user_hints_t * hints){
 	unsigned cd_values[2];
 	//printf("set %p \n", old_hints);
 	memcpy(& cd_values[0], & hints, sizeof(void *));
@@ -263,7 +263,7 @@ herr_t H5Pset_scil_user_params_t(hid_t dcpl, scil_user_params_t * hints){
 	return H5Pmodify_filter( dcpl, SCIL_ID, H5Z_FLAG_MANDATORY, 2, (unsigned*) cd_values );
 }
 
-herr_t H5Pget_scil_user_params_t(hid_t dcpl, scil_user_params_t ** out_hints){
+herr_t H5Pget_scil_user_hints_t(hid_t dcpl, scil_user_hints_t ** out_hints){
 	unsigned int *flags = NULL;
 	size_t cd_nelmts = 2;
 

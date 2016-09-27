@@ -24,7 +24,7 @@ static <DATATYPE> scil_unquantize_value_<DATATYPE>(uint64_t value,
     return minimum + (<DATATYPE>)(value * 2.0 * absolute_tolerance);
 }
 
-static <DATATYPE> scil_find_minimum_<DATATYPE>(const <DATATYPE>* const buffer,
+static <DATATYPE> scil_find_minimum_<DATATYPE>(const <DATATYPE>* buffer,
                                                size_t count)
 {
     assert(buffer != NULL);
@@ -39,7 +39,7 @@ static <DATATYPE> scil_find_minimum_<DATATYPE>(const <DATATYPE>* const buffer,
     return min;
 }
 
-static <DATATYPE> scil_find_maximum_<DATATYPE>(const <DATATYPE>* const buffer,
+static <DATATYPE> scil_find_maximum_<DATATYPE>(const <DATATYPE>* buffer,
                                                size_t count)
 {
     assert(buffer != NULL);
@@ -54,10 +54,10 @@ static <DATATYPE> scil_find_maximum_<DATATYPE>(const <DATATYPE>* const buffer,
     return max;
 }
 
-static void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* const restrict buffer,
+static void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* restrict buffer,
                                                  size_t count,
-                                                 <DATATYPE>* const minimum,
-                                                 <DATATYPE>* const maximum)
+                                                 <DATATYPE>* minimum,
+                                                 <DATATYPE>* maximum)
 {
     assert(buffer != NULL);
     assert(minimum != NULL);
@@ -82,8 +82,8 @@ static uint64_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum,
     return (uint64_t)ceil( log2( 1.0 + (double)(maximum - minimum) / (2.0 * absolute_tolerance) ) );
 }
 
-static int scil_quantize_buffer_<DATATYPE>(uint64_t* const restrict dest,
-                                                  const <DATATYPE>* const restrict source,
+static int scil_quantize_buffer_<DATATYPE>(uint64_t* restrict dest,
+                                                  const <DATATYPE>* restrict source,
                                                   size_t count,
                                                   double absolute_tolerance,
                                                   <DATATYPE> minimum,
@@ -102,8 +102,8 @@ static int scil_quantize_buffer_<DATATYPE>(uint64_t* const restrict dest,
     return 0;
 }
 
-static int scil_unquantize_buffer_<DATATYPE>(<DATATYPE>* const restrict dest,
-                                             const uint64_t* const restrict source,
+static int scil_unquantize_buffer_<DATATYPE>(<DATATYPE>* restrict dest,
+                                             const uint64_t* restrict source,
                                              size_t count,
                                              double absolute_tolerance,
                                              <DATATYPE> minimum)
@@ -118,13 +118,13 @@ static int scil_unquantize_buffer_<DATATYPE>(<DATATYPE>* const restrict dest,
     return 0;
 }
 
-int scil_quantize_compress_<DATATYPE>(const scil_context_p ctx,
+int scil_quantize_compress_<DATATYPE>(const scil_context_t* ctx,
                                       int64_t* restrict dest,
                                       size_t* restrict out_size,
                                       <DATATYPE>*restrict source,
-                                      const scil_dims* dims)
+                                      const scil_dims_t* dims)
 {
-    size_t count = scil_get_data_count(dims);
+    size_t count = scilPr_get_dims_count(dims);
 
     <DATATYPE> minimum, maximum;
     scil_find_minimum_maximum_<DATATYPE>(source, count, &minimum, &maximum);
@@ -144,13 +144,13 @@ int scil_quantize_compress_<DATATYPE>(const scil_context_p ctx,
 
     char value[2];
     snprintf(value, 2, "%u", bits_per_value);
-    scil_dict_put(ctx->pipeline_params, "bits_per_value", value);
+    scilI_dict_put(ctx->pipeline_params, "bits_per_value", value);
 
     return scil_quantize_buffer_<DATATYPE>((uint64_t*)dest, source, count, ctx->hints.absolute_tolerance, minimum, maximum, bits_per_value);
 }
 
 int scil_quantize_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
-                                        scil_dims* dims,
+                                        scil_dims_t* dims,
                                         int64_t*restrict source,
                                         const size_t in_size)
 {
@@ -160,11 +160,11 @@ int scil_quantize_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
     double abstol  = *(double*)source;
     ++source;
 
-    return scil_unquantize_buffer_<DATATYPE>(dest, (uint64_t*)source, scil_get_data_count(dims), abstol, minimum);
+    return scil_unquantize_buffer_<DATATYPE>(dest, (uint64_t*)source, scilPr_get_dims_count(dims), abstol, minimum);
 }
 // End repeat
 
-scil_compression_algorithm algo_quantize = {
+scilI_algorithm_t algo_quantize = {
     .c.Ctype = {
         CREATE_INITIALIZER(scil_quantize)
     },

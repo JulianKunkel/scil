@@ -15,11 +15,11 @@
 
 #include <algo/algo-abstol.h>
 
-#include <scil.h>
-#include <scil-error.h>
 #include <scil-quantizer.h>
 #include <scil-swager.h>
+#include <scil-util.h>
 
+#include <assert.h>
 #include <math.h>
 #include <string.h>
 
@@ -35,10 +35,10 @@ static uint64_t round_up_byte(const uint64_t bits){
 }
 
 static void read_header(const byte* source,
-                        size_t* const source_size,
-                        double* const minimum,
-                        double* const absolute_tolerance,
-                        uint8_t* const bits_per_value){
+                        size_t* source_size,
+                        double* minimum,
+                        double* absolute_tolerance,
+                        uint8_t* bits_per_value){
 
     *minimum = *((double*)source);
     source += 8;
@@ -71,11 +71,11 @@ static void write_header(byte* dest,
 //Repeat for each data type
 //Supported datatypes:double float
 
-int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
+int scil_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
                                     byte* restrict dest,
                                     size_t* restrict dest_size,
                                     <DATATYPE>* restrict source,
-                                    const scil_dims* dims){
+                                    const scil_dims_t* dims){
 
     assert(dest != NULL);
     assert(dest_size != NULL);
@@ -83,7 +83,7 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
     assert(dims != NULL);
 
     // Element count in buffer to compress
-    size_t count = scil_get_data_count(dims);
+    size_t count = scilPr_get_dims_count(dims);
 
     // Finding minimum and maximum values in data
     <DATATYPE> min, max;
@@ -126,7 +126,7 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_p ctx,
 }
 
 int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
-                                      scil_dims* dims,
+                                      scil_dims_t* dims,
                                       byte* restrict source,
                                       size_t source_size){
 
@@ -138,7 +138,7 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
     uint8_t bits_per_value;
     byte* in = source;
     size_t in_size = source_size;
-    size_t count = scil_get_data_count(dims);
+    size_t count = scilPr_get_dims_count(dims);
     uint64_t* unswaged_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t*));
 
     // ============ Decompress ================================================
@@ -165,7 +165,7 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
 
 
 
-scil_compression_algorithm algo_abstol = {
+scilI_algorithm_t algo_abstol = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_abstol)
     },

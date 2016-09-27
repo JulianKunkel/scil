@@ -13,27 +13,41 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SCIL_PATTERN_LIB_H
-#define SCIL_PATTERN_LIB_H
+#ifndef SCIL_PATTERN_H
+#define SCIL_PATTERN_H
 
-#include <scil.h>
+#include <scil-dims.h>
 
-int scilP_available_patterns_count();
-char * scilP_available_patterns_name(int p);
+int   scilPa_get_available_patterns_count();
+char* scilPa_get_pattern_name(int index);
+int   scilPa_get_pattern_index(const char* name);
 
 /*
  * Create the pattern selected by num with the arguments
  */
-int scilP_create_pattern_double(scil_dims * dims, double * buffer, char * name, float mn, float mx, float arg, float arg2);
-int scilP_create_pattern_float (scil_dims * dims, float * buffer, char * name, float mn, float mx, float arg, float arg2);
+int scilPa_create_pattern_double(double* buffer,
+                                 const scil_dims_t* dims,
+                                 const char* name,
+                                 float mn,
+                                 float mx,
+                                 float arg,
+                                 float arg2);
+
+int scilPa_create_pattern_float (float*  const buffer,
+                                 const scil_dims_t* dims,
+                                 const char* name,
+                                 float mn,
+                                 float mx,
+                                 float arg,
+                                 float arg2);
 
 /*
  * The pattern library contains a list of useful patterns.
  */
-int scilP_library_size();
-char * scilP_library_pattern_name(int pattern);
+int scilPa_get_pattern_library_size();
+char* scilPa_get_library_pattern_name(int pattern);
 
-int scilP_library_create_pattern_double(int pattern, scil_dims * dims, double * buffer);
-int scilP_library_create_pattern_float (int pattern, scil_dims * dims, float * buffer);
+int scilPa_create_library_pattern_double(double* buffer, const scil_dims_t* dims, int pattern);
+int scilPa_create_library_pattern_float (float*  const buffer, const scil_dims_t* dims, int pattern);
 
-#endif
+#endif // SCIL_PATTERN_H

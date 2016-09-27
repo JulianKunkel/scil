@@ -18,11 +18,11 @@
 
 #include <scil-pattern-internal.h>
 
-extern scil_pattern scil_pattern_constant;
-extern scil_pattern scil_pattern_steps;
-extern scil_pattern scil_pattern_rnd;
-extern scil_pattern scil_pattern_sin;
+extern scil_pattern_t scil_pattern_constant;
+extern scil_pattern_t scil_pattern_steps;
+extern scil_pattern_t scil_pattern_rnd;
+extern scil_pattern_t scil_pattern_sin;
 
-extern scil_pattern scil_pattern_poly4;
+extern scil_pattern_t scil_pattern_poly4;
 
 #endif

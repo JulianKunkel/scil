@@ -85,7 +85,7 @@ FILE* safe_fopen(const char* path, const char* args, const char* src, unsigned l
     return file;
 }
 
-size_t scilU_write_dims_to_buffer(void* dest, const scil_dims* dims){
+size_t scilU_write_dims_to_buffer(void* dest, const scil_dims_t* dims){
 
     assert(dest != NULL);
 
@@ -104,7 +104,7 @@ size_t scilU_write_dims_to_buffer(void* dest, const scil_dims* dims){
     return header_size;
 }
 
-void scilU_read_dims_from_buffer(scil_dims* dims, void* dest){
+void scilU_read_dims_from_buffer(scil_dims_t* dims, void* dest){
     dims->dims = *((uint8_t*)dest);
     dest = (char*)dest + 1;
 
@@ -245,7 +245,7 @@ int scilU_float_equal(float val1, float val2){
 /*
 \brief Convert the current position in a ND array to the position of the original 1D data array.
  */
-size_t scilG_data_pos(scil_dims * pos, scil_dims * size){
+size_t scilG_data_pos(const scil_dims_t* pos, const scil_dims_t* size){
   assert(size->dims == pos->dims);
   size_t cur = pos->length[size->dims - 1];
   if(size->dims == 0){
@@ -259,39 +259,46 @@ size_t scilG_data_pos(scil_dims * pos, scil_dims * size){
 }
 
 
-void scilG_iter(double * data, scil_dims dims, scil_dims offset, scil_dims ende, int * iter, scilG_iterfunc func, void * user_ptr){
-  assert(dims.dims > 0);
+void scilG_iter(double* data,
+                const scil_dims_t* dims,
+                const scil_dims_t* offset,
+                const scil_dims_t* ende,
+                int* iter,
+                scilG_iterfunc func,
+                const void* user_ptr)
+{
+  assert(dims->dims > 0);
   // check arguments further
-  for(int i = 0; i < dims.dims; i++){
-    assert(dims.length[i] > 0);
-    assert(ende.length[i] <= dims.length[i]);
+  for(int i = 0; i < dims->dims; i++){
+    assert(dims->length[i] > 0);
+    assert(ende->length[i] <= dims->length[i]);
   }
 
-  scil_dims pos_dims;
-  pos_dims.dims = dims.dims;
-  size_t * pos = pos_dims.length;
-  for(int i = 0; i < dims.dims; i++){
-    pos[i] = offset.length[i];
+  scil_dims_t pos_dims;
+  pos_dims.dims = dims->dims;
+  size_t* pos = pos_dims.length;
+  for(int i = 0; i < dims->dims; i++){
+    pos[i] = offset->length[i];
   }
-  int iter_local[dims.dims];
+  int iter_local[dims->dims];
 
   if(iter == NULL){
     iter = iter_local;
-    for(int i = 0; i < dims.dims; i++){
+    for(int i = 0; i < dims->dims; i++){
       iter[i] = 1;
     }
   }
 
   // descent into starting point
-  int stackpos = dims.dims - 1;
+  int stackpos = dims->dims - 1;
   while(stackpos != -1){
     // walk over last dimension
     {
-      size_t start = offset.length[dims.dims - 1];
-      size_t end = ende.length[dims.dims - 1];
+      size_t start = offset->length[dims->dims - 1];
+      size_t end = ende->length[dims->dims - 1];
       for(size_t i=start; i < end; i+= iter[stackpos]){
         pos[stackpos] = i;
-        func(data, pos_dims, dims, iter, user_ptr);
+        func(data, &pos_dims, dims, iter, user_ptr);
       }
     }
     // propagate upwards
@@ -299,11 +306,11 @@ void scilG_iter(double * data, scil_dims dims, scil_dims offset, scil_dims ende,
     while(stackpos != -1){
       pos[stackpos]+= iter[stackpos];
 
-      size_t start = offset.length[stackpos];
-      size_t end = ende.length[stackpos];
+      size_t start = offset->length[stackpos];
+      size_t end = ende->length[stackpos];
 
       if(pos[stackpos] < end){
-        stackpos = dims.dims - 1;
+        stackpos = dims->dims - 1;
         break;
       }
       pos[stackpos] = start;
@@ -312,7 +319,7 @@ void scilG_iter(double * data, scil_dims dims, scil_dims offset, scil_dims ende,
   }
 }
 
-void scilU_print_dims(scil_dims pos){
+void scilU_print_dims(scil_dims_t pos){
   printf("(");
   printf("%zu", pos.length[0]);
   for(int i=1; i < pos.dims; i++){
@@ -323,7 +330,7 @@ void scilU_print_dims(scil_dims pos){
 
 
 
-static void scilU_plot1D(const char* name, scil_dims dims, double * buffer_in){
+static void scilU_plot1D(const char* name, scil_dims_t dims, double * buffer_in){
   FILE * f = fopen(name, "w");
   if(f == NULL){
     printf("Coult not open %s for write\n", name);
@@ -338,7 +345,7 @@ static void scilU_plot1D(const char* name, scil_dims dims, double * buffer_in){
   fclose(f);
 }
 
-static void scilU_plot2D(const char* name, scil_dims dims, double * buffer_in){
+static void scilU_plot2D(const char* name, scil_dims_t dims, double * buffer_in){
   FILE * f = fopen(name, "w");
   if(f == NULL){
     printf("Coult not open %s for write\n", name);
@@ -355,7 +362,7 @@ static void scilU_plot2D(const char* name, scil_dims dims, double * buffer_in){
   fclose(f);
 }
 
-static void scilU_plot3D(const char* name, scil_dims dims, double * buffer_in){
+static void scilU_plot3D(const char* name, scil_dims_t dims, double * buffer_in){
   FILE * f = fopen(name, "w");
   if(f == NULL){
     printf("Coult not open %s for write\n", name);
@@ -376,7 +383,7 @@ static void scilU_plot3D(const char* name, scil_dims dims, double * buffer_in){
   fclose(f);
 }
 
-void scilU_plot(const char* name, scil_dims dims, double * buffer_in){
+void scilU_plot(const char* name, scil_dims_t dims, double * buffer_in){
   switch(dims.dims){
     case (1):{
        scilU_plot1D(name, dims, buffer_in);

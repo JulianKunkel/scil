@@ -16,7 +16,7 @@
 #ifndef SCIL_ALGO_LZ4_H_
 #define SCIL_ALGO_LZ4_H_
 
-#include <scil-internal.h>
+#include <scil-algorithm.h>
 
 /**
  * \brief Trivial LZ4 compression function
@@ -27,7 +27,7 @@
  * \param source_size Byte size of uncompressed buffer
  * \return Success state of the compression
  */
-int scil_lz4fast_compress(const scil_context_p ctx, byte* restrict dest, size_t * restrict out_size, const byte*restrict source, const size_t source_size);
+int scil_lz4fast_compress(const scil_context_t* ctx, byte* restrict dest, size_t * restrict out_size, const byte*restrict source, const size_t source_size);
 
 /**
  * \brief Trivial LZ4 decompression function
@@ -40,6 +40,6 @@ int scil_lz4fast_compress(const scil_context_p ctx, byte* restrict dest, size_t 
  */
 int scil_lz4fast_decompress(byte*restrict dest, size_t buff_size, const byte*restrict src, const size_t in_size, size_t * uncomp_size_out);
 
-extern scil_compression_algorithm algo_lz4fast;
+extern scilI_algorithm_t algo_lz4fast;
 
 #endif

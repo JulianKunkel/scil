@@ -24,21 +24,21 @@
 
 int main(){
 
-  scil_context_p ctx;
-  scil_user_params_t hints;
-  scil_dims dims;
+  scil_context_t* ctx;
+  scil_user_hints_t hints;
+  scil_dims_t dims;
   int ret;
 
-  scil_init_hints(& hints);
+  scilPr_initialize_user_hints(& hints);
   hints.force_compression_methods = "dummy-precond";
-  ret = scil_create_compression_context(& ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+  ret = scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
   assert(ret == SCIL_NO_ERR);
 
   size_t size;
   byte * buff;
 
-  scil_init_dims_1d(& dims, 0);
-  size = scil_compress_buffer_size_bound(SCIL_TYPE_DOUBLE, & dims);
+  scilPr_initialize_dims_1d(& dims, 0);
+  size = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
   buff = malloc(size);
 
   double data[] = {1};
@@ -48,7 +48,7 @@ int main(){
   assert(ret == SCIL_NO_ERR);
   assert(out_size == 1);
 
-  scil_destroy_compression_context(& ctx);
+  scilPr_destroy_context(ctx);
 
   free(buff);
 

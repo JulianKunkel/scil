@@ -21,10 +21,11 @@
 #include <float.h>
 #include <math.h>
 
-#include <scil-util.h>
+#include <scil-compressors.h>
 #include <scil-algo-chooser.h>
-#include <scil-patterns.h>
 #include <scil-internal.h>
+#include <scil-patterns.h>
+#include <scil-util.h>
 
 #define allocate(type, name, count) type* name = (type*)malloc(count * sizeof(type))
 
@@ -35,7 +36,7 @@
 // # Data Characteristics Aquisition
 // #############################################################################
 
-static double get_data_minimum(const double* const data, size_t count){
+static double get_data_minimum(const double* data, size_t count){
 
     double min = INFINITY;
 
@@ -46,7 +47,7 @@ static double get_data_minimum(const double* const data, size_t count){
     return min;
 }
 
-static double get_data_maximum(const double* const data, size_t count){
+static double get_data_maximum(const double* data, size_t count){
 
     double max = -INFINITY;
 
@@ -57,7 +58,7 @@ static double get_data_maximum(const double* const data, size_t count){
     return max;
 }
 
-static double get_data_mean(const double* const data, size_t count){
+static double get_data_mean(const double* data, size_t count){
 
       double mn = 0.0;
 
@@ -74,7 +75,7 @@ static int compdblp(const void* a, const void* b){
     if (*(double*)a < *(double*)b){ return -1; }
     return 0;
 }
-static double get_data_median(const double* const data, size_t count){
+static double get_data_median(const double* data, size_t count){
 
     allocate(double, tmp_buf, count);
     memcpy(tmp_buf, data, count * sizeof(double));
@@ -91,7 +92,7 @@ static double get_data_median(const double* const data, size_t count){
     return median;
 }
 
-static double get_data_std_deviation(const double* const data, size_t count, double mean){
+static double get_data_std_deviation(const double* data, size_t count, double mean){
 
     double variance_sum = 0.0;
 
@@ -103,10 +104,10 @@ static double get_data_std_deviation(const double* const data, size_t count, dou
     return sqrt(variance_sum / count);
 }
 
-static int get_data_characteristics(const double* const data, size_t count,
-                                    double* const minimum   , double* const maximum,
-                                    double* const mean      , double* const median,
-                                    double* const std_deviation){
+static int get_data_characteristics(const double* data, size_t count,
+                                    double* minimum   , double* maximum,
+                                    double* mean      , double* median,
+                                    double* std_deviation){
 
     *minimum       = get_data_minimum(data, count);
     *maximum       = get_data_maximum(data, count);
@@ -128,18 +129,18 @@ float positive_limit   = 1.1e6;
 float factor_step      = 10.0f;
 
 double* data = NULL;
-scil_dims dims;
+scil_dims_t dims;
 
-scil_user_params_t hints;
-//scil_init_hints(&hints);
+scil_user_hints_t hints;
+//scilPr_initialize_user_hints(&hints);
 
-static int benchmark_data(const double* const data, const scil_dims* const dims){
+static int benchmark_data(const double* data, const scil_dims_t* dims){
 
     double minimum, maximum;
     double mean, median;
     double std_deviation;
 
-    get_data_characteristics(data          , scil_get_data_count(dims),
+    get_data_characteristics(data          , scilPr_get_dims_count(dims),
                              &minimum      , &maximum,
                              &mean         , &median,
                              &std_deviation);
@@ -155,7 +156,7 @@ static void iterate_6_poly4_arg2(float mn, float mx, float arg){
 
     for (int arg2 = 1; arg2 < 33; arg2 *= 2){
 
-        scilP_create_pattern_double(&dims, data, "sin", mn, mx, arg, arg2);
+        scilPa_create_pattern_double(&dims, data, "sin", mn, mx, arg, arg2);
     }
 }
 static void iterate_5_poly4_arg(float mn, float mx){
@@ -209,7 +210,7 @@ static void iterate_5_sin_arg(){
 
     for (int arg = 1; arg < arg_maximum; ++arg) {
 
-        scilP_create_pattern_double(&dims, data, "sin", mn, mx, arg, 0.0f);
+        scilPa_create_pattern_double(&dims, data, "sin", mn, mx, arg, 0.0f);
     }
 }
 static void iterate_4_sin_mx_negative(float mn){
@@ -256,7 +257,7 @@ static void iterate_5_step_arg(float mn, float mx) {
 
     for (int arg = 1; arg < 65; arg *= 2) {
 
-        scilP_create_pattern_double(&dims, data, "step", mn, mx, arg, 0.0f);
+        scilPa_create_pattern_double(&dims, data, "step", mn, mx, arg, 0.0f);
     }
 }
 static void iterate_4_step_mx_negative(float mn) {
@@ -303,18 +304,18 @@ static void iterate_4_random_mx_negative(float mn) {
 
     for (float mx = min; mx < negative_limit; mx /= factor_step) {
 
-        scilP_create_pattern_double(&dims, data, "random", mn, mx, 0.0f, 0.0f);
+        scilPa_create_pattern_double(&dims, data, "random", mn, mx, 0.0f, 0.0f);
     }
 }
 static void iterate_4_random_mx_zero(float mn) {
 
-    scilP_create_pattern_double(&dims, data, "random", mn, 0.0f, 0.0f, 0.0f);
+    scilPa_create_pattern_double(&dims, data, "random", mn, 0.0f, 0.0f, 0.0f);
 }
 static void iterate_4_random_mx_positive(float mn) {
 
     for (float mx = positive_minimum; mx < positive_limit; mx *= factor_step) {
 
-        scilP_create_pattern_double(&dims, data, "random", mn, mx, 0.0f, 0.0f);
+        scilPa_create_pattern_double(&dims, data, "random", mn, mx, 0.0f, 0.0f);
     }
 }
 static void iterate_3_random_mn() {
@@ -345,15 +346,15 @@ static void iterate_3_constant_mn(){
 
     // Negative constant
     for (float mn = negative_minimum; mn < negative_limit; mn /= factor_step) {
-        scilP_create_pattern_double(&dims, data, "constant", mn, 0.0f, 0.0f, 0.0f);
+        scilPa_create_pattern_double(&dims, data, "constant", mn, 0.0f, 0.0f, 0.0f);
     }
 
     // Zero constant
-    scilP_create_pattern_double(&dims, data, "constant", 0.0f, 0.0f, 0.0f, 0.0f);
+    scilPa_create_pattern_double(&dims, data, "constant", 0.0f, 0.0f, 0.0f, 0.0f);
 
     // Positive constant
     for (float mn = positive_minimum; mn < positive_limit; mn *= factor_step) {
-        scilP_create_pattern_double(&dims, data, "constant", mn, 0.0f, 0.0f, 0.0f);
+        scilPa_create_pattern_double(&dims, data, "constant", mn, 0.0f, 0.0f, 0.0f);
     }
 }
 
@@ -374,10 +375,10 @@ static void iterate_2_patterns() {
 
 static void iterate_4_algos(){
 
-    uint8_t count = scil_compressors_available();
+    uint8_t count = scilU_get_available_compressor_count();
     for (uint8_t i = 0; i < count; ++i) {
 
-        scil_init_hints(&hints);
+        scilPr_initialize_user_hints(&hints);
         snprintf(hints.force_compression_methods, 8, "%d", i);
     }
 }
@@ -388,7 +389,7 @@ static void iterate_3_random_poly4(){
     float seed = (float)rand();
     float points = 1.0f + (float)(rand() % 63);
 
-    scilP_create_pattern_double(&dims, data, "poly4", 0.0f, 1.0f, seed, points); // min and max don't matter
+    scilPa_create_pattern_double(data, &dims, "poly4", 0.0f, 1.0f, seed, points); // min and max don't matter
 
 
 }
@@ -402,7 +403,7 @@ static void iterate_3_random_sin(){
 
     float octaves = 1.0f + (float)(rand() % 10);
 
-    scilP_create_pattern_double(&dims, data, "sin", 0.0f, 1.0f, height, octaves); // min and max don't matter
+    scilPa_create_pattern_double(data, &dims, "sin", 0.0f, 1.0f, height, octaves); // min and max don't matter
 }
 static void iterate_3_random_steps(){
 
@@ -419,7 +420,7 @@ static void iterate_3_random_steps(){
 
     float arg = 2.0f + 98.0f * (float)rand()/RAND_MAX;
 
-    scilP_create_pattern_double(&dims, data, "steps", mn, mx, arg, 0.0f);
+    scilPa_create_pattern_double(data, &dims, "steps", mn, mx, arg, 0.0f);
 }
 static void iterate_3_random_random(){
 
@@ -434,7 +435,7 @@ static void iterate_3_random_random(){
     float mn = powf(mn_base, (float)iexp) + offset;
     float mx = powf(mx_base, (float)iexp) + offset;
 
-    scilP_create_pattern_double(&dims, data, "random", mn, mx, 0.0f, 0.0f);
+    scilPa_create_pattern_double(data, &dims, "random", mn, mx, 0.0f, 0.0f);
 }
 static void iterate_3_random_constant(){
 
@@ -447,7 +448,7 @@ static void iterate_3_random_constant(){
 
     float mn = powf(base, (float)iexp);
 
-    scilP_create_pattern_double(&dims, data, "constant", mn, 0.0f, 0.0f, 0.0f);
+    scilPa_create_pattern_double(data, &dims, "constant", mn, 0.0f, 0.0f, 0.0f);
 }
 
 static void iterate_2_random_patterns(size_t count){
@@ -469,13 +470,13 @@ static void iterate_1_dimensions(size_t count){
         size_t count_per_dim = (size_t)(pow((double)count, 1.0 / d_size));
 
         switch (d_size) {
-        case 1: scil_init_dims_1d(&dims, count_per_dim); break;
-        case 2: scil_init_dims_2d(&dims, count_per_dim, count_per_dim); break;
-        case 3: scil_init_dims_3d(&dims, count_per_dim, count_per_dim, count_per_dim); break;
-        case 4: scil_init_dims_4d(&dims, count_per_dim, count_per_dim, count_per_dim, count_per_dim); break;
+        case 1: scilPr_initialize_dims_1d(&dims, count_per_dim); break;
+        case 2: scilPr_initialize_dims_2d(&dims, count_per_dim, count_per_dim); break;
+        case 3: scilPr_initialize_dims_3d(&dims, count_per_dim, count_per_dim, count_per_dim); break;
+        case 4: scilPr_initialize_dims_4d(&dims, count_per_dim, count_per_dim, count_per_dim, count_per_dim); break;
         }
 
-        data = (double*)malloc(scil_get_data_size(SCIL_TYPE_DOUBLE, &dims));
+        data = (double*)malloc(scilPr_get_dims_size(&dims, SCIL_TYPE_DOUBLE));
 
         iterate_2_random_patterns(1);
 

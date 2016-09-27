@@ -12,21 +12,21 @@ int main(void)
 
     float* source = (float*)SAFE_MALLOC(count * sizeof(float));
 
-    scil_dims dims;
-    scil_init_dims_1d(&dims, count);
+    scil_dims_t dims;
+    scilPr_initialize_dims_1d(&dims, count);
 
-    scilP_create_pattern_float(&dims, source, "random", -100.0f, 100.0f, 0.0f, 0.0f);
+    scilPa_create_pattern_float(source, &dims, "random", -100.0f, 100.0f, 0.0f, 0.0f);
 
-    size_t dest_size = scil_compress_buffer_size_bound(SCIL_TYPE_FLOAT, &dims);
+    size_t dest_size = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_FLOAT);
     byte* dest       = (byte*)SAFE_MALLOC(dest_size);
 
-    scil_user_params_t hints;
-    scil_init_hints(&hints);
+    scil_user_hints_t hints;
+    scilPr_initialize_user_hints(&hints);
     hints.force_compression_methods = "1";
     hints.absolute_tolerance        = 1e-100;
 
-    scil_context_p ctx;
-    scil_create_compression_context(&ctx, SCIL_TYPE_FLOAT, 0, NULL, &hints);
+    scil_context_t* ctx;
+    scilPr_create_context(&ctx, SCIL_TYPE_FLOAT, 0, NULL, &hints);
 
     //printf("%s\n", ctx->chain.byte_compressor->name);
     //printf("%s\n", ctx->chain.data_compressor->name);

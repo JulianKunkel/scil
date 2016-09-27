@@ -46,11 +46,11 @@ int hard_threshold_<DATATYPE>(<DATATYPE> **matrix,int Ni,int Nj,float threshold)
 }
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_wavelets_compress_<DATATYPE>(const scil_context_p ctx,
+int scil_wavelets_compress_<DATATYPE>(const scil_context_t* ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
                         <DATATYPE>*restrict source,
-                        const scil_dims* dims)
+                        const scil_dims_t* dims)
 {
     int i,j;
   	int shift_arr_r[MAX_ARR_SIZE],shift_arr_c[MAX_ARR_SIZE];
@@ -111,7 +111,7 @@ int scil_wavelets_compress_<DATATYPE>(const scil_context_p ctx,
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int  scil_wavelets_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
-                            scil_dims* dims,
+                            scil_dims_t* dims,
                             byte*restrict compressed_buf_in,
                             const size_t in_size)
 {
@@ -157,7 +157,7 @@ int  scil_wavelets_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
 }
 // End repeat
 
-scil_compression_algorithm algo_wavelets = {
+scilI_algorithm_t algo_wavelets = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_wavelets)
     },

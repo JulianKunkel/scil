@@ -23,7 +23,7 @@
 #ifndef SCIL_GZIP_H_
 #define SCIL_GZIP_H_
 
-#include <scil-internal.h>
+#include <scil-algorithm.h>
 
 /**
  * \brief Compression function of gzip
@@ -34,7 +34,7 @@
  * \param source_size Byte size of uncompressed buffer
  * \return Success state of the compression
  */
-int scil_gzip_compress(const scil_context_p ctx, byte* restrict dest, size_t* restrict dest_size, const byte* restrict source, const size_t source_size);
+int scil_gzip_compress(const scil_context_t* ctx, byte* restrict dest, size_t* restrict dest_size, const byte* restrict source, const size_t source_size);
 
 /**
  * \brief Deompression function of gzip
@@ -46,6 +46,6 @@ int scil_gzip_compress(const scil_context_p ctx, byte* restrict dest, size_t* re
  */
 int scil_gzip_decompress(byte*restrict data_out, size_t buff_size, const byte*restrict compressed_buf_in, const size_t in_size, size_t * uncomp_size_out);
 
-extern scil_compression_algorithm algo_gzip;
+extern scilI_algorithm_t algo_gzip;
 
 #endif

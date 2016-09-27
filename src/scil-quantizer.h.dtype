@@ -12,7 +12,7 @@
  * \pre buffer != NULL
  * \return Smallest value in the buffer
  */
-<DATATYPE> scil_find_minimum_<DATATYPE>(const <DATATYPE>* const buffer,
+<DATATYPE> scil_find_minimum_<DATATYPE>(const <DATATYPE>* buffer,
                                         size_t count);
 
 /**
@@ -22,7 +22,7 @@
  * \pre buffer != NULL
  * \return Biggest value in the buffer
  */
-<DATATYPE> scil_find_maximum_<DATATYPE>(const <DATATYPE>* const buffer,
+<DATATYPE> scil_find_maximum_<DATATYPE>(const <DATATYPE>* buffer,
                                         size_t count);
 
 /**
@@ -37,10 +37,10 @@
  * \pre maximum != NULL
  * \return Biggest value in the buffer
  */
-void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* const restrict buffer,
+void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* restrict buffer,
                                           size_t count,
-                                          <DATATYPE>* const minimum,
-                                          <DATATYPE>* const maximum);
+                                          <DATATYPE>* minimum,
+                                          <DATATYPE>* maximum);
 
 /**
  * \brief Calculates how many bit are needed per value, considering
@@ -67,8 +67,8 @@ uint64_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum,
  * \pre buf_in != NULL
  * \return SCIL error code
  */
-int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* const restrict buf_out,
-                                           const <DATATYPE>* const restrict buf_in,
+int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* restrict buf_out,
+                                           const <DATATYPE>* restrict buf_in,
                                            size_t count,
                                            double absolute_tolerance,
                                            <DATATYPE> minimum,
@@ -85,8 +85,8 @@ int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* const restrict buf_out,
 * \return 0 (success) or
 *         1 (quantizing would result in integer values bigger than UINT64_MAX)
 */
-int scil_quantize_buffer_<DATATYPE>(uint64_t* const restrict buf_out,
-                                    const <DATATYPE>* const restrict buf_in,
+int scil_quantize_buffer_<DATATYPE>(uint64_t* restrict buf_out,
+                                    const <DATATYPE>* restrict buf_in,
                                     size_t count,
                                     double absolute_tolerance);
 
@@ -101,8 +101,8 @@ int scil_quantize_buffer_<DATATYPE>(uint64_t* const restrict buf_out,
  * \pre buf_in != NULL
  * \return SCIL error code
  */
-int scil_unquantize_buffer_<DATATYPE>(<DATATYPE>* const restrict buf_out,
-                                      const uint64_t* const restrict buf_in,
+int scil_unquantize_buffer_<DATATYPE>(<DATATYPE>* restrict buf_out,
+                                      const uint64_t* restrict buf_in,
                                       size_t count,
                                       double absolute_tolerance,
                                       <DATATYPE> minimum);

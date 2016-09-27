@@ -38,14 +38,14 @@ int main(){
   H5Pset_chunk(dcpl, 2, chunk_size);
   H5Pset_filter(dcpl, SCIL_ID, H5Z_FLAG_MANDATORY, 0, NULL);
 
-  scil_user_params_t h;
-  scil_init_hints(& h);
+  scil_user_hints_t h;
+  scilPr_initialize_user_hints(& h);
   h.significant_digits = 12;
   h.absolute_tolerance = 1.0;
   h.comp_speed.unit = SCIL_PERFORMANCE_MIB;
   h.comp_speed.multiplier = 100;
   h.force_compression_methods = "abstol";
-  H5Pset_scil_user_params_t(dcpl, & h);
+  H5Pset_scil_user_hints_t(dcpl, & h);
 
   hsize_t dims[2] = {4,10};
   data_space = H5Screate_simple (2, dims, NULL);

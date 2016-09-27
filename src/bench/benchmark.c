@@ -624,7 +624,7 @@ int main_alt(int argc, char** argv) {
 	return 0;
 }*/
 
-static int write_to_csv(const double bias, const double discountFactor, const scil_user_params_t hints, const size_t uncompressed_size, const size_t compressed_size, const double compression_ratio, const double seconds){
+static int write_to_csv(const double bias, const double discountFactor, const scil_user_hints_t hints, const size_t uncompressed_size, const size_t compressed_size, const double compression_ratio, const double seconds){
 
 	char path[128];
 	sprintf(path, "performance_data_%.2f_%.2f.csv", bias, discountFactor);
@@ -708,13 +708,13 @@ int test_performance(double bias, double discountFactor){
 	allocate(byte, buffer_out, c_size);
 	if(!buffer_out) return kErrNoMem;
 
-	scil_dims dims;
-	scil_init_dims_1d(& dims, variableSize);
+	scil_dims_t dims;
+	scilPr_initialize_dims_1d(& dims, variableSize);
 
-  scil_context_p ctx;
-  scil_user_params_t hints;
+  scil_context_t* ctx;
+  scil_user_hints_t hints;
 
-  scil_init_hints(&hints);
+  scilPr_initialize_user_hints(&hints);
 
   hints.force_compression_methods = "0";
 	hints.absolute_tolerance = 0.5;
@@ -723,7 +723,7 @@ int test_performance(double bias, double discountFactor){
 	char pipeline[100];
 
 	hints.force_compression_methods = pipeline;
-	for(int i=0; i < scil_compressors_available(); i++ ){
+	for(int i=0; i < scilU_get_available_compressor_count(); i++ ){
 		sprintf(pipeline, "%d", i);
 
 		double abs_tol = 0.5;
@@ -734,7 +734,7 @@ int test_performance(double bias, double discountFactor){
 			hints.absolute_tolerance = abs_tol;
 			hints.significant_bits = r;
 
-			scil_create_compression_context(&ctx, SCIL_TYPE_DOUBLE, &hints);
+			scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, &hints);
 			size_t out_c_size = c_size;
 
 			double seconds = 0;

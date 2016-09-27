@@ -25,7 +25,7 @@
 #ifndef SCIL_FPZIP_H_
 #define SCIL_FPZIP_H_
 
-#include <scil-internal.h>
+#include <scil-algorithm.h>
 
 // Repeat for each data type
 
@@ -38,7 +38,7 @@
  * \param dims Dimensional configuration of uncompressed buffer
  * \return Success state of the compression
  */
-int scil_fpzip_compress_<DATATYPE>(const scil_context_p ctx, byte* restrict dest, size_t* restrict dest_size, <DATATYPE>*restrict source, const scil_dims* dims);
+int scil_fpzip_compress_<DATATYPE>(const scil_context_t* ctx, byte* restrict dest, size_t* restrict dest_size, <DATATYPE>*restrict source, const scil_dims_t* dims);
 
 /**
  * \brief Decompression function of fpzip
@@ -48,11 +48,11 @@ int scil_fpzip_compress_<DATATYPE>(const scil_context_p ctx, byte* restrict dest
  * \param in_size Byte size of compressed buffer
  * \return Success state of the compression
  */
-int scil_fpzip_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_dims* dims, byte*restrict compressed_buf_in, const size_t in_size);
+int scil_fpzip_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_dims_t* dims, byte*restrict compressed_buf_in, const size_t in_size);
 
 // End repeat
 
 
-extern scil_compression_algorithm algo_fpzip;
+extern scilI_algorithm_t algo_fpzip;
 
 #endif

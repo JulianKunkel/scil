@@ -20,6 +20,7 @@
 #include <scil-error.h>
 #include <scil-internal.h>
 #include <scil-swager.h>
+#include <scil-util.h>
 
 #include <math.h>
 
@@ -82,11 +83,11 @@ static uint64_t mask[] = {
 };
 
 static void read_header(const byte* source,
-                        size_t* const source_size,
-                        uint8_t* const signs_id,
-                        uint8_t* const exponent_bit_count,
-                        uint8_t* const mantissa_bit_count,
-                        int16_t* const minimum_exponent){
+                        size_t* source_size,
+                        uint8_t* signs_id,
+                        uint8_t* exponent_bit_count,
+                        uint8_t* mantissa_bit_count,
+                        int16_t* minimum_exponent){
 
     *signs_id = *((uint8_t*)source);
     source += 1;
@@ -171,12 +172,12 @@ static uint64_t get_mantissa_double(uint64_t value, uint8_t mantissa_bit_count){
 
 // Repeat for each data type
 
-static void find_minimums_and_maximums_<DATATYPE>(const <DATATYPE>* const buffer,
+static void find_minimums_and_maximums_<DATATYPE>(const <DATATYPE>* buffer,
                                                   const size_t size,
-                                                  uint8_t* const minimum_sign,
-                                                  uint8_t* const maximum_sign,
-                                                  int16_t* const minimum_exponent,
-                                                  int16_t* const maximum_exponent){
+                                                  uint8_t* minimum_sign,
+                                                  uint8_t* maximum_sign,
+                                                  int16_t* minimum_exponent,
+                                                  int16_t* maximum_exponent){
 
     *minimum_sign = 1;
     *maximum_sign = 0;
@@ -197,11 +198,11 @@ static void find_minimums_and_maximums_<DATATYPE>(const <DATATYPE>* const buffer
     }
 }
 
-static void get_header_data_<DATATYPE>(const <DATATYPE>* const source,
+static void get_header_data_<DATATYPE>(const <DATATYPE>* source,
                                        size_t count,
-                                       uint8_t* const signs_id,
-                                       uint8_t* const exponent_bit_count,
-                                       int16_t* const minimum_exponent){
+                                       uint8_t* signs_id,
+                                       uint8_t* exponent_bit_count,
+                                       int16_t* minimum_exponent){
 
     uint8_t minimum_sign, maximum_sign;
     int16_t maximum_exponent;
@@ -270,8 +271,8 @@ static <DATATYPE> decompress_value_<DATATYPE>(uint64_t value,
     return cur.f;
 }
 
-static int compress_buffer_<DATATYPE>(uint64_t* const restrict dest,
-                                      const <DATATYPE>* const restrict source,
+static int compress_buffer_<DATATYPE>(uint64_t* restrict dest,
+                                      const <DATATYPE>* restrict source,
                                       size_t count,
                                       uint8_t signs_id,
                                       uint8_t exponent_bit_count,
@@ -285,7 +286,7 @@ static int compress_buffer_<DATATYPE>(uint64_t* const restrict dest,
     return SCIL_NO_ERR;
 }
 
-static int decompress_buffer_<DATATYPE>(<DATATYPE>* const restrict dest,
+static int decompress_buffer_<DATATYPE>(<DATATYPE>* restrict dest,
                                         const uint64_t* restrict source,
                                         size_t count,
                                         uint8_t bit_count_per_value,
@@ -301,11 +302,11 @@ static int decompress_buffer_<DATATYPE>(<DATATYPE>* const restrict dest,
     return SCIL_NO_ERR;
 }
 
-int scil_sigbits_compress_<DATATYPE>(const scil_context_p ctx,
+int scil_sigbits_compress_<DATATYPE>(const scil_context_t* ctx,
                                      byte * restrict dest,
                                      size_t* dest_size,
                                      <DATATYPE>*restrict source,
-                                     const scil_dims* dims){
+                                     const scil_dims_t* dims){
 
     assert(ctx != NULL);
     assert(dest != NULL);
@@ -321,7 +322,7 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_p ctx,
         return SCIL_PRECISION_ERR;
     }
 
-    size_t count = scil_get_data_count(dims);
+    size_t count = scilPr_get_dims_count(dims);
 
     uint8_t signs_id, exponent_bit_count;
     int16_t minimum_exponent;
@@ -361,7 +362,7 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_p ctx,
 }
 
 int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
-                                       scil_dims* dims,
+                                       scil_dims_t* dims,
                                        byte*restrict source,
                                        size_t source_size){
 
@@ -371,7 +372,7 @@ int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 
     // ==================== Initialization =====================================
 
-    size_t count = scil_get_data_count(dims);
+    size_t count = scilPr_get_dims_count(dims);
 
     size_t source_size_cp = source_size;
 
@@ -414,7 +415,7 @@ int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 
 // End repeat
 
-scil_compression_algorithm algo_sigbits = {
+scilI_algorithm_t algo_sigbits = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_sigbits)
     },

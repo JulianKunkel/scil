@@ -22,7 +22,7 @@
 #ifndef SCIL_SIGBITS_H_
 #define SCIL_SIGBITS_H_
 
-#include <scil-internal.h>
+#include <scil-algorithm.h>
 
 // Repeat for each data type
 
@@ -35,7 +35,7 @@
  * \param dims Dimensional information of uncompressed buffer
  * \return Success state of the compression
  */
-int scil_sigbits_compress_<DATATYPE>(const scil_context_p ctx, byte* restrict dest, size_t* restrict dest_size, <DATATYPE>*restrict source, const scil_dims* dims);
+int scil_sigbits_compress_<DATATYPE>(const scil_context_t* ctx, byte* restrict dest, size_t* restrict dest_size, <DATATYPE>*restrict source, const scil_dims_t* dims);
 
 
 /**
@@ -46,11 +46,11 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_p ctx, byte* restrict de
  * \param source_size Byte size of compressed buffer
  * \return Success state of the compression
  */
-int scil_sigbits_decompress_<DATATYPE>( <DATATYPE>*restrict dest, scil_dims* dims, byte*restrict source, const size_t source_size);
+int scil_sigbits_decompress_<DATATYPE>( <DATATYPE>*restrict dest, scil_dims_t* dims, byte*restrict source, const size_t source_size);
 
 // End repeat
 
 
-extern scil_compression_algorithm algo_sigbits;
+extern scilI_algorithm_t algo_sigbits;
 
 #endif /* SCIL_SIGBITS_H_ */
