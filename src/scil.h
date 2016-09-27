@@ -145,7 +145,7 @@ folder "src/" {
 
 folder "Install directory"{
 
-  folder "share/scil/"{
+  folder "etc/"{
     artifact [scil.conf]
   }
   folder "lib/pkgconfig"{
