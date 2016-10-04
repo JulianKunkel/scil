@@ -28,7 +28,7 @@
 // Repeat for each data type
 
 // hard threshold the values in matrix.
-int hard_threshold_<DATATYPE>(<DATATYPE> **matrix,int Ni,int Nj,float threshold)
+int hard_threshold_<DATATYPE>(<DATATYPE> **matrix,int Ni,int Nj,double threshold)
 
 {
 	int i,j,cnt=0;
@@ -52,9 +52,9 @@ int scil_wavelets_compress_<DATATYPE>(const scil_context_t* ctx,
                         <DATATYPE>*restrict source,
                         const scil_dims_t* dims)
 {
-    int i,j;
+    int i;
   	int shift_arr_r[MAX_ARR_SIZE],shift_arr_c[MAX_ARR_SIZE];
-    float threshold = 1;
+    double threshold = 1;
 
   	// 3 levels of wavelets.
   	const int levs=1;
@@ -115,7 +115,7 @@ int  scil_wavelets_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
                             byte*restrict compressed_buf_in,
                             const size_t in_size)
 {
-  int i,j;
+  int i;
   int Ni = dims->length[1], Nj = dims->length[0];
   <DATATYPE> **buffer_t;
   int shift_arr_r[MAX_ARR_SIZE],shift_arr_c[MAX_ARR_SIZE];
@@ -163,5 +163,6 @@ scilI_algorithm_t algo_wavelets = {
     },
     "wavelets",
     11,
-    SCIL_COMPRESSOR_TYPE_DATATYPES
+    SCIL_COMPRESSOR_TYPE_DATATYPES,
+		1
 };
