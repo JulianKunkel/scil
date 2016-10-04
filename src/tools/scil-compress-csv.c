@@ -145,18 +145,18 @@ void writeCSVData(){
   if(dims.dims == 1){
     if (output_header)
       fprintf(f, "%zu\n", dims.length[0]);
-    fprintf(f, "%.17f", buffer_in[0]);
+    fprintf(f, "%.17f", (double)buffer_in[0]);
     for(size_t x = 1; x < dims.length[0]; x++){
-      fprintf(f, ",%.17f", buffer_in[x]);
+      fprintf(f, ",%.17f", (double)buffer_in[x]);
     }
     fprintf(f, "\n");
   }else{
     if (output_header)
       fprintf(f, "%zu, %zu\n", dims.length[0], dims.length[1]);
     for(size_t y = 0; y < dims.length[1]; y++){
-      fprintf(f, "%.17f", buffer_in[0+ y * dims.length[0]]);
+      fprintf(f, "%.17f", (double)buffer_in[0+ y * dims.length[0]]);
       for(size_t x = 1; x < dims.length[0]; x++){
-        fprintf(f, ",%.17f", buffer_in[x+ y * dims.length[0]]);
+        fprintf(f, ",%.17f", (double)buffer_in[x+ y * dims.length[0]]);
       }
       fprintf(f, "\n");
     }
@@ -175,11 +175,20 @@ void readData(){
 
   uint8_t rows;
   size_t x ,y = 1, input_data_size, curr_pos;
-  fread(&rows, sizeof(uint8_t), 1, f);
-  fread(&x, sizeof(size_t), 1, f);
+  if(fread(&rows, sizeof(uint8_t), 1, f) == 0){
+    printf("Could not read values from %s\n", in_file);
+    exit(1);
+  }
+  if(fread(&x, sizeof(size_t), 1, f) == 0){
+    printf("Could not read values from %s\n", in_file);
+    exit(1);
+  }
 
   if(rows > 1){
-    fread(&y, sizeof(size_t), 1, f);
+    if(fread(&y, sizeof(size_t), 1, f) == 0){
+      printf("Could not read values from %s\n", in_file);
+      exit(1);
+    }
     scilPr_initialize_dims_2d(&dims, x, y);
   }else{
     scilPr_initialize_dims_1d(&dims, x);
@@ -192,7 +201,10 @@ void readData(){
 
   input_data = (byte*) SAFE_MALLOC(input_data_size);
 
-  fread(input_data, 1, input_data_size, f);
+  if(fread(input_data, 1, input_data_size, f) == 0){
+    printf("Could not read values from %s\n", in_file);
+    exit(1);
+  }
 
   fclose(f);
 }
