@@ -155,7 +155,7 @@ int main(int argc, char** argv)
     for (int i = 0; i < scilPa_get_pattern_library_size(); i++) {
         char* name = scilPa_get_library_pattern_name(i);
         printf("processing: %s\n", name);
-        scilPa_create_library_pattern_double(buffer_in, &dims, i);
+        ret = scilPa_create_library_pattern_double(buffer_in, &dims, i);
         assert(ret == SCIL_NO_ERR);
         test_correctness(name, buffer_in, dims);
     }
