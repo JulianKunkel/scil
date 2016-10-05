@@ -311,6 +311,11 @@ int main(int argc, char ** argv){
       ret = scil_compress(result, input_size, (double*)input_data, & dims, & buff_size, ctx);
     }
     assert(ret == SCIL_NO_ERR);
+    if (validate) {
+        ret = scil_validate_compression(datatype, input_data, &dims, result, buff_size, ctx, &out_accuracy);
+        assert(ret == SCIL_NO_ERR);
+    }
+
     ret = scilPr_destroy_context(ctx);
     assert(ret == SCIL_NO_ERR);
 
@@ -318,10 +323,6 @@ int main(int argc, char ** argv){
     ret = scil_decompress(datatype, output_data, & dims, result, buff_size, tmp_buff);
     assert(ret == SCIL_NO_ERR);
 
-    if (validate) {
-        ret = scil_validate_compression(datatype, input_data, &dims, result, buff_size, ctx, &out_accuracy);
-        assert(ret == SCIL_NO_ERR);
-    }
     free(tmp_buff);
 
   } else if (compress){
