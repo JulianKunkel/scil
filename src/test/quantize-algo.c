@@ -33,7 +33,7 @@ int test_quantize_float(){
     printf("#Index,Value,Value after comp-decomp,Abs-difference\n");
     for (size_t i = 0; i < count; ++i) {
         float absdiff = fabsf(buffer_end[i] - buffer_in[i]);
-        printf("%lu,%f,%f,%f\n", i, buffer_in[i], buffer_end[i], absdiff);
+        printf("%lu,%f,%f,%f\n", i, (double)buffer_in[i], (double)buffer_end[i], (double)absdiff);
         if ((double)absdiff > hints.absolute_tolerance) {
             printf("#FAILURE: Absolute difference bigger than tolerance.\n");
             return 1;

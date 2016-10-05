@@ -21,14 +21,6 @@ int main(void){
     scil_context_t* context;
     scilPr_create_context(&context, SCIL_TYPE_FLOAT, 0, NULL, &hints);
 
-    //1D
-
-    //float* arr1d = (float*)malloc(4*sizeof(float));
-
-
-
-
-
     //2D
 
     scil_dims_t dims;
@@ -51,9 +43,9 @@ int main(void){
     }
 
     printf("Input\n");
-    for(int i=0;i<count1;i++) {
-      for(int j=0;j<count2;j++) {
-        printf("%f ",*(float*)(buffer_in+i*count2+j));
+    for(i=0;i<count1;i++) {
+      for(j=0;j<count2;j++) {
+        printf("%f ",(double)(*(float*)(buffer_in+i*count2+j)));
       }
     }
 
@@ -67,7 +59,7 @@ int main(void){
     printf("Output\n");
     for(i=0;i<count1;i++) {
       for(j=0;j<count2;j++) {
-        printf("%f ",*(float*)(buffer_end+i*count2+j));
+        printf("%f ",(double)(*(float*)(buffer_end+i*count2+j)));
       }
     }
 
@@ -80,7 +72,7 @@ int main(void){
     mse/=count1*count2;
 
     printf("\nThe mse due to transformation and inverse transformation is: \n");
-    printf("\t%8.4f, ( %8.4f dB)\n ",mse,10*log10(255*255/mse));
+    printf("\t%8.4f, ( %8.4f dB)\n ",(double)mse,10*log10(255*255/mse));
     printf("(Very small amount of mse is OK due to numerical errors.)\n");
 
     /*
