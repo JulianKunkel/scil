@@ -165,6 +165,7 @@ static void create_library_patterns_if_needed(){
   library_add("steps", "steps100", 1, 100, 100, 0, 0);
 
   library_add("sin", "sin11", 1, 100, 1.0, 1, 0); // 1 pass
+  library_add("sin", "sin16", 0, 1, 1.0, 6, 0); // 1 pass
   library_add("sin", "sin31", 1, 100, 3.0, 1, 0); // 3 sines
   library_add("sin", "sin35", 0, 1, 3.0, 5, 0); // 3 sines
   library_add("sin", "sin23", 1, 100, 2.0, 3, 0); // 3 passes, 2 sines
