@@ -385,25 +385,25 @@ static void m_poly_func(double* data,
                         int* iter,
                         const void* user_ptr)
 {
-  poly4_data * usr = (poly4_data*) user_ptr;
-  double val = 0;
-  for(int d=0; d < pos->dims; d++){
-    double new = 1;
-    double * v = & usr->values[usr->points * d];
-    for(int i=0; i < usr->points; i++){
-      new = new * (pos->length[d] - v[i]);
+    poly4_data * usr = (poly4_data*) user_ptr;
+    double val = 0;
+    for(int d=0; d < pos->dims; d++){
+        double new = 1;
+        double * v = & usr->values[usr->points * d];
+        for(int i=0; i < usr->points; i++){
+            new = new * (pos->length[d] - v[i]);
+        }
+        val += new;
     }
-    val += new;
-  }
 
-  data[scilG_data_pos(pos, size)] = val;
+    data[scilG_data_pos(pos, size)] = val;
 }
 
 
 static int poly4(double* data, const scil_dims_t* dims, float mn, float mx, float arg, float arg2){
   scil_dims_t pos;
   scilPr_copy_dims(&pos, dims);
-  memset(pos.length, 0, sizeof(size_t)*pos.dims);
+  memset(pos.length, 0, sizeof(size_t) * pos.dims);
 
   srand((int) arg);
 
