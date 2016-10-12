@@ -33,28 +33,90 @@ static int constant(double* buffer, const scil_dims_t* dims, float mn, float mx,
   return SCIL_NO_ERR;
 }
 
-static int steps(double* buffer, const scil_dims_t* dims, float mn, float mx, float arg, float arg2){
-  if(arg <= 0 || scilU_float_equal(mn, mx) ){
-    return SCIL_EINVAL;
-  }
-  int steps = (int) arg;
-  float step_height = (mx - mn) / (steps-1); // Possible division by 0
-  size_t count = scilPr_get_dims_count(dims);
-  for (size_t i=0; i < count; i++){
-    buffer[i] = mn + (i % steps) * step_height;
-  }
-  return SCIL_NO_ERR;
+static int steps1d(double* buffer, const scil_dims_t* dims, float mn, float mx, int step_size)
+{
+    float gradient = (mx - mn) / (step_size-1);
+
+    size_t x_size = dims->length[0];
+
+    for (size_t x = 0; x < x_size; x++){
+        buffer[x] = mn + gradient * (x % step_size);
+    }
+
+    return SCIL_NO_ERR;
 }
 
-static int steps2(double* buffer, const scil_dims_t* dims, float mn, float mx, float arg, float arg2)
+static int steps2d(double* buffer, const scil_dims_t* dims, float mn, float mx, int step_size)
 {
-    size_t count      = scilPr_get_dims_count(dims);
-    int steps_count   = arg;
-    int step_width    = count / steps_count;
-    float step_height = steps_count <= 1 ? 0 : (mx - mn) / (steps_count - 1);
-    for (size_t i = 0; i < count; ++i){
-        buffer[i] = mn + i / step_width * step_height;
+    float gradient = 0.5f * (mx - mn) / (step_size - 1);
+
+    size_t x_size = dims->length[0];
+    size_t y_size = dims->length[1];
+
+    for (size_t y = 0; y < y_size; ++y){
+        for (size_t x = 0; x < x_size; ++x){
+            buffer[x_size * y + x] = mn + gradient * (x + y) % (2 * step_size);
+        }
     }
+
+    return SCIL_NO_ERR;
+}
+
+static int steps3d(double* buffer, const scil_dims_t* dims, float mn, float mx, int step_size)
+{
+    float gradient = 0.3333f * (mx - mn) / (step_size - 1);
+
+    size_t x_size = dims->length[0];
+    size_t y_size = dims->length[1];
+    size_t z_size = dims->length[2];
+
+    for (size_t z = 0; z < z_size; ++z){
+        for (size_t y = 0; y < y_size; ++y){
+            for (size_t x = 0; x < x_size; ++x){
+                buffer[(z * y_size + y) * x_size + x]
+                    = mn + gradient * ((x + y + z) % (3 * step_size));
+            }
+        }
+    }
+
+    return SCIL_NO_ERR;
+}
+
+static int steps4d(double* buffer, const scil_dims_t* dims, float mn, float mx, int step_size)
+{
+    float gradient = 0.25f * (mx - mn) / (step_size - 1);
+
+    size_t x_size = dims->length[0];
+    size_t y_size = dims->length[1];
+    size_t z_size = dims->length[2];
+    size_t w_size = dims->length[2];
+
+    for (size_t w = 0; w < w_size; ++w){
+        for (size_t z = 0; z < z_size; ++z){
+            for (size_t y = 0; y < y_size; ++y){
+                for (size_t x = 0; x < x_size; ++x){
+                    buffer[((w * z_size + z) * y_size + y) * x_size + x]
+                        = mn + gradient * ((x + y + z + w) % ( 4 * step_size));
+                }
+            }
+        }
+    }
+
+    return SCIL_NO_ERR;
+}
+
+static int steps(double* buffer, const scil_dims_t* dims, float mn, float mx, float arg, float arg2)
+{
+    if (arg < 1.5f || scilU_float_equal(mn, mx))
+        return SCIL_EINVAL;
+
+    switch (dims->dims) {
+        case 1: steps1d(buffer, dims, mn, mx, (int) arg); break;
+        case 2: steps2d(buffer, dims, mn, mx, (int) arg); break;
+        case 3: steps3d(buffer, dims, mn, mx, (int) arg); break;
+        case 4: steps4d(buffer, dims, mn, mx, (int) arg); break;
+    }
+
     return SCIL_NO_ERR;
 }
 

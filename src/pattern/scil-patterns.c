@@ -161,6 +161,7 @@ static void create_library_patterns_if_needed(){
   library_add("random", "random-1-+1", -1, 1, -1, 0, 0);
 
   library_add("steps", "steps2", 0, 1, 2, 0, 0);
+  library_add("steps", "steps16", 0, 1, 16, 0, 0);
   library_add("steps", "steps100", 1, 100, 100, 0, 0);
 
   library_add("sin", "sin", 1, 100, 1.0, 1, 0); // 1 pass
