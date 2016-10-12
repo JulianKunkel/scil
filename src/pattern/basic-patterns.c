@@ -55,7 +55,7 @@ static int steps2d(double* buffer, const scil_dims_t* dims, float mn, float mx, 
 
     for (size_t y = 0; y < y_size; ++y){
         for (size_t x = 0; x < x_size; ++x){
-            buffer[x_size * y + x] = mn + gradient * (x + y) % (2 * step_size);
+            buffer[x_size * y + x] = mn + gradient * ((x + y) % (2 * step_size));
         }
     }
 
@@ -197,88 +197,181 @@ static int rnd(double* buffer, const scil_dims_t* dims, float mn, float mx, floa
   return SCIL_NO_ERR;
 }
 
-static int p_sin(double* buffer, const scil_dims_t* dims, float mn, float mx, float arg, float arg2){
-  const int frequencyCount = (int) arg2;
-  double highFrequency = (double)arg;
+static int p_sin1d(double* buffer, const scil_dims_t* dims, float base_freq, int freq_count)
+{
+    const size_t x_size = dims->length[0];
 
-  if(scilU_float_equal(mn, mx) || frequencyCount <= 0){
+    const float x_scale_b = 2 * M_PI * base_freq / x_size;
+    const float falloff_b = 1.0f;
+
+    float x_scale = x_scale_b;
+    float falloff = falloff_b;
+
+    for (size_t x = 0; x < x_size; x++)
+    {
+        float value = 0.0f;
+        float falloff = 1.0f;
+        for(int freq = 1; freq <= freq_count; ++freq)
+        {
+            value += sin(x * x_scale) * falloff;
+            x_scale *= 2;
+            falloff /= 2;
+        }
+        buffer[x] = value;
+        x_scale = x_scale_b;
+        falloff = falloff_b;
+    }
+
+    return SCIL_NO_ERR;
+}
+
+static int p_sin2d(double* buffer, const scil_dims_t* dims, float base_freq, int freq_count)
+{
+    const size_t x_size = dims->length[0];
+    const size_t y_size = dims->length[1];
+
+    const float scale = 2 * M_PI * base_freq;
+    const float x_scale_b = scale / x_size;
+    const float y_scale_b = scale / y_size;
+    const float falloff_b = 1.0f;
+
+    float x_scale = x_scale_b;
+    float y_scale = y_scale_b;
+    float falloff = falloff_b;
+
+    for (size_t y = 0; y < y_size; y++){
+        for (size_t x = 0; x < x_size; x++)
+        {
+            float value = 0.0f;
+            for(int freq = 1; freq <= freq_count; ++freq){
+                value += (sin(x * x_scale) + sin(y * y_scale)) * falloff;
+                x_scale *= 2;
+                y_scale *= 2;
+                falloff /= 2;
+            }
+            buffer[y * x_size + x] = value;
+
+            x_scale = x_scale_b;
+            y_scale = y_scale_b;
+            falloff = falloff_b;
+        }
+    }
+
+    return SCIL_NO_ERR;
+}
+
+static int p_sin3d(double* buffer, const scil_dims_t* dims, float base_freq, int freq_count)
+{
+    const size_t x_size = dims->length[0];
+    const size_t y_size = dims->length[1];
+    const size_t z_size = dims->length[2];
+
+    const float scale = 2 * M_PI * base_freq;
+    const float x_scale_b = scale / x_size;
+    const float y_scale_b = scale / y_size;
+    const float z_scale_b = scale / z_size;
+    const float falloff_b = 1.0f;
+
+    float x_scale = x_scale_b;
+    float y_scale = y_scale_b;
+    float z_scale = z_scale_b;
+    float falloff = falloff_b;
+
+    for (size_t z = 0; z < z_size; z++){
+        for (size_t y = 0; y < y_size; y++){
+            for (size_t x = 0; x < x_size; x++)
+            {
+                float value = 0.0f;
+                for(int freq = 1; freq <= freq_count; ++freq){
+                    value += (sin(x * x_scale) + sin(y * y_scale) + sin(z * z_scale)) * falloff;
+                    x_scale *= 2;
+                    y_scale *= 2;
+                    z_scale *= 2;
+                    falloff /= 2;
+                }
+                buffer[((z * y_size) + y) * x_size + x] = value;
+
+                x_scale = x_scale_b;
+                y_scale = y_scale_b;
+                z_scale = z_scale_b;
+                falloff = falloff_b;
+            }
+        }
+    }
+
+    return SCIL_NO_ERR;
+}
+
+static int p_sin4d(double* buffer, const scil_dims_t* dims, float base_freq, int freq_count)
+{
+    const size_t x_size = dims->length[0];
+    const size_t y_size = dims->length[1];
+    const size_t z_size = dims->length[2];
+    const size_t w_size = dims->length[3];
+
+    const float scale = 2 * M_PI * base_freq;
+    const float x_scale_b = scale / x_size;
+    const float y_scale_b = scale / y_size;
+    const float z_scale_b = scale / z_size;
+    const float w_scale_b = scale / w_size;
+    const float falloff_b = 1.0f;
+
+    float x_scale = x_scale_b;
+    float y_scale = y_scale_b;
+    float z_scale = z_scale_b;
+    float w_scale = w_scale_b;
+    float falloff = falloff_b;
+
+    for (size_t w = 0; w < w_size; w++){
+        for (size_t z = 0; z < z_size; z++){
+            for (size_t y = 0; y < y_size; y++){
+                for (size_t x = 0; x < x_size; x++)
+                {
+                    float value = 0.0f;
+                    for(int freq = 1; freq <= freq_count; ++freq){
+                        value += (sin(x * x_scale) + sin(y * y_scale) + sin(z * z_scale) + sin(w * w_scale)) * falloff;
+                        x_scale *= 2;
+                        y_scale *= 2;
+                        z_scale *= 2;
+                        w_scale *= 2;
+                        falloff /= 2;
+                    }
+                    buffer[((w * z_size + z) * y_size + y) * x_size + x] = value;
+
+                    x_scale = x_scale_b;
+                    y_scale = y_scale_b;
+                    z_scale = z_scale_b;
+                    w_scale = w_scale_b;
+                    falloff = falloff_b;
+                }
+            }
+        }
+    }
+
+    return SCIL_NO_ERR;
+}
+
+static int p_sin(double* buffer, const scil_dims_t* dims, float mn, float mx, float arg, float arg2)
+{
+  double base_freq = (double)arg;
+  const int freq_count = (int) arg2;
+
+  if(scilU_float_equal(mn, mx) || freq_count <= 0){
     return SCIL_EINVAL;
   }
-  int64_t max_potenz = 1<<frequencyCount;
-  const double pi = highFrequency*M_PI*2;
-  const size_t* len = dims->length;
 
-  switch(dims->dims){
-    case (1):{
-      for (size_t x=0; x < dims->length[0]; x++){
-        double var = 0;
-        int64_t potenz = max_potenz;
-        int64_t divisor = 1;
-        for(int f = 1 ; f <= frequencyCount; f++){
-          var += potenz * sin((x+1)*f*pi / len[0]);
-          potenz /= 2;
-          divisor *= 2;
-        }
-        buffer[x] = var;
-      }
-      break;
-    }case (2):{
-      for (size_t y=0; y < dims->length[1]; y++){
-        for (size_t x=0; x < dims->length[0]; x++){
-          double var = 0;
-          int64_t potenz = max_potenz;
-          int64_t divisor = 1;
-          for(int f = 1 ; f <= frequencyCount; f++){
-            var += potenz * sin((x+1)*f*pi/len[0]) + potenz * sin((y+1)*f*pi/len[1]);
-            potenz /= 2;
-            divisor *= 2;
-          }
-          buffer[x+y*dims->length[0]] = var;
-        }
-      }
-      break;
-    }case (3):{
-      for (size_t z=0; z < dims->length[2]; z++){
-        for (size_t y=0; y < dims->length[1]; y++){
-          for (size_t x=0; x < dims->length[0]; x++){
-            double var = 0;
-            int64_t potenz = max_potenz;
-            int64_t divisor = 1;
-            for(int f = 1 ; f <= frequencyCount; f++){
-              var += potenz * sin((x+1)*f*pi/len[0]) + potenz * sin((y+1)*f*pi/len[1]) + potenz * sin((z+1)*f*pi/len[2]);
-              potenz /= 2;
-              divisor *= 2;
-            }
-            buffer[x+y*len[0]+z*(len[0]*len[1])] = var;
-          }
-        }
-      }      break;
-    }case (4):{
-      for (size_t w=0; w < dims->length[3]; w++){
-        for (size_t z=0; z < dims->length[2]; z++){
-          for (size_t y=0; y < dims->length[1]; y++){
-            for (size_t x=0; x < dims->length[0]; x++){
-              double var = 0;
-              int64_t potenz = max_potenz;
-              int64_t divisor = 1;
-              for(int f = 1 ; f <= frequencyCount; f++){
-                var += potenz * sin((x+1)*f*pi/len[0]) + potenz * sin((y+1)*f*pi/len[1]) + potenz * sin((z+1)*f*pi/len[2] + potenz * sin((w+1)*f*pi/len[3]));
-                potenz /= 2;
-                divisor *= 2;
-              }
-              buffer[x+y*len[0]+z*(len[0]*len[1])+w*(len[0]*len[1]*len[2])] = var;
-            }
-          }
-        }
-      }
-      break;
-    }default:
-      assert(0);
+  int ret = SCIL_UNKNOWN_ERR;
+
+  switch (dims->dims) {
+      case 1: ret = p_sin1d(buffer, dims, base_freq, freq_count); break;
+      case 2: ret = p_sin2d(buffer, dims, base_freq, freq_count); break;
+      case 3: ret = p_sin3d(buffer, dims, base_freq, freq_count); break;
+      case 4: ret = p_sin4d(buffer, dims, base_freq, freq_count); break;
   }
 
   scilPI_change_data_scale(buffer, dims, mn, mx);
 
-  return SCIL_NO_ERR;
+  return ret;
 }
 
 typedef struct{
