@@ -154,7 +154,7 @@ int scil_compress(byte* restrict dest,
         return SCIL_MEMORY_ERR;
     }
 
-	// Set local copies of hints and compression chain
+	// Set local references of hints and compression chain
     const scil_user_hints_t* hints = &ctx->hints;
     scilI_chain_t* chain  = &ctx->chain;
 
