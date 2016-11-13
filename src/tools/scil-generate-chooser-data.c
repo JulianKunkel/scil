@@ -29,7 +29,7 @@
 
 #define allocate(type, name, count) type* name = (type*)malloc(count * sizeof(type))
 
-static enum metrics {
+enum metrics {
     DATA_SIZE,
     ELEMENT_COUNT,
     DIMENSIONALITY,
@@ -42,6 +42,34 @@ static enum metrics {
     ABS_ERR_TOL,
     REL_ERR_TOL
 };
+
+#define AVAILABLE_METRICS_COUNT 11
+static const char *available_metrics[AVAILABLE_METRICS_COUNT] = {
+    "dsize",
+    "ecount",
+    "dim",
+    "dtype",
+    "min",
+    "max",
+    "mean",
+    "stddev",
+    "maxstp",
+    "abserr",
+    "relerr",
+    NULL
+};
+
+#define DEFAULT_ECOUNT  1024
+#define DEFAULT_DIM     1
+#define DEFAULT_MIN     -1024
+#define DEFAULT_MAX     1024
+#define DEFAULT_ABS_ERR 0.005
+#define DEFAULT_REL_ERR 1
+
+//#define AVAILABLE_COMPRESSION_CHAINS_COUNT 15
+//static const *available_compression_chains[AVAILABLE_COMPRESSION_CHAINS_COUNT] = {
+//
+//}
 
 // #############################################################################
 // # Data Characteristics Aquisition
@@ -141,18 +169,75 @@ static int get_data_characteristics(const double* data, size_t count,
     return 0;
 }
 
-static int is_str_in_array(const char** strarr, int count){
+// #############################################################################
+// # Utility Functions
+// #############################################################################
+static int in_strarr(const char* string, const char* const* strarr, size_t count){
+
     for (size_t i = 0; i < count; i++) {
-        if (strcmp(strarr[i], ))
+        if (strcmp(strarr[i], string))
             continue;
         return 1;
     }
     return 0;
 }
 
+static int get_metric_bit_mask(const char *const *metric_args, size_t count){
+    int result = 0;
+
+    const char *const *current_metric = available_metrics;
+    size_t i = 0;
+    while(*current_metric++ != NULL){
+        result |= in_strarr(*current_metric, metric_args, count) << i;
+        i++;
+    }
+
+    return result;
+}
+
+// #############################################################################
+// # Data Generation
+// #############################################################################
+
+static void generate_file_name(char* file_name, int metric_bit_mask){
+    strcpy(file_name, "data");
+
+    for (size_t i = 0; i < AVAILABLE_METRICS_COUNT; i++) {
+        if(!(metric_bit_mask & (1 << i)))
+            continue;
+
+        strcat(file_name, "_");
+        strcat(file_name, available_metrics[i]);
+    }
+}
+
+static void generate_data(int metric_bit_mask){
+    allocate(char, file_name, 256);
+    generate_file_name(file_name, metric_bit_mask);
+
+    //for (size_t i = 0; i < count; i++) {
+    //    /* code */
+    //}
+
+    printf("%s\n", file_name);
+
+    FILE *file = fopen(file_name, "w");
+
+
+    fclose(file);
+
+}
+
+// #############################################################################
+// # Main Function
+// #############################################################################
+
 int main(int argc, char** argv){
 
-    char** metrics = &argv[1];
+    const char *const *metrics = (const char *const *)&argv[1];
+    const int m_count = argc - 1;
+
+    int met_bit_mask = get_metric_bit_mask(metrics, m_count);
 
 
 
