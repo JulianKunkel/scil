@@ -161,6 +161,7 @@ int scilPr_create_context(scil_context_t** out_ctx,
 
 int scilPr_destroy_context(scil_context_t* out_ctx)
 {
+    free(out_ctx->hints.force_compression_methods);
     free(out_ctx);
     out_ctx = NULL;
 
