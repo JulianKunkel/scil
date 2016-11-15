@@ -80,7 +80,7 @@ typedef struct
     scilPr_performance_hint_t decomp_speed;
 
     /** \brief */
-    char* force_compression_methods;
+    char *force_compression_methods;
 
 } scil_user_hints_t;
 
