@@ -89,7 +89,7 @@ static int steps4d(double* buffer, const scil_dims_t* dims, float mn, float mx, 
     size_t x_size = dims->length[0];
     size_t y_size = dims->length[1];
     size_t z_size = dims->length[2];
-    size_t w_size = dims->length[2];
+    size_t w_size = dims->length[3];
 
     for (size_t w = 0; w < w_size; ++w){
         for (size_t z = 0; z < z_size; ++z){
@@ -107,10 +107,10 @@ static int steps4d(double* buffer, const scil_dims_t* dims, float mn, float mx, 
 
 static int steps(double* buffer, const scil_dims_t* dims, float mn, float mx, float arg, float arg2)
 {
-    if (arg < 1.5f || scilU_float_equal(mn, mx))
-        return SCIL_EINVAL;
-
     int corrected_arg = arg < 2.0f ? 2 : (int)arg;
+
+    //if (scilU_float_equal(mn, mx))
+    //    return SCIL_EINVAL;
 
     switch (dims->dims) {
         case 1: steps1d(buffer, dims, mn, mx, corrected_arg); break;
