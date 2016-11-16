@@ -113,10 +113,10 @@ static int steps(double* buffer, const scil_dims_t* dims, float mn, float mx, fl
     int corrected_arg = arg < 2.0f ? 2 : (int)arg;
 
     switch (dims->dims) {
-        case 1: steps1d(buffer, dims, mn, mx, (int) arg); break;
-        case 2: steps2d(buffer, dims, mn, mx, (int) arg); break;
-        case 3: steps3d(buffer, dims, mn, mx, (int) arg); break;
-        case 4: steps4d(buffer, dims, mn, mx, (int) arg); break;
+        case 1: steps1d(buffer, dims, mn, mx, corrected_arg); break;
+        case 2: steps2d(buffer, dims, mn, mx, corrected_arg); break;
+        case 3: steps3d(buffer, dims, mn, mx, corrected_arg); break;
+        case 4: steps4d(buffer, dims, mn, mx, corrected_arg); break;
     }
 
     return SCIL_NO_ERR;
