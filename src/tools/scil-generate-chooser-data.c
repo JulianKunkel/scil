@@ -342,7 +342,8 @@ static void generate_data(){
 
     // Pattern name
     char* name;
-    switch(rand() % 5){
+    uint8_t pid = rand() % 5;
+    switch(pid){
         case 0: name = "constant"; break;
         case 1: name = "random"; break;
         case 2: name = "steps"; break;
@@ -371,18 +372,23 @@ static void generate_data(){
     // Minimum and maximum
     double min, max;
 
-    double point_a = get_random_double_in_range(DEFAULT_MIN, DEFAULT_MAX);
-    double point_b = get_random_double_in_range(DEFAULT_MIN, DEFAULT_MAX);
+    double point_a = pow(2.0, get_random_double_in_range(-14, 14));
+    double point_b = pow(2.0, get_random_double_in_range(-14, 14));
+
+    point_a = rand() % 2 == 1 ? -point_a : point_a;
+    point_b = rand() % 2 == 1 ? -point_b : point_b;
 
     if (point_b > point_a) { min = point_a; max = point_b; }
     else                   { min = point_b; max = point_a; }
 
     // Other Arguments
-    uint8_t arg1 = (uint8_t)pow(2.0, get_random_double_in_range(0, 4));
-    uint8_t arg2 = (uint8_t)pow(2.0, get_random_double_in_range(0, 4));
+    float arg1 = get_random_double_in_range(1, 16);
+    float arg2 = get_random_double_in_range(1, 16);
 
     printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name);
     fflush(stdout);
+
+    if (pid == 0) min = point_a;
 
     scilPa_create_pattern_double(data_buffer, &dims, name, min, max, arg1, arg2);
 
