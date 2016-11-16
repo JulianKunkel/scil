@@ -70,7 +70,7 @@ static const char *available_metrics[AVAILABLE_METRICS_COUNT] = {
 
 #define SAMPLE_SIZE 10000
 
-#define FILE_NAME "machine_learning_data.csv"
+#define FILE_NAME "machine_learning_data2.csv"
 static FILE *file = NULL;
 
 typedef struct line_data {
@@ -378,8 +378,8 @@ static void generate_data(){
     else                   { min = point_b; max = point_a; }
 
     // Other Arguments
-    uint8_t arg1 = get_random_integer_in_range(1, 16);
-    uint8_t arg2 = get_random_integer_in_range(1, 16);
+    uint8_t arg1 = (uint8_t)pow(2.0, get_random_double_in_range(0, 4));
+    uint8_t arg2 = (uint8_t)pow(2.0, get_random_double_in_range(0, 4));
 
     printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name);
     fflush(stdout);
@@ -392,8 +392,8 @@ static void generate_data(){
     set_data_characteristics(data_buffer, current_data.count);
 
     // User Params for compression
-    current_data.abs_tol = pow(2.0, get_random_integer_in_range(-13, -1));
-    current_data.rel_tol = pow(2.0, get_random_integer_in_range(-10, 2));
+    current_data.abs_tol = pow(2.0, get_random_double_in_range(-13, -1));
+    current_data.rel_tol = pow(2.0, get_random_double_in_range(-10, 2));
 
     evaluate_compression_algorithms(data_buffer, &dims);
 
