@@ -70,7 +70,7 @@ static const char *available_metrics[AVAILABLE_METRICS_COUNT] = {
 
 #define SAMPLE_SIZE 10000
 
-#define FILE_NAME "machine_learning_data2.csv"
+#define FILE_NAME "machine_learning_data5.csv"
 static FILE *file = NULL;
 
 typedef struct line_data {
@@ -84,7 +84,7 @@ typedef struct line_data {
     double mean;
     double median;
     double stddev;
-    //double stepsize0;
+    double maxstep;
     double abs_tol;
     double rel_tol;
     double compthru;
@@ -92,10 +92,10 @@ typedef struct line_data {
     double compratio;
 } line_data_t;
 
-static line_data_t current_data = { 0, "", 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+static line_data_t current_data = { 0, "", 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
 static void write_line(){
-    printf("%lu,%s,%lu,%lu,%u,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", current_data.line,
+    printf("%lu,%s,%lu,%lu,%u,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", current_data.line,
                                                                 current_data.algo,
                                                                 current_data.size,
                                                                 current_data.count,
@@ -105,13 +105,14 @@ static void write_line(){
                                                                 current_data.mean,
                                                                 current_data.median,
                                                                 current_data.stddev,
+                                                                current_data.maxstep,
                                                                 current_data.abs_tol,
                                                                 current_data.rel_tol,
                                                                 current_data.compthru,
                                                                 current_data.decompthru,
                                                                 current_data.compratio);
 
-    fprintf(file, "%lu,%s,%lu,%lu,%u,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", current_data.line,
+    fprintf(file, "%lu,%s,%lu,%lu,%u,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", current_data.line,
                                                                 current_data.algo,
                                                                 current_data.size,
                                                                 current_data.count,
@@ -121,6 +122,7 @@ static void write_line(){
                                                                 current_data.mean,
                                                                 current_data.median,
                                                                 current_data.stddev,
+                                                                current_data.maxstep,
                                                                 current_data.abs_tol,
                                                                 current_data.rel_tol,
                                                                 current_data.compthru,
@@ -134,6 +136,59 @@ static void write_line(){
 //static const *available_compression_chains[AVAILABLE_COMPRESSION_CHAINS_COUNT] = {
 //
 //}
+
+// #############################################################################
+// # Utility Functions
+// #############################################################################
+
+static size_t get_index_2d(size_t x, size_t y, const scil_dims_t *dims){
+    return y * dims->length[0] + x;
+}
+static size_t get_index_3d(size_t x, size_t y, size_t z, const scil_dims_t *dims){
+    return (z * dims->length[1] + y) * dims->length[0] + x;
+}
+static size_t get_index_4d(size_t x, size_t y, size_t z, size_t w, const scil_dims_t *dims){
+    return ((w * dims->length[2] + z) * dims->length[1] + y) * dims->length[0] + x;
+}
+
+static int in_strarr(const char* string, const char* const* strarr, size_t count){
+
+    for (size_t i = 0; i < count; i++) {
+        if (strcmp(strarr[i], string))
+            continue;
+        return 1;
+    }
+    return 0;
+}
+
+static int get_metric_bit_mask(const char *const *metric_args, size_t count){
+    int result = 0;
+
+    const char *const *current_metric = available_metrics;
+    size_t i = 0;
+    while(*current_metric != NULL){
+        //printf("%s\n", *current_metric);
+        result |= in_strarr(*current_metric, metric_args, count) << i;
+        i++;
+        current_metric++;
+    }
+
+    return result;
+}
+
+static double get_random_double_in_range(double minimum, double maximum){
+
+    return minimum + (maximum - minimum) * (double)rand()/RAND_MAX;
+}
+
+static int get_random_integer_in_range(int minimum, int maximum){
+
+    assert(maximum >= minimum);
+
+    if (minimum == maximum) return minimum;
+
+    return minimum + rand()%(maximum - minimum + 1);
+}
 
 // #############################################################################
 // # Data Characteristics Aquisition
@@ -219,57 +274,176 @@ static double get_data_std_deviation_alt(const double* data, size_t count){
     return sqrt((squared_sum - (sum * sum) / count) / count);
 }
 
-static int set_data_characteristics(const double *data, size_t count){
+static double get_data_max_step_1d(const double *data, const scil_dims_t *dims){
 
-    current_data.min    = get_data_minimum(data, count);
-    current_data.max    = get_data_maximum(data, count);
-    current_data.mean   = get_data_mean(data, count);
-    current_data.median = get_data_median(data, count);
-    current_data.stddev = get_data_std_deviation(data, count, current_data.mean);
+    double max_step = 0.0;
 
-    return 0;
-}
+    size_t xsize = dims->length[0];
 
-// #############################################################################
-// # Utility Functions
-// #############################################################################
-static int in_strarr(const char* string, const char* const* strarr, size_t count){
-
-    for (size_t i = 0; i < count; i++) {
-        if (strcmp(strarr[i], string))
-            continue;
-        return 1;
-    }
-    return 0;
-}
-
-static int get_metric_bit_mask(const char *const *metric_args, size_t count){
-    int result = 0;
-
-    const char *const *current_metric = available_metrics;
-    size_t i = 0;
-    while(*current_metric != NULL){
-        //printf("%s\n", *current_metric);
-        result |= in_strarr(*current_metric, metric_args, count) << i;
-        i++;
-        current_metric++;
+    for (size_t x = 1; x < xsize; x++) {
+        double step = fabs(data[x] - data[x-1]);
+        if (max_step < step) { max_step = step; }
     }
 
-    return result;
+    return max_step;
+}
+static double get_data_max_step_2d(const double *data, const scil_dims_t *dims){
+
+    double max_step = 0.0;
+
+    size_t xsize = dims->length[0];
+    size_t ysize = dims->length[1];
+
+    // X-direction
+    for (size_t y = 0; y < ysize; y++) {
+        for (size_t x = 1; x < xsize; x++) {
+            size_t i1 = get_index_2d(x, y, dims);
+            size_t i2 = get_index_2d(x - 1, y, dims);
+            double step = fabs(data[i1] - data[i2]);
+            if (max_step < step) { max_step = step; }
+        }
+    }
+
+    // Y-direction
+    for (size_t y = 1; y < ysize; y++) {
+        for (size_t x = 0; x < xsize; x++) {
+            size_t i1 = get_index_2d(x, y, dims);
+            size_t i2 = get_index_2d(x, y-1, dims);
+            double step = fabs(data[i1] - data[i2]);
+            if (max_step < step) { max_step = step; }
+        }
+    }
+
+    return max_step;
+}
+static double get_data_max_step_3d(const double *data, const scil_dims_t *dims){
+
+    double max_step = 0.0;
+
+    size_t xsize = dims->length[0];
+    size_t ysize = dims->length[1];
+    size_t zsize = dims->length[2];
+
+    // X-direction
+    for (size_t z = 0; z < zsize; z++) {
+        for (size_t y = 0; y < ysize; y++) {
+            for (size_t x = 1; x < xsize; x++) {
+                size_t i1 = get_index_3d(x, y, z, dims);
+                size_t i2 = get_index_3d(x-1, y, z, dims);
+                double step = fabs(data[i1] - data[i2]);
+                if (max_step < step) { max_step = step; }
+            }
+        }
+    }
+    // Y-direction
+    for (size_t z = 0; z < zsize; z++) {
+        for (size_t y = 1; y < ysize; y++) {
+            for (size_t x = 0; x < xsize; x++) {
+                size_t i1 = get_index_3d(x, y, z, dims);
+                size_t i2 = get_index_3d(x, y-1, z, dims);
+                double step = fabs(data[i1] - data[i2]);
+                if (max_step < step) { max_step = step; }
+            }
+        }
+    }
+    // Z-direction
+    for (size_t z = 1; z < zsize; z++) {
+        for (size_t y = 0; y < ysize; y++) {
+            for (size_t x = 0; x < xsize; x++) {
+                size_t i1 = get_index_3d(x, y, z, dims);
+                size_t i2 = get_index_3d(x, y, z-1, dims);
+                double step = fabs(data[i1] - data[i2]);
+                if (max_step < step) { max_step = step; }
+            }
+        }
+    }
+
+    return max_step;
+}
+static double get_data_max_step_4d(const double *data, const scil_dims_t *dims){
+
+    double max_step = 0.0;
+
+    size_t xsize = dims->length[0];
+    size_t ysize = dims->length[1];
+    size_t zsize = dims->length[2];
+    size_t wsize = dims->length[3];
+
+    // X-direction
+    for (size_t w = 0; w < wsize; w++) {
+        for (size_t z = 0; z < zsize; z++) {
+            for (size_t y = 0; y < ysize; y++) {
+                for (size_t x = 1; x < xsize; x++) {
+                    size_t i1 = get_index_4d(x, y, z, w, dims);
+                    size_t i2 = get_index_4d(x-1, y, z, w, dims);
+                    double step = fabs(data[i1] - data[i2]);
+                    if (max_step < step) { max_step = step; }
+                }
+            }
+        }
+    }
+    // Y-direction
+    for (size_t w = 0; w < wsize; w++) {
+        for (size_t z = 0; z < zsize; z++) {
+            for (size_t y = 1; y < ysize; y++) {
+                for (size_t x = 0; x < xsize; x++) {
+                    size_t i1 = get_index_4d(x, y, z, w, dims);
+                    size_t i2 = get_index_4d(x, y-1, z, w, dims);
+                    double step = fabs(data[i1] - data[i2]);
+                    if (max_step < step) { max_step = step; }
+                }
+            }
+        }
+    }
+    // Z-direction
+    for (size_t w = 0; w < wsize; w++) {
+        for (size_t z = 1; z < zsize; z++) {
+            for (size_t y = 0; y < ysize; y++) {
+                for (size_t x = 0; x < xsize; x++) {
+                    size_t i1 = get_index_4d(x, y, z, w, dims);
+                    size_t i2 = get_index_4d(x, y, z-1, w, dims);
+                    double step = fabs(data[i1] - data[i2]);
+                    if (max_step < step) { max_step = step; }
+                }
+            }
+        }
+    }
+    // W-direction
+    for (size_t w = 1; w < wsize; w++) {
+        for (size_t z = 0; z < zsize; z++) {
+            for (size_t y = 0; y < ysize; y++) {
+                for (size_t x = 0; x < xsize; x++) {
+                    size_t i1 = get_index_4d(x, y, z, w, dims);
+                    size_t i2 = get_index_4d(x, y, z, w-1, dims);
+                    double step = fabs(data[i1] - data[i2]);
+                    if (max_step < step) { max_step = step; }
+                }
+            }
+        }
+    }
+
+    return max_step;
+}
+static double get_data_max_step(const double *data, const scil_dims_t *dims){
+
+    switch (dims->dims){
+        case 1: return get_data_max_step_1d(data, dims);
+        case 2: return get_data_max_step_2d(data, dims);
+        case 3: return get_data_max_step_3d(data, dims);
+        case 4: return get_data_max_step_4d(data, dims);
+    }
 }
 
-static double get_random_double_in_range(double minimum, double maximum){
+static int set_data_characteristics(const double *data, const scil_dims_t *dims){
 
-    return minimum + (maximum - minimum) * (double)rand()/RAND_MAX;
-}
+    current_data.min    = get_data_minimum(data, current_data.count);
+    current_data.max    = get_data_maximum(data, current_data.count);
+    current_data.mean   = 0.0;//get_data_mean(data, current_data.count);
+    current_data.median = get_data_median(data, current_data.count);
+    current_data.stddev = get_data_std_deviation(data, current_data.count, current_data.mean);
+    current_data.maxstep = get_data_max_step(data, dims);
 
-static int get_random_integer_in_range(int minimum, int maximum){
-
-    assert(maximum >= minimum);
-
-    if (minimum == maximum) return minimum;
-
-    return minimum + rand()%(maximum - minimum + 1);
+    return 0;
 }
 
 // #############################################################################
@@ -342,7 +516,7 @@ static void generate_data(){
 
     // Pattern name
     char* name;
-    uint8_t pid = rand() % 5;
+    uint8_t pid = rand() % 4 + 1;
     switch(pid){
         case 0: name = "constant"; break;
         case 1: name = "random"; break;
@@ -388,18 +562,19 @@ static void generate_data(){
     printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name);
     fflush(stdout);
 
-    if (pid == 0) min = point_a;
+    if (pid == 0) { min = point_a; }
 
     scilPa_create_pattern_double(data_buffer, &dims, name, min, max, arg1, arg2);
 
     printf("Done!\n");
 
     // Data characteristics
-    set_data_characteristics(data_buffer, current_data.count);
+    set_data_characteristics(data_buffer, &dims);
+    if (current_data.stddev < 0.0f) printf("%s\n", "Was geht?!");
 
     // User Params for compression
-    current_data.abs_tol = pow(2.0, get_random_double_in_range(-13, -1));
-    current_data.rel_tol = pow(2.0, get_random_double_in_range(-10, 2));
+    current_data.abs_tol = pow(2.0, get_random_double_in_range(-13, 2));
+    current_data.rel_tol = pow(2.0, get_random_double_in_range(-10, 4));
 
     evaluate_compression_algorithms(data_buffer, &dims);
 
@@ -420,10 +595,11 @@ int main(int argc, char** argv){
         return 1;
     }
 
-    fprintf(file, "%s\n", "Index,Algorithm,Size of buffer,Number of values in buffer,Dimensionality,Minimum value,Maximum value,Average,Median,Standard deviation,Absolute error tolerance,Relative error tolerance,Compression throughput,Decompression throughput,Compression ratio");
+    fprintf(file, "%s\n", "Index,Algorithm,Size of buffer,Value count,Dimensionality,Minimum,Maximum,Average,Median,Standard deviation,Maximum step,Absolute error tolerance,Relative error tolerance,Compression throughput,Decompression throughput,Compression ratio");
 
     for (size_t i = 0; i < SAMPLE_SIZE; i++){
         generate_data();
+        if (i % 12 == 0) { srand(time(NULL)); }
     }
 
     fclose(file);
