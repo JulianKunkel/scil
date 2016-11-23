@@ -438,8 +438,8 @@ static int set_data_characteristics(const double *data, const scil_dims_t *dims)
 
     current_data.min    = get_data_minimum(data, current_data.count);
     current_data.max    = get_data_maximum(data, current_data.count);
-    current_data.mean   = 0.0;//get_data_mean(data, current_data.count);
-    current_data.median = get_data_median(data, current_data.count);
+    current_data.mean   = get_data_mean(data, current_data.count);
+    current_data.median = 0.0;//get_data_median(data, current_data.count);
     current_data.stddev = get_data_std_deviation(data, current_data.count, current_data.mean);
     current_data.maxstep = get_data_max_step(data, dims);
 
