@@ -61,10 +61,10 @@ static const char *available_metrics[AVAILABLE_METRICS_COUNT] = {
 };
 
 #define DEFAULT_DTYPE   SCIL_TYPE_DOUBLE
-#define DEFAULT_ECOUNT  16777216 // 2^24. square, cubic and 4th root are integers
+#define DEFAULT_ECOUNT  262144 // NOPE! 2^24. square, cubic and 4th root are integers
 #define DEFAULT_DIM     2
-#define DEFAULT_MIN     -1024
-#define DEFAULT_MAX     1024
+#define DEFAULT_MIN     -16384
+#define DEFAULT_MAX     16384
 #define DEFAULT_ABS_ERR 0.005
 #define DEFAULT_REL_ERR 1
 
@@ -73,7 +73,6 @@ static const char *available_metrics[AVAILABLE_METRICS_COUNT] = {
 
 #define SAMPLE_SIZE 10000
 
-#define FILE_NAME "machine_learning_data7.csv"
 static FILE *file = NULL;
 
 typedef struct line_data {
@@ -144,6 +143,21 @@ static void write_line(){
 // # Utility Functions
 // #############################################################################
 
+static void open_data_file(const char *file_name){
+
+    file = fopen(file_name, "w");
+    if(file == NULL){
+        fprintf(stderr, "%s\n", "Error, opening file.");
+        exit(1);
+    }
+
+    fprintf(file, "%s\n", "Index,Algorithm,Size of buffer,Value count,Dimensionality,Minimum,Maximum,Average,Median,Standard deviation,Maximum step,Absolute error tolerance,Relative error tolerance,Compression throughput,Decompression throughput,Compression ratio");
+}
+
+static void close_data_file(){
+    fclose(file);
+}
+
 static size_t get_index_2d(size_t x, size_t y, const scil_dims_t *dims){
     return y * dims->length[0] + x;
 }
@@ -182,11 +196,11 @@ static int get_metric_bit_mask(const char *const *metric_args, size_t count){
 static void get_pattern_name_by_index(uint8_t index, char *name){
 
     switch(index){
-        case 0: name = "constant"; return;
-        case 1: name = "random"; return;
-        case 2: name = "steps"; return;
-        case 3: name = "sin"; return;
-        case 4: name = "simplexNoise"; return;
+        case 0: strcpy(name, "constant"); return;
+        case 1: strcpy(name, "random"); return;
+        case 2: strcpy(name, "steps"); return;
+        case 3: strcpy(name, "sin"); return;
+        case 4: strcpy(name, "simplexNoise"); return;
     }
 }
 
@@ -205,7 +219,7 @@ static int get_random_integer_in_range(int minimum, int maximum){
 }
 
 static void reset_current_data(){
-    current_data.algo       = "";
+    memset(&current_data.algo, 0, 16);
     current_data.size       = sizeof(double) * DEFAULT_ECOUNT;
     current_data.count      = DEFAULT_ECOUNT;
     current_data.dims       = DEFAULT_DIM;
@@ -582,10 +596,12 @@ static void generate_dims_data(){
 
     reset_current_data();
 
+    open_data_file("dims_data.csv");
+
     for (uint8_t pattern_i = 0; pattern_i < 5; pattern_i++) {
 
-        char *name;
-        get_pattern_name_by_index(i, name);
+        char *name = (char *)malloc(16);
+        get_pattern_name_by_index(pattern_i, name);
 
         for (uint8_t dims_i = 1; dims_i < 5; dims_i++) {
 
@@ -595,10 +611,10 @@ static void generate_dims_data(){
 
             scil_dims_t dims;
             switch(dims_i){
-                case 1: scilPr_initialize_dims_1d(dims, side); break;
-                case 2: scilPr_initialize_dims_2d(dims, side, side); break;
-                case 3: scilPr_initialize_dims_3d(dims, side, side, side); break;
-                case 4: scilPr_initialize_dims_4d(dims, side, side, side, side); break;
+                case 1: scilPr_initialize_dims_1d(&dims, side); break;
+                case 2: scilPr_initialize_dims_2d(&dims, side, side); break;
+                case 3: scilPr_initialize_dims_3d(&dims, side, side, side); break;
+                case 4: scilPr_initialize_dims_4d(&dims, side, side, side, side); break;
             }
 
             current_data.size  = scilPr_get_dims_size(&dims, SCIL_TYPE_DOUBLE);
@@ -606,23 +622,109 @@ static void generate_dims_data(){
 
             allocate(double, data_buffer, current_data.count);
 
+            if (pattern_i < 2) {
+                printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name); fflush(stdout);
+                double min = pattern_i == 0 ? 0 : DEFAULT_MIN;
+                scilPa_create_pattern_double(data_buffer, &dims, name, min, DEFAULT_MAX, 0.0, 0.0);
+                printf("Done!\n");
+
+                set_data_characteristics(data_buffer, &dims);
+                evaluate_compression_algorithms(data_buffer, &dims);
+
+                continue;
+            }
+
             for(uint8_t arg1 = 1; arg1 <= 16; ++arg1) {
-                for(uint8_t arg2 = 1; arg2 <= 16; ++arg2) {
-
-                    printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name);
-                    fflush(stdout);
-
-                    scilPa_create_pattern_double(data_buffer, &dims, name, DEFAULT_MIN, DEFAULT_MAX, arg1, arg2);
-
+                if (pattern_i == 2) {
+                    printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name); fflush(stdout);
+                    double min = pattern_i == 0 ? 0 : DEFAULT_MIN;
+                    scilPa_create_pattern_double(data_buffer, &dims, name, min, DEFAULT_MAX, arg1, 0.0);
                     printf("Done!\n");
 
                     set_data_characteristics(data_buffer, &dims);
+                    evaluate_compression_algorithms(data_buffer, &dims);
 
+                    continue;
+                }
+
+                for(uint8_t arg2 = 1; arg2 <= 16; ++arg2) {
+
+                    printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name); fflush(stdout);
+                    double min = pattern_i == 0 ? 0 : DEFAULT_MIN;
+                    scilPa_create_pattern_double(data_buffer, &dims, name, min, DEFAULT_MAX, arg1, arg2);
+                    printf("Done!\n");
+
+                    set_data_characteristics(data_buffer, &dims);
                     evaluate_compression_algorithms(data_buffer, &dims);
                 }
             }
         }
+        free(name);
     }
+    close_data_file();
+}
+
+static void generate_stddev_data(){
+
+    reset_current_data();
+
+    open_data_file("stddev_data.csv");
+
+    size_t side = (size_t)pow(DEFAULT_ECOUNT, 1.0/DEFAULT_DIM);
+
+    scil_dims_t dims;
+    scilPr_initialize_dims_2d(&dims, side, side);
+
+    current_data.size  = scilPr_get_dims_size(&dims, SCIL_TYPE_DOUBLE);
+    current_data.count = scilPr_get_dims_count(&dims);
+
+    allocate(double, data_buffer, current_data.count);
+
+    for (uint8_t pattern_i = 0; pattern_i < 5; pattern_i++) {
+
+        char *name = (char *)malloc(16);
+        get_pattern_name_by_index(pattern_i, name);
+
+        for (double mult = pow(2.0, -6.0); mult < pow(2.0, 6.0) + 1.0; mult *= 2.0) {
+
+            if (pattern_i < 2) {
+                printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name); fflush(stdout);
+                double min = pattern_i == 0 ? 0 : -mult;
+                scilPa_create_pattern_double(data_buffer, &dims, name, min, mult, 0.0, 0.0);
+                printf("Done!\n");
+
+                set_data_characteristics(data_buffer, &dims);
+                evaluate_compression_algorithms(data_buffer, &dims);
+
+                continue;
+            }
+
+            for(uint8_t arg1 = 1; arg1 <= 16; ++arg1) {
+                if (pattern_i == 2) {
+                    printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name); fflush(stdout);
+                    scilPa_create_pattern_double(data_buffer, &dims, name, -mult, mult, arg1, 0.0);
+                    printf("Done!\n");
+
+                    set_data_characteristics(data_buffer, &dims);
+                    evaluate_compression_algorithms(data_buffer, &dims);
+
+                    continue;
+                }
+
+                for(uint8_t arg2 = 1; arg2 <= 16; ++arg2) {
+
+                    printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name); fflush(stdout);
+                    scilPa_create_pattern_double(data_buffer, &dims, name, -mult, mult, arg1, arg2);
+                    printf("Done!\n");
+
+                    set_data_characteristics(data_buffer, &dims);
+                    evaluate_compression_algorithms(data_buffer, &dims);
+                }
+            }
+        }
+        free(name);
+    }
+    close_data_file();
 }
 
 static void generate_data(){
@@ -701,19 +803,10 @@ int main(int argc, char** argv){
 
     srand((unsigned)time(NULL));
 
-    file = fopen(FILE_NAME, "w");
-    if(file == NULL){
-        fprintf(stderr, "%s\n", "Error, opening file.");
-        return 1;
-    }
-
     fprintf(file, "%s\n", "Index,Algorithm,Size of buffer,Value count,Dimensionality,Minimum,Maximum,Average,Median,Standard deviation,Maximum step,Absolute error tolerance,Relative error tolerance,Compression throughput,Decompression throughput,Compression ratio");
 
-    //for (size_t i = 0; i < SAMPLE_SIZE; i++){
-    //    generate_data();
-    //    if (i % 12 == 0) { srand(time(NULL)); }
-    //}
-    generate_dims_data();
+    //generate_dims_data();
+    generate_stddev_data();
 
     fclose(file);
 
