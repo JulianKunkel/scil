@@ -68,9 +68,9 @@ static const char *available_metrics[AVAILABLE_METRICS_COUNT] = {
 #define DEFAULT_ABS_ERR 0.005
 #define DEFAULT_REL_ERR 1
 
-#define SAMPLE_SIZE 10000
+#define SAMPLE_SIZE 100000
 
-#define FILE_NAME "machine_learning_data5.csv"
+#define FILE_NAME "machine_learning_data7.csv"
 static FILE *file = NULL;
 
 typedef struct line_data {
