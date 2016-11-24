@@ -15,6 +15,9 @@ target_link_libraries(scil-compress-csv scil)
 add_executable(scil-generate-chooser-data scil-generate-chooser-data.c)
 target_link_libraries(scil-generate-chooser-data scil scil-patterns)
 
+add_executable(scil-generate-chooser-data2 scil-generate-chooser-data2.c)
+target_link_libraries(scil-generate-chooser-data2 scil scil-patterns)
+
 install(TARGETS scil-compress-csv DESTINATION bin)
 
 install(FILES scil-plot-csv.R DESTINATION bin)
