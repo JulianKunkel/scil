@@ -12,6 +12,9 @@ install(TARGETS scil-pattern-plotter RUNTIME DESTINATION bin)
 add_executable(scil-compress-csv scil-compress-csv.c)
 target_link_libraries(scil-compress-csv scil)
 
+add_executable(scil-add-noise scil-add-noise.c)
+target_link_libraries(scil-add-noise scil)
+
 add_executable(scil-generate-chooser-data scil-generate-chooser-data.c)
 target_link_libraries(scil-generate-chooser-data scil scil-patterns)
 
