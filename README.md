@@ -11,6 +11,7 @@ Name/Version
 * g++
 * lz4
 * zlib
+* libgsl-dev
 
 The following requirements are automatically downloaded and installed.
 
