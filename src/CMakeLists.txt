@@ -111,6 +111,7 @@ target_link_libraries(scil m)
 # for specific algorithms
 include_directories(
     ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/tools
     ${CMAKE_SOURCE_DIR}/compression
     ${CMAKE_SOURCE_DIR}/internal
     ${CMAKE_SOURCE_DIR}/pattern

@@ -25,6 +25,7 @@
  #include <stdlib.h>
  #include <time.h>
 
+ #include <plugins/file-plugin.h>
  #include "cnoise.h"
 
  /*
