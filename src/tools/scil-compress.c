@@ -124,8 +124,9 @@ int main(int argc, char ** argv){
   }
 
   SCIL_Datatype_t input_datatype;
+  size_t read_data_size;
 
-  ret = in_plugin->readData(in_file, & input_data, & input_datatype, & dims);
+  ret = in_plugin->readData(in_file, & input_data, & input_datatype, & dims, & read_data_size);
   if (ret != 0){
     printf("The input file %s could not be read\n", in_file);
     exit(1);
@@ -186,7 +187,7 @@ int main(int argc, char ** argv){
   } else if (uncompress){
     printf("...decompression\n");
     byte* tmp_buff = (byte*) SAFE_MALLOC(input_size);
-    ret = scil_decompress(input_datatype, output_data, & dims, input_data, input_size, tmp_buff);
+    ret = scil_decompress(input_datatype, output_data, & dims, input_data, read_data_size, tmp_buff);
     free(tmp_buff);
     assert(ret == SCIL_NO_ERR);
 
@@ -198,16 +199,16 @@ int main(int argc, char ** argv){
     printf("Runtime: %fs \n", runtime);
   }
 
-  if ( output_datatype == SCIL_TYPE_BINARY ){
-    ret = in_plugin->writeBinaryData(out_file, output_data, buff_size);
-  }else{
-    ret = in_plugin->writeData(out_file, output_data, input_datatype, output_datatype, dims);
-  }
+  // todo reformat into output format, if neccessary
+  ret = out_plugin->writeData(out_file, output_data, output_datatype, buff_size, input_datatype, dims);
 
   if (ret != 0){
     printf("The output file %s could not be written\n", out_file);
     exit(1);
   }
+
+  free(input_data);
+  free(output_data);
 
   return 0;
 }

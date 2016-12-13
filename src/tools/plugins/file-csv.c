@@ -40,7 +40,7 @@ static option_help * get_options(){
 }
 
 
-static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_datatype, scil_dims_t * out_dims){
+static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_datatype, scil_dims_t * out_dims, size_t * read_size){
   FILE * fd = fopen(name, "r");
   if (! fd){
     return -1;
@@ -132,29 +132,47 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
   return 0;
 }
 
+static void printToFile(FILE * f, const byte * buf, size_t position,  SCIL_Datatype_t datatype){
+  char * format;
+  switch(datatype){
+    case(SCIL_TYPE_DOUBLE):
+      fprintf(f, "%.17f", ((double*) buf)[position]);
+      break;
+    case(SCIL_TYPE_FLOAT):
+      fprintf(f, "%.8f", ((float*) buf)[position]);
+      break;
+    default:
+      printf("Not supported in writeData\n");
+  }
+}
 
-
-static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_datatype, SCIL_Datatype_t datatype, scil_dims_t dims){
+static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_datatype, size_t elements, SCIL_Datatype_t orig_datatype, scil_dims_t dims){
   FILE * f = fopen(name, "w");
   if(f == NULL){
     return -1;
   }
-  double * buffer_in = (double*) buf;
+
+  char * buffer_in = (char*) buf;
+  if (output_header){
+    fprintf(f, "%d,%d,", orig_datatype, dims.dims);
+    for(int i=0; i < SCIL_DIMS_MAX; i++) {
+      fprintf(f, "%zu,", dims.length[i]);
+    }
+    fprintf(f, "\n");
+  }
   if(dims.dims == 1){
-    if (output_header)
-      fprintf(f, "%zu\n", dims.length[0]);
-    fprintf(f, "%.17f", (double)buffer_in[0]);
-    for(size_t x = 1; x < dims.length[0]; x++){
-      fprintf(f, ",%.17f", (double)buffer_in[x]);
+    printToFile(f, buf, 0, buf_datatype);
+    for(size_t x = 1; x < dims.length[0]; x+=1){
+      fprintf(f, ",");
+      printToFile(f,  buf, x, buf_datatype);
     }
     fprintf(f, "\n");
   }else{
-    if (output_header)
-      fprintf(f, "%zu, %zu\n", dims.length[0], dims.length[1]);
-    for(size_t y = 0; y < dims.length[1]; y++){
-      fprintf(f, "%.17f", (double)buffer_in[0+ y * dims.length[0]]);
-      for(size_t x = 1; x < dims.length[0]; x++){
-        fprintf(f, ",%.17f", (double)buffer_in[x+ y * dims.length[0]]);
+    for(size_t y = 0; y < dims.length[1]; y+=1){
+      printToFile(f, buf, y * dims.length[0], buf_datatype);
+      for(size_t x = 1; x < dims.length[0]; x+=1){
+        fprintf(f, ",");
+        printToFile(f, buf, x+ y * dims.length[0], buf_datatype);
       }
       fprintf(f, "\n");
     }
@@ -163,14 +181,9 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
   return 0;
 }
 
-static int writeBinaryData(const char * name, const byte * buf, size_t elements){
-  return -1;
-}
-
 scil_file_plugin_t csv_plugin = {
   "csv",
   get_options,
   readData,
-  writeData,
-  writeBinaryData
+  writeData
 };

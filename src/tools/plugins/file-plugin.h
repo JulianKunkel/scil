@@ -23,9 +23,8 @@
 typedef struct {
   char * name;
   option_help *  (*get_options)();
-  int (*readData)(const char * name, byte ** out_buf, SCIL_Datatype_t * out_datatype, scil_dims_t * out_dims);
-  int (*writeData)(const char * name, const byte * buf, SCIL_Datatype_t buf_datatype, SCIL_Datatype_t to_write_datatype, scil_dims_t dims);
-  int (*writeBinaryData)(const char * name, const byte * buf, size_t elements);
+  int (*readData)(const char * name, byte ** out_buf, SCIL_Datatype_t * out_datatype, scil_dims_t * out_dims, size_t * read_size);
+  int (*writeData)(const char * name, const byte * buf, SCIL_Datatype_t buf_datatype, size_t elements, SCIL_Datatype_t orig_datatype, scil_dims_t dims);
 } scil_file_plugin_t;
 
 scil_file_plugin_t * scil_find_plugin(const char * name);
