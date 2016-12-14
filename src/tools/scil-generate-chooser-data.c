@@ -68,17 +68,26 @@ static const char *available_metrics[AVAILABLE_METRICS_COUNT] = {
 #define DEFAULT_ABS_ERR 0.005
 #define DEFAULT_REL_ERR 1
 
-#define SAMPLE_SIZE 100000
+#define SAMPLE_SIZE 10000
 
-#define FILE_NAME "machine_learning_data7.csv"
+#define FILE_NAME "machine_learning_data8.csv"
 static FILE *file = NULL;
 
 typedef struct line_data {
     size_t line;
     char algo[16];
+    char pattern[16];
+    float pat_param_min;
+    float pat_param_max;
+    float pat_param_arg1;
+    float pat_param_arg2;
     size_t size;
     size_t count;
     uint8_t dims;
+    size_t dim1;
+    size_t dim2;
+    size_t dim3;
+    size_t dim4;
     double min;
     double max;
     double mean;
@@ -92,42 +101,62 @@ typedef struct line_data {
     double compratio;
 } line_data_t;
 
-static line_data_t current_data = { 0, "", 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+static line_data_t current_data = { 0, "", "", 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
 static void write_line(){
-    printf("%lu,%s,%lu,%lu,%u,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", current_data.line,
-                                                                current_data.algo,
-                                                                current_data.size,
-                                                                current_data.count,
-                                                                current_data.dims,
-                                                                current_data.min,
-                                                                current_data.max,
-                                                                current_data.mean,
-                                                                current_data.median,
-                                                                current_data.stddev,
-                                                                current_data.maxstep,
-                                                                current_data.abs_tol,
-                                                                current_data.rel_tol,
-                                                                current_data.compthru,
-                                                                current_data.decompthru,
-                                                                current_data.compratio);
+    printf("%lu,%s,%s,%f,%f,%f,%f,%lu,%lu,%u,%lu,%lu,%lu,%lu,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
+        current_data.line,
+        current_data.algo,
+        current_data.pattern,
+        current_data.pat_param_min,
+        current_data.pat_param_max,
+        current_data.pat_param_arg1,
+        current_data.pat_param_arg2,
+        current_data.size,
+        current_data.count,
+        current_data.dims,
+        current_data.dim1,
+        current_data.dim2,
+        current_data.dim3,
+        current_data.dim4,
+        current_data.min,
+        current_data.max,
+        current_data.mean,
+        current_data.median,
+        current_data.stddev,
+        current_data.maxstep,
+        current_data.abs_tol,
+        current_data.rel_tol,
+        current_data.compthru,
+        current_data.decompthru,
+        current_data.compratio);
 
-    fprintf(file, "%lu,%s,%lu,%lu,%u,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n", current_data.line,
-                                                                current_data.algo,
-                                                                current_data.size,
-                                                                current_data.count,
-                                                                current_data.dims,
-                                                                current_data.min,
-                                                                current_data.max,
-                                                                current_data.mean,
-                                                                current_data.median,
-                                                                current_data.stddev,
-                                                                current_data.maxstep,
-                                                                current_data.abs_tol,
-                                                                current_data.rel_tol,
-                                                                current_data.compthru,
-                                                                current_data.decompthru,
-                                                                current_data.compratio);
+    fprintf(file, "%lu,%s,%s,%f,%f,%f,%f,%lu,%lu,%u,%lu,%lu,%lu,%lu,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n",
+        current_data.line,
+        current_data.algo,
+        current_data.pattern,
+        current_data.pat_param_min,
+        current_data.pat_param_max,
+        current_data.pat_param_arg1,
+        current_data.pat_param_arg2,
+        current_data.size,
+        current_data.count,
+        current_data.dims,
+        current_data.dim1,
+        current_data.dim2,
+        current_data.dim3,
+        current_data.dim4,
+        current_data.min,
+        current_data.max,
+        current_data.mean,
+        current_data.median,
+        current_data.stddev,
+        current_data.maxstep,
+        current_data.abs_tol,
+        current_data.rel_tol,
+        current_data.compthru,
+        current_data.decompthru,
+        current_data.compratio);
 
     current_data.line++;
 }
@@ -439,7 +468,7 @@ static int set_data_characteristics(const double *data, const scil_dims_t *dims)
     current_data.min    = get_data_minimum(data, current_data.count);
     current_data.max    = get_data_maximum(data, current_data.count);
     current_data.mean   = get_data_mean(data, current_data.count);
-    current_data.median = 0.0;//get_data_median(data, current_data.count);
+    current_data.median = get_data_median(data, current_data.count);
     current_data.stddev = get_data_std_deviation(data, current_data.count, current_data.mean);
     current_data.maxstep = get_data_max_step(data, dims);
 
@@ -515,20 +544,24 @@ static void evaluate_compression_algorithms(double *buffer, scil_dims_t *dims){
 static void generate_data(){
 
     // Pattern name
-    char* name;
-    uint8_t pid = rand() % 4 + 1;
+    uint8_t pid = rand() % 5;
     switch(pid){
-        case 0: name = "constant"; break;
-        case 1: name = "random"; break;
-        case 2: name = "steps"; break;
-        case 3: name = "sin"; break;
-        case 4: name = "simplexNoise"; break;
+        case 0: strncpy(current_data.pattern, "constant"    , 16); break;
+        case 1: strncpy(current_data.pattern, "random"      , 16); break;
+        case 2: strncpy(current_data.pattern, "steps"       , 16); break;
+        case 3: strncpy(current_data.pattern, "sin"         , 16); break;
+        case 4: strncpy(current_data.pattern, "simplexNoise", 16); break;
     }
 
     // Dimensionality
     current_data.dims = (uint8_t)get_random_integer_in_range(1, 4);
     size_t e_count = (size_t)pow(2.0, get_random_double_in_range(8.0, 22.0)); // maximum of 32 MB for double values
     size_t side = (size_t)pow(e_count, 1.0/current_data.dims);
+
+    current_data.dim1 = side;
+    current_data.dim2 = current_data.dims > 1 ? side : 1;
+    current_data.dim3 = current_data.dims > 2 ? side : 1;
+    current_data.dim4 = current_data.dims > 3 ? side : 1;
 
     scil_dims_t dims;
     switch(current_data.dims){
@@ -544,33 +577,45 @@ static void generate_data(){
     allocate(double, data_buffer, current_data.count);
 
     // Minimum and maximum
-    double min, max;
-
     double point_a = pow(2.0, get_random_double_in_range(-14, 14));
     double point_b = pow(2.0, get_random_double_in_range(-14, 14));
 
     point_a = rand() % 2 == 1 ? -point_a : point_a;
     point_b = rand() % 2 == 1 ? -point_b : point_b;
 
-    if (point_b > point_a) { min = point_a; max = point_b; }
-    else                   { min = point_b; max = point_a; }
+    if (point_b > point_a) {
+        current_data.pat_param_min = point_a;
+        current_data.pat_param_max = point_b;
+    }
+    else {
+        current_data.pat_param_max = point_b;
+        current_data.pat_param_min = point_a;
+    }
 
     // Other Arguments
-    float arg1 = get_random_double_in_range(1, 16);
-    float arg2 = get_random_double_in_range(1, 16);
+    current_data.pat_param_arg1 = get_random_double_in_range(1, 16);
+    current_data.pat_param_arg2 = get_random_double_in_range(1, 16);
 
-    printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name);
+    printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, current_data.pattern);
     fflush(stdout);
 
-    if (pid == 0) { min = point_a; }
+    if (pid == 0) {
+        current_data.pat_param_min = point_a;
+        current_data.pat_param_max = -INFINITY;
+    }
 
-    scilPa_create_pattern_double(data_buffer, &dims, name, min, max, arg1, arg2);
+    scilPa_create_pattern_double(data_buffer,
+                                 &dims,
+                                 current_data.pattern,
+                                 current_data.pat_param_min,
+                                 current_data.pat_param_max,
+                                 current_data.pat_param_arg1,
+                                 current_data.pat_param_arg2);
 
     printf("Done!\n");
 
     // Data characteristics
     set_data_characteristics(data_buffer, &dims);
-    if (current_data.stddev < 0.0f) printf("%s\n", "Was geht?!");
 
     // User Params for compression
     current_data.abs_tol = pow(2.0, get_random_double_in_range(-13, 2));
@@ -595,7 +640,7 @@ int main(int argc, char** argv){
         return 1;
     }
 
-    fprintf(file, "%s\n", "Index,Algorithm,Size of buffer,Value count,Dimensionality,Minimum,Maximum,Average,Median,Standard deviation,Maximum step,Absolute error tolerance,Relative error tolerance,Compression throughput,Decompression throughput,Compression ratio");
+    fprintf(file, "%s\n", "Index,Algorithm,Pattern Name,Pattern Param Minimum,Pattern Param Maximum,Pattern Param 1,Pattern Param 2,Size of buffer,Value count,Dimensionality,Count x-Dim,Count y-Dim,Count z-Dim,Count w-Dim,Minimum,Maximum,Average,Median,Standard deviation,Maximum step,Absolute error tolerance,Relative error tolerance,Compression throughput,Decompression throughput,Compression ratio");
 
     for (size_t i = 0; i < SAMPLE_SIZE; i++){
         generate_data();
