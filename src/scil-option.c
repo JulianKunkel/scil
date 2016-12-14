@@ -30,6 +30,7 @@ static char* scil_performance_unit_names[] = {
     "SINGLESTREAM_SHARED_STORAGE"
 };
 
+
 static int print_value(option_help * o){
   int pos = 0;
   if (o->arg == OPTION_OPTIONAL_ARGUMENT || o->arg == OPTION_REQUIRED_ARGUMENT){
@@ -48,6 +49,7 @@ static int print_value(option_help * o){
         pos += printf("=%d ", *(int*) o->variable);
         break;
       }
+      case('H'):
       case('s'):{
         if ( *(char**) o->variable != NULL &&  ((char**) o->variable)[0][0] != 0 ){
           pos += printf("=%s", *(char**) o->variable);
@@ -108,9 +110,7 @@ static void print_help_section(option_help * args, option_value_type type, char 
   }
 }
 
-static void print_help(char * name, option_help * args){
-  printf("Synopsis: %s ", name);
-
+void scilO_print_help(option_help * args, int is_plugin){
   option_help * o;
   int optionalArgs = 0;
   for(o = args; o->shortVar != 0 || o->longVar != 0 ; o++){
@@ -138,18 +138,102 @@ static void print_help(char * name, option_help * args){
     }
   }
   if (optionalArgs){
-    printf(" [Optional Args]");
+    //printf(" [Optional Args]");
   }
-  printf("\n");
+  if (! is_plugin){
+    printf(" -- <Input plugin options, see below> -- <Output plugin options, see below>\n");
+  }
 
   print_help_section(args, OPTION_REQUIRED_ARGUMENT, "Required arguments");
   print_help_section(args, OPTION_FLAG, "Flags");
   print_help_section(args, OPTION_OPTIONAL_ARGUMENT, "Optional arguments");
 }
 
-void scilO_parseOptions(int argc, char ** argv, option_help * args){
+
+static int print_option_value(option_help * o){
+  int pos = 0;
+  if (o->arg == OPTION_OPTIONAL_ARGUMENT || o->arg == OPTION_REQUIRED_ARGUMENT){
+    assert(o->variable != NULL);
+
+    switch(o->type){
+      case('F'):{
+        pos += printf("=%.14f ", *(double*) o->variable);
+        break;
+      }
+      case('f'):{
+        pos += printf("=%.6f ", (double) *(float*) o->variable);
+        break;
+      }
+      case('d'):{
+        pos += printf("=%d ", *(int*) o->variable);
+        break;
+      }
+      case('H'):{
+        pos += printf("=HIDDEN");
+        break;
+      }
+      case('s'):{
+        if ( *(char**) o->variable != NULL &&  ((char**) o->variable)[0][0] != 0 ){
+          pos += printf("=%s", *(char**) o->variable);
+        }else{
+          pos += printf("=");
+        }
+        break;
+      }
+      case('c'):{
+        pos += printf("=%c", *(char*) o->variable);
+        break;
+      }
+      case('l'):{
+        pos += printf("=%lld", *(long long*) o->variable);
+        break;
+      }
+      case('e'):{
+        pos += printf("=%s", scil_performance_unit_names[*(int*) o->variable]);
+        break;
+      }
+    }
+  }else{
+    //printf(" ");
+  }
+
+  return pos;
+}
+
+
+static void print_current_option_section(option_help * args, option_value_type type){
+  option_help * o;
+  for(o = args; o->shortVar != 0 || o->longVar != 0 ; o++){
+    if (o->arg == type){
+      int pos = 0;
+      if (o->arg == OPTION_FLAG && (*(int*)o->variable) == 0){
+        continue;
+      }
+      printf("\t");
+
+      if(o->shortVar != 0 && o->longVar != 0){
+        pos += printf("%s", o->longVar);
+      }else if(o->shortVar != 0){
+        pos += printf("%c", o->shortVar);
+      }else if(o->longVar != 0){
+        pos += printf("%s", o->longVar);
+      }
+
+      pos += print_option_value(o);
+      printf("\n");
+    }
+  }
+}
+
+
+void scilO_print_current_options(option_help * args){
+  print_current_option_section(args, OPTION_REQUIRED_ARGUMENT);
+  print_current_option_section(args, OPTION_OPTIONAL_ARGUMENT);
+  print_current_option_section(args, OPTION_FLAG);
+}
+
+int scilO_parseOptions(int argc, char ** argv, option_help * args, int * printhelp){
   int error = 0;
-  int printhelp = 0;
   int requiredArgsSeen = 0;
   int requiredArgsNeeded = 0;
   int i;
@@ -159,7 +243,6 @@ void scilO_parseOptions(int argc, char ** argv, option_help * args){
       requiredArgsNeeded++;
     }
   }
-
   for(i=1; i < argc; i++){
     char * txt = argv[i];
     int foundOption = 0;
@@ -167,6 +250,10 @@ void scilO_parseOptions(int argc, char ** argv, option_help * args){
     if(arg != NULL){
       arg[0] = 0;
       arg++;
+    }
+    if(strcmp(txt, "--") == 0){
+      // we found plugin options
+      break;
     }
 
     // try to find matching option help
@@ -215,6 +302,7 @@ void scilO_parseOptions(int argc, char ** argv, option_help * args){
                 *(int*) o->variable = atoi(arg);
                 break;
               }
+              case('H'):
               case('s'):{
                 (*(char **) o->variable) = strdup(arg);
                 break;
@@ -249,13 +337,11 @@ void scilO_parseOptions(int argc, char ** argv, option_help * args){
                 }
                 if(!found){
                   printf("Error, enum value %s is not valid.\n", arg);
-                  exit(1);
+                  error = 1;
                 }
                 break;
               }
             }
-
-            break;
           }
         }
 
@@ -268,7 +354,7 @@ void scilO_parseOptions(int argc, char ** argv, option_help * args){
     }
     if (! foundOption){
         if(strcmp(txt, "-h") == 0 || strcmp(txt, "--help") == 0){
-          printhelp=1;
+          *printhelp=1;
         }else{
           printf("Error invalid argument: %s\n", txt);
           error = 1;
@@ -278,16 +364,13 @@ void scilO_parseOptions(int argc, char ** argv, option_help * args){
 
   if( requiredArgsSeen != requiredArgsNeeded ){
     printf("Error: Missing some required arguments\n\n");
-    print_help(argv[0], args);
-    exit(1);
+    *printhelp = -1;
   }
 
-  if(printhelp != 0){
-    print_help(argv[0], args);
-    exit(0);
-  }
   if(error != 0){
-    printf("Invalid options, aborting\n");
-    exit(1);
+    printf("Invalid options\n");
+    *printhelp = -1;
   }
+
+  return i;
 }

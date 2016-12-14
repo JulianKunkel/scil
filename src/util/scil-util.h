@@ -47,7 +47,7 @@
 #define min(a,b) \
   (-max(-a, -b))
 
-#define DATATYPE_LENGTH(type) (type == SCIL_TYPE_FLOAT ? sizeof(float) : type == SCIL_TYPE_DOUBLE ? sizeof(double) : type == SCIL_TYPE_INT8 ? sizeof(int8_t) : type == SCIL_TYPE_INT16 ? sizeof(int16_t) : type == SCIL_TYPE_INT32 ? sizeof(int32_t) : type == SCIL_TYPE_INT64 ? sizeof(int64_t) : 0)
+#define DATATYPE_LENGTH(type) (type == SCIL_TYPE_FLOAT ? sizeof(float) : type == SCIL_TYPE_DOUBLE ? sizeof(double) : type == SCIL_TYPE_INT8 ? sizeof(int8_t) : type == SCIL_TYPE_INT16 ? sizeof(int16_t) : type == SCIL_TYPE_INT32 ? sizeof(int32_t) : type == SCIL_TYPE_INT64 ? sizeof(int64_t) : type == SCIL_TYPE_BINARY ? 1 : 0)
 
 /**
  * \brief Allocates a buffer with error checking.

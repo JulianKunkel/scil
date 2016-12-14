@@ -13,33 +13,20 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef SCIL_PLUGIN_FILETYPE_H
+#define SCIL_PLUGIN_FILETYPE_H
 
-#ifndef SCIL_OPTION_H
-#define SCIL_OPTION_H
+#include <scil-option.h>
+#include <scil-dims.h>
+#include <scil-datatypes.h>
 
-typedef enum{
-  OPTION_FLAG,
-  OPTION_OPTIONAL_ARGUMENT,
-  OPTION_REQUIRED_ARGUMENT
-} option_value_type;
+typedef struct {
+  char * name;
+  option_help *  (*get_options)();
+  int (*readData)(const char * name, byte ** out_buf, SCIL_Datatype_t * out_datatype, scil_dims_t * out_dims, size_t * read_size);
+  int (*writeData)(const char * name, const byte * buf, SCIL_Datatype_t buf_datatype, size_t elements, SCIL_Datatype_t orig_datatype, scil_dims_t dims);
+} scil_file_plugin_t;
 
-typedef struct{
-  char shortVar;
-  char * longVar;
-  char * help;
-
-  option_value_type arg;
-  char type;  // data type, H = hidden string
-  void * variable;
-} option_help;
-
-#define LAST_OPTION {0, 0, 0, (option_value_type) 0, 0, NULL}
-
-void scilO_print_help(option_help * args, int is_plugin);
-
-void scilO_print_current_options(option_help * args);
-
-//@return the number of parsed arguments
-int scilO_parseOptions(int argc, char ** argv, option_help * args, int * print_help);
+scil_file_plugin_t * scil_find_plugin(const char * name);
 
 #endif

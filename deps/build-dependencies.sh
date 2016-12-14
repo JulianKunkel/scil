@@ -20,6 +20,18 @@ if [[ ! -e $WAVELET.zip ]] ; then
 	unzip $WAVELET.zip -d $WAVELET
 fi
 
+if [[ ! -e cnoise ]] ; then
+	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/cnoise.c -P ./cnoise/
+	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/cnoise.h -P ./cnoise/
+	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/README.txt -P ./cnoise/
+	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/Config.mk -P ./cnoise/
+	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/Makefile -P ./cnoise/
+
+	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/example/test.c -P ./cnoise/test/
+	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/example/Makefile -P ./cnoise/test/
+	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/example/test_output.txt -P ./cnoise/test/
+fi
+
 BUILD=0
 
 if [[ ! -e libzfp.a ]] ; then
@@ -40,10 +52,19 @@ if [[ ! -e libfpzip.a ]] ; then
 	BUILD=1
 fi
 
+if [[ ! -e cnoise.a ]] ; then
+	echo "  Building cnoise library"
+  pushd cnoise/
+  make
+  popd
+	BUILD=1
+fi
+
 if [[ $BUILD == 1 ]] ; then
-  mkdir -p include/fpzip include/zfp
+  mkdir -p include/fpzip include/zfp include/cnoise
   cp $FPZIP/inc/* include/fpzip
   cp $ZFP/inc/* include/zfp
+	cp cnoise/cnoise.h include/cnoise
 
   rm *.a
   cp $(find -name "*.a") .

@@ -417,8 +417,6 @@ int scil_decompress(enum SCIL_Datatype datatype,
     // for(int i=0; i < chain_size; i++){
     src_size--;
     uint8_t compressor_id = src_adj[src_size];
-	printf("%u\n", compressor_id);
-
     debugI("D compressor ID %d at pos %llu\n", compressor_id, (long long unsigned)&src_adj[src_size]);
 
     CHECK_COMPRESSOR_ID(compressor_id)

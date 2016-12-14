@@ -11,6 +11,8 @@
  */
 #define SCIL_BLOCK_HEADER_MAX_SIZE 1024
 
+#define SCIL_DIMS_MAX 4
+
 /** \brief Struct to contain the dimensional configuration of data. */
 typedef struct scil_dims
 {
@@ -18,7 +20,7 @@ typedef struct scil_dims
     uint8_t dims;
 
     /** \brief Array containing each dimensions element count. */
-    size_t length[4];
+    size_t length[SCIL_DIMS_MAX];
 } scil_dims_t;
 
 void scilPr_initialize_dims_1d(scil_dims_t* dims, size_t dim1);

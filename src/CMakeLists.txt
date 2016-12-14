@@ -111,6 +111,7 @@ target_link_libraries(scil m)
 # for specific algorithms
 include_directories(
     ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/tools
     ${CMAKE_SOURCE_DIR}/compression
     ${CMAKE_SOURCE_DIR}/internal
     ${CMAKE_SOURCE_DIR}/pattern
@@ -121,13 +122,14 @@ include_directories(
     ${DEPS_DIR}/wavelet_code
     ${DEPS_DIR}/include/zfp
     ${DEPS_DIR}/include/fpzip
-    ${OPENJPEG_INCLUDE_DIRS}
+    ${DEPS_DIR}/include/cnoise
 )
 
 target_link_libraries(scil z)
 target_link_libraries(scil
   ${DEPS_DIR}/libfpzip.a
   ${DEPS_DIR}/libzfp.a
+  ${DEPS_DIR}/libcnoise.a
   lz4
   )
 
