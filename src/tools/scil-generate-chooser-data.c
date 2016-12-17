@@ -44,8 +44,7 @@ enum metrics {
     REL_ERR_TOL
 };
 
-#define AVAILABLE_METRICS_COUNT 11
-static const char *available_metrics[AVAILABLE_METRICS_COUNT] = {
+static const char *available_metrics[] = {
     "dtype",
     "ecount",
     "dsize",

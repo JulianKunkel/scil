@@ -13,7 +13,7 @@ set (VERSION_MINOR 1)
 
 set(DEV_DIR "${CMAKE_SOURCE_DIR}/../dev")
 set(DEPS_DIR "${CMAKE_SOURCE_DIR}/../deps")
-
+set(DEPS_COMPILED_DIR "${CMAKE_BINARY_DIR}/deps")
 
 find_package(PkgConfig REQUIRED)
 
@@ -23,13 +23,13 @@ include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
 
 # compile flags
-set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -pedantic-errors -std=gnu11 -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections  -Wl,--no-allow-shlib-undefined")
+set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -std=gnu11 -pedantic-errors -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections  -Wl,--no-allow-shlib-undefined")
 # -fdiagnostics-color=always
 # -fvisibility=hidden -fvisibility-inlines-hidden -Wl,--print-gc-sections
 set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--no-allow-shlib-undefined -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt")
 
-set (CMAKE_C_FLAGS_DEBUG   "-O0 -ggdb -fvar-tracking -DDEBUG")
-set (CMAKE_CXX_FLAGS_DEBUG "-O0 -ggdb")
+set (CMAKE_C_FLAGS_DEBUG   "-O0 -g3 -fvar-tracking -DDEBUG")
+set (CMAKE_CXX_FLAGS_DEBUG "-O0 -g3")
 
 set (CMAKE_C_FLAGS_RELEASE "-O3")
 
@@ -74,7 +74,7 @@ message(STATUS "Endianess: ${ENDIANESS}")
 
 
 # run during configure:
-execute_process(COMMAND ${DEPS_DIR}/build-dependencies.sh WORKING_DIRECTORY ${DEPS_DIR})
+execute_process(COMMAND ${DEPS_DIR}/build-dependencies.sh) # WORKING_DIRECTORY ${DEPS_DIR}
 execute_process(COMMAND ${DEV_DIR}/create-datatype-variants.py ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/)
 
 #
@@ -102,11 +102,11 @@ add_library(scil SHARED scil.c scil-dummy.cpp
     ${CMAKE_BINARY_DIR}/scil-quantizer.c
     ${ALGO}
     ${DEPS_DIR}/open-simplex-noise-in-c/open-simplex-noise.c
-    ${DEPS_DIR}/wavelet_code/alloc.c
-    ${DEPS_DIR}/wavelet_code/wav_basic.c
-    ${DEPS_DIR}/wavelet_code/wav_trf.c
+    ${DEPS_COMPILED_DIR}/wavelet_code/alloc.c
+    ${DEPS_COMPILED_DIR}/wavelet_code/wav_basic.c
+    ${DEPS_COMPILED_DIR}/wavelet_code/wav_trf.c
 )
-target_link_libraries(scil m)
+target_link_libraries(scil m rt)
 
 # for specific algorithms
 include_directories(
@@ -119,17 +119,17 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/util
     ${CMAKE_BINARY_DIR}
     ${DEPS_DIR}/open-simplex-noise-in-c
-    ${DEPS_DIR}/wavelet_code
-    ${DEPS_DIR}/include/zfp
-    ${DEPS_DIR}/include/fpzip
-    ${DEPS_DIR}/include/cnoise
+    ${DEPS_COMPILED_DIR}/wavelet_code
+    ${DEPS_COMPILED_DIR}/include/zfp
+    ${DEPS_COMPILED_DIR}/include/fpzip
+    ${DEPS_COMPILED_DIR}/include/cnoise
 )
 
 target_link_libraries(scil z)
 target_link_libraries(scil
-  ${DEPS_DIR}/libfpzip.a
-  ${DEPS_DIR}/libzfp.a
-  ${DEPS_DIR}/libcnoise.a
+  ${DEPS_COMPILED_DIR}/libfpzip.a
+  ${DEPS_COMPILED_DIR}/libzfp.a
+  ${DEPS_COMPILED_DIR}/libcnoise.a
   lz4
   )
 

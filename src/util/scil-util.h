@@ -31,6 +31,7 @@
 
 #include <scil.h>
 
+
 /**
  * \brief Makro to make sure off_t is 64-bit unsigned integer
  */
@@ -150,16 +151,18 @@ typedef union {
 	float f;
 } datatype_cast_float;
 
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 typedef union {
   struct {
-    uint64_t mantissa  :  MANTISSA_LENGTH_DOUBLE;
+    uint64_t mantissa  :  MANTISSA_LENGTH_DOUBLE; // actually not C99 since it is a 64 Bit type
     uint32_t exponent : 11;
     uint32_t sign     : 1;
   } p;
 	double f;
 } datatype_cast_double;
 
+#pragma GCC diagnostic pop
 
 
 /**

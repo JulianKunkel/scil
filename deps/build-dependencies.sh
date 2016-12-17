@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/bash -e
 
 SRC="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TGT=$PWD/deps
 
-mkdir -p $TGT || exit 1
+mkdir -p $TGT
 cd $TGT
 echo "Building dependencies for SCIL from third-party software"
 
@@ -27,7 +27,11 @@ if [[ ! -e $SRC/$WAVELET.zip ]] ; then
 	wget http://eeweb.poly.edu/~onur/$SRC.zip
 fi
 if [[ ! -e $TGT/$WAVELET ]] ; then
-unzip $SRC/$WAVELET.zip -d $TGT/$WAVELET
+	unzip $SRC/$WAVELET.zip -d $TGT/$WAVELET
+	if [[ $? != 0 ]] ; then
+		echo "Error unzip $SRC/$1"
+		exit 1
+	fi
 fi
 
 if [[ ! -e $SRC/cnoise/test/test_output.txt ]] ; then
@@ -83,7 +87,7 @@ if [[ $BUILD == 1 ]] ; then
   cp $ZFP/inc/* include/zfp
 	cp cnoise/cnoise.h include/cnoise
 
-  rm *.a
+  rm *.a || true # ignore error
   cp $(find -name "*.a") .
 	echo "[OK]"
 else
