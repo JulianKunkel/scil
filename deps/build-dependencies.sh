@@ -1,62 +1,79 @@
 #!/bin/bash
 
+SRC="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+TGT=$PWD/deps
+
+mkdir -p $TGT || exit 1
+cd $TGT
 echo "Building dependencies for SCIL from third-party software"
+
+function download(){
+		if [[ ! -e $SRC/$1 ]] ; then
+			wget $2/$1 -o $SRC/$1
+		fi
+		if [[ ! -e $TGT/$1 ]] ; then
+			tar -xf $SRC/$1
+		fi
+}
 
 ZFP=zfp-0.5.0
 FPZIP=fpzip-1.1.0
 WAVELET=wavelet_code
 
-function download(){
-		if [[ ! -e $1 ]] ; then
-			wget $2/$1
-			tar -xf $1
-		fi
-}
-
 download $FPZIP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download
 download $ZFP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download
-if [[ ! -e $WAVELET.zip ]] ; then
-	wget http://eeweb.poly.edu/~onur/wavelet_code.zip
-	unzip $WAVELET.zip -d $WAVELET
+
+if [[ ! -e $SRC/$WAVELET.zip ]] ; then
+	wget http://eeweb.poly.edu/~onur/$SRC.zip
+fi
+if [[ ! -e $TGT/$WAVELET ]] ; then
+unzip $SRC/$WAVELET.zip -d $TGT/$WAVELET
 fi
 
-if [[ ! -e cnoise ]] ; then
-	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/cnoise.c -P ./cnoise/
-	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/cnoise.h -P ./cnoise/
-	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/README.txt -P ./cnoise/
-	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/Config.mk -P ./cnoise/
-	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/Makefile -P ./cnoise/
+if [[ ! -e $SRC/cnoise/test/test_output.txt ]] ; then
+	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/cnoise.c -P $SRC/cnoise/
+	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/cnoise.h -P $SRC/cnoise/
+	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/README.txt -P $SRC/cnoise/
+	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/Config.mk -P $SRC/cnoise/
+	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/Makefile -P $SRC/cnoise/
 
-	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/example/test.c -P ./cnoise/test/
-	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/example/Makefile -P ./cnoise/test/
-	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/example/test_output.txt -P ./cnoise/test/
+	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/example/test.c -P $SRC/cnoise/test/
+	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/example/Makefile -P $SRC/cnoise/test/
+	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/example/test_output.txt -P $SRC/cnoise/test/
 fi
+
+if [[ ! -e $TGT/cnoise/ ]] ; then
+	cp -r $SRC/cnoise/ .
+fi
+
 
 BUILD=0
 
 if [[ ! -e libzfp.a ]] ; then
 	echo "  Building fpzip shared library"
-	pushd $ZFP
-	cp ../config-zfp Config
+	pushd $ZFP > /dev/null
+	cp $SRC/config-zfp Config
 	make shared
 	make
-	popd
+	popd > /dev/null
 	BUILD=1
 fi
 
 if [[ ! -e libfpzip.a ]] ; then
   echo "  Building zfp shared library"
-  pushd $FPZIP/src
-  make -f ../../Makefile-fpzip-1.1.0
-  popd
+  pushd $FPZIP/src > /dev/null
+  make -f $SRC/Makefile-fpzip-1.1.0
+  popd > /dev/null
 	BUILD=1
 fi
 
-if [[ ! -e cnoise.a ]] ; then
+
+if [[ ! -e libcnoise.a ]] ; then
 	echo "  Building cnoise library"
-  pushd cnoise/
+
+  pushd cnoise/ > /dev/null
   make
-  popd
+  popd > /dev/null
 	BUILD=1
 fi
 
@@ -68,6 +85,7 @@ if [[ $BUILD == 1 ]] ; then
 
   rm *.a
   cp $(find -name "*.a") .
+	echo "[OK]"
+else
+	echo "[Already built]"
 fi
-
-echo "[OK]"
