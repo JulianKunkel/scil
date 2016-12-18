@@ -5,6 +5,7 @@
 #include <scil-chain.h>
 #include <scil-hardware-limits.h>
 #include <scil-util.h>
+#include <scil-internal.h>
 
 #include <assert.h>
 #include <float.h>

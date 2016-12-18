@@ -66,17 +66,17 @@ typedef struct scil_compression_algorithm {
       int (*compress_double)(const scil_context_t* ctx, double* restrict data_out, byte*restrict header, int * header_size_out, double*restrict data_in, const scil_dims_t* dims);
       int (*decompress_double)(double*restrict data_out, scil_dims_t* dims, double*restrict compressed_buf_in, byte*restrict header_end, int * header_parsed_out);
 
-      int (*compress_int8)(const scil_context_t* ctx, int8* restrict data_out, byte*restrict header, int * header_size_out, int8*restrict data_in, const scil_dims_t* dims);
-      int (*decompress_int8)(int8*restrict data_out, scil_dims_t* dims, int8*restrict compressed_buf_in, byte*restrict header_end, int * header_parsed_out);
+      int (*compress_int8)(const scil_context_t* ctx, int8_t* restrict data_out, byte*restrict header, int * header_size_out, int8_t*restrict data_in, const scil_dims_t* dims);
+      int (*decompress_int8)(int8_t*restrict data_out, scil_dims_t* dims, int8_t*restrict compressed_buf_in, byte*restrict header_end, int * header_parsed_out);
 
-      int (*compress_int16)(const scil_context_t* ctx, int16* restrict data_out, byte*restrict header, int * header_size_out, int16*restrict data_in, const scil_dims_t* dims);
-      int (*decompress_int16)(int16*restrict data_out, scil_dims_t* dims, int16*restrict compressed_buf_in, byte*restrict header_end, int * header_parsed_out);
+      int (*compress_int16)(const scil_context_t* ctx, int16_t* restrict data_out, byte*restrict header, int * header_size_out, int16_t*restrict data_in, const scil_dims_t* dims);
+      int (*decompress_int16)(int16_t*restrict data_out, scil_dims_t* dims, int16_t*restrict compressed_buf_in, byte*restrict header_end, int * header_parsed_out);
 
-      int (*compress_int32)(const scil_context_t* ctx, int32* restrict data_out, byte*restrict header, int * header_size_out, int32*restrict data_in, const scil_dims_t* dims);
-      int (*decompress_int32)(int32*restrict data_out, scil_dims_t* dims, int32*restrict compressed_buf_in, byte*restrict header_end, int * header_parsed_out);
+      int (*compress_int32)(const scil_context_t* ctx, int32_t * restrict data_out, byte*restrict header, int * header_size_out, int32_t*restrict data_in, const scil_dims_t* dims);
+      int (*decompress_int32)(int32_t*restrict data_out, scil_dims_t* dims, int32_t*restrict compressed_buf_in, byte*restrict header_end, int * header_parsed_out);
 
-      int (*compress_int64)(const scil_context_t* ctx, int64* restrict data_out, byte*restrict header, int * header_size_out, int64*restrict data_in, const scil_dims_t* dims);
-      int (*decompress_int64)(int64*restrict data_out, scil_dims_t* dims, int64*restrict compressed_buf_in, byte*restrict header_end, int * header_parsed_out);
+      int (*compress_int64)(const scil_context_t* ctx, int64_t* restrict data_out, byte*restrict header, int * header_size_out, int64_t*restrict data_in, const scil_dims_t* dims);
+      int (*decompress_int64)(int64_t*restrict data_out, scil_dims_t* dims, int64_t*restrict compressed_buf_in, byte*restrict header_end, int * header_parsed_out);
   } PFtype; // preconditioner first stage
 
     struct{
@@ -87,17 +87,17 @@ typedef struct scil_compression_algorithm {
       int (*compress_double)(const scil_context_t* ctx, int64_t* restrict compressed_buf_in_out, size_t* restrict out_size, double*restrict data_in, const scil_dims_t* dims);
       int (*decompress_double)( double*restrict data_out, scil_dims_t* dims, int64_t*restrict compressed_buf_in, const size_t in_size);
 
-      int (*compress_int8)(const scil_context_t* ctx, int64_t* restrict compressed_buf_in_out, size_t* restrict out_size, int8*restrict data_in, const scil_dims_t* dims);
-      int (*decompress_int8)( int8*restrict data_out, scil_dims_t* dims, int64_t*restrict compressed_buf_in, const size_t in_size);
+      int (*compress_int8)(const scil_context_t* ctx, int64_t* restrict compressed_buf_in_out, size_t* restrict out_size, int8_t*restrict data_in, const scil_dims_t* dims);
+      int (*decompress_int8)( int8_t*restrict data_out, scil_dims_t* dims, int64_t*restrict compressed_buf_in, const size_t in_size);
 
-      int (*compress_int16)(const scil_context_t* ctx, int64_t* restrict compressed_buf_in_out, size_t* restrict out_size, int16*restrict data_in, const scil_dims_t* dims);
-      int (*decompress_int16)( int16*restrict data_out, scil_dims_t* dims, int64_t*restrict compressed_buf_in, const size_t in_size);
+      int (*compress_int16)(const scil_context_t* ctx, int64_t* restrict compressed_buf_in_out, size_t* restrict out_size, int16_t*restrict data_in, const scil_dims_t* dims);
+      int (*decompress_int16)( int16_t*restrict data_out, scil_dims_t* dims, int64_t*restrict compressed_buf_in, const size_t in_size);
 
-      int (*compress_int32)(const scil_context_t* ctx, int64_t* restrict compressed_buf_in_out, size_t* restrict out_size, int32*restrict data_in, const scil_dims_t* dims);
-      int (*decompress_int32)( int32*restrict data_out, scil_dims_t* dims, int64_t*restrict compressed_buf_in, const size_t in_size);
+      int (*compress_int32)(const scil_context_t* ctx, int64_t* restrict compressed_buf_in_out, size_t* restrict out_size, int32_t*restrict data_in, const scil_dims_t* dims);
+      int (*decompress_int32)( int32_t*restrict data_out, scil_dims_t* dims, int64_t*restrict compressed_buf_in, const size_t in_size);
 
-      int (*compress_int64)(const scil_context_t* ctx, int64_t* restrict compressed_buf_in_out, size_t* restrict out_size, int64*restrict data_in, const scil_dims_t* dims);
-      int (*decompress_int64)( int64*restrict data_out, scil_dims_t* dims, int64_t*restrict compressed_buf_in, const size_t in_size);
+      int (*compress_int64)(const scil_context_t* ctx, int64_t* restrict compressed_buf_in_out, size_t* restrict out_size, int64_t*restrict data_in, const scil_dims_t* dims);
+      int (*decompress_int64)( int64_t*restrict data_out, scil_dims_t* dims, int64_t*restrict compressed_buf_in, const size_t in_size);
     } Ctype; // converter
 
     struct{
@@ -115,17 +115,17 @@ typedef struct scil_compression_algorithm {
       int (*compress_double)(const scil_context_t* ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, double*restrict data_in, const scil_dims_t* dims);
       int (*decompress_double)( double*restrict data_out, scil_dims_t* dims, byte*restrict compressed_buf_in, const size_t in_size);
 
-      int (*compress_int8)(const scil_context_t* ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, int8*restrict data_in, const scil_dims_t* dims);
-      int (*decompress_int8)( int8*restrict data_out, scil_dims_t* dims, byte*restrict compressed_buf_in, const size_t in_size);
+      int (*compress_int8)(const scil_context_t* ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, int8_t*restrict data_in, const scil_dims_t* dims);
+      int (*decompress_int8)( int8_t*restrict data_out, scil_dims_t* dims, byte*restrict compressed_buf_in, const size_t in_size);
 
-      int (*compress_int16)(const scil_context_t* ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, int16*restrict data_in, const scil_dims_t* dims);
-      int (*decompress_int16)( int16*restrict data_out, scil_dims_t* dims, byte*restrict compressed_buf_in, const size_t in_size);
+      int (*compress_int16)(const scil_context_t* ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, int16_t*restrict data_in, const scil_dims_t* dims);
+      int (*decompress_int16)( int16_t*restrict data_out, scil_dims_t* dims, byte*restrict compressed_buf_in, const size_t in_size);
 
-      int (*compress_int32)(const scil_context_t* ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, int32*restrict data_in, const scil_dims_t* dims);
-      int (*decompress_int32)( int32*restrict data_out, scil_dims_t* dims, byte*restrict compressed_buf_in, const size_t in_size);
+      int (*compress_int32)(const scil_context_t* ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, int32_t*restrict data_in, const scil_dims_t* dims);
+      int (*decompress_int32)( int32_t*restrict data_out, scil_dims_t* dims, byte*restrict compressed_buf_in, const size_t in_size);
 
-      int (*compress_int64)(const scil_context_t* ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, int64*restrict data_in, const scil_dims_t* dims);
-      int (*decompress_int64)( int64*restrict data_out, scil_dims_t* dims, byte*restrict compressed_buf_in, const size_t in_size);
+      int (*compress_int64)(const scil_context_t* ctx, byte* restrict compressed_buf_in_out, size_t* restrict out_size, int64_t*restrict data_in, const scil_dims_t* dims);
+      int (*decompress_int64)( int64_t*restrict data_out, scil_dims_t* dims, byte*restrict compressed_buf_in, const size_t in_size);
     } DNtype;
 
     struct{

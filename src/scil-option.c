@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <scil-internal.h>
 #include <scil-option.h>
 
 static char* scil_performance_unit_names[] = {

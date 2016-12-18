@@ -13,15 +13,13 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <scil-util.h>
-
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <time.h>
 
+#include <scil-util.h>
 
 void* safe_malloc (size_t size, const char* file, unsigned long line)
 {
@@ -168,9 +166,8 @@ double scilU_significant_bits_to_relative_tolerance(uint8_t sig_bits){
 	return 100.0 / exp2(sig_bits);
 }
 
-struct timespec scilU_time_diff (struct timespec end, struct timespec start)
-{
-    struct timespec diff;
+scil_timer scilU_time_diff (scil_timer end, scil_timer start){
+    scil_timer diff;
     if (end.tv_nsec < start.tv_nsec)
     {
         diff.tv_sec = end.tv_sec - start.tv_sec - 1;
@@ -184,9 +181,9 @@ struct timespec scilU_time_diff (struct timespec end, struct timespec start)
     return diff;
 }
 
-struct timespec scilU_time_sum (struct timespec t1, struct timespec t2)
+scil_timer scilU_time_sum (scil_timer t1, scil_timer t2)
 {
-    struct timespec sum;
+    scil_timer sum;
     sum.tv_nsec = t1.tv_nsec + t2.tv_nsec;
     sum.tv_sec = sum.tv_nsec / 1000000000;
     sum.tv_nsec %= 1000000000;
@@ -194,7 +191,7 @@ struct timespec scilU_time_sum (struct timespec t1, struct timespec t2)
     return sum;
 }
 
-double scilU_time_to_double (struct timespec t)
+double scilU_time_to_double (scil_timer t)
 {
     double d = (double)t.tv_nsec;
     d /= 1000000000.0;
@@ -214,7 +211,7 @@ double scilU_stop_timer(scil_timer t1){
 
 
 
-void print_time (struct timespec time, FILE* file)
+void print_time (scil_timer time, FILE* file)
 {
     fprintf(file, "%lu.%09lu", time.tv_sec, time.tv_nsec);
 }

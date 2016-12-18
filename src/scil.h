@@ -286,14 +286,14 @@ int scil_compress(byte* restrict dest,
  * \pre tmp_buff != NULL with a size of scilPr_get_compressed_data_size_limit() / 2
  * \return Success state of the decompression
  */
-int scil_decompress(enum SCIL_Datatype datatype,
+int scil_decompress(SCIL_Datatype_t datatype,
                     void* restrict dest,
                     scil_dims_t* expected_dims,
                     byte* restrict source,
                     const size_t source_size,
                     byte* restrict tmp_buff);
 
-void scil_determine_accuracy(enum SCIL_Datatype datatype,
+void scil_determine_accuracy(SCIL_Datatype_t datatype,
                              const void* restrict data_1,
                              const void* restrict data_2,
                              scil_dims_t* dims,
@@ -306,7 +306,7 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
  out_accuracy contains a set of hints with the observed finest
  resolution/required precision to accept the data.
  */
-int scil_validate_compression(enum SCIL_Datatype datatype,
+int scil_validate_compression(SCIL_Datatype_t datatype,
                               const void* restrict data_uncompressed,
                               scil_dims_t* dims,
                               byte* restrict data_compressed,

@@ -2,6 +2,7 @@
 
 #include <scil-algorithm.h>
 #include <scil-error.h>
+#include <scil-internal.h>
 
 #include <string.h>
 

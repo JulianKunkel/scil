@@ -196,21 +196,24 @@ int scil_compress(byte* restrict dest,
                 case (SCIL_TYPE_DOUBLE):
                     ret = algo->c.PFtype.compress_double(ctx, (double*)dst, header, &header_size_out, src, dims);
                     break;
-				case (SCIL_TYPE_INT8) :
-					ret = algo->c.PFtype.compress_int8(ctx, (int8_t*)dst, header, &header_size_out, src, dims);
-					break;
-				case(SCIL_TYPE_INT16) :
-					ret = algo->c.PFtype.compress_int16(ctx, (int16_t*)dst, header, &header_size_out, src, dims);
-					break;
-				case(SCIL_TYPE_INT32) :
-					ret = algo->c.PFtype.compress_int32(ctx, (int32_t*)dst, header, &header_size_out, src, dims);
-					break;
-				case(SCIL_TYPE_INT64) :
-					ret = algo->c.PFtype.compress_int64(ctx, (int64_t*)dst, header, &header_size_out, src, dims);
-					break;
-				case(SCIL_TYPE_STRING) :
-					assert(0);
-					break;
+              	case (SCIL_TYPE_INT8) :
+              		ret = algo->c.PFtype.compress_int8(ctx, (int8_t*)dst, header, &header_size_out, src, dims);
+              		break;
+              	case(SCIL_TYPE_INT16) :
+              		ret = algo->c.PFtype.compress_int16(ctx, (int16_t*)dst, header, &header_size_out, src, dims);
+              		break;
+              	case(SCIL_TYPE_INT32) :
+              		ret = algo->c.PFtype.compress_int32(ctx, (int32_t*)dst, header, &header_size_out, src, dims);
+              		break;
+              	case(SCIL_TYPE_INT64) :
+              		ret = algo->c.PFtype.compress_int64(ctx, (int64_t*)dst, header, &header_size_out, src, dims);
+              		break;
+              	case(SCIL_TYPE_STRING) :
+              		assert(0);
+              		break;
+                case(SCIL_TYPE_BINARY) :
+                  assert(0);
+                  break;
             }
 
             if (ret != 0) return ret;
@@ -246,21 +249,22 @@ int scil_compress(byte* restrict dest,
             case (SCIL_TYPE_DOUBLE):
                 ret = algo->c.Ctype.compress_double(ctx, (int64_t*)dst, &out_size, src, dims);
                 break;
-			case (SCIL_TYPE_INT8) :
-				ret = algo->c.Ctype.compress_int8(ctx, (int64_t*)dst, &out_size, src, dims);
-				break;
-			case(SCIL_TYPE_INT16) :
-				ret = algo->c.Ctype.compress_int16(ctx, (int64_t*)dst, &out_size, src, dims);
-				break;
-			case(SCIL_TYPE_INT32) :
-				ret = algo->c.Ctype.compress_int32(ctx, (int64_t*)dst, &out_size, src, dims);
-				break;
-			case(SCIL_TYPE_INT64) :
-				ret = algo->c.Ctype.compress_int64(ctx, (int64_t*)dst, &out_size, src, dims);
-				break;
-			case(SCIL_TYPE_STRING) :
-				assert(0);
-				break;
+          	case (SCIL_TYPE_INT8) :
+          		ret = algo->c.Ctype.compress_int8(ctx, (int64_t*)dst, &out_size, src, dims);
+          		break;
+          	case(SCIL_TYPE_INT16) :
+          		ret = algo->c.Ctype.compress_int16(ctx, (int64_t*)dst, &out_size, src, dims);
+          		break;
+          	case(SCIL_TYPE_INT32) :
+          		ret = algo->c.Ctype.compress_int32(ctx, (int64_t*)dst, &out_size, src, dims);
+          		break;
+          	case(SCIL_TYPE_INT64) :
+          		ret = algo->c.Ctype.compress_int64(ctx, (int64_t*)dst, &out_size, src, dims);
+          		break;
+            case(SCIL_TYPE_BINARY) :
+          	case(SCIL_TYPE_STRING) :
+          		assert(0);
+          		break;
         }
         if (ret != 0) return ret;
         // check if we have to preserve another header from the preconditioners
@@ -342,6 +346,7 @@ int scil_compress(byte* restrict dest,
 			case(SCIL_TYPE_INT64) :
 				ret = algo->c.DNtype.compress_int64(ctx, dst, &out_size, src, dims);
 				break;
+      case(SCIL_TYPE_BINARY) :
 			case(SCIL_TYPE_STRING) :
 				assert(0);
 				break;
@@ -388,7 +393,7 @@ int scil_compress(byte* restrict dest,
     return SCIL_NO_ERR;
 }
 
-int scil_decompress(enum SCIL_Datatype datatype,
+int scil_decompress(SCIL_Datatype_t datatype,
                     void* restrict dest,
                     scil_dims_t* dims,
                     byte* restrict source,
@@ -474,6 +479,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
 			case(SCIL_TYPE_INT64) :
 				ret = algo->c.DNtype.decompress_int64(dst, dims, src, src_size);
 				break;
+      case(SCIL_TYPE_BINARY) :
 			case(SCIL_TYPE_STRING) :
 				assert(0);
 				break;
@@ -534,7 +540,8 @@ int scil_decompress(enum SCIL_Datatype datatype,
 			case(SCIL_TYPE_INT64) :
 				ret = algo->c.Ctype.decompress_int64(dst, dims, src, src_size);
 				break;
-			case(SCIL_TYPE_STRING) :
+      case(SCIL_TYPE_BINARY) :
+      case(SCIL_TYPE_STRING) :
 				assert(0);
 				break;
         }
@@ -579,7 +586,8 @@ int scil_decompress(enum SCIL_Datatype datatype,
 			case(SCIL_TYPE_INT64) :
 				ret = algo->c.PFtype.decompress_int64(dst, dims, src, header, &header_parsed);
 				break;
-			case(SCIL_TYPE_STRING) :
+			case(SCIL_TYPE_BINARY) :
+      case(SCIL_TYPE_STRING) :
 				assert(0);
 				break;
         }
@@ -604,7 +612,7 @@ int scil_decompress(enum SCIL_Datatype datatype,
     return SCIL_NO_ERR;
 }
 
-void scil_determine_accuracy(enum SCIL_Datatype datatype,
+void scil_determine_accuracy(SCIL_Datatype_t datatype,
                              const void* restrict data_1,
                              const void* restrict data_2,
                              scil_dims_t* dims,
@@ -638,8 +646,8 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
 		}
 		case(SCIL_TYPE_INT8):{
 			a.significant_bits = 8;
-			scil_determine_accuracy_int8((int8*)data_1,
-															(int8*)data_2,
+			scil_determine_accuracy_int8_t((int8_t*)data_1,
+															(int8_t*)data_2,
 															scilPr_get_dims_count(dims),
 															relative_err_finest_abs_tolerance,
 															&a);
@@ -647,20 +655,21 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
 		}
 		case(SCIL_TYPE_INT16):{
 			a.significant_bits = 16;
-			scil_determine_accuracy_int16((int16*)data_1, (int16*)data_2, scilPr_get_dims_count(dims), relative_err_finest_abs_tolerance, &a);
+			scil_determine_accuracy_int16_t((int16_t*)data_1, (int16_t*)data_2, scilPr_get_dims_count(dims), relative_err_finest_abs_tolerance, &a);
 			break;
 		}
 		case(SCIL_TYPE_INT32):{
 			a.significant_bits = 32;
-			scil_determine_accuracy_int32((int32*)data_1, (int32*)data_2, scilPr_get_dims_count(dims), relative_err_finest_abs_tolerance, &a);
+			scil_determine_accuracy_int32_t((int32_t*)data_1, (int32_t*)data_2, scilPr_get_dims_count(dims), relative_err_finest_abs_tolerance, &a);
 			break;
 		}
 		case(SCIL_TYPE_INT64):{
 			a.significant_bits = 64;
-			scil_determine_accuracy_int64((int64*)data_1, (int64*)data_2, scilPr_get_dims_count(dims), relative_err_finest_abs_tolerance, &a);
+			scil_determine_accuracy_int64_t((int64_t*)data_1, (int64_t*)data_2, scilPr_get_dims_count(dims), relative_err_finest_abs_tolerance, &a);
 			break;
 		}
-		case(SCIL_TYPE_STRING):{
+    case(SCIL_TYPE_BINARY):
+    case(SCIL_TYPE_STRING):{
 			// No relevant comparision
 			*out_hints = a;
 			return;
@@ -678,13 +687,7 @@ void scil_determine_accuracy(enum SCIL_Datatype datatype,
     *out_hints = a;
 }
 
-int scil_validate_compression(enum SCIL_Datatype datatype,
-                              const void* restrict data_uncompressed,
-                              scil_dims_t* dims,
-                              byte* restrict data_compressed,
-                              const size_t compressed_size,
-                              const scil_context_t* ctx,
-                              scil_user_hints_t* out_accuracy) {
+int scil_validate_compression(SCIL_Datatype_t datatype, const void* restrict data_uncompressed, scil_dims_t* dims, byte* restrict data_compressed, const size_t compressed_size, const scil_context_t* ctx, scil_user_hints_t* out_accuracy) {
     const uint64_t length = scilPr_get_compressed_data_size_limit(dims, datatype);
     byte* data_out        = (byte*)malloc(length);
     if (data_out == NULL) {
@@ -694,12 +697,7 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
 
     memset(data_out, -1, length);
 
-    int ret = scil_decompress(datatype,
-                              data_out,
-                              dims,
-                              data_compressed,
-                              compressed_size,
-                              &data_out[length / 2]);
+    int ret = scil_decompress(datatype, data_out, dims, data_compressed, compressed_size, &data_out[length / 2]);
     if (ret != 0) {
         goto end;
     }
@@ -714,23 +712,12 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
                 "INFO: can check only for identical data as data is not a "
                 "multiple of DataType\n");
         } else {
-            scil_determine_accuracy(
-                datatype,
-                data_out,
-                data_uncompressed,
-                dims,
-                ctx->hints.relative_err_finest_abs_tolerance,
-                &a);
+            scil_determine_accuracy( datatype, data_out, data_uncompressed, dims, ctx->hints.relative_err_finest_abs_tolerance, &a);
         }
         goto end;
     } else {
         // determine achieved accuracy
-        scil_determine_accuracy(datatype,
-                                data_out,
-                                data_uncompressed,
-                                dims,
-                                ctx->hints.relative_err_finest_abs_tolerance,
-                                &a);
+        scil_determine_accuracy(datatype, data_out, data_uncompressed, dims, ctx->hints.relative_err_finest_abs_tolerance, &a);
 
         const scil_user_hints_t h = ctx->hints;
 
@@ -769,7 +756,6 @@ int scil_validate_compression(enum SCIL_Datatype datatype,
             ret = 1;
         }
     }
-
 end:
     free(data_out);
     *out_accuracy = a;

@@ -23,7 +23,7 @@ include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
 
 # compile flags
-set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -std=gnu11 -pedantic-errors -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections  -Wl,--no-allow-shlib-undefined")
+set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -std=gnu99 -pedantic-errors -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections  -Wl,--no-allow-shlib-undefined")
 # -fdiagnostics-color=always
 # -fvisibility=hidden -fvisibility-inlines-hidden -Wl,--print-gc-sections
 set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--no-allow-shlib-undefined -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt")

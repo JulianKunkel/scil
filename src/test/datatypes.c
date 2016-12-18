@@ -43,19 +43,19 @@ int main(void)
     test(SCIL_TYPE_FLOAT, source);
   }
   {
-    int8 source[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    int8_t source[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     test(SCIL_TYPE_INT8, source);
   }
   {
-    int16 source[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    int16_t source[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     test(SCIL_TYPE_INT16, source);
   }
   {
-    int32 source[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    int32_t source[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     test(SCIL_TYPE_INT32, source);
   }
   {
-    int64 source[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    int64_t source[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     test(SCIL_TYPE_INT64, source);
   }
   {

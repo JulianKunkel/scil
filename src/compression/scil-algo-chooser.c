@@ -74,7 +74,7 @@ void scilC_algo_chooser_initialize(){
 
   while(true){
     size_t length = 1024;
-    ssize_t linelength;
+    int64_t linelength;
     linelength = getline(&buff, & length, data);
     if(linelength == -1){
       break;

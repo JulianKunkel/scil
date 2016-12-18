@@ -12,7 +12,7 @@ def replaceFunc(data, d):
 
 def parsefile(infile, outfile):
   DATATYPES=["float","double"]
-  DATATYPES_FULL=["float","double","int8","int16","int32","int64"]
+  DATATYPES_FULL=["float","double","int8_t","int16_t","int32_t","int64_t"]
 
   fin = open(infile, "r")
   data = fin.read()
