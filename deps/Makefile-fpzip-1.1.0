@@ -41,7 +41,7 @@ TARGET = ../lib/libfpzip.a
 $(TARGET): $(O_FILES) Makefile
 	@rm -f $@
 	#gcc $(LDFLAGS) -o $@ $(O_FILES)
-	ar rc -o $@ $(O_FILES)
+	ar rc -o $@ $(O_FILES) || ar rc $@ $(O_FILES)
 
 .cpp.o: Makefile
 	$(CXX) $(CXXFLAGS) $(DEFS) -I../inc -c $<

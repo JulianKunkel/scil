@@ -23,10 +23,18 @@ include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
 
 # compile flags
-set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -std=gnu99 -pedantic-errors -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections  -Wl,--no-allow-shlib-undefined")
+set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -std=gnu99 -Wall -Wextra -Wfloat-equal -fdata-sections -ffunction-sections -Wl,--gc-sections")
 # -fdiagnostics-color=always
 # -fvisibility=hidden -fvisibility-inlines-hidden -Wl,--print-gc-sections
-set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wdouble-promotion -Wfloat-equal -flto -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--no-allow-shlib-undefined -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt")
+set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wfloat-equal -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt")
+# -Wl,--no-allow-shlib-undefined  does not work with Centos7 / older GCC
+
+if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6")
+else()
+set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -Wdouble-promotion -flto -pedantic-errors -pedantic")
+set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wdouble-promotion -flto -pedantic-errors -pedantic")
+endif()
+
 
 set (CMAKE_C_FLAGS_DEBUG   "-O0 -g3 -fvar-tracking -DDEBUG")
 set (CMAKE_CXX_FLAGS_DEBUG "-O0 -g3")
@@ -35,6 +43,10 @@ set (CMAKE_C_FLAGS_RELEASE "-O3")
 
 set (SCIL_ALGO_SOURCE ${CMAKE_SOURCE_DIR}/algo)
 set (SCIL_ALGO_BINARY ${CMAKE_BINARY_DIR}/algo)
+
+
+find_path(LIBZ_INCLUDE_DIRS NAMES zlib.h PATHS ENV ADDITIONAL_INC_PATH)
+find_library(LIBZ_LIBRARIES NAMES z PATHS ENV ADDITIONAL_LIB_PATH)
 
 
 ##### ENDIANESS
@@ -106,26 +118,27 @@ add_library(scil SHARED scil.c scil-dummy.cpp
     ${DEPS_COMPILED_DIR}/wavelet_code/wav_basic.c
     ${DEPS_COMPILED_DIR}/wavelet_code/wav_trf.c
 )
-target_link_libraries(scil m rt)
+target_link_libraries(scil m)
 
 # for specific algorithms
 include_directories(
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/tools
-    ${CMAKE_SOURCE_DIR}/compression
-    ${CMAKE_SOURCE_DIR}/internal
-    ${CMAKE_SOURCE_DIR}/pattern
-    ${CMAKE_SOURCE_DIR}/prepare
-    ${CMAKE_SOURCE_DIR}/util
-    ${CMAKE_BINARY_DIR}
-    ${DEPS_DIR}/open-simplex-noise-in-c
-    ${DEPS_COMPILED_DIR}/wavelet_code
-    ${DEPS_COMPILED_DIR}/include/zfp
-    ${DEPS_COMPILED_DIR}/include/fpzip
-    ${DEPS_COMPILED_DIR}/include/cnoise
+  ${LIBZ_INCLUDE_DIRS}
+  ${CMAKE_SOURCE_DIR}
+  ${CMAKE_SOURCE_DIR}/tools
+  ${CMAKE_SOURCE_DIR}/compression
+  ${CMAKE_SOURCE_DIR}/internal
+  ${CMAKE_SOURCE_DIR}/pattern
+  ${CMAKE_SOURCE_DIR}/prepare
+  ${CMAKE_SOURCE_DIR}/util
+  ${CMAKE_BINARY_DIR}
+  ${DEPS_DIR}/open-simplex-noise-in-c
+  ${DEPS_COMPILED_DIR}/wavelet_code
+  ${DEPS_COMPILED_DIR}/include/zfp
+  ${DEPS_COMPILED_DIR}/include/fpzip
+  ${DEPS_COMPILED_DIR}/include/cnoise
 )
 
-target_link_libraries(scil z)
+target_link_libraries(scil ${LIBZ_LIBRARIES})
 target_link_libraries(scil
   ${DEPS_COMPILED_DIR}/libfpzip.a
   ${DEPS_COMPILED_DIR}/libzfp.a

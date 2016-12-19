@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 PARAMETERS="$0 $*"
 CMAKEFLAGS=
@@ -12,6 +12,9 @@ function help(){
 	echo "specify them in the traditional way and get the equivalent cmake command."
 	echo "Use the following options to change default paths."
 	echo "--prefix=<dir>           : installation prefix"
+	echo "--lz4=<dir>              : path to lz4"
+	echo "--lgsl=<dir>             : path to lib-gsl"
+	echo "--lzlib=<dir>            : path to lzlib"
 	echo
 	echo "Optional:"
 	echo "--build-dir=<dir>        : directory in which to build"
@@ -24,6 +27,32 @@ function help(){
 
 buildDIR="build"
 
+function check(){
+	if [[ "$1" == "" ]] ; then
+		return
+	fi
+	where=$1
+	what=$2
+	if [[ ! -e "$where" ]] ; then
+		echo "Error could not find $what in $where ; directory does not exist"
+		exit 1
+	fi
+	export PKG_CONFIG_PATH=$where/lib/pkgconfig/:$where/lib64/pkgconfig/:$PKG_CONFIG_PATH
+	#does not ship with pkg-config
+	pkg-config --exists $what
+	if [ $? != 0 ] ; then
+		if [[ -e $where/include && -e $where/lib ]] ; then
+			AI="$AI $where/include"
+			AL="$AL $where/lib $where/lib64"
+		else
+			echo "Error could not find $what in $where"
+			exit 1
+		fi
+	fi
+}
+
+
+
 function reconfigure(){
 	if [[ ! -e "configure.log" ]] ; then
 		echo "Error, didn't run configure before!" ;
@@ -33,7 +62,7 @@ function reconfigure(){
 	exit $?
 }
 
-set -- `getopt -u -l "help,version,debug,reconfigure,prefix:,plantuml-jar-dir:,with-cc:,with-cxx:,verbose,build-dir:" -o "hV" -- "$@"`
+set -- `getopt -u -l "help,version,debug,reconfigure,prefix:,plantuml-jar-dir:,with-cc:,with-cxx:,verbose,build-dir:,lzlib:,lgsl:,lz4:" -o "hV" -- "$@"`
 test $# -lt 1  && exit 1
 while test $# -gt 0
 do
@@ -41,6 +70,9 @@ do
 		--help) help; exit;;
 		--reconfigure) reconfigure;;
 		--version) cmake --version; exit;;
+		--lz4) check "$2" "lz4"; shift;;
+		--lgsl) check "$2" "gsl"; shift;;
+		--lzlib) check "$2" "z"; shift;;
 		--prefix) prefix="$2"; shift;;
 		--debug) debug="yes"; ;;
 		--with-cc) ccbin="$2"; shift;;
@@ -55,7 +87,13 @@ do
 	shift
 done
 
+
 echo $PARAMETERS > configure.log
+
+
+export ADDITIONAL_INC_PATH=$AI
+export ADDITIONAL_LIB_PATH=$AL
+
 
 TARGET_DIR="/usr/local"
 
