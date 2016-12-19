@@ -48,6 +48,7 @@ set (SCIL_ALGO_BINARY ${CMAKE_BINARY_DIR}/algo)
 find_path(LIBZ_INCLUDE_DIRS NAMES zlib.h PATHS ENV ADDITIONAL_INC_PATH)
 find_library(LIBZ_LIBRARIES NAMES z PATHS ENV ADDITIONAL_LIB_PATH)
 
+# TODO other libraries
 
 ##### ENDIANESS
 
@@ -144,6 +145,7 @@ target_link_libraries(scil
   ${DEPS_COMPILED_DIR}/libzfp.a
   ${DEPS_COMPILED_DIR}/libcnoise.a
   lz4
+  rt
   )
 
 configure_file("${CMAKE_SOURCE_DIR}/scil-config.h.in" "scil-config.h" @ONLY)
