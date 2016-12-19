@@ -7,7 +7,7 @@ DOWNLOAD_ONLY=0
 
 if [[ "$1" == "download" ]] ; then
 DOWNLOAD_ONLY=1
-fi 
+fi
 
 mkdir -p $TGT
 cd $TGT
@@ -15,9 +15,9 @@ echo "Building dependencies for SCIL from third-party software"
 
 function download(){
 		if [[ ! -e $SRC/$1 ]] ; then
-			wget $2/$1 -o $SRC/$1
+			wget $2/$1 -O $SRC/$1
 		fi
-		if [ $DOWNLOAD_ONLY ] ; then
+		if [[ $DOWNLOAD_ONLY == 1 ]] ; then
 			return
 		fi
 
@@ -37,7 +37,7 @@ if [[ ! -e $SRC/$WAVELET.zip ]] ; then
 	wget http://eeweb.poly.edu/~onur/$WAVELET.zip -O $SRC/$WAVELET.zip
 fi
 
-if [[ ! -e $TGT/$WAVELET ]] ; then
+if [[ ! -e $TGT/$WAVELET && $DOWNLOAD_ONLY == 0 ]] ; then
 	unzip $SRC/$WAVELET.zip -d $TGT/$WAVELET
 	if [[ $? != 0 ]] ; then
 		echo "Error unzip $SRC/$1"
@@ -57,8 +57,8 @@ if [[ ! -e $SRC/cnoise/test/test_output.txt ]] ; then
 	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/example/test_output.txt -P $SRC/cnoise/test/
 fi
 
-if [ $DOWNLOAD_ONLY ] ; then
-exit 0
+if [[ $DOWNLOAD_ONLY == 1 ]] ; then
+  exit 0
 fi
 
 
