@@ -3,6 +3,12 @@
 SRC="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 TGT=$PWD/deps
 
+DOWNLOAD_ONLY=0
+
+if [[ "$1" == "download" ]] ; then
+DOWNLOAD_ONLY=1
+fi 
+
 mkdir -p $TGT
 cd $TGT
 echo "Building dependencies for SCIL from third-party software"
@@ -11,6 +17,10 @@ function download(){
 		if [[ ! -e $SRC/$1 ]] ; then
 			wget $2/$1 -o $SRC/$1
 		fi
+		if [ $DOWNLOAD_ONLY ] ; then
+			return
+		fi
+
 		if [[ ! -e $TGT/$1 ]] ; then
 			tar -xf $SRC/$1
 		fi
@@ -24,8 +34,9 @@ download $FPZIP.tar.gz http://computation.llnl.gov/projects/floating-point-compr
 download $ZFP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download
 
 if [[ ! -e $SRC/$WAVELET.zip ]] ; then
-	wget http://eeweb.poly.edu/~onur/$SRC.zip
+	wget http://eeweb.poly.edu/~onur/$WAVELET.zip -O $SRC/$WAVELET.zip
 fi
+
 if [[ ! -e $TGT/$WAVELET ]] ; then
 	unzip $SRC/$WAVELET.zip -d $TGT/$WAVELET
 	if [[ $? != 0 ]] ; then
@@ -45,6 +56,11 @@ if [[ ! -e $SRC/cnoise/test/test_output.txt ]] ; then
 	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/example/Makefile -P $SRC/cnoise/test/
 	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/example/test_output.txt -P $SRC/cnoise/test/
 fi
+
+if [ $DOWNLOAD_ONLY ] ; then
+exit 0
+fi
+
 
 if [[ ! -e $TGT/cnoise/ ]] ; then
 	cp -r $SRC/cnoise/ .
