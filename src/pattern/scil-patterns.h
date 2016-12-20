@@ -28,10 +28,10 @@ int   scilPa_get_pattern_index(const char* name);
 int scilPa_create_pattern_double(double* buffer,
                                  const scil_dims_t* dims,
                                  const char* name,
-                                 float mn,
-                                 float mx,
-                                 float arg,
-                                 float arg2);
+                                 double mn,
+                                 double mx,
+                                 double arg,
+                                 double arg2);
 
 int scilPa_create_pattern_float (float*  const buffer,
                                  const scil_dims_t* dims,

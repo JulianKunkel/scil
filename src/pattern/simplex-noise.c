@@ -22,11 +22,11 @@
 
 #include <open-simplex-noise.h>
 
-static int simplex(double* buffer, const scil_dims_t* dims, float mn, float mx, float arg, float arg2){
+static int simplex(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2){
   const int frequencyCount = (int) arg2;
   double highFrequency = (double)arg;
 
-  if( scilU_float_equal(mn, mx) || frequencyCount <= 0 ){
+  if( scilU_double_equal(mn, mx) || frequencyCount <= 0 ){
     return SCIL_EINVAL;
   }
 

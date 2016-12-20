@@ -65,7 +65,7 @@ static void m_interpolator_func(double* data, const scil_dims_t* pos, const scil
   data[scilG_data_pos(pos, size)] = val;
 }
 
-static void m_interpolator(double* data, const scil_dims_t* dims, float arg){
+static void m_interpolator(double* data, const scil_dims_t* dims, double arg){
   const int l = (int) arg;
   assert(l > 1);
 
@@ -119,7 +119,7 @@ static void m_repeater_func(double* data, const scil_dims_t* pos, const scil_dim
   scilG_iter(data, size, pos, &extend, NULL, & m_repeater_func_i, & val );
 }
 
-static void m_repeater(double* data, const scil_dims_t* dims, float arg){
+static void m_repeater(double* data, const scil_dims_t* dims, double arg){
   int l = (int) arg;
   assert(l > 1);
 

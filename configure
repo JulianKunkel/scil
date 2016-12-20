@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 PARAMETERS="$0 $*"
 CMAKEFLAGS=
@@ -33,17 +33,19 @@ function check(){
 	fi
 	where=$1
 	what=$2
+	extra_dir=$3
 	if [[ ! -e "$where" ]] ; then
 		echo "Error could not find $what in $where ; directory does not exist"
 		exit 1
 	fi
+
 	export PKG_CONFIG_PATH=$where/lib/pkgconfig/:$where/lib64/pkgconfig/:$PKG_CONFIG_PATH
 	#does not ship with pkg-config
 	pkg-config --exists $what
 	if [ $? != 0 ] ; then
 		if [[ -e $where/include && -e $where/lib ]] ; then
-			AI="$AI $where/include"
-			AL="$AL $where/lib $where/lib64"
+			AI="$AI $where/include $where/$extra_dir"
+			AL="$AL $where/lib $where/lib64 $where/$extra_dir"
 		else
 			echo "Error could not find $what in $where"
 			exit 1

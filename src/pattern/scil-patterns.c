@@ -92,7 +92,7 @@ int scilPa_get_pattern_index(const char* name)
     return -1;
 }
 
-int scilPa_create_pattern_double(double* buffer, const scil_dims_t* dims, const char* name, float mn, float mx, float arg, float arg2)
+int scilPa_create_pattern_double(double* buffer, const scil_dims_t* dims, const char* name, double mn, double mx, double arg, double arg2)
 {
   if (name == NULL){
     return SCIL_EINVAL;
@@ -225,7 +225,7 @@ int scilPa_create_library_pattern_float (float* buffer, const scil_dims_t* dims,
   return SCIL_NO_ERR;
 }
 
-void scilPI_change_data_scale(double* buffer, const scil_dims_t* dims, float mn, float mx){
+void scilPI_change_data_scale(double* buffer, const scil_dims_t* dims, double mn, double mx){
   // fix min + max, first identify min/max
   size_t count = scilPr_get_dims_count(dims);
   double mn_o = 1e308, mx_o=-1e308;

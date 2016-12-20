@@ -25,7 +25,7 @@
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-static int constant(double* buffer, const scil_dims_t* dims, float mn, float mx, float arg, float arg2){
+static int constant(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2){
   size_t count = scilPr_get_dims_count(dims);
   for (size_t i=0; i < count; i++){
     buffer[i] = mn;
@@ -33,9 +33,9 @@ static int constant(double* buffer, const scil_dims_t* dims, float mn, float mx,
   return SCIL_NO_ERR;
 }
 
-static int steps1d(double* buffer, const scil_dims_t* dims, float mn, float mx, int step_size)
+static int steps1d(double* buffer, const scil_dims_t* dims, double mn, double mx, int step_size)
 {
-    float gradient = (mx - mn) / (step_size-1);
+    double gradient = (mx - mn) / (step_size-1);
 
     size_t x_size = dims->length[0];
 
@@ -46,9 +46,9 @@ static int steps1d(double* buffer, const scil_dims_t* dims, float mn, float mx, 
     return SCIL_NO_ERR;
 }
 
-static int steps2d(double* buffer, const scil_dims_t* dims, float mn, float mx, int step_size)
+static int steps2d(double* buffer, const scil_dims_t* dims, double mn, double mx, int step_size)
 {
-    float gradient = 0.5f * (mx - mn) / (step_size - 1);
+    double gradient = 0.5 * (mx - mn) / (step_size - 1);
 
     size_t x_size = dims->length[0];
     size_t y_size = dims->length[1];
@@ -62,9 +62,9 @@ static int steps2d(double* buffer, const scil_dims_t* dims, float mn, float mx, 
     return SCIL_NO_ERR;
 }
 
-static int steps3d(double* buffer, const scil_dims_t* dims, float mn, float mx, int step_size)
+static int steps3d(double* buffer, const scil_dims_t* dims, double mn, double mx, int step_size)
 {
-    float gradient = 0.3333f * (mx - mn) / (step_size - 1);
+    double gradient = 0.3333 * (mx - mn) / (step_size - 1);
 
     size_t x_size = dims->length[0];
     size_t y_size = dims->length[1];
@@ -82,9 +82,9 @@ static int steps3d(double* buffer, const scil_dims_t* dims, float mn, float mx, 
     return SCIL_NO_ERR;
 }
 
-static int steps4d(double* buffer, const scil_dims_t* dims, float mn, float mx, int step_size)
+static int steps4d(double* buffer, const scil_dims_t* dims, double mn, double mx, int step_size)
 {
-    float gradient = 0.25f * (mx - mn) / (step_size - 1);
+    double gradient = 0.25 * (mx - mn) / (step_size - 1);
 
     size_t x_size = dims->length[0];
     size_t y_size = dims->length[1];
@@ -105,11 +105,11 @@ static int steps4d(double* buffer, const scil_dims_t* dims, float mn, float mx, 
     return SCIL_NO_ERR;
 }
 
-static int steps(double* buffer, const scil_dims_t* dims, float mn, float mx, float arg, float arg2)
+static int steps(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2)
 {
-    int corrected_arg = arg < 2.0f ? 2 : (int)arg;
+    int corrected_arg = arg < 2.0 ? 2 : (int)arg;
 
-    //if (scilU_float_equal(mn, mx))
+    //if (scilU_double_equal(mn, mx))
     //    return SCIL_EINVAL;
 
     switch (dims->dims) {
@@ -122,39 +122,39 @@ static int steps(double* buffer, const scil_dims_t* dims, float mn, float mx, fl
     return SCIL_NO_ERR;
 }
 
-static void rotate2d(float* a, float* b, float* c, float mn, float mx, size_t x_size, size_t y_size)
+static void rotate2d(double* a, double* b, double* c, double mn, double mx, size_t x_size, size_t y_size)
 {
-    float a_tmp = -*b * y_size / x_size;
-    float b_tmp = *a * x_size / y_size;
-    float c_tmp = mn + *b * y_size; //where is *c?
+    double a_tmp = -*b * y_size / x_size;
+    double b_tmp = *a * x_size / y_size;
+    double c_tmp = mn + *b * y_size; //where is *c?
 
     *a = a_tmp;
     *b = b_tmp;
     *c = c_tmp;
 }
 
-static int linear1d(double* buffer, const scil_dims_t* dims, float mn, float mx)
+static int linear1d(double* buffer, const scil_dims_t* dims, double mn, double mx)
 {
     size_t nmemb = scilPr_get_dims_count(dims);
     double r   = random() / RAND_MAX;
-    float a    = r > 0.5 ? mn : mx;
-    float last = r > 0.5 ? mx : mn;
-    float b    = (last - a) / nmemb;
+    double a    = r > 0.5 ? mn : mx;
+    double last = r > 0.5 ? mx : mn;
+    double b    = (last - a) / nmemb;
     for (size_t x = 0; x < nmemb; x++) {
         buffer[x] = a + b * x;
     }
     return SCIL_NO_ERR;
 }
-static int linear2d(double* buffer, const scil_dims_t* dims, float mn, float mx)
+static int linear2d(double* buffer, const scil_dims_t* dims, double mn, double mx)
 {
     size_t x_size = dims->length[0];
     size_t y_size = dims->length[1];
     // a * x_size + b * y_size = mx - mn
     // a < (mx - mn) / x_size
-    float r = random() / RAND_MAX;
-    float a = r * (mx - mn) / x_size;
-    float b = ((mx - mn) - a * x_size) / y_size;
-    float c = mn;
+    double r = random() / RAND_MAX;
+    double a = r * (mx - mn) / x_size;
+    double b = ((mx - mn) - a * x_size) / y_size;
+    double c = mn;
 
     int r2 = random() % 4;
     for (int i = 0; i < r2; ++i)
@@ -169,27 +169,28 @@ static int linear2d(double* buffer, const scil_dims_t* dims, float mn, float mx)
     return SCIL_NO_ERR;
 }
 
-static int linear3d(double* buffer, const scil_dims_t* dims, float mn, float mx)
+static int linear3d(double* buffer, const scil_dims_t* dims, double mn, double mx)
 {
   return SCIL_NO_ERR;
 }
 
-static int linear4d(double* buffer, const scil_dims_t* dims, float mn, float mx)
+static int linear4d(double* buffer, const scil_dims_t* dims, double mn, double mx)
 {
   return SCIL_NO_ERR;
 }
 
-static int linear(double* buffer, const scil_dims_t* dims, float mn, float mx, float arg, float arg2)
+static int linear(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2)
 {
     switch(dims->dims){
     case 1: return linear1d(buffer, dims, mn, mx);
     case 2: return linear2d(buffer, dims, mn, mx);
     case 3: return linear3d(buffer, dims, mn, mx);
     case 4: return linear4d(buffer, dims, mn, mx);
+    default: return SCIL_UNKNOWN_ERR;
     }
 }
 
-static int rnd(double* buffer, const scil_dims_t* dims, float mn, float mx, float arg, float arg2){
+static int rnd(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2){
   srand((int) arg);
   size_t count = scilPr_get_dims_count(dims);
   double delta = (mx - mn);
@@ -199,20 +200,19 @@ static int rnd(double* buffer, const scil_dims_t* dims, float mn, float mx, floa
   return SCIL_NO_ERR;
 }
 
-static int p_sin1d(double* buffer, const scil_dims_t* dims, float base_freq, int freq_count)
+static int p_sin1d(double* buffer, const scil_dims_t* dims, double base_freq, int freq_count)
 {
     const size_t x_size = dims->length[0];
 
-    const float x_scale_b = 2 * M_PI * base_freq / x_size;
-    const float falloff_b = 1.0f;
+    const double x_scale_b = 2 * M_PI * base_freq / x_size;
+    const double falloff_b = 1.0f;
 
-    float x_scale = x_scale_b;
-    float falloff = falloff_b;
+    double x_scale = x_scale_b;
 
     for (size_t x = 0; x < x_size; x++)
     {
-        float value = 0.0f;
-        float falloff = 1.0f;
+        double value = 0.0f;
+        double falloff = 1.0f;
         for(int freq = 1; freq <= freq_count; ++freq)
         {
             value += sin(x * x_scale) * falloff;
@@ -227,24 +227,24 @@ static int p_sin1d(double* buffer, const scil_dims_t* dims, float base_freq, int
     return SCIL_NO_ERR;
 }
 
-static int p_sin2d(double* buffer, const scil_dims_t* dims, float base_freq, int freq_count)
+static int p_sin2d(double* buffer, const scil_dims_t* dims, double base_freq, int freq_count)
 {
     const size_t x_size = dims->length[0];
     const size_t y_size = dims->length[1];
 
-    const float scale = 2 * M_PI * base_freq;
-    const float x_scale_b = scale / x_size;
-    const float y_scale_b = scale / y_size;
-    const float falloff_b = 1.0f;
+    const double scale = 2 * M_PI * base_freq;
+    const double x_scale_b = scale / x_size;
+    const double y_scale_b = scale / y_size;
+    const double falloff_b = 1.0f;
 
-    float x_scale = x_scale_b;
-    float y_scale = y_scale_b;
-    float falloff = falloff_b;
+    double x_scale = x_scale_b;
+    double y_scale = y_scale_b;
+    double falloff = falloff_b;
 
     for (size_t y = 0; y < y_size; y++){
         for (size_t x = 0; x < x_size; x++)
         {
-            float value = 0.0f;
+            double value = 0.0f;
             for(int freq = 1; freq <= freq_count; ++freq){
                 value += (sin(x * x_scale) + sin(y * y_scale)) * falloff;
                 x_scale *= 2;
@@ -262,28 +262,28 @@ static int p_sin2d(double* buffer, const scil_dims_t* dims, float base_freq, int
     return SCIL_NO_ERR;
 }
 
-static int p_sin3d(double* buffer, const scil_dims_t* dims, float base_freq, int freq_count)
+static int p_sin3d(double* buffer, const scil_dims_t* dims, double base_freq, int freq_count)
 {
     const size_t x_size = dims->length[0];
     const size_t y_size = dims->length[1];
     const size_t z_size = dims->length[2];
 
-    const float scale = 2 * M_PI * base_freq;
-    const float x_scale_b = scale / x_size;
-    const float y_scale_b = scale / y_size;
-    const float z_scale_b = scale / z_size;
-    const float falloff_b = 1.0f;
+    const double scale = 2 * M_PI * base_freq;
+    const double x_scale_b = scale / x_size;
+    const double y_scale_b = scale / y_size;
+    const double z_scale_b = scale / z_size;
+    const double falloff_b = 1.0f;
 
-    float x_scale = x_scale_b;
-    float y_scale = y_scale_b;
-    float z_scale = z_scale_b;
-    float falloff = falloff_b;
+    double x_scale = x_scale_b;
+    double y_scale = y_scale_b;
+    double z_scale = z_scale_b;
+    double falloff = falloff_b;
 
     for (size_t z = 0; z < z_size; z++){
         for (size_t y = 0; y < y_size; y++){
             for (size_t x = 0; x < x_size; x++)
             {
-                float value = 0.0f;
+                double value = 0.0f;
                 for(int freq = 1; freq <= freq_count; ++freq){
                     value += (sin(x * x_scale) + sin(y * y_scale) + sin(z * z_scale)) * falloff;
                     x_scale *= 2;
@@ -304,32 +304,32 @@ static int p_sin3d(double* buffer, const scil_dims_t* dims, float base_freq, int
     return SCIL_NO_ERR;
 }
 
-static int p_sin4d(double* buffer, const scil_dims_t* dims, float base_freq, int freq_count)
+static int p_sin4d(double* buffer, const scil_dims_t* dims, double base_freq, int freq_count)
 {
     const size_t x_size = dims->length[0];
     const size_t y_size = dims->length[1];
     const size_t z_size = dims->length[2];
     const size_t w_size = dims->length[3];
 
-    const float scale = 2 * M_PI * base_freq;
-    const float x_scale_b = scale / x_size;
-    const float y_scale_b = scale / y_size;
-    const float z_scale_b = scale / z_size;
-    const float w_scale_b = scale / w_size;
-    const float falloff_b = 1.0f;
+    const double scale = 2 * M_PI * base_freq;
+    const double x_scale_b = scale / x_size;
+    const double y_scale_b = scale / y_size;
+    const double z_scale_b = scale / z_size;
+    const double w_scale_b = scale / w_size;
+    const double falloff_b = 1.0f;
 
-    float x_scale = x_scale_b;
-    float y_scale = y_scale_b;
-    float z_scale = z_scale_b;
-    float w_scale = w_scale_b;
-    float falloff = falloff_b;
+    double x_scale = x_scale_b;
+    double y_scale = y_scale_b;
+    double z_scale = z_scale_b;
+    double w_scale = w_scale_b;
+    double falloff = falloff_b;
 
     for (size_t w = 0; w < w_size; w++){
         for (size_t z = 0; z < z_size; z++){
             for (size_t y = 0; y < y_size; y++){
                 for (size_t x = 0; x < x_size; x++)
                 {
-                    float value = 0.0f;
+                    double value = 0.0f;
                     for(int freq = 1; freq <= freq_count; ++freq){
                         value += (sin(x * x_scale) + sin(y * y_scale) + sin(z * z_scale) + sin(w * w_scale)) * falloff;
                         x_scale *= 2;
@@ -353,12 +353,12 @@ static int p_sin4d(double* buffer, const scil_dims_t* dims, float base_freq, int
     return SCIL_NO_ERR;
 }
 
-static int p_sin(double* buffer, const scil_dims_t* dims, float mn, float mx, float arg, float arg2)
+static int p_sin(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2)
 {
   double base_freq = (double)arg;
   const int freq_count = (int) arg2;
 
-  if(scilU_float_equal(mn, mx) || freq_count <= 0){
+  if(scilU_double_equal(mn, mx) || freq_count <= 0){
     return SCIL_EINVAL;
   }
 
@@ -402,7 +402,7 @@ static void m_poly_func(double* data,
 }
 
 
-static int poly4(double* data, const scil_dims_t* dims, float mn, float mx, float arg, float arg2){
+static int poly4(double* data, const scil_dims_t* dims, double mn, double mx, double arg, double arg2){
   scil_dims_t pos;
   scilPr_copy_dims(&pos, dims);
   memset(pos.length, 0, sizeof(size_t) * pos.dims);
@@ -422,7 +422,7 @@ static int poly4(double* data, const scil_dims_t* dims, float mn, float mx, floa
   for(int d=0; d < dims->dims; d++){
     int frac = dims->length[d] / usr.points;
     for(int i=0; i < usr.points; i++){
-      *vals = (rand() % (frac*10)) / 10.0 + i*frac;
+      *vals = (rand() % (1+frac*10)) / 10.0 + i*frac;
       vals++;
     }
     usr.values[d*usr.points] = 0;
@@ -442,4 +442,5 @@ scil_pattern_t scil_pattern_constant = { &constant, "constant" };
 scil_pattern_t scil_pattern_steps = { &steps , "steps" };
 scil_pattern_t scil_pattern_rnd = { &rnd , "random" };
 scil_pattern_t scil_pattern_sin = { &p_sin , "sin" };
+scil_pattern_t scil_pattern_linear = { &linear , "linear" };
 scil_pattern_t scil_pattern_poly4 = {&poly4, "poly4"};

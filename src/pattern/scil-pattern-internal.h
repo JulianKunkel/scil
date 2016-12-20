@@ -19,12 +19,12 @@
 #include <scil-dims.h>
 
 typedef struct scil_pattern {
-    int (*create)(double* buffer, const scil_dims_t* dims, float mn, float mx, float arg, float arg2);
+    int (*create)(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2);
   char * name;
 } scil_pattern_t;
 
-typedef void (*scilPa_mutator)(double* buffer, const scil_dims_t* dims, float arg);
+typedef void (*scilPa_mutator)(double* buffer, const scil_dims_t* dims, double arg);
 
-void scilPI_change_data_scale(double* buffer, const scil_dims_t* dims, float mn, float mx);
+void scilPI_change_data_scale(double* buffer, const scil_dims_t* dims, double mn, double mx);
 
 #endif // SCIL_PATTERN_INTERNAL_H
