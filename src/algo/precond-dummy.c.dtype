@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-//Supported datatypes: float double int8 int16 int32 int64
+//Supported datatypes: float double int8_t int16_t int32_t int64_t
 
 #include <algo/precond-dummy.h>
 

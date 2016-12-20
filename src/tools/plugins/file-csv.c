@@ -133,7 +133,6 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
 }
 
 static void printToFile(FILE * f, const byte * buf, size_t position,  SCIL_Datatype_t datatype){
-  char * format;
   switch(datatype){
     case(SCIL_TYPE_DOUBLE):
       fprintf(f, "%.17f", ((double*) buf)[position]);
@@ -152,7 +151,6 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
     return -1;
   }
 
-  char * buffer_in = (char*) buf;
   if (output_header){
     fprintf(f, "%d,%d,", orig_datatype, dims.dims);
     for(int i=0; i < SCIL_DIMS_MAX; i++) {

@@ -40,7 +40,7 @@ typedef struct scil_context {
   scilI_chain_t chain;
 
   /** \brief Dictionary for pipeline internal parameters */
-  scilI_dict_t* pipeline_params;
+  scilI_dict_t * pipeline_params;
 } scil_context_t;
 
 enum compressor_type{

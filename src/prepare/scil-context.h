@@ -13,7 +13,7 @@
  * \return success state of the creation
  */
 int scilPr_create_context(scil_context_t** out_ctx,
-                          enum SCIL_Datatype datatype,
+                          SCIL_Datatype_t datatype,
                           int special_values_count,
                           void* special_values,
                           const scil_user_hints_t* hints);

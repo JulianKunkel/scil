@@ -35,7 +35,7 @@ typedef struct{
 
 #define LAST_OPTION {0, 0, 0, (option_value_type) 0, 0, NULL}
 
-void scilO_print_help(option_help * args, int is_plugin);
+void scilO_print_help(option_help * args, const char * text_suffix);
 
 void scilO_print_current_options(option_help * args);
 

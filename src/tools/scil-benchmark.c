@@ -39,10 +39,10 @@ void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double 
 	allocate(byte, buffer_out, buff_size);
 	allocate(byte, tmp_buff, buff_size);
 
-    scil_context_t* ctx;
-    scil_user_hints_t hints;
+  scil_context_t* ctx;
+  scil_user_hints_t hints;
 
-    scilPr_initialize_user_hints(&hints);
+  scilPr_initialize_user_hints(&hints);
 	hints.absolute_tolerance = SCIL_ACCURACY_DBL_FINEST;
 
 	double r = (double) scilI_get_data_randomness(buffer_in, data_size, tmp_buff, buff_size);

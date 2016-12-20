@@ -111,7 +111,7 @@ static void print_help_section(option_help * args, option_value_type type, char 
   }
 }
 
-void scilO_print_help(option_help * args, int is_plugin){
+void scilO_print_help(option_help * args, const char * text_suffix){
   option_help * o;
   int optionalArgs = 0;
   for(o = args; o->shortVar != 0 || o->longVar != 0 ; o++){
@@ -141,9 +141,7 @@ void scilO_print_help(option_help * args, int is_plugin){
   if (optionalArgs){
     //printf(" [Optional Args]");
   }
-  if (! is_plugin){
-    printf(" -- <Input plugin options, see below> -- <Output plugin options, see below>\n");
-  }
+  printf("%s", text_suffix);
 
   print_help_section(args, OPTION_REQUIRED_ARGUMENT, "Required arguments");
   print_help_section(args, OPTION_FLAG, "Flags");

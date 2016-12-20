@@ -66,30 +66,31 @@ static void fix_double_setting(double* dbl)
 }
 
 int scilPr_create_context(scil_context_t** out_ctx,
-                          enum SCIL_Datatype datatype,
+                          SCIL_Datatype_t datatype,
                           int special_values_count,
                           void* special_values,
-                          const scil_user_hints_t* hints)
-{
-    initialize();
+                          const scil_user_hints_t* hints){
+  initialize();
 
-    int ret = SCIL_NO_ERR;
-    scil_context_t* ctx;
-    *out_ctx = NULL;
+  int ret = SCIL_NO_ERR;
+  scil_context_t* ctx;
+  *out_ctx = NULL;
 
-    ctx = (scil_context_t*)SAFE_MALLOC(sizeof(scil_context_t));
-    memset(&ctx->chain, 0, sizeof(ctx->chain));
-    ctx->datatype = datatype;
-		ctx->special_values_count = special_values_count;
-		if (ctx->special_values_count > 0){
-			assert(special_values != NULL);
-			ctx->special_values = special_values;
-		}else{
-			ctx->special_values = NULL;
-		}
+  ctx = (scil_context_t*)SAFE_MALLOC(sizeof(scil_context_t));
+  memset(ctx, 0, sizeof(scil_context_t));
+  ctx->pipeline_params = scilI_dict_create(30);
 
-    scil_user_hints_t* oh;
-    oh = & ctx->hints;
+  ctx->datatype = datatype;
+	ctx->special_values_count = special_values_count;
+	if (ctx->special_values_count > 0){
+		assert(special_values != NULL);
+		ctx->special_values = special_values;
+	}else{
+		ctx->special_values = NULL;
+	}
+
+  scil_user_hints_t* oh;
+  oh = & ctx->hints;
 	scilPr_copy_user_hints(oh, hints);
 
 	// adjust accuracy needed
@@ -147,8 +148,12 @@ int scilPr_create_context(scil_context_t** out_ctx,
     if (oh->force_compression_methods != NULL) {
         // now we can prefill the compression pipeline
         ret = scilI_create_chain(&ctx->chain, hints->force_compression_methods);
-
-        oh->force_compression_methods = strdup(oh->force_compression_methods);
+        if (ret == SCIL_NO_ERR ){
+          ret = scilI_chain_is_applicable(&ctx->chain, datatype);
+          if (ret == SCIL_NO_ERR ){
+            oh->force_compression_methods = strdup(oh->force_compression_methods);
+          }
+        }
     }
 
     if (ret == SCIL_NO_ERR) {

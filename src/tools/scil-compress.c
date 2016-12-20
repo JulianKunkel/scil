@@ -113,13 +113,13 @@ int main(int argc, char ** argv){
   if(printhelp != 0){
     printf("\nSynopsis: %s ", argv[0]);
 
-    scilO_print_help(known_args, 0);
+    scilO_print_help(known_args, "-- <Input plugin options, see below> -- <Output plugin options, see below>\n");
 
     printf("\nPlugin options for input plugin %s\n", in_file_format);
-    scilO_print_help(in_plugin->get_options(), 1);
+    scilO_print_help(in_plugin->get_options(), "");
 
     printf("\nPlugin options for output plugin %s\n", out_file_format);
-    scilO_print_help(out_plugin->get_options(), 1);
+    scilO_print_help(out_plugin->get_options(), "");
     exit(1);
   }
 

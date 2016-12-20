@@ -1,21 +1,28 @@
 #ifndef SCIL_DICT_H
 #define SCIL_DICT_H
 
+
 typedef struct scilI_dict_element scilI_dict_element_t;
 
 struct scilI_dict_element { /* table entry: */
-    scilI_dict_element_t* next; /* next entry in chain */
     char* key; /* defined key */
     char* value; /* replacement text */
+    scilI_dict_element_t * next;
 };
 
-typedef scilI_dict_element_t* scilI_dict_t;
 
-scilI_dict_t* scilI_dict_create();
+typedef struct {
+  unsigned size; // the initialized size of the dictionary
+  scilI_dict_element_t ** elem;
+} scilI_dict_t;
+
+
+
+scilI_dict_t * scilI_dict_create(int size);
 
 void scilI_dict_destroy(scilI_dict_t* dict);
 
-unsigned scilI_dict_hash(const char* s);
+unsigned scilI_dict_hash(const scilI_dict_t* dict, const char* s);
 
 scilI_dict_element_t* scilI_dict_get(const scilI_dict_t* dict, const char* s);
 

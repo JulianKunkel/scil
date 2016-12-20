@@ -28,7 +28,7 @@ static uint8_t end_mask[9] = {
     255        //0b11111111
 };
 
-//Supported datatypes: int8 int16 int32 int64
+//Supported datatypes: int8_t int16_t int32_t int64_t
 // Repeat for each data type
 
 // Can do negative right shifts!! (left shifts)

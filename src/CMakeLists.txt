@@ -23,7 +23,7 @@ include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
 
 # compile flags
-set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -std=gnu99 -Wall -Wextra -Wfloat-equal -fdata-sections -ffunction-sections -Wl,--gc-sections")
+set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -std=gnu99 -Wall -Wno-unused-parameter -Wextra -Wfloat-equal -fdata-sections -ffunction-sections -Wl,--gc-sections")
 # -fdiagnostics-color=always
 # -fvisibility=hidden -fvisibility-inlines-hidden -Wl,--print-gc-sections
 set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wfloat-equal -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt")

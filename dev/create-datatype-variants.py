@@ -8,7 +8,7 @@ import os
 import fnmatch
 
 def replaceFunc(data, d):
-  return data.replace("<DATATYPE>", d).replace("<DATATYPE_UPPER>", d.upper())
+  return data.replace("<DATATYPE>", d).replace("<DATATYPE_UPPER>", d.upper().replace("_T", ""))
 
 def parsefile(infile, outfile):
   DATATYPES=["float","double"]

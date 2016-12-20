@@ -44,7 +44,7 @@ static void print_errors()
 
 int main(void)
 {
-    scilI_dict_t* dict = scilI_dict_create();
+    scilI_dict_t* dict = scilI_dict_create(10);
 
     // Inserting entries
     scilI_dict_put(dict, "key1", "value1");
