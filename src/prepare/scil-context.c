@@ -43,14 +43,14 @@ static int check_compress_lossless_needed(scil_context_t* ctx)
 {
     const scil_user_hints_t hints = ctx->hints;
 
-    if ((hints.absolute_tolerance != SCIL_ACCURACY_DBL_IGNORE &&
+    if (((hints.absolute_tolerance < SCIL_ACCURACY_DBL_IGNORE || hints.absolute_tolerance > SCIL_ACCURACY_DBL_IGNORE) &&
          hints.absolute_tolerance <= SCIL_ACCURACY_DBL_FINEST) ||
         (hints.relative_err_finest_abs_tolerance <= SCIL_ACCURACY_DBL_FINEST &&
-         hints.relative_err_finest_abs_tolerance != SCIL_ACCURACY_DBL_IGNORE) ||
+        (hints.relative_err_finest_abs_tolerance < SCIL_ACCURACY_DBL_IGNORE || hints.relative_err_finest_abs_tolerance > SCIL_ACCURACY_DBL_IGNORE)) ||
         (hints.relative_tolerance_percent <= SCIL_ACCURACY_DBL_FINEST &&
-         hints.relative_tolerance_percent != SCIL_ACCURACY_DBL_IGNORE) ||
-        (hints.significant_digits == SCIL_ACCURACY_INT_FINEST) ||
-        (hints.significant_bits == SCIL_ACCURACY_INT_FINEST)) {
+         (hints.relative_tolerance_percent < SCIL_ACCURACY_DBL_IGNORE && hints.relative_tolerance_percent > SCIL_ACCURACY_DBL_IGNORE)) ||
+        (hints.significant_digits <= SCIL_ACCURACY_INT_FINEST && hints.significant_digits >= SCIL_ACCURACY_INT_FINEST) ||
+        (hints.significant_bits <= SCIL_ACCURACY_INT_FINEST && hints.significant_bits >= SCIL_ACCURACY_INT_FINEST)) {
         return 1;
     }
     return 0;
@@ -60,7 +60,7 @@ static int check_compress_lossless_needed(scil_context_t* ctx)
 // value
 static void fix_double_setting(double* dbl)
 {
-    if (*dbl == SCIL_ACCURACY_DBL_IGNORE) {
+    if (*dbl <= SCIL_ACCURACY_DBL_IGNORE && *dbl >= SCIL_ACCURACY_DBL_IGNORE) {
         *dbl = DBL_MAX;
     }
 }
@@ -78,6 +78,7 @@ int scilPr_create_context(scil_context_t** out_ctx,
 
   ctx = (scil_context_t*)SAFE_MALLOC(sizeof(scil_context_t));
   memset(ctx, 0, sizeof(scil_context_t));
+
   ctx->pipeline_params = scilI_dict_create(30);
 
   ctx->datatype = datatype;
@@ -143,7 +144,7 @@ int scilPr_create_context(scil_context_t** out_ctx,
     fix_double_setting(&oh->relative_err_finest_abs_tolerance);
     fix_double_setting(&oh->absolute_tolerance);
     // TODO handle float differently.
-	// Why? hints can be double while compressing float-data.
+	  // Why? hints can be double while compressing float-data.
 
     if (oh->force_compression_methods != NULL) {
         // now we can prefill the compression pipeline

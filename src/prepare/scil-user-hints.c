@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <float.h>
 
 const char * performance_units[] = {
 	"IGNORE",
@@ -11,6 +12,27 @@ const char * performance_units[] = {
 	"NodeLocalStorageSpeed",
 	"SingleStreamSharedStorageSpeed"
 };
+
+static void print_hint_dbl_values(const char * name, const double val ){
+	if ((val <= SCIL_ACCURACY_DBL_IGNORE && val >= SCIL_ACCURACY_DBL_IGNORE) || (val <= DBL_MAX && val >= DBL_MAX)){
+		printf("\t%s:\tIGNORE\n", name);
+		return;
+	}
+	if (val <= SCIL_ACCURACY_DBL_FINEST && val >= SCIL_ACCURACY_DBL_FINEST){
+		printf("\t%s:\tFINEST\n", name);
+		return;
+	}
+	printf("\t%s:\t%.16f\n", name, val);
+}
+
+static void print_hint_int_values(const char * name, const int val ){
+	if (val == SCIL_ACCURACY_INT_FINEST){
+		printf("\t%s:\tFINEST\n", name);
+		return;
+	}
+	printf("\t%s:\t%d\n", name, val);
+}
+
 
 static void print_performance_hint(const char* name, const scilPr_performance_hint_t p)
 {
@@ -39,6 +61,14 @@ void scilPr_copy_user_hints(scil_user_hints_t * oh, const scil_user_hints_t* hin
 
 void scilPr_print_user_hints(const scil_user_hints_t* hints)
 {
-    // TODO: implement this
-    return;
+  // TODO: implement this
+	printf("hints:\n");
+
+	print_hint_int_values("sig digits", hints->significant_digits);
+	print_hint_int_values("sig bits", hints->significant_bits);
+	print_hint_dbl_values("abs tol", hints->absolute_tolerance);
+	print_hint_dbl_values("rel percent", hints->relative_tolerance_percent);
+	print_hint_dbl_values("rel abs tol", hints->relative_err_finest_abs_tolerance);
+	print_performance_hint("Comp speed", hints->comp_speed);
+	print_performance_hint("Deco speed", hints->decomp_speed);
 }
