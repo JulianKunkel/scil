@@ -44,7 +44,10 @@ void test(char * name, size_t expected_size, int check_compressed_output){
   ret = scil_compress(buff, size, data, & dims, & out_size,  ctx);
   printf("%d %lld\n", ret, (long long) out_size);
   assert(ret == SCIL_NO_ERR && "ERROR COMPRESSION");
-  assert(out_size == expected_size);
+
+  // check a range of output, as newer versions of LZ4 behave differently.
+  assert(out_size >= expected_size - 2);
+  assert(out_size <= expected_size + 2);
 
   if(check_compressed_output){
     assert( memcmp(& buff[1], data, sizeof(data)) == 0);
