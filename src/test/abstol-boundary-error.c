@@ -1,8 +1,11 @@
+#include <string.h>
+
 #include <scil-util.h>
 #include <scil.h>
 
 #include <scil-internal.h>
 #include <scil-patterns.h>
+
 
 int main(void)
 {
@@ -27,6 +30,14 @@ int main(void)
 
     int ret = scil_compress(dest, dest_size, source, &dims, &compressed_size, ctx);
     // scil_decompress();
+
+    byte* data_out        = (byte*)malloc(dest_size);
+    memset(data_out, -1, dest_size);
+    ret = scil_decompress(SCIL_TYPE_DOUBLE, data_out, & dims, dest, compressed_size, &data_out[dest_size / 2]);
+
+    for(size_t i=0; i < count; i++){
+      printf("%f - %f\n", source[i], ((double*)data_out)[i]);
+    }
 
     scil_user_hints_t out_accuracy;
     ret = scil_validate_compression(SCIL_TYPE_DOUBLE, source, & dims, dest, compressed_size,  ctx, & out_accuracy);

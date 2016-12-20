@@ -1,4 +1,5 @@
 #include <scil-quantizer.h>
+#include <scil-error.h>
 
 #include <assert.h>
 #include <math.h>
@@ -8,13 +9,13 @@
 static uint64_t scil_quantize_value_<DATATYPE>(<DATATYPE> value,
                                                double absolute_tolerance,
                                                <DATATYPE> minimum){
-    return (uint64_t)round( (double)(value - minimum) / (2.0 * absolute_tolerance) );
+    return (uint64_t) round( ((double) (value - minimum)) * absolute_tolerance );
 }
 
 static <DATATYPE> scil_unquantize_value_<DATATYPE>(uint64_t value,
                                                    double absolute_tolerance,
                                                    <DATATYPE> minimum){
-    return minimum + (<DATATYPE>)(value * 2.0 * absolute_tolerance);
+    return minimum + (<DATATYPE>)(value * absolute_tolerance);
 }
 
 <DATATYPE> scil_find_minimum_<DATATYPE>(const <DATATYPE>* buffer,
@@ -70,9 +71,10 @@ void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* restrict buffer,
 uint64_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum,
                                                <DATATYPE> maximum,
                                                double absolute_tolerance){
-    return (uint64_t)ceil( log2( 1.0 + (double)(maximum - minimum) / (2.0 * absolute_tolerance) ) );
+    return (uint64_t) ceil( log2( 1.0 + (double)(maximum - minimum) / absolute_tolerance ) );
 }
 
+#include <stdio.h>
 int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* restrict dest,
                                            const <DATATYPE>* restrict source,
                                            size_t count,
@@ -83,15 +85,16 @@ int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* restrict dest,
     assert(dest != NULL);
     assert(source != NULL);
 
-    if(scil_calculate_bits_needed_<DATATYPE>(minimum, maximum, absolute_tolerance) > 64){
-        return 1; // Quantizing would result in values bigger than UINT64_MAX
+    if(scil_calculate_bits_needed_<DATATYPE>(minimum, maximum, absolute_tolerance) > 53){
+        return SCIL_EINVAL; // Quantizing would result in values bigger than UINT64_MAX
     }
+    double real_tolerance = (1 / 1.0) / absolute_tolerance;
 
     for(size_t i = 0; i < count; ++i){
-        dest[i] = scil_quantize_value_<DATATYPE>(source[i], absolute_tolerance, minimum);
+        dest[i] = scil_quantize_value_<DATATYPE>(source[i], real_tolerance, minimum);
     }
 
-    return 0;
+    return SCIL_NO_ERR;
 }
 
 int scil_unquantize_buffer_<DATATYPE>(<DATATYPE>* restrict dest,
@@ -103,8 +106,10 @@ int scil_unquantize_buffer_<DATATYPE>(<DATATYPE>* restrict dest,
     assert(dest != NULL);
     assert(source != NULL);
 
+    double real_tolerance = 1.0 * absolute_tolerance;
+
     for(size_t i = 0; i < count; ++i){
-        dest[i] = scil_unquantize_value_<DATATYPE>(source[i], absolute_tolerance, minimum);
+        dest[i] = scil_unquantize_value_<DATATYPE>(source[i], real_tolerance, minimum);
     }
 
     return 0;

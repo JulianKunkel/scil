@@ -279,9 +279,7 @@ int scil_compress(byte* restrict dest,
 
         remaining_compressors--;
         ((char*)dst)[out_size] = algo->compressor_id;
-        debugI("C compressor ID %d at pos %llu\n",
-               algo->compressor_id,
-               (long long unsigned)&((char*)dst)[out_size]);
+        debugI("C compressor ID %d at pos %llu\n", algo->compressor_id, (long long unsigned)&((char*)dst)[out_size]);
 
         out_size++;
         input_size = out_size;
@@ -299,7 +297,7 @@ int scil_compress(byte* restrict dest,
             void* src = pick_buffer(1, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
             void* dst = pick_buffer(0, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
 
-			ret = algo->c.PStype.compress(ctx, (int64_t*)dst, header, &header_size_out, src, dims);
+			      ret = algo->c.PStype.compress(ctx, (int64_t*)dst, header, &header_size_out, src, dims);
 
             if (ret != 0) return ret;
             remaining_compressors--;
@@ -307,9 +305,8 @@ int scil_compress(byte* restrict dest,
             header   += header_size_out;
 
             *header = algo->compressor_id;
-            debugI(
-                "C compressor ID %d at pos %llu\n", *header, (long long unsigned)header)
-                header++;
+            debugI("C compressor ID %d at pos %llu\n", *header, (long long unsigned)header)
+            header++;
             out_size++;
 
             // scilU_print_buffer(dst, out_size);
@@ -328,28 +325,28 @@ int scil_compress(byte* restrict dest,
 
         scilI_algorithm_t* algo = chain->data_compressor;
         switch (ctx->datatype) {
-            case (SCIL_TYPE_FLOAT):
+          case (SCIL_TYPE_FLOAT):
                 ret = algo->c.DNtype.compress_float(ctx, dst, &out_size, src, dims);
                 break;
-            case (SCIL_TYPE_DOUBLE):
+          case (SCIL_TYPE_DOUBLE):
                 ret = algo->c.DNtype.compress_double(ctx, dst, &out_size, src, dims);
                 break;
-			case (SCIL_TYPE_INT8) :
-				ret = algo->c.DNtype.compress_int8(ctx, dst, &out_size, src, dims);
-				break;
-			case(SCIL_TYPE_INT16) :
-				ret = algo->c.DNtype.compress_int16(ctx, dst, &out_size, src, dims);
-				break;
-			case(SCIL_TYPE_INT32) :
-				ret = algo->c.DNtype.compress_int32(ctx, dst, &out_size, src, dims);
-				break;
-			case(SCIL_TYPE_INT64) :
-				ret = algo->c.DNtype.compress_int64(ctx, dst, &out_size, src, dims);
-				break;
-      case(SCIL_TYPE_BINARY) :
-			case(SCIL_TYPE_STRING) :
-				assert(0);
-				break;
+    			case (SCIL_TYPE_INT8) :
+    				ret = algo->c.DNtype.compress_int8(ctx, dst, &out_size, src, dims);
+    				break;
+    			case(SCIL_TYPE_INT16) :
+    				ret = algo->c.DNtype.compress_int16(ctx, dst, &out_size, src, dims);
+    				break;
+    			case(SCIL_TYPE_INT32) :
+    				ret = algo->c.DNtype.compress_int32(ctx, dst, &out_size, src, dims);
+    				break;
+    			case(SCIL_TYPE_INT64) :
+    				ret = algo->c.DNtype.compress_int64(ctx, dst, &out_size, src, dims);
+    				break;
+          case(SCIL_TYPE_BINARY) :
+    			case(SCIL_TYPE_STRING) :
+  				assert(0);
+  				break;
         }
         if (ret != 0) return ret;
         // check if we have to preserve another header from the preconditioners
@@ -364,9 +361,7 @@ int scil_compress(byte* restrict dest,
 
         remaining_compressors--;
         ((char*)dst)[out_size] = algo->compressor_id;
-        debugI("C compressor ID %d at pos %llu\n",
-               algo->compressor_id,
-               (long long unsigned)&((char*)dst)[out_size]);
+        debugI("C compressor ID %d at pos %llu\n", algo->compressor_id, (long long unsigned)&((char*)dst)[out_size]);
 
         out_size++;
         input_size = out_size;
@@ -722,18 +717,18 @@ int scil_validate_compression(SCIL_Datatype_t datatype, const void* restrict dat
         const scil_user_hints_t h = ctx->hints;
 
         // check if tolerance level is met:
-        ret = 0;
+        ret = SCIL_NO_ERR;
         if (a.absolute_tolerance > h.absolute_tolerance) {
             debug("Validation error absolute_tolerance %f > %f\n",
                   a.absolute_tolerance,
                   h.absolute_tolerance);
-            ret = 1;
+            ret = SCIL_PRECISION_ERR;
         }
         if (a.relative_tolerance_percent > h.relative_tolerance_percent) {
             debug("Validation error relative_tolerance_percent %f > %f\n",
                   a.relative_tolerance_percent,
                   h.relative_tolerance_percent);
-            ret = 1;
+            ret = SCIL_PRECISION_ERR;
         }
         if (a.relative_err_finest_abs_tolerance >
             h.relative_err_finest_abs_tolerance) {
@@ -741,19 +736,19 @@ int scil_validate_compression(SCIL_Datatype_t datatype, const void* restrict dat
                 "Validation error relative_err_finest_abs_tolerance %f < %f\n",
                 a.relative_err_finest_abs_tolerance,
                 h.relative_err_finest_abs_tolerance);
-            ret = 1;
+            ret = SCIL_PRECISION_ERR;
         }
         if (a.significant_digits < h.significant_digits) {
             debug("Validation error significant_digits %d > %d\n",
                   a.significant_digits,
                   h.significant_digits);
-            ret = 1;
+            ret = SCIL_PRECISION_ERR;
         }
         if (a.significant_bits < h.significant_bits) {
             debug("Validation error significant_bits %d > %d\n",
                   a.significant_bits,
                   h.significant_bits);
-            ret = 1;
+            ret = SCIL_PRECISION_ERR;
         }
     }
 end:

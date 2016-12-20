@@ -25,6 +25,8 @@
 #include <string.h>
 #include <math.h>
 
+#include <scil-error.h>
+
 // Repeat for each data type
 
 // hard threshold the values in matrix.
@@ -67,6 +69,10 @@ int scil_wavelets_compress_<DATATYPE>(const scil_context_t* ctx,
     // Select the forward bank of filters.
     lp=MFLP;Nl=Nflp;
     hp=MFHP;Nh=Nfhp;
+
+		if(dims->dims == 1){
+			return SCIL_EINVAL;
+		}
 
     /*if (dims->dims==1){
       int Nj = dims->length[0];

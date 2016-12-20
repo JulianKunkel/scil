@@ -16,7 +16,7 @@ int main(void){
     srand((unsigned)time(NULL));
 
     printf("#Testing scil-quantizer\n\n");
-    for(uint16_t i = 1; i < 64; ++i){
+    for(uint16_t i = 1; i < 55; ++i){
 
         for(size_t j = 0; j < count; ++j){
             buf_in[j] = 1000.0 * ( -1.0 + ((double)rand() / (double)RAND_MAX) * 2.0 );
@@ -56,19 +56,19 @@ int main(void){
 
         uint8_t ret = scil_quantize_buffer_minmax_double(buf_out, buf_in, count, absolute_tolerance, minimum, maximum);
 
-        if(bits_needed > 64){
+        if(bits_needed > 53){
             // Failure testing
-            printf("#Needed bits for quantized values > 64.\n");
+            printf("#Needed bits for quantized values > 53.\n");
 
-            if(ret != 1){
-                printf("#FAILURE: scil_quantize_buffer did the quantization even though quantized values need more than 64 bits.");
+            if(ret != SCIL_EINVAL){
+                printf("#FAILURE: scil_quantize_buffer did the quantization even though quantized values need more than 53 bits.");
                 return 1;
             }
             printf("\n");
         }
         else{
             // Success testing
-            printf("#Needed bits for quantized values <= 64.\n");
+            printf("#Needed bits for quantized values <= 53.\n");
 
             scil_unquantize_buffer_double(buf_end, buf_out, count, absolute_tolerance, minimum);
 
@@ -77,7 +77,7 @@ int main(void){
                 //printf("%+.20f,%+.20f\n", buf_in[j], buf_end[j]);
                 if( fabs(buf_in[j] - buf_end[j]) > absolute_tolerance ){
                     printf("#FAILURE: value at index %lu was after quantizing not in the tolerated error margin.\n", j);
-                    printf("#Before: %+.20f\n", buf_in[j]);
+                    printf("#Before: %+.20f == %lu\n", buf_in[j], buf_out[j]);
                     printf("#After:  %+.20f\n", buf_end[j]);
                     printf("#Difference: %.20f\n", fabs(buf_in[j] - buf_end[j]) );
                     printf("#Error tol.: %.20f\n", absolute_tolerance );

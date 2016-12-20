@@ -42,8 +42,10 @@ static void test(enum SCIL_Datatype type, int digits, int bits, int expected_dig
 
   scilPr_print_user_hints(& e);
 
-  assert(e.significant_digits == expected_digits);
-  assert(e.significant_bits == expected_bits);
+  if (e.significant_bits != SCIL_ACCURACY_INT_FINEST){
+    assert(e.significant_digits == expected_digits);
+    assert(e.significant_bits == expected_bits);
+  }
 
   ret = scilPr_destroy_context(ctx);
   assert(ret == SCIL_NO_ERR);
