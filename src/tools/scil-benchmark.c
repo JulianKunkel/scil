@@ -160,67 +160,10 @@ int main(int argc, char** argv){
 			continue;
 		}
 
-		ret = scilPa_create_library_pattern_double(buffer_in, &dims, i);
-		assert( ret == SCIL_NO_ERR);
-		size_t elemCount = scilPr_get_dims_count(& dims);
-
-		// convert the data
 		for(int d=0; d < SCIL_DATATYPE_NUMERIC_MAX; d++ ){
-			int convDataSize = scilPr_get_compressed_data_size_limit(&dims, d);
-
-			switch(d){
-				case(SCIL_TYPE_FLOAT):{
-					float * buffer_real = (float*) malloc(convDataSize);
-					for(unsigned x = 0; x < elemCount; x++){
-						buffer_real[x] = (float) buffer_in[x];
-					}
-					benchmark(f, d, name, (byte*) buffer_real, dims);
-					free(buffer_real);
-					break;
-				}
-			  case(SCIL_TYPE_DOUBLE):{
-					benchmark(f, d, name, (byte*) buffer_in, dims);
-					break;
-				}
-			  case(SCIL_TYPE_INT8):{
-					int8_t * buffer_real = (int8_t*) malloc(convDataSize);
-					for(unsigned x = 0; x < elemCount; x++){
-						buffer_real[x] = (int8_t) buffer_in[x];
-					}
-					benchmark(f, d, name, (byte*) buffer_real, dims);
-					free(buffer_real);
-					break;
-				}
-			  case(SCIL_TYPE_INT16):{
-					int16_t * buffer_real = (int16_t*) malloc(convDataSize);
-					for(unsigned x = 0; x < elemCount; x++){
-						buffer_real[x] = (int16_t) buffer_in[x];
-					}
-					benchmark(f, d, name, (byte*) buffer_real, dims);
-					free(buffer_real);
-					break;
-				}
-			  case(SCIL_TYPE_INT32):{
-					int32_t * buffer_real = (int32_t*) malloc(convDataSize);
-					for(unsigned x = 0; x < elemCount; x++){
-						buffer_real[x] = (int32_t) buffer_in[x];
-					}
-					benchmark(f, d, name, (byte*) buffer_real, dims);
-					free(buffer_real);
-					break;
-				}
-			  case(SCIL_TYPE_INT64):{
-					int64_t * buffer_real = (int64_t*) malloc(convDataSize);
-					for(unsigned x = 0; x < elemCount; x++){
-						buffer_real[x] = (int64_t) buffer_in[x];
-					}
-					benchmark(f, d, name, (byte*) buffer_real, dims);
-					free(buffer_real);
-					break;
-				}
-				default:
-					assert(0 && "Should never be here");
-			}
+			ret = scilPa_create_library_pattern(buffer_in, d, &dims, i);
+			assert( ret == SCIL_NO_ERR);
+			benchmark(f, d, name, (byte*) buffer_in, dims);
 		}
 	}
 	fclose(f);

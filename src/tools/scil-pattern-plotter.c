@@ -61,7 +61,7 @@ int main(int argc, char ** argv){
     sprintf(fullName, "%s.csv", name);
 
     printf("Processing %s\n", name);
-	ret = scilPa_create_library_pattern_double(buffer_in, & dims, i);
+	ret = scilPa_create_library_pattern(buffer_in, SCIL_TYPE_DOUBLE, & dims, i);
 	assert( ret == SCIL_NO_ERR);
     scilU_plot(fullName, dims, buffer_in);
   }

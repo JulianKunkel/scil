@@ -14,7 +14,7 @@ int main()
     scil_dims_t dims;
     scilPr_initialize_dims_1d(&dims, count);
 
-    scilPa_create_pattern_float(source, &dims, "random", -100.0f, 100.0f, 0.0f, 0.0f);
+    scilPa_create_pattern(source, SCIL_TYPE_FLOAT, &dims, "random", -100.0f, 100.0f, 0.0f, 0.0f);
 
     size_t dest_size = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_FLOAT);
     byte* dest       = (byte*)SAFE_MALLOC(dest_size);

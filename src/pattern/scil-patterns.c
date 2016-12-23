@@ -92,8 +92,7 @@ int scilPa_get_pattern_index(const char* name)
     return -1;
 }
 
-int scilPa_create_pattern_double(double* buffer, const scil_dims_t* dims, const char* name, double mn, double mx, double arg, double arg2)
-{
+int scilPa_create_pattern_double(double * buffer, const scil_dims_t* dims, const char* name, double mn, double mx, double arg, double arg2){
   if (name == NULL){
     return SCIL_EINVAL;
   }
@@ -102,21 +101,6 @@ int scilPa_create_pattern_double(double* buffer, const scil_dims_t* dims, const 
     return SCIL_EINVAL;
   }
   return patterns[num]->create(buffer, dims, mn, mx, arg, arg2);
-}
-
-int scilPa_create_pattern_float(float* buffer, const scil_dims_t* dims, const char* name, float mn, float mx, float arg, float arg2)
-{
-  size_t count = scilPr_get_dims_count(dims);
-  double * buf = (double*) malloc(count * sizeof(double));
-  int ret = scilPa_create_pattern_double(buf, dims, name, mn, mx, arg, arg2);
-  if (ret != SCIL_NO_ERR){
-    return ret;
-  }
-  for(size_t i=0; i < count; i++){
-    buffer[i] = (float) buf[i];
-  }
-  free(buf);
-  return SCIL_NO_ERR;
 }
 
 static void library_add(char * pattern, char * name, float mn, float mx, float arg, float arg2, int mutator_count, ...){
@@ -160,23 +144,23 @@ static void create_library_patterns_if_needed(){
   library_add("random", "random1-100", 1, 100, -1, 0, 0);
   library_add("random", "random-1-+1", -1, 1, -1, 0, 0);
 
-  library_add("steps", "steps2", 0, 1, 2, 0, 0);
-  library_add("steps", "steps16", 0, 1, 16, 0, 0);
+  library_add("steps", "steps2", 0, 100, 2, 0, 0);
+  library_add("steps", "steps16", 0, 100, 16, 0, 0);
   library_add("steps", "steps100", 1, 100, 100, 0, 0);
 
   library_add("sin", "sin11", 1, 100, 1.0, 1, 0); // 1 pass
-  library_add("sin", "sin16", 0, 1, 1.0, 6, 0); // 6 passes
+  library_add("sin", "sin16", 0, 100, 1.0, 6, 0); // 6 passes
   library_add("sin", "sin31", 1, 100, 3.0, 1, 0); // 3 sines
-  library_add("sin", "sin35", 0, 1, 3.0, 5, 0); // 3 sines, 5 passes
+  library_add("sin", "sin35", 0, 100, 3.0, 5, 0); // 3 sines, 5 passes
   library_add("sin", "sin23", 1, 100, 2.0, 3, 0); // 3 passes, 2 sines
 
   library_add("poly4", "poly4--1-5", 1, 100, -1, 5, 0);
-  library_add("poly4", "poly4-234-3", 0, 1, 234, 3, 0);
-  library_add("poly4", "poly4-65432-14", 0, 1, 65432, 14, 0);
+  library_add("poly4", "poly4-234-3", 0, 100, 234, 3, 0);
+  library_add("poly4", "poly4-65432-14", 0, 100, 65432, 14, 0);
 
-  library_add("simplexNoise", "simplex102", -1, 1, 1.0, 2, 0); // 2 passes
-  library_add("simplexNoise", "simplex106", -1, 1, 1.0, 6, 0); // 6 passes
-  library_add("simplexNoise", "simplex206", -1, 1, 3.0, 6, 0); // 6 passes, 3 hills
+  library_add("simplexNoise", "simplex102", 0, 100, 1.0, 2, 0); // 2 passes
+  library_add("simplexNoise", "simplex106", 0, 100, 1.0, 6, 0); // 6 passes
+  library_add("simplexNoise", "simplex206", 0, 100, 3.0, 6, 0); // 6 passes, 3 hills
 }
 
 int scilPa_get_pattern_library_size(){
@@ -191,14 +175,96 @@ char * scilPa_get_library_pattern_name(int p){
   return library[p].name;
 }
 
-int scilPa_create_library_pattern_double(double* buffer, const scil_dims_t* dims, int pattern_index)
+void scilPa_convert_data(void * buffer, SCIL_Datatype_t datatype,  double * data, const scil_dims_t* dims){
+  size_t elemCount = scilPr_get_dims_count(dims);
+
+	switch(datatype){
+		case(SCIL_TYPE_FLOAT):{
+      float * buffer_real = (float*)buffer;
+			for(unsigned x = 0; x < elemCount; x++){
+				buffer_real[x] = (float) data[x];
+			}
+			break;
+		}
+	  case(SCIL_TYPE_INT8):{
+			int8_t * buffer_real = (int8_t*) buffer;
+			for(unsigned x = 0; x < elemCount; x++){
+				buffer_real[x] = (int8_t) data[x];
+			}
+			break;
+		}
+	  case(SCIL_TYPE_INT16):{
+			int16_t * buffer_real = (int16_t*)  buffer;
+			for(unsigned x = 0; x < elemCount; x++){
+				buffer_real[x] = (int16_t) data[x];
+			}
+			break;
+		}
+	  case(SCIL_TYPE_INT32):{
+			int32_t * buffer_real = (int32_t*)  buffer;
+			for(unsigned x = 0; x < elemCount; x++){
+				buffer_real[x] = (int32_t) data[x];
+			}
+			break;
+		}
+	  case(SCIL_TYPE_INT64):{
+			int64_t * buffer_real = (int64_t*)  buffer;
+			for(unsigned x = 0; x < elemCount; x++){
+				buffer_real[x] = (int64_t) data[x];
+			}
+			break;
+		}
+		default:
+			assert(0 && "Should never be here");
+	}
+}
+
+
+int scilPa_create_pattern(void * buffer, SCIL_Datatype_t datatype, const scil_dims_t* dims, const char* name, double mn, double mx, double arg, double arg2){
+  double * data;
+  if (datatype != SCIL_TYPE_DOUBLE){
+    int doubleSize = scilPr_get_compressed_data_size_limit( dims, datatype);
+    data = malloc(doubleSize * sizeof(double));
+  }else{
+    data = (double*) buffer;
+  }
+
+  int ret;
+  ret = scilPa_create_pattern_double(data, dims, name, mn, mx, arg, arg2);
+  if (ret != SCIL_NO_ERR){
+    if (datatype != SCIL_TYPE_DOUBLE){
+      free(data);
+    }
+    return ret;
+  }
+
+  if (datatype != SCIL_TYPE_DOUBLE){
+    scilPa_convert_data(buffer, datatype,  data, dims);
+
+    free(data);
+  }
+  return SCIL_NO_ERR;
+}
+
+int scilPa_create_library_pattern(void * buffer, SCIL_Datatype_t datatype, const scil_dims_t* dims, int pattern_index)
 {
+  double * data;
+  if (datatype != SCIL_TYPE_DOUBLE){
+    int doubleSize = scilPr_get_compressed_data_size_limit( dims, datatype);
+    data = malloc(doubleSize * sizeof(double));
+  }else{
+    data = (double*) buffer;
+  }
+
   create_library_patterns_if_needed();
   assert(pattern_index <= library_size && pattern_index >= 0);
   library_pattern* l = &library[pattern_index];
   int ret;
-  ret = scilPa_create_pattern_double(buffer, dims, l->pattern, l->mn, l->mx, l->arg, l->arg2);
+  ret = scilPa_create_pattern_double(data, dims, l->pattern, l->mn, l->mx, l->arg, l->arg2);
   if (ret != SCIL_NO_ERR){
+    if (datatype != SCIL_TYPE_DOUBLE){
+      free(data);
+    }
     return ret;
   }
   for(int i=0; i < l->mutator_count; i++){
@@ -206,24 +272,15 @@ int scilPa_create_library_pattern_double(double* buffer, const scil_dims_t* dims
     m->call(buffer, dims, m->arg);
   }
 
+  if (datatype != SCIL_TYPE_DOUBLE){
+    scilPa_convert_data(buffer, datatype,  data, dims);
+
+    free(data);
+  }
+
   return ret;
 }
 
-int scilPa_create_library_pattern_float (float* buffer, const scil_dims_t* dims, int pattern_index){
-  create_library_patterns_if_needed();
-  assert(pattern_index <= library_size && pattern_index >= 0);
-  size_t size = scilPr_get_dims_size(dims, SCIL_TYPE_DOUBLE);
-  double* buf = (double*) malloc(size);
-  int ret = scilPa_create_library_pattern_double(buf, dims, pattern_index);
-  if (ret != SCIL_NO_ERR){
-    return ret;
-  }
-  for(size_t i=0; i < size; i++){
-    buffer[i] = (float) buf[i];
-  }
-  free(buf);
-  return SCIL_NO_ERR;
-}
 
 void scilPI_change_data_scale(double* buffer, const scil_dims_t* dims, double mn, double mx){
   // fix min + max, first identify min/max

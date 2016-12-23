@@ -25,7 +25,7 @@ int   scilPa_get_pattern_index(const char* name);
 /*
  * Create the pattern selected by num with the arguments
  */
-int scilPa_create_pattern_double(double* buffer,
+int scilPa_create_pattern_double(double * buffer,
                                  const scil_dims_t* dims,
                                  const char* name,
                                  double mn,
@@ -33,13 +33,15 @@ int scilPa_create_pattern_double(double* buffer,
                                  double arg,
                                  double arg2);
 
-int scilPa_create_pattern_float (float*  const buffer,
-                                 const scil_dims_t* dims,
-                                 const char* name,
-                                 float mn,
-                                 float mx,
-                                 float arg,
-                                 float arg2);
+int scilPa_create_pattern(void * buffer, SCIL_Datatype_t datatype,
+                                const scil_dims_t* dims,
+                                const char* name,
+                                double mn,
+                                double mx,
+                                double arg,
+                                double arg2);
+
+void scilPa_convert_data(void * out, SCIL_Datatype_t datatype,  double * in, const scil_dims_t* dims);
 
 /*
  * The pattern library contains a list of useful patterns.
@@ -47,7 +49,6 @@ int scilPa_create_pattern_float (float*  const buffer,
 int scilPa_get_pattern_library_size();
 char* scilPa_get_library_pattern_name(int pattern);
 
-int scilPa_create_library_pattern_double(double* buffer, const scil_dims_t* dims, int pattern);
-int scilPa_create_library_pattern_float (float*  const buffer, const scil_dims_t* dims, int pattern);
+int scilPa_create_library_pattern(void * buffer, SCIL_Datatype_t datatype, const scil_dims_t* dims, int pattern);
 
 #endif // SCIL_PATTERN_H
