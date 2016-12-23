@@ -3,7 +3,27 @@
 
 #include <assert.h>
 #include <math.h>
+#include <limits.h>
 
+#define INFINITY_double INFINITY
+#define INFINITY_float INFINITY
+
+#define NINFINITY_double -INFINITY
+#define NINFINITY_float -INFINITY
+
+#define INFINITY_int8_t CHAR_MAX
+#define NINFINITY_int8_t CHAR_MIN
+
+#define INFINITY_int16_t SHRT_MAX
+#define NINFINITY_int16_t SHRT_MIN
+
+#define INFINITY_int32_t INT_MAX
+#define NINFINITY_int32_t INT_MIN
+
+#define INFINITY_int64_t LONG_MAX
+#define NINFINITY_int64_t LONG_MIN
+
+//Supported datatypes: int8_t int16_t int32_t int64_t float double
 // Repeat for each data type
 
 static uint64_t scil_quantize_value_<DATATYPE>(<DATATYPE> value,
@@ -22,7 +42,7 @@ static <DATATYPE> scil_unquantize_value_<DATATYPE>(uint64_t value,
                                         size_t count){
     assert(buffer != NULL);
 
-    <DATATYPE> min = INFINITY;
+    <DATATYPE> min = INFINITY_<DATATYPE>;
 
     for(size_t i = 0; i < count; ++i)
     {
@@ -37,7 +57,7 @@ static <DATATYPE> scil_unquantize_value_<DATATYPE>(uint64_t value,
 
     assert(buffer != NULL);
 
-    <DATATYPE> max = -INFINITY;
+    <DATATYPE> max = NINFINITY_<DATATYPE>;
 
     for(size_t i = 0; i < count; ++i)
     {
@@ -56,8 +76,8 @@ void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* restrict buffer,
     assert(minimum != NULL);
     assert(maximum != NULL);
 
-    <DATATYPE> min = INFINITY;
-    <DATATYPE> max = -INFINITY;
+    <DATATYPE> min = INFINITY_<DATATYPE>;
+    <DATATYPE> max = NINFINITY_<DATATYPE>;
 
     for(size_t i = 0; i < count; ++i){
         if (buffer[i] < min) { min = buffer[i]; }

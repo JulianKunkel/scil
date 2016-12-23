@@ -2,6 +2,7 @@
 
 #include <algo/algo-swage.h>
 
+#include <scil-quantizer.h>
 #include <scil-internal.h>
 
 static uint8_t start_mask[9] = {
@@ -122,10 +123,20 @@ int scil_swage_compress_<DATATYPE>(const scil_context_t* ctx,
                                    <DATATYPE>*restrict source,
                                    const scil_dims_t* dims)
 {
-    char* bpv_str = scilI_dict_get(ctx->pipeline_params, "bits_per_value")->value;
-    uint8_t bits_per_value = strtol(bpv_str, (char**)NULL, 10);
+    scilI_dict_element_t* elem = scilI_dict_get(ctx->pipeline_params, "bits_per_value");
+    uint8_t bits_per_value;
+    size_t count = scilPr_get_dims_count(dims);
+    if( elem ){
+      char* bpv_str = elem->value;
+      bits_per_value = strtol(bpv_str, (char**)NULL, 10);
+    }else{
+      // we determine the value new based on min / max
+      <DATATYPE> minimum, maximum;
+      scil_find_minimum_maximum_<DATATYPE>(source, count, &minimum, &maximum);
 
-    if (scil_swage_<DATATYPE>(dest, source, scilPr_get_dims_count(dims), bits_per_value))
+    }
+
+    if (scil_swage_<DATATYPE>(dest, source, count, bits_per_value))
     {
         return 1;
     }

@@ -30,7 +30,7 @@
 static int error_occured = 0;
 static double * buffer_uncompressed;
 
-void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double * buffer_in, scil_dims_t dims){
+void benchmark(FILE * f, SCIL_Datatype_t datatype, const char * name, byte * buffer_in, scil_dims_t dims){
 	size_t out_c_size;
 
 	const size_t buff_size = scilPr_get_compressed_data_size_limit(&dims, datatype);
@@ -48,14 +48,14 @@ void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double 
 	double r = (double) scilI_get_data_randomness(buffer_in, data_size, tmp_buff, buff_size);
 
 	char * outputFiles = getenv("SCIL_BENCHMARK_OUTPUT");
-	const size_t buffer_size = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
+	const size_t buffer_size = scilPr_get_compressed_data_size_limit(&dims, datatype);
 
 	for(int i=0; i < scilU_get_available_compressor_count(); i++ ){
 		char compression_name[1024];
 		sprintf(compression_name, "%s", scilU_get_compressor_name(i));
 		hints.force_compression_methods = compression_name;
 
-		int ret = scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+		int ret = scilPr_create_context(&ctx, datatype, 0, NULL, &hints);
 		if (ret != 0){
 			printf("Invalid combination %s\n", compression_name);
 			continue;
@@ -76,7 +76,7 @@ void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double 
 			memset(buffer_uncompressed, -1, buffer_size);
 
 			scilU_start_timer(& timer);
-			ret_d = scil_decompress(SCIL_TYPE_DOUBLE, buffer_uncompressed, & dims, buffer_out, out_c_size, tmp_buff);
+			ret_d = scil_decompress(datatype, buffer_uncompressed, & dims, buffer_out, out_c_size, tmp_buff);
 			seconds_decompress = scilU_stop_timer(timer);
 		}else{
 			seconds_decompress = 1;
@@ -97,8 +97,8 @@ void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double 
 		}
 		double c_fac = (double)(out_c_size) / data_size;
 
-		fprintf(f, "%.1f; %s; %s; %.1lf; %.1lf; %.3lf\n",
-			r, name, hints.force_compression_methods,
+		fprintf(f, "%.1f; %d; %s; %s; %.1lf; %.1lf; %.3lf\n",
+			r, datatype, name, hints.force_compression_methods,
 			data_size/seconds_compress/1024 /1024, data_size/seconds_decompress/1024 /1024, c_fac);
   }
 	free(buffer_out);
@@ -145,7 +145,7 @@ int main(int argc, char** argv){
 
 	FILE * f = fopen("scil.conf.bak", "w+");
 	{
-		char * str = "#randomness; pattern name; compressor name; compr. performance MiB; decompr. performance MiB; inverse compr. ratio\n";
+		char * str = "#randomness; data type; pattern name; compressor name; compr. performance MiB; decompr. performance MiB; inverse compr. ratio\n";
 		ret = fwrite(str, strlen(str), 1, f);
 		scilU_check_std_err("fwrite", ret != 1);
 	}
@@ -162,7 +162,66 @@ int main(int argc, char** argv){
 
 		ret = scilPa_create_library_pattern_double(buffer_in, &dims, i);
 		assert( ret == SCIL_NO_ERR);
-		benchmark(f, SCIL_TYPE_DOUBLE, name, buffer_in, dims);
+		size_t elemCount = scilPr_get_dims_count(& dims);
+
+		// convert the data
+		for(int d=0; d < SCIL_DATATYPE_NUMERIC_MAX; d++ ){
+			int convDataSize = scilPr_get_compressed_data_size_limit(&dims, d);
+
+			switch(d){
+				case(SCIL_TYPE_FLOAT):{
+					float * buffer_real = (float*) malloc(convDataSize);
+					for(unsigned x = 0; x < elemCount; x++){
+						buffer_real[x] = (float) buffer_in[x];
+					}
+					benchmark(f, d, name, (byte*) buffer_real, dims);
+					free(buffer_real);
+					break;
+				}
+			  case(SCIL_TYPE_DOUBLE):{
+					benchmark(f, d, name, (byte*) buffer_in, dims);
+					break;
+				}
+			  case(SCIL_TYPE_INT8):{
+					int8_t * buffer_real = (int8_t*) malloc(convDataSize);
+					for(unsigned x = 0; x < elemCount; x++){
+						buffer_real[x] = (int8_t) buffer_in[x];
+					}
+					benchmark(f, d, name, (byte*) buffer_real, dims);
+					free(buffer_real);
+					break;
+				}
+			  case(SCIL_TYPE_INT16):{
+					int16_t * buffer_real = (int16_t*) malloc(convDataSize);
+					for(unsigned x = 0; x < elemCount; x++){
+						buffer_real[x] = (int16_t) buffer_in[x];
+					}
+					benchmark(f, d, name, (byte*) buffer_real, dims);
+					free(buffer_real);
+					break;
+				}
+			  case(SCIL_TYPE_INT32):{
+					int32_t * buffer_real = (int32_t*) malloc(convDataSize);
+					for(unsigned x = 0; x < elemCount; x++){
+						buffer_real[x] = (int32_t) buffer_in[x];
+					}
+					benchmark(f, d, name, (byte*) buffer_real, dims);
+					free(buffer_real);
+					break;
+				}
+			  case(SCIL_TYPE_INT64):{
+					int64_t * buffer_real = (int64_t*) malloc(convDataSize);
+					for(unsigned x = 0; x < elemCount; x++){
+						buffer_real[x] = (int64_t) buffer_in[x];
+					}
+					benchmark(f, d, name, (byte*) buffer_real, dims);
+					free(buffer_real);
+					break;
+				}
+				default:
+					assert(0 && "Should never be here");
+			}
+		}
 	}
 	fclose(f);
 	ret = rename("scil.conf.bak", "scil.conf");

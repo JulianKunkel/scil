@@ -517,28 +517,28 @@ int scil_decompress(SCIL_Datatype_t datatype,
         void* dst = pick_buffer(0, total_compressors, remaining_compressors, src_adj, dest, buff_tmp1, buff_tmp2);
 
         switch (datatype) {
-            case (SCIL_TYPE_FLOAT):
-                ret = algo->c.Ctype.decompress_float(dst, dims, src, src_size);
-                break;
-            case (SCIL_TYPE_DOUBLE):
-                ret = algo->c.Ctype.decompress_double(dst, dims, src, src_size);
-                break;
-			case (SCIL_TYPE_INT8) :
-				ret = algo->c.Ctype.decompress_int8(dst, dims, src, src_size);
-				break;
-			case(SCIL_TYPE_INT16) :
-				ret = algo->c.Ctype.decompress_int16(dst, dims, src, src_size);
-				break;
-			case(SCIL_TYPE_INT32) :
-				ret = algo->c.Ctype.decompress_int32(dst, dims, src, src_size);
-				break;
-			case(SCIL_TYPE_INT64) :
-				ret = algo->c.Ctype.decompress_int64(dst, dims, src, src_size);
-				break;
-      case(SCIL_TYPE_BINARY) :
-      case(SCIL_TYPE_STRING) :
-				assert(0);
-				break;
+          case (SCIL_TYPE_FLOAT):
+            ret = algo->c.Ctype.decompress_float(dst, dims, src, src_size);
+            break;
+          case (SCIL_TYPE_DOUBLE):
+            ret = algo->c.Ctype.decompress_double(dst, dims, src, src_size);
+            break;
+    			case (SCIL_TYPE_INT8) :
+    				ret = algo->c.Ctype.decompress_int8(dst, dims, src, src_size);
+    				break;
+    			case(SCIL_TYPE_INT16) :
+    				ret = algo->c.Ctype.decompress_int16(dst, dims, src, src_size);
+    				break;
+    			case(SCIL_TYPE_INT32) :
+    				ret = algo->c.Ctype.decompress_int32(dst, dims, src, src_size);
+    				break;
+    			case(SCIL_TYPE_INT64) :
+    				ret = algo->c.Ctype.decompress_int64(dst, dims, src, src_size);
+    				break;
+          case(SCIL_TYPE_BINARY) :
+          case(SCIL_TYPE_STRING) :
+    				assert(0);
+    				break;
         }
 
         if (ret != 0) return ret;

@@ -82,10 +82,46 @@ int scilI_create_chain(scilI_chain_t* chain, const char* str_in)
 
 int scilI_chain_is_applicable(const scilI_chain_t* chain, SCIL_Datatype_t datatype){
   // TODO complete me
-  if (chain->converter){
-    // converts from X to int
-  }else if(chain->data_compressor){
+  if(chain->data_compressor){
     scilI_algorithm_t* algo = chain->data_compressor;
+    switch (datatype) {
+      case (SCIL_TYPE_FLOAT):
+        if ( ! algo->c.DNtype.compress_float ){
+          return SCIL_EINVAL;
+        }
+        break;
+      case (SCIL_TYPE_DOUBLE):
+        if ( ! algo->c.DNtype.compress_double ){
+          return SCIL_EINVAL;
+        }
+        break;
+      case (SCIL_TYPE_INT8) :
+        if ( ! algo->c.DNtype.compress_int8 ){
+          return SCIL_EINVAL;
+        }
+        break;
+      case(SCIL_TYPE_INT16) :
+        if ( ! algo->c.DNtype.compress_int16){
+          return SCIL_EINVAL;
+        }
+        break;
+      case(SCIL_TYPE_INT32) :
+        if ( ! algo->c.DNtype.compress_int32 ){
+          return SCIL_EINVAL;
+        }
+        break;
+      case(SCIL_TYPE_INT64) :
+        if ( ! algo->c.DNtype.compress_int64 ){
+          return SCIL_EINVAL;
+        }
+        break;
+      case(SCIL_TYPE_BINARY) :
+      case(SCIL_TYPE_STRING) :
+        return SCIL_EINVAL;
+      }
+  }else if (chain->converter){
+    // elementary datatype must be supported.
+    scilI_algorithm_t* algo = chain->converter;
     switch (datatype) {
     case (SCIL_TYPE_FLOAT):
       if ( ! algo->c.Ctype.compress_float ){

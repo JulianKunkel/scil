@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+//Supported datatypes: int8_t int16_t int32_t int64_t float double
 // Repeat for each data type
 /**
  * \brief Finds and returns the smallest value of the given buffer.
