@@ -97,8 +97,8 @@ void benchmark(FILE * f, enum SCIL_Datatype datatype, const char * name, double 
 		}
 		double c_fac = (double)(out_c_size) / data_size;
 
-		fprintf(f, "%.1f; %s; %.1lf; %.1lf; %.3lf\n",
-			r, hints.force_compression_methods,
+		fprintf(f, "%.1f; %s; %s; %.1lf; %.1lf; %.3lf\n",
+			r, name, hints.force_compression_methods,
 			data_size/seconds_compress/1024 /1024, data_size/seconds_decompress/1024 /1024, c_fac);
   }
 	free(buffer_out);
@@ -145,7 +145,7 @@ int main(int argc, char** argv){
 
 	FILE * f = fopen("scil.conf.bak", "w+");
 	{
-		char * str = "#randomness; compressor name; compr. performance MiB; decompr. performance MiB; inverse compr. ratio\n";
+		char * str = "#randomness; pattern name; compressor name; compr. performance MiB; decompr. performance MiB; inverse compr. ratio\n";
 		ret = fwrite(str, strlen(str), 1, f);
 		scilU_check_std_err("fwrite", ret != 1);
 	}

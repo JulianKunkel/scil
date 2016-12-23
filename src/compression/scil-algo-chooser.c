@@ -102,8 +102,9 @@ void scilC_algo_chooser_initialize(){
 
     config_file_entry_t * e = & config_list[config_list_size];
     char name[100];
-    int tokens = sscanf(buff, "%f; %s %f; %f; %f", & e->randomness, name, & e->c_speed, & e->d_speed, & e->ratio);
-    if( tokens != 5){
+    char pattern_name[100];
+    int tokens = sscanf(buff, "%f; %s %s %f; %f; %f", & e->randomness, pattern_name, name, & e->c_speed, & e->d_speed, & e->ratio);
+    if( tokens != 6){
       warn("Parsing configuration line \"%s\" returned an error after token %d\n", buff, tokens);
       continue;
     }
