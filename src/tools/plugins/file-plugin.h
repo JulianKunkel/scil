@@ -22,6 +22,7 @@
 
 typedef struct {
   char * name;
+  char * extension;
   option_help *  (*get_options)();
   int (*readData)(const char * name, byte ** out_buf, SCIL_Datatype_t * out_datatype, scil_dims_t * out_dims, size_t * read_size);
   int (*writeData)(const char * name, const byte * buf, SCIL_Datatype_t buf_datatype, size_t elements, SCIL_Datatype_t orig_datatype, scil_dims_t dims);

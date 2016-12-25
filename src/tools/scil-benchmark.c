@@ -86,7 +86,8 @@ void benchmark(FILE * f, SCIL_Datatype_t datatype, const char * name, byte * buf
 			// dump the file
 			char filename[1024];
 			sprintf(filename,"%s-%s.csv", name, compression_name);
-			scilU_plot(filename, dims, (double*) buffer_uncompressed);
+			// TODO
+			//scilU_plot(filename, dims, (double*) buffer_uncompressed);
 		}
 
 

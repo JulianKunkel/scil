@@ -24,14 +24,12 @@
 
 static char delim = ',';
 static int ignore_header = 0;
-static int output_header = 0;
 static int data_type_float = 0;
 
 static option_help options [] = {
-  {'d', "delim", "Seperator", OPTION_OPTIONAL_ARGUMENT, 'c', & delim},
-  {0, "add-output-header", "Provide an header for plotting", OPTION_FLAG, 'd', & output_header},
-  {0, "ignore-header", "Ignore the header", OPTION_FLAG, 'd', & ignore_header},
-  {'f', "float", "Use float as datatype otherwise double.", OPTION_FLAG, 'd', & data_type_float},
+  {'d', "delim", "Separator", OPTION_OPTIONAL_ARGUMENT, 'c', & delim},
+  {0, "ignore-header", "Ignore the header/do not write it", OPTION_FLAG, 'd', & ignore_header},
+  {'f', "float", "Use float as datatype for data without header, otherwise double.", OPTION_FLAG, 'd', & data_type_float},
   LAST_OPTION
 };
 
@@ -138,7 +136,19 @@ static void printToFile(FILE * f, const byte * buf, size_t position,  SCIL_Datat
       fprintf(f, "%.17f", ((double*) buf)[position]);
       break;
     case(SCIL_TYPE_FLOAT):
-      fprintf(f, "%.8f", ((float*) buf)[position]);
+      fprintf(f, "%.8f", (double) ((float*) buf)[position]);
+      break;
+    case(SCIL_TYPE_INT8):
+      fprintf(f, "%d", (int8_t) ((int8_t*) buf)[position]);
+      break;
+    case(SCIL_TYPE_INT16):
+      fprintf(f, "%d", (int16_t) ((int16_t*) buf)[position]);
+      break;
+    case(SCIL_TYPE_INT32):
+      fprintf(f, "%d", (int32_t) ((int32_t*) buf)[position]);
+      break;
+    case(SCIL_TYPE_INT64):
+      fprintf(f, "%ld", (int64_t) ((int64_t*) buf)[position]);
       break;
     default:
       printf("Not supported in writeData\n");
@@ -151,35 +161,39 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
     return -1;
   }
 
-  if (output_header){
-    fprintf(f, "%d,%d,", orig_datatype, dims.dims);
+  if (! ignore_header){
+    fprintf(f, "%d%c%d%c", orig_datatype, delim, dims.dims, delim);
     for(int i=0; i < SCIL_DIMS_MAX; i++) {
-      fprintf(f, "%zu,", dims.length[i]);
+      fprintf(f, "%zu%c", dims.length[i], delim);
     }
     fprintf(f, "\n");
   }
   if(dims.dims == 1){
     printToFile(f, buf, 0, buf_datatype);
     for(size_t x = 1; x < dims.length[0]; x+=1){
-      fprintf(f, ",");
+      fprintf(f, "%c", delim);
       printToFile(f,  buf, x, buf_datatype);
     }
     fprintf(f, "\n");
-  }else{
+  }else if(dims.dims == 2){
     for(size_t y = 0; y < dims.length[1]; y+=1){
       printToFile(f, buf, y * dims.length[0], buf_datatype);
       for(size_t x = 1; x < dims.length[0]; x+=1){
-        fprintf(f, ",");
+        fprintf(f, "%c", delim);
         printToFile(f, buf, x+ y * dims.length[0], buf_datatype);
       }
       fprintf(f, "\n");
     }
+  }else{
+    printf("3Dims not supported in CSV writer\n");
+    return SCIL_EINVAL;
   }
   fclose(f);
-  return 0;
+  return SCIL_NO_ERR;
 }
 
 scil_file_plugin_t csv_plugin = {
+  "csv",
   "csv",
   get_options,
   readData,

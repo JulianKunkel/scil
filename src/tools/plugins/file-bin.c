@@ -42,12 +42,13 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
   size_t input_data_size;
   size_t curr_pos;
   size_t expected_size;
+  int ret;
 
-  fread(out_datatype, 1, sizeof(SCIL_Datatype_t), f);
-  fread(& expected_size, 1, sizeof(size_t), f);
+  ret = fread(out_datatype, 1, sizeof(SCIL_Datatype_t), f);
+  ret = fread(& expected_size, 1, sizeof(size_t), f);
   *read_size = expected_size;
 
-  fread(out_dims, 1, sizeof(scil_dims_t), f);
+  ret = fread(out_dims, 1, sizeof(scil_dims_t), f);
   curr_pos = ftell(f);
   fseek(f, 0L, SEEK_END);
   input_data_size = ftell(f) - curr_pos;
@@ -73,6 +74,7 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
     return 1;
   }
 
+  int ret;
   size_t buffer_in_size;
   if(buf_datatype == SCIL_TYPE_BINARY){
     buffer_in_size = elements;
@@ -80,16 +82,17 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
      buffer_in_size = scilPr_get_dims_size(& dims, buf_datatype);
   }
 
-  fwrite(& orig_datatype, 1, sizeof(SCIL_Datatype_t), f);
-  fwrite(& buffer_in_size, 1, sizeof(size_t), f);
-  fwrite(& dims, 1, sizeof(scil_dims_t), f);
-  fwrite(buf, 1, buffer_in_size, f);
+  ret = fwrite(& orig_datatype, 1, sizeof(SCIL_Datatype_t), f);
+  ret = fwrite(& buffer_in_size, 1, sizeof(size_t), f);
+  ret = fwrite(& dims, 1, sizeof(scil_dims_t), f);
+  ret = fwrite(buf, 1, buffer_in_size, f);
 
   fclose(f);
   return 0;
 }
 
 scil_file_plugin_t bin_plugin = {
+  "bin",
   "bin",
   get_options,
   readData,

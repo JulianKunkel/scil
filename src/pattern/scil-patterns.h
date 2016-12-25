@@ -41,7 +41,7 @@ int scilPa_create_pattern(void * buffer, SCIL_Datatype_t datatype,
                                 double arg,
                                 double arg2);
 
-void scilPa_convert_data(void * out, SCIL_Datatype_t datatype,  double * in, const scil_dims_t* dims);
+void scilPa_convert_data_from_double(void * out, SCIL_Datatype_t datatype,  double * in, const scil_dims_t* dims);
 
 /*
  * The pattern library contains a list of useful patterns.

@@ -13,6 +13,9 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
+#include <string.h>
+#include <stdarg.h>
+#include <math.h>
 
 #include <scil-patterns.h>
 #include <scil-pattern-internal.h>
@@ -20,9 +23,6 @@
 #include <scil-error.h>
 #include <scil-internal.h>
 #include <scil-util.h>
-
-#include <string.h>
-#include <stdarg.h>
 
 #include <basic-patterns.h>
 #include <basic-mutators.h>
@@ -175,42 +175,42 @@ char * scilPa_get_library_pattern_name(int p){
   return library[p].name;
 }
 
-void scilPa_convert_data(void * buffer, SCIL_Datatype_t datatype,  double * data, const scil_dims_t* dims){
+void scilPa_convert_data_from_double(void * buffer, SCIL_Datatype_t datatype,  double * data, const scil_dims_t* dims){
   size_t elemCount = scilPr_get_dims_count(dims);
 
 	switch(datatype){
 		case(SCIL_TYPE_FLOAT):{
       float * buffer_real = (float*)buffer;
 			for(unsigned x = 0; x < elemCount; x++){
-				buffer_real[x] = (float) data[x];
+				buffer_real[x] = (float) round(data[x]);
 			}
 			break;
 		}
 	  case(SCIL_TYPE_INT8):{
 			int8_t * buffer_real = (int8_t*) buffer;
 			for(unsigned x = 0; x < elemCount; x++){
-				buffer_real[x] = (int8_t) data[x];
+				buffer_real[x] = (int8_t) round(data[x]);
 			}
 			break;
 		}
 	  case(SCIL_TYPE_INT16):{
 			int16_t * buffer_real = (int16_t*)  buffer;
 			for(unsigned x = 0; x < elemCount; x++){
-				buffer_real[x] = (int16_t) data[x];
+				buffer_real[x] = (int16_t) round(data[x]);
 			}
 			break;
 		}
 	  case(SCIL_TYPE_INT32):{
 			int32_t * buffer_real = (int32_t*)  buffer;
 			for(unsigned x = 0; x < elemCount; x++){
-				buffer_real[x] = (int32_t) data[x];
+				buffer_real[x] = (int32_t) round(data[x]);
 			}
 			break;
 		}
 	  case(SCIL_TYPE_INT64):{
 			int64_t * buffer_real = (int64_t*)  buffer;
 			for(unsigned x = 0; x < elemCount; x++){
-				buffer_real[x] = (int64_t) data[x];
+				buffer_real[x] = (int64_t) round(data[x]);
 			}
 			break;
 		}
@@ -239,7 +239,7 @@ int scilPa_create_pattern(void * buffer, SCIL_Datatype_t datatype, const scil_di
   }
 
   if (datatype != SCIL_TYPE_DOUBLE){
-    scilPa_convert_data(buffer, datatype,  data, dims);
+    scilPa_convert_data_from_double(buffer, datatype,  data, dims);
 
     free(data);
   }
@@ -250,8 +250,8 @@ int scilPa_create_library_pattern(void * buffer, SCIL_Datatype_t datatype, const
 {
   double * data;
   if (datatype != SCIL_TYPE_DOUBLE){
-    int doubleSize = scilPr_get_compressed_data_size_limit( dims, datatype);
-    data = malloc(doubleSize * sizeof(double));
+    int doubleSize = scilPr_get_compressed_data_size_limit( dims, SCIL_TYPE_DOUBLE);
+    data = malloc(doubleSize);
   }else{
     data = (double*) buffer;
   }
@@ -269,11 +269,11 @@ int scilPa_create_library_pattern(void * buffer, SCIL_Datatype_t datatype, const
   }
   for(int i=0; i < l->mutator_count; i++){
     mutator_config* m = &l->mutators[i];
-    m->call(buffer, dims, m->arg);
+    m->call(data, dims, m->arg);
   }
 
   if (datatype != SCIL_TYPE_DOUBLE){
-    scilPa_convert_data(buffer, datatype,  data, dims);
+    scilPa_convert_data_from_double(buffer, datatype,  data, dims);
 
     free(data);
   }

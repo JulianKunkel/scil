@@ -257,8 +257,6 @@ void scilG_iter(double* data,
 
 void scilU_print_dims(scil_dims_t dims);
 
-void scilU_plot(const char* name, scil_dims_t dims, double * buffer_in);
-
 // like memcopy but swaps the order
 #define scilU_reverse_copy(buffer, src, size) do { char * _o = (char*) buffer; char * _s = ((char *) src) + size - 1; for(int _c=size; _c > 0; _c-- ) { *_o = *_s ; _s--; _o++; } } while(0)
 

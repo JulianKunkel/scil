@@ -208,9 +208,8 @@ int scil_compress(byte* restrict dest,
               	case(SCIL_TYPE_INT64) :
               		ret = algo->c.PFtype.compress_int64(ctx, (int64_t*)dst, header, &header_size_out, src, dims);
               		break;
+                case(SCIL_TYPE_UNKNOWN) :
               	case(SCIL_TYPE_STRING) :
-              		assert(0);
-              		break;
                 case(SCIL_TYPE_BINARY) :
                   assert(0);
                   break;
@@ -261,6 +260,7 @@ int scil_compress(byte* restrict dest,
           	case(SCIL_TYPE_INT64) :
           		ret = algo->c.Ctype.compress_int64(ctx, (int64_t*)dst, &out_size, src, dims);
           		break;
+            case(SCIL_TYPE_UNKNOWN) :
             case(SCIL_TYPE_BINARY) :
           	case(SCIL_TYPE_STRING) :
           		assert(0);
@@ -343,6 +343,7 @@ int scil_compress(byte* restrict dest,
     			case(SCIL_TYPE_INT64) :
     				ret = algo->c.DNtype.compress_int64(ctx, dst, &out_size, src, dims);
     				break;
+          case(SCIL_TYPE_UNKNOWN) :
           case(SCIL_TYPE_BINARY) :
     			case(SCIL_TYPE_STRING) :
   				assert(0);
@@ -474,6 +475,7 @@ int scil_decompress(SCIL_Datatype_t datatype,
 			case(SCIL_TYPE_INT64) :
 				ret = algo->c.DNtype.decompress_int64(dst, dims, src, src_size);
 				break;
+      case(SCIL_TYPE_UNKNOWN) :
       case(SCIL_TYPE_BINARY) :
 			case(SCIL_TYPE_STRING) :
 				assert(0);
@@ -535,6 +537,7 @@ int scil_decompress(SCIL_Datatype_t datatype,
     			case(SCIL_TYPE_INT64) :
     				ret = algo->c.Ctype.decompress_int64(dst, dims, src, src_size);
     				break;
+          case(SCIL_TYPE_UNKNOWN) :
           case(SCIL_TYPE_BINARY) :
           case(SCIL_TYPE_STRING) :
     				assert(0);
@@ -563,28 +566,29 @@ int scil_decompress(SCIL_Datatype_t datatype,
         }
 
         switch (datatype) {
-            case (SCIL_TYPE_FLOAT):
-                ret = algo->c.PFtype.decompress_float(dst, dims, src, header, &header_parsed);
-                break;
-            case (SCIL_TYPE_DOUBLE):
-                ret = algo->c.PFtype.decompress_double(dst, dims, src, header, &header_parsed);
-                break;
-			case (SCIL_TYPE_INT8) :
-				ret = algo->c.PFtype.decompress_int8(dst, dims, src, header, &header_parsed);
-				break;
-			case(SCIL_TYPE_INT16) :
-				ret = algo->c.PFtype.decompress_int16(dst, dims, src, header, &header_parsed);
-				break;
-			case(SCIL_TYPE_INT32) :
-				ret = algo->c.PFtype.decompress_int32(dst, dims, src, header, &header_parsed);
-				break;
-			case(SCIL_TYPE_INT64) :
-				ret = algo->c.PFtype.decompress_int64(dst, dims, src, header, &header_parsed);
-				break;
-			case(SCIL_TYPE_BINARY) :
-      case(SCIL_TYPE_STRING) :
-				assert(0);
-				break;
+          case (SCIL_TYPE_FLOAT):
+              ret = algo->c.PFtype.decompress_float(dst, dims, src, header, &header_parsed);
+              break;
+          case (SCIL_TYPE_DOUBLE):
+              ret = algo->c.PFtype.decompress_double(dst, dims, src, header, &header_parsed);
+              break;
+    			case (SCIL_TYPE_INT8) :
+    				ret = algo->c.PFtype.decompress_int8(dst, dims, src, header, &header_parsed);
+    				break;
+    			case(SCIL_TYPE_INT16) :
+    				ret = algo->c.PFtype.decompress_int16(dst, dims, src, header, &header_parsed);
+    				break;
+    			case(SCIL_TYPE_INT32) :
+    				ret = algo->c.PFtype.decompress_int32(dst, dims, src, header, &header_parsed);
+    				break;
+    			case(SCIL_TYPE_INT64) :
+    				ret = algo->c.PFtype.decompress_int64(dst, dims, src, header, &header_parsed);
+    				break;
+          case(SCIL_TYPE_UNKNOWN) :
+    			case(SCIL_TYPE_BINARY) :
+          case(SCIL_TYPE_STRING) :
+    				assert(0);
+    				break;
         }
         header -= header_parsed;
 
@@ -663,6 +667,7 @@ void scil_determine_accuracy(SCIL_Datatype_t datatype,
 			scil_determine_accuracy_int64_t((int64_t*)data_1, (int64_t*)data_2, scilPr_get_dims_count(dims), relative_err_finest_abs_tolerance, &a);
 			break;
 		}
+    case(SCIL_TYPE_UNKNOWN) :
     case(SCIL_TYPE_BINARY):
     case(SCIL_TYPE_STRING):{
 			// No relevant comparision

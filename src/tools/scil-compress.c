@@ -86,7 +86,7 @@ int main(int argc, char ** argv){
     {0, "hint-decomp-speed", NULL,  OPTION_OPTIONAL_ARGUMENT, 'f', & hints.decomp_speed.multiplier},
 
     {0, "cycle", "For testing: Compress, then decompress and store the output. Files are CSV files",OPTION_FLAG, 'd' , & cycle},
-    {0, 0, 0, 0, 0, NULL}
+    LAST_OPTION
   };
 
   int printhelp = 0;
@@ -120,7 +120,7 @@ int main(int argc, char ** argv){
 
     printf("\nPlugin options for output plugin %s\n", out_file_format);
     scilO_print_help(out_plugin->get_options(), "");
-    exit(1);
+    exit(0);
   }
 
   SCIL_Datatype_t input_datatype;

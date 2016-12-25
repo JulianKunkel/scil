@@ -7,19 +7,22 @@
 
 void scilPr_initialize_dims_1d(scil_dims_t* dims, size_t dim1)
 {
-    dims->dims      = 1;
-    dims->length[0] = dim1;
+  memset(dims, 0, sizeof(scil_dims_t));
+  dims->dims      = 1;
+  dims->length[0] = dim1;
 }
 
 void scilPr_initialize_dims_2d(scil_dims_t* dims, size_t dim1, size_t dim2)
 {
-    dims->dims      = 2;
-    dims->length[0] = dim1;
-    dims->length[1] = dim2;
+  memset(dims, 0, sizeof(scil_dims_t));
+  dims->dims      = 2;
+  dims->length[0] = dim1;
+  dims->length[1] = dim2;
 }
 
 void scilPr_initialize_dims_3d(scil_dims_t* dims, size_t dim1, size_t dim2, size_t dim3)
 {
+  memset(dims, 0, sizeof(scil_dims_t));
 	dims->dims = 3;
 	dims->length[0] = dim1;
 	dims->length[1] = dim2;
@@ -37,9 +40,10 @@ void scilPr_initialize_dims_4d(scil_dims_t* dims, size_t dim1, size_t dim2, size
 
 void scilPr_initialize_dims_array(scil_dims_t* dims, uint8_t count, const size_t* length)
 {
-    dims->dims = count;
-    assert(count <= 4);
-    memcpy(&dims->length, length, count * sizeof(size_t));
+  memset(dims, 0, sizeof(scil_dims_t));
+  dims->dims = count;
+  assert(count <= 4);
+  memcpy(&dims->length, length, count * sizeof(size_t));
 }
 
 void scilPr_copy_dims(scil_dims_t* out_dims, const scil_dims_t* in_dims)

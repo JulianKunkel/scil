@@ -115,6 +115,7 @@ int scilI_chain_is_applicable(const scilI_chain_t* chain, SCIL_Datatype_t dataty
           return SCIL_EINVAL;
         }
         break;
+      case(SCIL_TYPE_UNKNOWN) :
       case(SCIL_TYPE_BINARY) :
       case(SCIL_TYPE_STRING) :
         return SCIL_EINVAL;
@@ -153,6 +154,7 @@ int scilI_chain_is_applicable(const scilI_chain_t* chain, SCIL_Datatype_t dataty
         return SCIL_EINVAL;
       }
       break;
+    case(SCIL_TYPE_UNKNOWN) :
     case(SCIL_TYPE_BINARY) :
     case(SCIL_TYPE_STRING) :
       return SCIL_EINVAL;

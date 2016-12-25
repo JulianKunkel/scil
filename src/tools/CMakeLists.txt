@@ -5,9 +5,9 @@ target_link_libraries(scil-benchmark scil scil-patterns)
 install(TARGETS scil-benchmark RUNTIME DESTINATION bin)
 
 
-add_executable(scil-pattern-plotter scil-pattern-plotter.c)
-target_link_libraries(scil-pattern-plotter scil scil-patterns)
-install(TARGETS scil-pattern-plotter RUNTIME DESTINATION bin)
+add_executable(scil-pattern-creator scil-pattern-creator.c ${FILE_PLUGINS})
+target_link_libraries(scil-pattern-creator scil scil-patterns)
+install(TARGETS scil-pattern-creator RUNTIME DESTINATION bin)
 
 add_executable(scil-compress scil-compress.c ${FILE_PLUGINS})
 target_link_libraries(scil-compress scil)
