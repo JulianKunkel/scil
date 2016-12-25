@@ -109,6 +109,7 @@ FILE(GLOB SOURCE_PREPARE_DEPS ${CMAKE_SOURCE_DIR}/prepare/*.c)
 FILE(GLOB SOURCE_UTIL_DEPS ${CMAKE_SOURCE_DIR}/util/*.c)
 
 # MESSAGE( STATUS "Available algorithms: " ${ALGO})
+
 add_library(scil SHARED scil.c scil-dummy.cpp
     ${SOURCE_DEPS}
     ${SOURCE_COMPRESSION_DEPS}
@@ -124,6 +125,12 @@ add_library(scil SHARED scil.c scil-dummy.cpp
     ${DEPS_COMPILED_DIR}/wavelet_code/wav_trf.c
 )
 target_link_libraries(scil m)
+
+add_custom_target(
+    trigger_datatype_variants
+    ALL COMMAND ${DEV_DIR}/create-datatype-variants.py ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/)
+
+add_dependencies(scil trigger_datatype_variants)
 
 # for specific algorithms
 include_directories(
