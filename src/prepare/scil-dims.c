@@ -36,6 +36,15 @@ void scilPr_initialize_dims_4d(scil_dims_t* dims, size_t dim1, size_t dim2, size
 	dims->length[1] = dim2;
 	dims->length[2] = dim3;
 	dims->length[3] = dim4;
+  if(dim4 == 0){
+    dims->dims--;
+    if(dim3 == 0){
+      dims->dims--;
+      if(dim2 == 0){
+        dims->dims--;
+      }
+    }
+  }
 }
 
 void scilPr_initialize_dims_array(scil_dims_t* dims, uint8_t count, const size_t* length)

@@ -47,7 +47,6 @@ static char * out_file_format = "csv";
 // data we process
 
 static scil_dims_t dims;
-static SCIL_Datatype_t user_out_datatype = SCIL_TYPE_DOUBLE; // used for the intermediate output
 static byte * input_data = NULL;
 static byte * output_data = NULL;
 
@@ -170,7 +169,7 @@ int main(int argc, char ** argv){
 
     free(tmp_buff);
 
-    output_datatype = user_out_datatype;
+    output_datatype = input_datatype;
   } else if (compress){
     printf("...compression\n");
     ret = scil_compress(output_data, input_size, input_data, & dims, & buff_size, ctx);
@@ -191,7 +190,7 @@ int main(int argc, char ** argv){
     free(tmp_buff);
     assert(ret == SCIL_NO_ERR);
 
-    output_datatype = user_out_datatype;
+    output_datatype = input_datatype;
   }
 
 	double runtime = scilU_stop_timer(timer);

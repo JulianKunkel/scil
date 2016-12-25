@@ -25,11 +25,13 @@
 static char delim = ',';
 static int ignore_header = 0;
 static int data_type_float = 0;
+static char comment_char = '#';
 
 static option_help options [] = {
   {'d', "delim", "Separator", OPTION_OPTIONAL_ARGUMENT, 'c', & delim},
   {0, "ignore-header", "Ignore the header/do not write it", OPTION_FLAG, 'd', & ignore_header},
   {'f', "float", "Use float as datatype for data without header, otherwise double.", OPTION_FLAG, 'd', & data_type_float},
+  {'C', "comment-delim", "Characters used in the beginning of a line indicating a comment", OPTION_OPTIONAL_ARGUMENT, 'c', & comment_char},
   LAST_OPTION
 };
 
@@ -44,12 +46,6 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
     return -1;
   }
 
-  if (data_type_float){
-    *out_datatype = SCIL_TYPE_FLOAT;
-  }else{
-    *out_datatype = SCIL_TYPE_DOUBLE;
-  }
-
   double dbl;
   int x = 0;
   int y = 0;
@@ -62,11 +58,36 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
   delimeter[0] = delim;
   delimeter[1] = 0;
 
-  if (ignore_header){
-    read = getline(&line, &len, fd);
-  }
-
+  int firstline = 1;
+  int foundHeader = 0;
   while ((read = getline(&line, &len, fd)) != -1) {
+    if (firstline){
+      firstline = 0;
+      if (line[0] == comment_char){
+        // this is the header
+        if (! ignore_header){
+          //printf("Header: %s\n", line);
+          int dim_count;
+          size_t dims[4];
+          char pattern[256];
+          sprintf(pattern, "# %%d%c%%d%c%%zu%c%%zu%c%%zu%c%%zu", delim, delim,delim,delim,delim);
+          int ret = sscanf(line, pattern, out_datatype, & dim_count, & dims[0], &dims[1], & dims[2], &dims[3]);
+          if( ret != 6){
+            printf("Invalid header!\n");
+            continue;
+          }
+          scilPr_initialize_dims_4d(out_dims, dims[0], dims[1], dims[2], dims[3]);
+          foundHeader = 1;
+          break;
+        }
+      }else if(! ignore_header){
+        printf("Warning: no header found in file\n");
+      }
+    }
+    if (line[0] == comment_char){
+      continue;
+    }
+
     char * data = strtok(line, delimeter);
     x = 0;
     while( data != NULL ){
@@ -86,32 +107,56 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
   }
   fclose(fd);
 
-  printf("Read file %s: %d %d\n", name, x, y);
+  if (! foundHeader){
+    printf("Read file %s: %d %d\n", name, x, y);
 
-  if(y > 1){
-    scilPr_initialize_dims_2d(out_dims, x, y);
-  }else{
-    scilPr_initialize_dims_1d(out_dims, x);
+    if (data_type_float){
+      *out_datatype = SCIL_TYPE_FLOAT;
+    }else{
+      *out_datatype = SCIL_TYPE_DOUBLE;
+    }
+
+    if(y > 1){
+      scilPr_initialize_dims_2d(out_dims, x, y);
+    }else{
+      scilPr_initialize_dims_1d(out_dims, x);
+    }
   }
 
   byte * input_data = (byte*) malloc(scilPr_get_compressed_data_size_limit(out_dims, *out_datatype));
 
   fd = fopen(name, "r");
-  if (ignore_header){
-    read = getline(&line, &len, fd);
-  }
-
   size_t pos = 0;
   while ((read = getline(&line, &len, fd)) != -1) {
+    if (line[0] == comment_char){
+      continue;
+    }
     char * data = strtok(line, delimeter);
     x = 0;
     while( data != NULL ){
       // count the number of elements.
       sscanf(data, "%lf", & dbl);
-      if(data_type_float){
-        ((float*) input_data)[pos] = (float) dbl;
-      }else{
-        ((double*) input_data)[pos] = dbl;
+      switch(*out_datatype){
+        case(SCIL_TYPE_DOUBLE):
+          ((double*) input_data)[pos] = dbl;
+          break;
+        case(SCIL_TYPE_FLOAT):
+          ((float*) input_data)[pos] = (float) dbl;
+          break;
+        case(SCIL_TYPE_INT8):
+          ((int8_t*) input_data)[pos] = (int8_t) dbl;
+          break;
+        case(SCIL_TYPE_INT16):
+          ((int16_t*) input_data)[pos] = (int16_t) dbl;
+          break;
+        case(SCIL_TYPE_INT32):
+          ((int32_t*) input_data)[pos] = (int32_t) dbl;
+          break;
+        case(SCIL_TYPE_INT64):
+          ((int64_t*) input_data)[pos] = (int64_t) dbl;
+          break;
+        default:
+          printf("Not supported in readData\n");
       }
       pos++;
 
@@ -162,7 +207,7 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
   }
 
   if (! ignore_header){
-    fprintf(f, "%d%c%d%c", orig_datatype, delim, dims.dims, delim);
+    fprintf(f, "# %d%c%d%c", orig_datatype, delim, dims.dims, delim);
     for(int i=0; i < SCIL_DIMS_MAX; i++) {
       fprintf(f, "%zu%c", dims.length[i], delim);
     }
