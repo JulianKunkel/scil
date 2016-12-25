@@ -161,11 +161,6 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
       pos++;
 
       data = strtok(NULL, delimeter);
-      x++;
-    }
-    ref_x = x;
-    if (x > 1){
-      y++;
     }
   }
 
@@ -228,6 +223,30 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
         printToFile(f, buf, x+ y * dims.length[0], buf_datatype);
       }
       fprintf(f, "\n");
+    }
+  }else if(dims.dims == 3){
+    for(size_t z = 0; z < dims.length[2]; z+=1){
+      for(size_t y = 0; y < dims.length[1]; y+=1){
+        printToFile(f, buf, y * dims.length[0] + z * dims.length[1], buf_datatype);
+        for(size_t x = 1; x < dims.length[0]; x+=1){
+          fprintf(f, "%c", delim);
+          printToFile(f, buf, x + y * dims.length[0] + z * dims.length[1], buf_datatype);
+        }
+        fprintf(f, "\n");
+      }
+    }
+  }else if(dims.dims == 4){
+    for(size_t w = 0; w < dims.length[3]; w+=1){
+      for(size_t z = 0; z < dims.length[2]; z+=1){
+        for(size_t y = 0; y < dims.length[1]; y+=1){
+          printToFile(f, buf, y * dims.length[0] + z * dims.length[1] + w * dims.length[2], buf_datatype);
+          for(size_t x = 1; x < dims.length[0]; x+=1){
+            fprintf(f, "%c", delim);
+            printToFile(f, buf, x + y * dims.length[0] + z * dims.length[1] + w * dims.length[2], buf_datatype);
+          }
+          fprintf(f, "\n");
+        }
+      }
     }
   }else{
     printf("3Dims not supported in CSV writer\n");

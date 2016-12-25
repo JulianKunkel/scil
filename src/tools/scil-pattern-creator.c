@@ -28,7 +28,7 @@ int main(int argc, char ** argv){
   int ret;
 	scil_dims_t dims;
   int parsed;
-  int x = 10, y = 0, z = 0;
+  int x = 10, y = 0, z = 0, w = 0;
   int printhelp = 0;
   char * check_pattern = "all";
   char * datatype_str = "double";
@@ -37,9 +37,10 @@ int main(int argc, char ** argv){
   scil_file_plugin_t * out_plugin = NULL;
 
   option_help known_args[] = {
-    {'x', NULL, "Dimension in X direction", OPTION_REQUIRED_ARGUMENT, 'd', & x},
-    {'y', NULL, "Dimension in Y direction", OPTION_OPTIONAL_ARGUMENT, 'd', & y},
-    {'z', NULL, "Dimension in Z direction", OPTION_OPTIONAL_ARGUMENT, 'd', & z},
+    {'x', NULL, "Cardinality in X direction", OPTION_REQUIRED_ARGUMENT, 'd', & x},
+    {'y', NULL, "Cardinality in Y direction", OPTION_OPTIONAL_ARGUMENT, 'd', & y},
+    {'z', NULL, "Cardinality in Z direction", OPTION_OPTIONAL_ARGUMENT, 'd', & z},
+    {'w', NULL, "Cardinality in W direction", OPTION_OPTIONAL_ARGUMENT, 'd', & w},
     {'p', "pattern", "The pattern to use (or all)", OPTION_OPTIONAL_ARGUMENT, 's', & check_pattern },
     {'D', "datatype", "The datatype to use", OPTION_OPTIONAL_ARGUMENT, 's', & datatype_str},
     {'O', "out_file_format", "Output file format", OPTION_OPTIONAL_ARGUMENT, 's', & out_file_format},
@@ -78,15 +79,7 @@ int main(int argc, char ** argv){
     exit(1);
   }
 
-  if(y > 0){
-    if (z > 0){
-      scilPr_initialize_dims_3d(& dims, x, y, z);
-    }else{
-      scilPr_initialize_dims_2d(& dims, x, y);
-    }
-  }else{
-    scilPr_initialize_dims_1d(& dims, x);
-  }
+  scilPr_initialize_dims_4d(& dims, x, y, z, w);
 
   size_t data_size = scilPr_get_dims_size(&dims, datatype);
   byte* buffer_in = (byte*) malloc(data_size);
