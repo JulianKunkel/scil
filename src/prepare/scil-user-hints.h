@@ -75,6 +75,11 @@ typedef struct
     /** \brief Alternative to the decimal digits */
     int significant_bits;
 
+    /** \brief Settings for a multi dimensional field
+     * The max steepness indicates the delta between two neighboring points that is considered to be tolerable for normal patterns.
+     */
+    double field_max_steepness;
+
     /** Describes the performance requirements for the compressors */
     scilPr_performance_hint_t comp_speed;
     scilPr_performance_hint_t decomp_speed;

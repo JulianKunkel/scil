@@ -68,9 +68,13 @@ static void write_header(byte* dest,
     dest += 1;
 }
 
-//Repeat for each data type
-//Supported datatypes: double float int8_t int16_t int32_t int64_t
+//xxx Repeat for each data type
+//xx Supported datatypes: double float
 
+// End repeat
+
+//Repeat for each data type
+//Supported datatypes: int8_t int16_t int32_t int64_t
 int scil_allquant_compress_<DATATYPE>(const scil_context_t* ctx,
                                     byte* restrict dest,
                                     size_t* restrict dest_size,
@@ -88,8 +92,10 @@ int scil_allquant_compress_<DATATYPE>(const scil_context_t* ctx,
     <DATATYPE> min, max;
     scil_find_minimum_maximum_<DATATYPE>(source, count, &min, &max);
 
-    // Locally assigning absolute tolerance
-    double abs_tol = ctx->hints.absolute_tolerance;
+    const double abs_tol = ctx->hints.absolute_tolerance;
+    const double rel_tol = ctx->hints.relative_tolerance_percent;
+    const double rel_fin = ctx->hints.relative_err_finest_abs_tolerance;
+    const int sig_bit = ctx->hints.significant_bits;
 
     // Get needed bits per compressed number in data
     uint64_t bits_per_value = scil_calculate_bits_needed_<DATATYPE>(min, max, abs_tol);
@@ -169,7 +175,7 @@ scilI_algorithm_t algo_allquant = {
         CREATE_INITIALIZER(scil_allquant)
     },
     "allquant",
-    1,
+    12,
     SCIL_COMPRESSOR_TYPE_DATATYPES,
     1
 };
