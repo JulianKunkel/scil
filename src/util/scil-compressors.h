@@ -14,6 +14,7 @@
 #include <algo/algo-quantize.h>
 #include <algo/algo-swage.h>
 #include <algo/algo-wavelets.h>
+#include <algo/algo-allquant.h>
 
 #include <scil-algorithm.h>
 

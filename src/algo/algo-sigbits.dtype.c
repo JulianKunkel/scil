@@ -170,6 +170,7 @@ static uint64_t get_mantissa_double(uint64_t value, uint8_t mantissa_bit_count){
     return (value & mask[mantissa_bit_count]) << (MANTISSA_LENGTH_DOUBLE - mantissa_bit_count);
 }
 
+//Supported datatypes: double float
 // Repeat for each data type
 
 static void find_minimums_and_maximums_<DATATYPE>(const <DATATYPE>* buffer,

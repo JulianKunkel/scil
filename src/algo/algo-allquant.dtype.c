@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <algo/algo-abstol.h>
+#include <algo/algo-allquant.h>
 
 #include <scil-quantizer.h>
 #include <scil-swager.h>
@@ -69,9 +69,9 @@ static void write_header(byte* dest,
 }
 
 //Repeat for each data type
-//Supported datatypes:double float
+//Supported datatypes: double float int8_t int16_t int32_t int64_t
 
-int scil_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
+int scil_allquant_compress_<DATATYPE>(const scil_context_t* ctx,
                                     byte* restrict dest,
                                     size_t* restrict dest_size,
                                     <DATATYPE>* restrict source,
@@ -94,7 +94,7 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
     // Get needed bits per compressed number in data
     uint64_t bits_per_value = scil_calculate_bits_needed_<DATATYPE>(min, max, abs_tol);
 
-    // See if abstol compression makes sense
+    // See if allquant compression makes sense
     if(bits_per_value >= 8 * sizeof(<DATATYPE>)){
         return SCIL_PRECISION_ERR;
     }
@@ -124,7 +124,7 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
     return SCIL_NO_ERR;
 }
 
-int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
+int scil_allquant_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
                                       scil_dims_t* dims,
                                       byte* restrict source,
                                       size_t source_size){
@@ -164,11 +164,11 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
 
 
 
-scilI_algorithm_t algo_abstol = {
+scilI_algorithm_t algo_allquant = {
     .c.DNtype = {
-        CREATE_INITIALIZER(scil_abstol)
+        CREATE_INITIALIZER(scil_allquant)
     },
-    "abstol",
+    "allquant",
     1,
     SCIL_COMPRESSOR_TYPE_DATATYPES,
     1

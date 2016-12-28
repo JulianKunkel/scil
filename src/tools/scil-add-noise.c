@@ -39,14 +39,14 @@
  */
 
 
- double mean( double *x, int N ){
+ static double mean( double *x, int N ){
  	int i;
  	double mean = 0.0;
  	for( i=0; i<N; i++ ){ mean += x[i]; };
  	return ( mean / ( (double) N ) );
  }
 
- void mean_std( double *x, int N, double *mean, double *std ){
+ static void mean_std( double *x, int N, double *mean, double *std ){
  	int i;
  	*mean = 0.0;
  	for( i=0; i<N; i++ ){ *mean += x[i]; };

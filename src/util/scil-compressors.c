@@ -17,6 +17,7 @@ scilI_algorithm_t* algo_array[] = {
 	& algo_quantize,
 	& algo_swage,
 	& algo_wavelets,
+	& algo_allquant,
 	NULL
 };
 

@@ -82,10 +82,15 @@ else:
 
 files = [os.path.join(path, f)
       for path, dirnames, files in os.walk(indir)
-      for f in fnmatch.filter(files, '*.dtype')]
+      for f in fnmatch.filter(files, '*.dtype.*')]
+
 
 for f in files:
-  suffix = f[len(indir):-6]
+  m = re.match("(.*)[.]dtype[.](.*)", f[len(indir)+1:])
+  if not m:
+    print("Error processing " + f)
+    continue
+  suffix = m.group(1) + "." + m.group(2)
   outfile = outdir + "./" + suffix
 
   if not os.path.isfile(outfile) or (os.path.getctime(f) > os.path.getctime(outfile)):
