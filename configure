@@ -17,7 +17,8 @@ function help(){
 	echo "--lzlib=<dir>            : path to lzlib"
 	echo
 	echo "Optional:"
-	echo "--build-dir=<dir>        : directory in which to build"
+        echo "--code-coverage   : compile with ctest and use gcov via target coverage to measure code coverage"
+	echo "--build-dir=<dir>     : directory in which to build"
 	echo "--debug                  : build SIOX with debug flags"
 	echo "--verbose                : output the command but do not execute it"
 	echo "--reconfigure            : run configure again with the parameters used the last time"
@@ -64,7 +65,7 @@ function reconfigure(){
 	exit $?
 }
 
-set -- `getopt -u -l "help,version,debug,reconfigure,prefix:,plantuml-jar-dir:,with-cc:,with-cxx:,verbose,build-dir:,lzlib:,lgsl:,lz4:" -o "hV" -- "$@"`
+set -- `getopt -u -l "help,version,debug,reconfigure,prefix:,plantuml-jar-dir:,with-cc:,with-cxx:,verbose,build-dir:,lzlib:,lgsl:,lz4:,code-coverage" -o "hV" -- "$@"`
 test $# -lt 1  && exit 1
 while test $# -gt 0
 do
@@ -77,6 +78,7 @@ do
 		--lzlib) check "$2" "z"; shift;;
 		--prefix) prefix="$2"; shift;;
 		--debug) debug="yes"; ;;
+                --code-coverage) debug="yes" ; codeCoverage="yes" ;;
 		--with-cc) ccbin="$2"; shift;;
 		--with-cxx) cxxbin="$2"; shift;;
 		--build-dir) buildDIR="$2"; shift;;
@@ -99,10 +101,14 @@ export ADDITIONAL_LIB_PATH=$AL
 
 TARGET_DIR="/usr/local"
 
+if test -n "$codeCoverage"; then
+	CMAKEFLAGS="$CMAKEFLAGS -DCODE_COVERAGE=ON"
+fi
+
 if test -n "$debug"; then
-	CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_BUILD_TYPE:STRING=debug"
+	CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_BUILD_TYPE:STRING=Debug"
 else
-	CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_BUILD_TYPE:STRING=release"
+	CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_BUILD_TYPE:STRING=Release"
 fi
 
 if test -n "$prefix"; then

@@ -1,5 +1,4 @@
 cmake_minimum_required (VERSION 2.8)
-set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
 # project name
 set (PROJECT_NAME scil)
@@ -15,6 +14,9 @@ set(DEV_DIR "${CMAKE_SOURCE_DIR}/../dev")
 set(DEPS_DIR "${CMAKE_SOURCE_DIR}/../deps")
 set(DEPS_COMPILED_DIR "${CMAKE_BINARY_DIR}/deps")
 
+set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake ${DEV_DIR}/CMakeModules)
+
+
 find_package(PkgConfig REQUIRED)
 
 include(CTest)
@@ -22,11 +24,29 @@ include(FeatureSummary)
 include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
 
+option(CODE_COVERAGE "CODE_COVERAGE" OFF)
+
+IF (CODE_COVERAGE)
+IF ( CMAKE_BUILD_TYPE STREQUAL "Debug") 
+	IF ( CMAKE_COMPILER_IS_GNUCC )
+	    include(CodeCoverage)
+	    setup_target_for_coverage(coverage ctest coverage)
+	    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
+	    set(GCOV_LIBRARIES "-lgcov")
+        else()
+		MESSAGE (FATAL_ERROR "Error, you need to compile with gcc")	
+        endif()
+else()
+	MESSAGE (FATAL_ERROR "Error, you need to compile with Debug mode")	
+endif()
+endif()
+
+
 # compile flags
-set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -std=gnu99 -Wall -Wno-unused-parameter -Wextra -Wfloat-equal -fdata-sections -ffunction-sections -Wl,--gc-sections")
+set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -std=gnu99 -pipe -Wall -Wno-unused-parameter -Wextra -Wfloat-equal -fdata-sections -ffunction-sections -Wl,--gc-sections")
 # -fdiagnostics-color=always
 # -fvisibility=hidden -fvisibility-inlines-hidden -Wl,--print-gc-sections
-set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wfloat-equal -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt")
+set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pedantic -pipe -Wall -Wextra -Wfloat-equal -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt")
 # -Wl,--no-allow-shlib-undefined  does not work with Centos7 / older GCC
 
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6")
@@ -131,7 +151,7 @@ add_library(scil SHARED scil.c scil-dummy.cpp
     ${DEPS_COMPILED_DIR}/wavelet_code/wav_basic.c
     ${DEPS_COMPILED_DIR}/wavelet_code/wav_trf.c
 )
-target_link_libraries(scil m)
+target_link_libraries(scil m ${GCOV_LIBRARIES})
 
 add_custom_target(
     trigger_datatype_variants
