@@ -15,6 +15,7 @@ function help(){
 	echo "--lz4=<dir>              : path to lz4"
 	echo "--lgsl=<dir>             : path to lib-gsl"
 	echo "--lzlib=<dir>            : path to lzlib"
+	echo "--netcdf=<dir>           : path to NetCDF"
 	echo
 	echo "Optional:"
         echo "--code-coverage   : compile with ctest and use gcov via target coverage to measure code coverage"
@@ -27,6 +28,32 @@ function help(){
 }
 
 buildDIR="build"
+
+function checknetcdf(){
+	if [[ "$1" == "" ]] ; then
+		return
+	fi
+	where=$1
+	if [[ ! -e "$where" ]] ; then
+		echo "Error could not find NetCDF in $where ; directory does not exist"
+		exit 1
+	fi
+	nc-config --libs >/dev/null
+	if [ $? != 0 ] ; then
+		if [[ -e $where/include && -e $where/lib ]] ; then
+			AI="$AI $where/include $where/$extra_dir"
+			AL="$AL $where/lib $where/lib64 $where/$extra_dir"
+		else
+			echo "Error could not find $what in $where"
+			exit 1
+		fi
+	else
+		if [[ -e $where/include && -e $where/lib ]] ; then
+			AI="$AI $(nc-config --includedir)"
+			AL="$AL $(nc-config --libs)"
+		fi
+	fi
+}
 
 function check(){
 	if [[ "$1" == "" ]] ; then
@@ -65,7 +92,7 @@ function reconfigure(){
 	exit $?
 }
 
-set -- `getopt -u -l "help,version,debug,reconfigure,prefix:,plantuml-jar-dir:,with-cc:,with-cxx:,verbose,build-dir:,lzlib:,lgsl:,lz4:,code-coverage" -o "hV" -- "$@"`
+set -- `getopt -u -l "help,version,debug,reconfigure,prefix:,plantuml-jar-dir:,netcdf:,with-cc:,with-cxx:,verbose,build-dir:,lzlib:,lgsl:,lz4:,code-coverage" -o "hV" -- "$@"`
 test $# -lt 1  && exit 1
 while test $# -gt 0
 do
@@ -76,6 +103,7 @@ do
 		--lz4) check "$2" "lz4"; shift;;
 		--lgsl) check "$2" "gsl"; shift;;
 		--lzlib) check "$2" "z"; shift;;
+		--netcdf) checknetcdf "$2" ; shift;;
 		--prefix) prefix="$2"; shift;;
 		--debug) debug="yes"; ;;
                 --code-coverage) debug="yes" ; codeCoverage="yes" ;;

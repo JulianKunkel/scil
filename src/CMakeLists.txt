@@ -27,17 +27,17 @@ include(CheckCSourceRuns)
 option(CODE_COVERAGE "CODE_COVERAGE" OFF)
 
 IF (CODE_COVERAGE)
-IF ( CMAKE_BUILD_TYPE STREQUAL "Debug") 
+IF ( CMAKE_BUILD_TYPE STREQUAL "Debug")
 	IF ( CMAKE_COMPILER_IS_GNUCC )
 	    include(CodeCoverage)
 	    setup_target_for_coverage(coverage ctest coverage)
 	    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
 	    set(GCOV_LIBRARIES "-lgcov")
         else()
-		MESSAGE (FATAL_ERROR "Error, you need to compile with gcc")	
+		MESSAGE (FATAL_ERROR "Error, you need to compile with gcc")
         endif()
 else()
-	MESSAGE (FATAL_ERROR "Error, you need to compile with Debug mode")	
+	MESSAGE (FATAL_ERROR "Error, you need to compile with Debug mode")
 endif()
 endif()
 
@@ -73,6 +73,9 @@ find_library(LIBGSL_LIBRARIES NAMES gsl PATHS ENV ADDITIONAL_LIB_PATH)
 
 find_path(LIBLZ4_INCLUDE_DIRS NAMES lz4.h PATHS ENV ADDITIONAL_INC_PATH)
 find_library(LIBLZ4_LIBRARIES NAMES lz4 PATHS ENV ADDITIONAL_LIB_PATH)
+
+find_path(LIBNETCDF_INCLUDE_DIRS NAMES netcdf.h PATHS ENV ADDITIONAL_INC_PATH)
+find_library(LIBNETCDF_LIBRARIES NAMES netcdf PATHS ENV ADDITIONAL_LIB_PATH)
 
 ##### ENDIANESS
 
