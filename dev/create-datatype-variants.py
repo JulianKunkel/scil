@@ -104,7 +104,7 @@ for f in files:
 
   if not os.path.isfile(outfile) or (os.path.getctime(f) > os.path.getctime(outfile)):
     print("Processing " + suffix)
-    match = re.search("/(.*)/.*?", suffix)
+    match = re.search("(.*)/.*?", suffix)
     if match:
         directory = outdir + match.group(1)
         if not os.path.exists(directory):
