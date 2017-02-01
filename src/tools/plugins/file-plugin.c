@@ -20,10 +20,12 @@
 
 #include <plugins/file-csv.h>
 #include <plugins/file-bin.h>
+#include <plugins/file-netcdf.h>
 
 static scil_file_plugin_t * file_plugins[] = {
 & csv_plugin,
 & bin_plugin,
+& netcdf_plugin,
 NULL
 };
 
