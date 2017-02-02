@@ -102,7 +102,7 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
 
   if (nvars_in >1)
   {
-    printf("ERROR: you can load now only file with one up to 2-dimensional variable\n");
+    printf("ERROR: you can load now only file with one variable\n");
     return 1;
   }
 
