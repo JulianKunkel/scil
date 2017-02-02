@@ -111,11 +111,6 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
   {
     if (retval = nc_inq_var (ncid, i, NULL, &rh_type, &rh_ndims, rh_dimids, NULL))
       NC_ISSYSERR(retval);
-    else if (rh_ndims > 2)
-    {
-      printf("ERROR: you can load now only file with one up to 2-dimensional variable\n");
-      return 1;
-    }
     else
     {
       switch(rh_type){
@@ -138,19 +133,55 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
           *out_datatype = SCIL_TYPE_INT64;
           break;
         default:
-          printf("Not supported datatype in writeData\n");
+          printf("Not supported datatype in readData\n");
+          return 1;
         }
       for (int j = 0; j < rh_ndims; j++)
         if (retval = nc_inq_dim(ncid, rh_dimids[j], NULL, &lengthp[j]))
           NC_ISSYSERR(retval);
 
-      if (rh_ndims == 2)
-      {
+      switch(rh_ndims){
+        case(1):
+        scilPr_initialize_dims_1d(out_dims, lengthp[0]);
+        break;
+        case(2):
         scilPr_initialize_dims_2d(out_dims, lengthp[0], lengthp[1]);
+        break;
+        case(3):
+        scilPr_initialize_dims_3d(out_dims, lengthp[0], lengthp[1], lengthp[2]);
+        break;
+        case(4):
+        scilPr_initialize_dims_4d(out_dims, lengthp[0], lengthp[1], lengthp[2], lengthp[3]);
+        break;
+        default:
+        printf("Not supported number of dimensions\n");
+        return 1;
+      }
 
-        input_data = (byte*) malloc(scilPr_get_compressed_data_size_limit(out_dims, *out_datatype));
+      input_data = (byte*) malloc(scilPr_get_compressed_data_size_limit(out_dims, *out_datatype));
 
-        nc_get_var_float(ncid,i,(float*)input_data);
+      switch(*out_datatype){
+        case(SCIL_TYPE_DOUBLE):
+          nc_get_var(ncid,i,(double*)input_data);
+          break;
+        case(SCIL_TYPE_FLOAT):
+          nc_get_var(ncid,i,(float*)input_data);
+          break;
+        case(SCIL_TYPE_INT8):
+          nc_get_var(ncid,i,(int8_t*)input_data);
+          break;
+        case(SCIL_TYPE_INT16):
+          nc_get_var(ncid,i,(int16_t*)input_data);
+          break;
+        case(SCIL_TYPE_INT32):
+          nc_get_var(ncid,i,(int32_t*)input_data);
+          break;
+        case(SCIL_TYPE_INT64):
+          nc_get_var(ncid,i,(int64_t*)input_data);
+          break;
+        default:
+          printf("Not supported in readData\n");
+          return 1;
       }
     }
   }
@@ -185,7 +216,7 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
       ncdatatype = NC_DOUBLE;
       break;
     case(SCIL_TYPE_FLOAT):
-      ncdatatype = NC_FLOAT;printf("float\n");
+      ncdatatype = NC_FLOAT;
       break;
     case(SCIL_TYPE_INT8):
       ncdatatype = NC_BYTE;
@@ -228,8 +259,9 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
      NC_ISSYSERR(retval);
 
   switch(buf_datatype){//output_datatype
-    if (retval = nc_put_var_double(ncid, varid, (const double*) buf))
-      NC_ISSYSERR(retval);
+       case(SCIL_TYPE_DOUBLE):
+       if (retval = nc_put_var_double(ncid, varid, (const double*) buf))
+         NC_ISSYSERR(retval);
          break;
        case(SCIL_TYPE_FLOAT):
        if (retval = nc_put_var_float(ncid, varid, (const float*) buf))
