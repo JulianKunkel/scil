@@ -108,12 +108,6 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
 
   printf("\n\n====OUTPUT====\nnumber of dimensions: %i\nnumber of variables: %i\nnumber of global attributes: %i\nunlimited dimentions: %i\n\n", ndims_in, nvars_in, ngatts_in, unlimdimid_in);
 
-  if (nvars_in >1)
-  {
-    printf("ERROR: you can load now only file with one variable\n");
-    return 1;
-  }
-  printf("\nVARNAME %s\n", netcdf_varname);
   /*Get variable*/
   if (retval = nc_inq_varid (ncid, netcdf_varname, &rh_id))
   {
