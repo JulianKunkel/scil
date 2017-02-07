@@ -92,14 +92,15 @@ int main(int argc, char ** argv){
   int parsed;
   SCIL_Datatype_t output_datatype;
 
-  parsed = scilO_parseOptions(argc, argv, known_args, & printhelp);
+  parsed = scilO_parseOptions(argc-1, argv+1, known_args, & printhelp);
 
   in_plugin = scil_find_plugin(in_file_format);
   if(! in_plugin){
     printf("Unknown format for input: %s\n", in_file_format);
     exit(1);
   }
-  ret = scilO_parseOptions(argc - parsed, argv + parsed, in_plugin->get_options(), & printhelp);
+
+  ret = scilO_parseOptions(argc-parsed-1, argv+parsed+1, in_plugin->get_options(), & printhelp);
   parsed += ret;
 
   out_plugin = scil_find_plugin(out_file_format);
@@ -107,7 +108,7 @@ int main(int argc, char ** argv){
     printf("Unknown format for output: %s\n", out_file_format);
     exit(1);
   }
-  ret = scilO_parseOptions(argc - parsed, argv + parsed, out_plugin->get_options(), & printhelp);
+  ret = scilO_parseOptions(argc-parsed-1, argv+parsed+1, out_plugin->get_options(), & printhelp);
 
   if(printhelp != 0){
     printf("\nSynopsis: %s ", argv[0]);
