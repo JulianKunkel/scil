@@ -23,7 +23,10 @@
 #include <scil-util.h>
 #include <plugins/file-netcdf.h>
 
+static char * netcdf_varname = "";
+
 static option_help options [] = {
+  {0, "netcdf-varname", "Name of variable to compress",  OPTION_OPTIONAL_ARGUMENT, 's', & netcdf_varname},
   LAST_OPTION
 };
 
@@ -72,7 +75,7 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
   printf("READDATA\n");
   int ncid;
   int ndims_in, nvars_in, ngatts_in, unlimdimid_in;
-  int varid;
+  int rh_id;
   size_t lengthp[NC_MAX_VAR_DIMS];
   int formatp, rh_ndims, rh_dimids[NC_MAX_VAR_DIMS];
   nc_type rh_type;
@@ -82,6 +85,11 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
 
   byte *input_data = NULL;
 
+  if (netcdf_varname == "")
+  {
+    printf("ERROR netcdf_varname is empty\n");
+    return 1;
+  }
   /* Open the file. */
   if (retval = nc_open(name, NC_NOWRITE, &ncid))
   {
@@ -105,11 +113,15 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
     printf("ERROR: you can load now only file with one variable\n");
     return 1;
   }
-
-  /*Get variables*/
-  for (int i = 0; i < nvars_in; i++)
+  printf("\nVARNAME %s\n", netcdf_varname);
+  /*Get variable*/
+  if (retval = nc_inq_varid (ncid, netcdf_varname, &rh_id))
   {
-    if (retval = nc_inq_var (ncid, i, NULL, &rh_type, &rh_ndims, rh_dimids, NULL))
+    printf("ERROR no variable with this name");
+    NC_ISSYSERR(retval);
+  }
+
+    if (retval = nc_inq_var (ncid, rh_id, NULL, &rh_type, &rh_ndims, rh_dimids, NULL))
       NC_ISSYSERR(retval);
     else
     {
@@ -133,7 +145,7 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
           *out_datatype = SCIL_TYPE_INT64;
           break;
         default:
-          printf("Not supported datatype in readData\n");
+          printf("ERROR: not supported datatype in readData\n");
           return 1;
         }
       for (int j = 0; j < rh_ndims; j++)
@@ -154,7 +166,7 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
         scilPr_initialize_dims_4d(out_dims, lengthp[0], lengthp[1], lengthp[2], lengthp[3]);
         break;
         default:
-        printf("Not supported number of dimensions\n");
+        printf("ERROR: not supported number of dimensions\n");
         return 1;
       }
 
@@ -162,29 +174,28 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
 
       switch(*out_datatype){
         case(SCIL_TYPE_DOUBLE):
-          nc_get_var(ncid,i,(double*)input_data);
+          nc_get_var(ncid,rh_id,(double*)input_data);
           break;
         case(SCIL_TYPE_FLOAT):
-          nc_get_var(ncid,i,(float*)input_data);
+          nc_get_var(ncid,rh_id,(float*)input_data);
           break;
         case(SCIL_TYPE_INT8):
-          nc_get_var(ncid,i,(int8_t*)input_data);
+          nc_get_var(ncid,rh_id,(int8_t*)input_data);
           break;
         case(SCIL_TYPE_INT16):
-          nc_get_var(ncid,i,(int16_t*)input_data);
+          nc_get_var(ncid,rh_id,(int16_t*)input_data);
           break;
         case(SCIL_TYPE_INT32):
-          nc_get_var(ncid,i,(int32_t*)input_data);
+          nc_get_var(ncid,rh_id,(int32_t*)input_data);
           break;
         case(SCIL_TYPE_INT64):
-          nc_get_var(ncid,i,(int64_t*)input_data);
+          nc_get_var(ncid,rh_id,(int64_t*)input_data);
           break;
         default:
-          printf("Not supported in readData\n");
+          printf("ERROR: not supported datatype in readData\n");
           return 1;
       }
     }
-  }
 
   /* Close the file. */
   if ((retval = nc_close(ncid)))
@@ -231,7 +242,8 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
       ncdatatype = NC_INT64;
       break;
     default:
-      printf("Not supported datatype in writeData\n");
+      printf("ERROR: not supported datatype in writeData\n");
+      return 1;
     }
   /* Write new file*/
   if (retval = nc_create(name, NC_NETCDF4, &ncid))
@@ -250,8 +262,11 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
   }
 
 
-  if (retval = nc_def_var(ncid, "data", ncdatatype, dims.dims, dimids, &varid))
+  if (retval = nc_def_var(ncid, netcdf_varname, ncdatatype, dims.dims, dimids, &varid))
+  {
+    printf("ERROR no variable with this name");
     NC_ISSYSERR(retval);
+  }
 
   /* End define mode. This tells netCDF we are done defining
    * metadata. */

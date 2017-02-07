@@ -224,7 +224,6 @@ static void print_current_option_section(option_help * args, option_value_type t
   }
 }
 
-
 void scilO_print_current_options(option_help * args){
   print_current_option_section(args, OPTION_REQUIRED_ARGUMENT);
   print_current_option_section(args, OPTION_OPTIONAL_ARGUMENT);
@@ -259,7 +258,6 @@ int scilO_parseOptions(int argc, char ** argv, option_help * args, int * printhe
     for(option_help * o = args; o->shortVar != 0 || o->longVar != 0 ; o++ ){
       if ( (strlen(txt) == 2 && txt[0] == '-' && o->shortVar == txt[1]) || (strlen(txt) > 2 && txt[0] == '-' && txt[1] == '-' && o->longVar != NULL && strcmp(txt + 2, o->longVar) == 0)){
         foundOption = 1;
-
         // now process the option.
         switch(o->arg){
           case (OPTION_FLAG):{
@@ -357,6 +355,7 @@ int scilO_parseOptions(int argc, char ** argv, option_help * args, int * printhe
         }else{
           printf("Error invalid argument: %s\n", txt);
           error = 1;
+          return i;// ADDED
         }
     }
   }
