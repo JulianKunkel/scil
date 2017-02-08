@@ -83,6 +83,8 @@ int main(int argc, char ** argv){
     {0, "hint-decomp-speed-unit", NULL,  OPTION_OPTIONAL_ARGUMENT, 'e', & hints.decomp_speed.unit},
     {0, "hint-comp-speed", NULL,  OPTION_OPTIONAL_ARGUMENT, 'f', & hints.comp_speed.multiplier},
     {0, "hint-decomp-speed", NULL,  OPTION_OPTIONAL_ARGUMENT, 'f', & hints.decomp_speed.multiplier},
+    {0, "hint-absolute-tolerance-percent-max", NULL,  OPTION_OPTIONAL_ARGUMENT, 'f', & hints.absolute_tolerance_percent_max},
+    {0, "hint-absolute-tolerance-percent-min", NULL,  OPTION_OPTIONAL_ARGUMENT, 'f', & hints.absolute_tolerance_percent_min},
 
     {0, "cycle", "For testing: Compress, then decompress and store the output. Files are CSV files",OPTION_FLAG, 'd' , & cycle},
     LAST_OPTION

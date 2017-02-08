@@ -45,6 +45,8 @@ void scilPr_initialize_user_hints(scil_user_hints_t* hints)
     hints->relative_tolerance_percent        = SCIL_ACCURACY_DBL_IGNORE;
     hints->relative_err_finest_abs_tolerance = SCIL_ACCURACY_DBL_IGNORE;
     hints->absolute_tolerance                = SCIL_ACCURACY_DBL_IGNORE;
+		hints->absolute_tolerance_percent_min        = 0;
+		hints->absolute_tolerance_percent_max        = 100;
 
     hints->comp_speed.unit   = SCIL_PERFORMANCE_IGNORE;
     hints->decomp_speed.unit = SCIL_PERFORMANCE_IGNORE;
@@ -67,6 +69,8 @@ void scilPr_print_user_hints(const scil_user_hints_t* hints)
 	print_hint_int_values("sig digits", hints->significant_digits);
 	print_hint_int_values("sig bits", hints->significant_bits);
 	print_hint_dbl_values("abs tol", hints->absolute_tolerance);
+	print_hint_dbl_values("abs percent min", hints->absolute_tolerance_percent_min);
+	print_hint_dbl_values("abs percent max", hints->absolute_tolerance_percent_max);
 	print_hint_dbl_values("rel percent", hints->relative_tolerance_percent);
 	print_hint_dbl_values("rel abs tol", hints->relative_err_finest_abs_tolerance);
 	print_performance_hint("Comp speed", hints->comp_speed);
