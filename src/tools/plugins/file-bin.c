@@ -42,13 +42,24 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
   size_t input_data_size;
   size_t curr_pos;
   size_t expected_size;
-  int ret;
 
-  ret = fread(out_datatype, 1, sizeof(SCIL_Datatype_t), f);
-  ret = fread(& expected_size, 1, sizeof(size_t), f);
+  if (fread(out_datatype, 1, sizeof(SCIL_Datatype_t), f) == 0)
+  {
+    printf("Could not read values from %s\n", name);
+    return 1;
+  }
+  if (fread(& expected_size, 1, sizeof(size_t), f) == 0)
+  {
+    printf("Could not read values from %s\n", name);
+    return 1;
+  }
   *read_size = expected_size;
 
-  ret = fread(out_dims, 1, sizeof(scil_dims_t), f);
+  if (fread(out_dims, 1, sizeof(scil_dims_t), f) == 0)
+  {
+    printf("Could not read values from %s\n", name);
+    return 1;
+  }
   curr_pos = ftell(f);
   fseek(f, 0L, SEEK_END);
   input_data_size = ftell(f) - curr_pos;
@@ -56,7 +67,8 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
 
   byte * input_data = (byte*) SAFE_MALLOC(input_data_size);
 
-  if(fread(input_data, 1, input_data_size, f) == 0){
+  if(fread(input_data, 1, input_data_size, f) == 0)
+  {
     printf("Could not read values from %s\n", name);
     return 1;
   }
@@ -74,7 +86,6 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
     return 1;
   }
 
-  int ret;
   size_t buffer_in_size;
   if(buf_datatype == SCIL_TYPE_BINARY){
     buffer_in_size = elements;
@@ -82,10 +93,29 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
      buffer_in_size = scilPr_get_dims_size(& dims, buf_datatype);
   }
 
-  ret = fwrite(& orig_datatype, 1, sizeof(SCIL_Datatype_t), f);
-  ret = fwrite(& buffer_in_size, 1, sizeof(size_t), f);
-  ret = fwrite(& dims, 1, sizeof(scil_dims_t), f);
-  ret = fwrite(buf, 1, buffer_in_size, f);
+  if (fwrite(& orig_datatype, 1, sizeof(SCIL_Datatype_t), f) == 0)
+  {
+    printf("Could not write values in %s\n", name);
+    return 1;
+  }
+
+  if (fwrite(& buffer_in_size, 1, sizeof(size_t), f) == 0)
+  {
+    printf("Could not write values in %s\n", name);
+    return 1;
+  }
+
+  if (fwrite(& dims, 1, sizeof(scil_dims_t), f) == 0)
+  {
+    printf("Could not write values in %s\n", name);
+    return 1;
+  }
+  
+  if (fwrite(buf, 1, buffer_in_size, f) == 0)
+  {
+    printf("Could not write values in %s\n", name);
+    return 1;
+  }
 
   fclose(f);
   return 0;

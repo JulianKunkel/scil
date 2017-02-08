@@ -107,10 +107,10 @@ static void write_line(){
         current_data.line,
         current_data.algo,
         current_data.pattern,
-        current_data.pat_param_min,
-        current_data.pat_param_max,
-        current_data.pat_param_arg1,
-        current_data.pat_param_arg2,
+        (double)current_data.pat_param_min,
+        (double)current_data.pat_param_max,
+        (double)current_data.pat_param_arg1,
+        (double)current_data.pat_param_arg2,
         current_data.size,
         current_data.count,
         current_data.dims,
@@ -134,10 +134,10 @@ static void write_line(){
         current_data.line,
         current_data.algo,
         current_data.pattern,
-        current_data.pat_param_min,
-        current_data.pat_param_max,
-        current_data.pat_param_arg1,
-        current_data.pat_param_arg2,
+        (double)current_data.pat_param_min,
+        (double)current_data.pat_param_max,
+        (double)current_data.pat_param_arg1,
+        (double)current_data.pat_param_arg2,
         current_data.size,
         current_data.count,
         current_data.dims,
@@ -510,6 +510,12 @@ static void evaluate_compression_algorithm(double *buffer, scil_dims_t *dims, ch
     int ret = scil_compress(dest, dest_size, buffer, dims, &dest_size, ctx);
     clock_t end = clock();
 
+    if (ret)
+    {
+      printf("Compression error\n");
+      return;
+    }
+
     current_data.compthru = 1e-6 * source_size * CLOCKS_PER_SEC / (end - start); // MB/s
 
     current_data.compratio = (double)source_size / dest_size;
@@ -521,6 +527,12 @@ static void evaluate_compression_algorithm(double *buffer, scil_dims_t *dims, ch
     start = clock();
     ret = scil_decompress(SCIL_TYPE_DOUBLE, decompd, dims, dest, dest_size, temp);
     end = clock();
+
+    if (ret)
+    {
+      printf("Decompression error\n");
+      return;
+    }
 
     current_data.decompthru = 1e-6 * source_size * CLOCKS_PER_SEC / (end - start); // MB/s
 

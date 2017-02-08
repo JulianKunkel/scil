@@ -34,14 +34,6 @@ static option_help * get_options(){
   return options;
 }
 
-/*
-From netCDF type in group igrp, get size in memory needed for each
- * value */
-//inq_value_size(int igrp, nc_type vartype, size_t *value_sizep)
-//copy_var_data(int igrp, int inkind, int varid, int ogrp)
-//copy_data(int igrp, int inkind, int ogrp)
-// to read all values::: nc_get_vara_double(ncid, rh_id, start, count, rh_vals);
-
 /* reverse string */
 void reverse(char s[])
 {
@@ -55,6 +47,7 @@ void reverse(char s[])
     }
 }
 
+/* integer to string*/
 void itoa(int n, char s[])
  {
      int i, sign;
@@ -85,22 +78,21 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
 
   byte *input_data = NULL;
 
-  if (netcdf_varname == "")
+  if (netcdf_varname == NULL)
   {
     printf("ERROR netcdf_varname is empty\n");
     return 1;
   }
   /* Open the file. */
-  if (retval = nc_open(name, NC_NOWRITE, &ncid))
+  if ((retval = nc_open(name, NC_NOWRITE, &ncid)))
   {
     NC_ISSYSERR(retval);
     return 1;
   }
   nc_inq_format(ncid, &formatp);
-  printf("%s file opened for read\n", (formatp == NC_FORMAT_CLASSIC)?"NC_FORMAT_CLASSIC":(formatp == NC_FORMAT_64BIT_OFFSET)?"NC_FORMAT_64BIT_OFFSET":(formatp == NC_FORMAT_NETCDF4)?"NC_FORMAT_NETCDF4":"another");
-  //NC_FORMAT_CLASSIC, NC_FORMAT_64BIT_OFFSET, NC_FORMAT_CDF5, NC_FORMAT_NETCDF4, NC_FORMAT_NETCDF4_CLASSIC.
+  printf("%s file opened for read\n", (formatp == NC_FORMAT_CLASSIC)?"NC_FORMAT_CLASSIC":(formatp == NC_FORMAT_64BIT_OFFSET)?"NC_FORMAT_64BIT_OFFSET":(formatp == NC_FORMAT_NETCDF4)?"NC_FORMAT_NETCDF4":(formatp == NC_FORMAT_CDF5)?"NC_FORMAT_CDF5":"another");
 
-  if (retval = nc_inq(ncid, &ndims_in, &nvars_in, &ngatts_in, &unlimdimid_in))
+  if ((retval = nc_inq(ncid, &ndims_in, &nvars_in, &ngatts_in, &unlimdimid_in)))
   {
     NC_ISSYSERR(retval);
     return 1;
@@ -109,13 +101,13 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
   printf("\n\n====OUTPUT====\nnumber of dimensions: %i\nnumber of variables: %i\nnumber of global attributes: %i\nunlimited dimentions: %i\n\n", ndims_in, nvars_in, ngatts_in, unlimdimid_in);
 
   /*Get variable*/
-  if (retval = nc_inq_varid (ncid, netcdf_varname, &rh_id))
+  if ((retval = nc_inq_varid (ncid, netcdf_varname, &rh_id)))
   {
     printf("ERROR no variable with this name");
     NC_ISSYSERR(retval);
   }
 
-    if (retval = nc_inq_var (ncid, rh_id, NULL, &rh_type, &rh_ndims, rh_dimids, NULL))
+    if ((retval = nc_inq_var (ncid, rh_id, NULL, &rh_type, &rh_ndims, rh_dimids, NULL)))
       NC_ISSYSERR(retval);
     else
     {
@@ -143,7 +135,7 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
           return 1;
         }
       for (int j = 0; j < rh_ndims; j++)
-        if (retval = nc_inq_dim(ncid, rh_dimids[j], NULL, &lengthp[j]))
+        if ((retval = nc_inq_dim(ncid, rh_dimids[j], NULL, &lengthp[j])))
           NC_ISSYSERR(retval);
 
       switch(rh_ndims){
@@ -208,7 +200,6 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
 static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_datatype, size_t elements, SCIL_Datatype_t orig_datatype, scil_dims_t dims){
   printf("WRITEDATA\n");
   int ncid;
-  int ndims_in, nvars_in, ngatts_in, unlimdimid_in;
   int dimids[NC_MAX_VAR_DIMS];
   int varid;
   int ncdatatype;
@@ -240,7 +231,7 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
       return 1;
     }
   /* Write new file*/
-  if (retval = nc_create(name, NC_NETCDF4, &ncid))
+  if ((retval = nc_create(name, NC_NETCDF4, &ncid)))
     NC_ISSYSERR(retval);
 
   char cbuffer[5];//99+dim
@@ -251,12 +242,12 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
     memset(cbuffer,0,strlen(cbuffer));
     itoa(i,cbuffer);
     strcat( cbuffer, "dim");
-    if (retval = nc_def_dim(ncid, cbuffer, dims.length[i], &dimids[i]))
+    if ((retval = nc_def_dim(ncid, cbuffer, dims.length[i], &dimids[i])))
       NC_ISSYSERR(retval);
   }
 
 
-  if (retval = nc_def_var(ncid, netcdf_varname, ncdatatype, dims.dims, dimids, &varid))
+  if ((retval = nc_def_var(ncid, netcdf_varname, ncdatatype, dims.dims, dimids, &varid)))
   {
     printf("ERROR no variable with this name");
     NC_ISSYSERR(retval);
@@ -264,32 +255,32 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
 
   /* End define mode. This tells netCDF we are done defining
    * metadata. */
-  if (retval = nc_enddef(ncid))
+  if ((retval = nc_enddef(ncid)))
      NC_ISSYSERR(retval);
 
   switch(buf_datatype){//output_datatype
        case(SCIL_TYPE_DOUBLE):
-       if (retval = nc_put_var_double(ncid, varid, (const double*) buf))
+       if ((retval = nc_put_var_double(ncid, varid, (const double*) buf)))
          NC_ISSYSERR(retval);
          break;
        case(SCIL_TYPE_FLOAT):
-       if (retval = nc_put_var_float(ncid, varid, (const float*) buf))
+       if ((retval = nc_put_var_float(ncid, varid, (const float*) buf)))
          NC_ISSYSERR(retval);
          break;
        case(SCIL_TYPE_INT8):
-       if (retval = nc_put_var_text(ncid, varid, (const char*) buf))
+       if ((retval = nc_put_var_text(ncid, varid, (const char*) buf)))
          NC_ISSYSERR(retval);
          break;
        case(SCIL_TYPE_INT16):
-       if (retval = nc_put_var_short(ncid, varid, (const short*) buf))
+       if ((retval = nc_put_var_short(ncid, varid, (const short*) buf)))
          NC_ISSYSERR(retval);
          break;
        case(SCIL_TYPE_INT32):
-       if (retval = nc_put_var_int(ncid, varid, (const int*) buf))
+       if ((retval = nc_put_var_int(ncid, varid, (const int*) buf)))
          NC_ISSYSERR(retval);
          break;
        case(SCIL_TYPE_INT64):
-       if (retval = nc_put_var_longlong(ncid, varid, (const long long*) buf))
+       if ((retval = nc_put_var_longlong(ncid, varid, (const long long*) buf)))
          NC_ISSYSERR(retval);
          break;
        default:
