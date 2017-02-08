@@ -241,7 +241,7 @@ int scilO_parseOptions(int argc, char ** argv, option_help * args, int * printhe
       requiredArgsNeeded++;
     }
   }
-  for(i=0; i < argc; i++){
+  for(i=1; i < argc; i++){
     char * txt = strdup(argv[i]);
     int foundOption = 0;
     char * arg = strstr(txt, "=");
@@ -355,7 +355,7 @@ int scilO_parseOptions(int argc, char ** argv, option_help * args, int * printhe
         }else{
           printf("Error invalid argument: %s\n", txt);
           error = 1;
-          return i;// ADDED
+          //return i;// ADDED
         }
     }
   }
