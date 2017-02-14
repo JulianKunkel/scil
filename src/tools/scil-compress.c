@@ -188,7 +188,7 @@ int main(int argc, char ** argv){
     ret = scilPr_destroy_context(ctx);
     assert(ret == SCIL_NO_ERR);
 
-    byte* tmp_buff = (byte*) SAFE_MALLOC(buff_size);
+    byte* tmp_buff = (byte*) SAFE_MALLOC(array_size);
     scilU_start_timer(& timer);
     ret = scil_decompress(input_datatype, output_data, & dims, result, buff_size, tmp_buff);
     t_decompress = scilU_stop_timer(timer);
@@ -236,7 +236,9 @@ int main(int argc, char ** argv){
   }
 	double runtime = scilU_stop_timer(timer);
   if(measure_time){
-    printf("Overall runtime:  %fs to process %ld Bytes \n", runtime, array_size);
+    printf("Size:\n");
+    printf(" size, %ld\n size_compressed, %ld\n ratio, %f\n", array_size, buff_size, ((double) buff_size) / array_size);
+    printf("Runtime:  %fs\n", runtime);
     printf(" read,       %fs, %f MiB/s\n", t_read, array_size/t_read/1024 /1024);
     if (t_compress > 0.0)
       printf(" compress,   %fs, %f MiB/s\n", t_compress, array_size/t_compress/1024 /1024);
