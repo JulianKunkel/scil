@@ -229,6 +229,9 @@ int scilU_convert_significant_bits_to_decimals(int bits);
 int scilU_double_equal(double val1, double val2);
 int scilU_float_equal(float val1, float val2);
 
+void scilU_find_minimum_maximum(SCIL_Datatype_t datatype, byte * data, scil_dims_t * dims, double * out_min, double * out_max);
+
+
 /* Tools to iterate over the 1D buffer as a multi-dimensional data space */
 
 typedef void(*scilG_iterfunc)(double* data,

@@ -58,6 +58,8 @@ int main(int argc, char ** argv){
   scil_user_hints_t hints;
   scil_user_hints_t out_accuracy;
 
+  double fake_abstol_value = 0;
+
   int ret;
 
   scilPr_initialize_user_hints(&hints);
@@ -83,8 +85,7 @@ int main(int argc, char ** argv){
     {0, "hint-decomp-speed-unit", NULL,  OPTION_OPTIONAL_ARGUMENT, 'e', & hints.decomp_speed.unit},
     {0, "hint-comp-speed", NULL,  OPTION_OPTIONAL_ARGUMENT, 'f', & hints.comp_speed.multiplier},
     {0, "hint-decomp-speed", NULL,  OPTION_OPTIONAL_ARGUMENT, 'f', & hints.decomp_speed.multiplier},
-    {0, "hint-absolute-tolerance-percent-max", NULL,  OPTION_OPTIONAL_ARGUMENT, 'f', & hints.absolute_tolerance_percent_max},
-    {0, "hint-absolute-tolerance-percent-min", NULL,  OPTION_OPTIONAL_ARGUMENT, 'f', & hints.absolute_tolerance_percent_min},
+    {0, "hint-fake-absolute-tolerance-percent-max", "This is a fake hint. Actually it sets the abstol value based on the given percentage (enter 0.1 aka 10%% tolerance)",  OPTION_OPTIONAL_ARGUMENT, 'F', & fake_abstol_value},
 
     {0, "cycle", "For testing: Compress, then decompress and store the output. Files are CSV files",OPTION_FLAG, 'd' , & cycle},
     LAST_OPTION
@@ -132,6 +133,18 @@ int main(int argc, char ** argv){
   if (ret != 0){
     printf("The input file %s could not be read\n", in_file);
     exit(1);
+  }
+
+  if (fake_abstol_value > 0.0){
+    double max, min;
+    scilU_find_minimum_maximum(input_datatype, input_data, & dims, & min, & max);
+    double new_abs_tol = max * fake_abstol_value;
+    //printf("setting value %f %f %f\n", min, max, new_abs_tol);
+    if ( hints.absolute_tolerance > 0.0 ){
+      printf("Error: don't set both the absolute_tolerance and the fake relative absolute tolerance!\n");
+      exit(1);
+    }
+    hints.absolute_tolerance = new_abs_tol;
   }
 
   ret = scilPr_create_context(&ctx, input_datatype, 0, NULL, &hints);
