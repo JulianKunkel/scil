@@ -35,6 +35,7 @@ static int verbose = 0;
 static int compress = 0;
 static int uncompress = 0;
 static int cycle = 0;
+static int no_write = 0;
 static char * in_file = "";
 static char * out_file = "";
 
@@ -88,6 +89,7 @@ int main(int argc, char ** argv){
     {0, "hint-fake-absolute-tolerance-percent-max", "This is a fake hint. Actually it sets the abstol value based on the given percentage (enter 0.1 aka 10%% tolerance)",  OPTION_OPTIONAL_ARGUMENT, 'F', & fake_abstol_value},
 
     {0, "cycle", "For testing: Compress, then decompress and store the output. Files are CSV files",OPTION_FLAG, 'd' , & cycle},
+    {0, "no-write", "For testing: do not write the output",OPTION_FLAG, 'd' , & no_write},
     LAST_OPTION
   };
 
@@ -223,12 +225,14 @@ int main(int argc, char ** argv){
   }
 
   // todo reformat into output format, if neccessary
-  scilU_start_timer(& timer);
-  ret = out_plugin->writeData(out_file, output_data, output_datatype, buff_size, input_datatype, dims);
-  t_write = scilU_stop_timer(timer);
-  if (ret != 0){
-    printf("The output file %s could not be written\n", out_file);
-    exit(1);
+  if (! no_write){
+    scilU_start_timer(& timer);
+    ret = out_plugin->writeData(out_file, output_data, output_datatype, buff_size, input_datatype, dims);
+    t_write = scilU_stop_timer(timer);
+    if (ret != 0){
+      printf("The output file %s could not be written\n", out_file);
+      exit(1);
+    }
   }
 	double runtime = scilU_stop_timer(timer);
   if(measure_time){
@@ -238,7 +242,8 @@ int main(int argc, char ** argv){
       printf(" compress,   %fs, %f MiB/s\n", t_compress, array_size/t_compress/1024 /1024);
     if (t_decompress > 0.0)
       printf(" decompress, %fs, %f MiB/s\n", t_decompress, array_size/t_decompress/1024 /1024);
-    printf(" write,      %fs, %f MiB/s\n", t_write, array_size/t_write/1024 /1024);
+    if (t_write > 0.0)
+      printf(" write,      %fs, %f MiB/s\n", t_write, array_size/t_write/1024 /1024);
   }
 
   free(input_data);
