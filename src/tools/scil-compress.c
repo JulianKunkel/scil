@@ -128,12 +128,20 @@ int main(int argc, char ** argv){
 
   SCIL_Datatype_t input_datatype;
   size_t read_data_size;
+  size_t array_size;
 
+  scil_timer timer;
+  double t_read = 0.0, t_write = 0.0, t_compress = 0.0, t_decompress = 0.0;
+
+  scilU_start_timer(& timer);
   ret = in_plugin->readData(in_file, & input_data, & input_datatype, & dims, & read_data_size);
   if (ret != 0){
     printf("The input file %s could not be read\n", in_file);
     exit(1);
   }
+  t_read = scilU_stop_timer(timer);
+  array_size = scilPr_get_dims_size(& dims, input_datatype);
+
 
   if (fake_abstol_value > 0.0){
     double max, min;
@@ -162,14 +170,13 @@ int main(int argc, char ** argv){
   input_size = scilPr_get_compressed_data_size_limit(&dims, input_datatype);
   output_data = (byte*) SAFE_MALLOC(input_size);
 
-	scil_timer timer;
-	scilU_start_timer(& timer);
-
   if (cycle || (! compress && ! uncompress) ){
     printf("...compression and decompression\n");
     byte* result = (byte*) SAFE_MALLOC(input_size);
 
+    scilU_start_timer(& timer);
     ret = scil_compress(result, input_size, input_data, & dims, & buff_size, ctx);
+    t_compress = scilU_stop_timer(timer);
     assert(ret == SCIL_NO_ERR);
     if (validate) {
         ret = scil_validate_compression(input_datatype, input_data, &dims, result, buff_size, ctx, &out_accuracy);
@@ -180,7 +187,9 @@ int main(int argc, char ** argv){
     assert(ret == SCIL_NO_ERR);
 
     byte* tmp_buff = (byte*) SAFE_MALLOC(buff_size);
+    scilU_start_timer(& timer);
     ret = scil_decompress(input_datatype, output_data, & dims, result, buff_size, tmp_buff);
+    t_decompress = scilU_stop_timer(timer);
     assert(ret == SCIL_NO_ERR);
 
     free(tmp_buff);
@@ -188,7 +197,9 @@ int main(int argc, char ** argv){
     output_datatype = input_datatype;
   } else if (compress){
     printf("...compression\n");
+    scilU_start_timer(& timer);
     ret = scil_compress(output_data, input_size, input_data, & dims, & buff_size, ctx);
+    t_compress = scilU_stop_timer(timer);
     assert(ret == SCIL_NO_ERR);
 
     if (validate) {
@@ -202,24 +213,32 @@ int main(int argc, char ** argv){
   } else if (uncompress){
     printf("...decompression\n");
     byte* tmp_buff = (byte*) SAFE_MALLOC(input_size);
+    scilU_start_timer(& timer);
     ret = scil_decompress(input_datatype, output_data, & dims, input_data, read_data_size, tmp_buff);
+    t_decompress = scilU_stop_timer(timer);
     free(tmp_buff);
     assert(ret == SCIL_NO_ERR);
 
     output_datatype = input_datatype;
   }
 
-	double runtime = scilU_stop_timer(timer);
-  if(measure_time){
-    printf("Runtime: %fs \n", runtime);
-  }
-
   // todo reformat into output format, if neccessary
+  scilU_start_timer(& timer);
   ret = out_plugin->writeData(out_file, output_data, output_datatype, buff_size, input_datatype, dims);
-
+  t_write = scilU_stop_timer(timer);
   if (ret != 0){
     printf("The output file %s could not be written\n", out_file);
     exit(1);
+  }
+	double runtime = scilU_stop_timer(timer);
+  if(measure_time){
+    printf("Overall runtime:  %fs to process %ld Bytes \n", runtime, array_size);
+    printf(" read,       %fs, %f MiB/s\n", t_read, array_size/t_read/1024 /1024);
+    if (t_compress > 0.0)
+      printf(" compress,   %fs, %f MiB/s\n", t_compress, array_size/t_compress/1024 /1024);
+    if (t_decompress > 0.0)
+      printf(" decompress, %fs, %f MiB/s\n", t_decompress, array_size/t_decompress/1024 /1024);
+    printf(" write,      %fs, %f MiB/s\n", t_write, array_size/t_write/1024 /1024);
   }
 
   free(input_data);
