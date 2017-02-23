@@ -22,6 +22,7 @@ int scilI_create_chain(scilI_chain_t* chain, const char* str_in)
     for (int i = 0; token != NULL; i++) {
         scilI_algorithm_t* algo = scilI_find_compressor_by_name(token);
         if (algo == NULL) {
+            printf("Error: could not find compressor: %s\n", token);
             return SCIL_EINVAL;
         }
         chain->total_size++;

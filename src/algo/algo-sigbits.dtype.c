@@ -326,7 +326,7 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_t* ctx,
 
     // ==================== Initialization =====================================
 
-    int8_t mantissa_bit_count = ctx->hints.significant_bits;
+    int8_t mantissa_bit_count = ctx->hints.significant_bits - 1;
     // Check whether sigbit compression makes sense
     if(mantissa_bit_count == SCIL_ACCURACY_INT_FINEST){
         return SCIL_PRECISION_ERR;

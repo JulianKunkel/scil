@@ -16,22 +16,26 @@ static void scil_determine_accuracy_<DATATYPE>(const <DATATYPE> *data_1, const <
 			datatype_cast_<DATATYPE> f1, f2;
 			f1.f = c1;
 			f2.f = c2;
+			//printf("checking %f %f\n", (double) c1, (double) c2);
+
 			if (f1.p.sign != f2.p.sign || f1.p.exponent != f2.p.exponent){
-				cur.significant_digits = 0;
+				cur.significant_bits = 0;
+				//printf("fall exponent different\n");
 			}else{
 				// check mantissa, bit by bit
 				//printf("%lld %lld\n", f1.p.mantissa, f2.p.mantissa);
-				cur.significant_digits = MANTISSA_LENGTH_<DATATYPE_UPPER>;
+				cur.significant_bits = MANTISSA_LENGTH_<DATATYPE_UPPER>;
 				for(int m = MANTISSA_LENGTH_<DATATYPE_UPPER>-1 ; m >= 0; m--){
 					int b1 = (f1.p.mantissa>>m) & (1);
 					int b2 = (f2.p.mantissa>>m) & (1);
 					//printf("%d: %d %d\n", m, b1, b2);
 					if( b1 != b2){
-						cur.significant_digits = MANTISSA_LENGTH_<DATATYPE_UPPER> - (int) m;
-						//printf("%f %f m:%d\n", (double) c1, (double) c2, cur.significant_digits);
+						cur.significant_bits = MANTISSA_LENGTH_<DATATYPE_UPPER> - (int) m;
+						//printf("significant bits:%d\n", cur.significant_bits);
 						break;
 					}
 				}
+				//printf("fall %d\n", cur.significant_bits);
 			}
 		}
 		// determine relative tolerance
@@ -55,7 +59,7 @@ static void scil_determine_accuracy_<DATATYPE>(const <DATATYPE> *data_1, const <
 		a->absolute_tolerance = max(cur.absolute_tolerance, a->absolute_tolerance);
 		a->relative_err_finest_abs_tolerance = max(cur.relative_err_finest_abs_tolerance, a->relative_err_finest_abs_tolerance);
 		a->relative_tolerance_percent = max(cur.relative_tolerance_percent, a->relative_tolerance_percent);
-		a->significant_bits = min(cur.significant_digits, a->significant_bits);
+		a->significant_bits = min(cur.significant_bits, a->significant_bits);
 	}
 }
 // End repeat

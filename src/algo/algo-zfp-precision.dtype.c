@@ -51,8 +51,9 @@ int scil_zfp_precision_compress_<DATATYPE>(const scil_context_t* ctx,
     zfp_stream* zfp = zfp_stream_open(NULL);
 
     /*  zfp_stream_set_rate(zfp, rate, type, 3, 0); */
-    zfp_stream_set_precision(zfp, ctx->hints.significant_bits+1, zfp_type_<DATATYPE>);
+    uint actual_precision = zfp_stream_set_precision(zfp, ctx->hints.significant_bits+1, zfp_type_<DATATYPE>);
     /* zfp_stream_set_accuracy(zfp, ctx->hints.absolute_tolerance, zfp_type_<DATATYPE>); */
+    printf("%d\n", actual_precision);
 
     size_t bufsize = zfp_stream_maximum_size(zfp, field);
     bitstream* stream = stream_open(dest, bufsize);
@@ -81,7 +82,7 @@ int scil_zfp_precision_decompress_<DATATYPE>(   <DATATYPE>*restrict data_out,
     int ret = 0;
 
     uint precision = *((uint*)compressed_buf_in);
-    compressed_buf_in += 8;
+    compressed_buf_in += sizeof(uint);
 
     // Decompress
     zfp_field* field = NULL;
