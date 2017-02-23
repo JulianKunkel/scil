@@ -25,9 +25,10 @@ static void scil_determine_accuracy_<DATATYPE>(const <DATATYPE> *data_1, const <
 				for(int m = MANTISSA_LENGTH_<DATATYPE_UPPER>-1 ; m >= 0; m--){
 					int b1 = (f1.p.mantissa>>m) & (1);
 					int b2 = (f2.p.mantissa>>m) & (1);
-					// printf("%d %d\n", (int) b1, (int) b2);
+					//printf("%d: %d %d\n", m, b1, b2);
 					if( b1 != b2){
 						cur.significant_digits = MANTISSA_LENGTH_<DATATYPE_UPPER> - (int) m;
+						//printf("%f %f m:%d\n", (double) c1, (double) c2, cur.significant_digits);
 						break;
 					}
 				}

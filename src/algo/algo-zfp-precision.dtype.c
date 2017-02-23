@@ -34,9 +34,9 @@ int scil_zfp_precision_compress_<DATATYPE>(const scil_context_t* ctx,
     int ret = 0;
 
     *dest_size = 0;
-    *((double*)dest) = ctx->hints.significant_bits;
-    dest += 8;
-    *dest_size += 8;
+    *((uint*)dest) = ctx->hints.significant_bits;
+    dest += sizeof(uint);
+    *dest_size += sizeof(uint);
 
     // Compress
     zfp_field* field = NULL;
@@ -80,7 +80,7 @@ int scil_zfp_precision_decompress_<DATATYPE>(   <DATATYPE>*restrict data_out,
 {
     int ret = 0;
 
-    double precision = *((double*)compressed_buf_in);
+    uint precision = *((uint*)compressed_buf_in);
     compressed_buf_in += 8;
 
     // Decompress

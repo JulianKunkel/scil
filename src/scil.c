@@ -421,7 +421,7 @@ int scil_decompress(SCIL_Datatype_t datatype,
     debugI("D compressor ID %d at pos %llu\n", compressor_id, (long long unsigned)&src_adj[src_size]);
 
     CHECK_COMPRESSOR_ID(compressor_id)
-    // printf("SCHUH %d %lld\n", compressor_id, source_size);
+    // printf("xx %d %lld\n", compressor_id, source_size);
 
     scilI_algorithm_t* algo = algo_array[compressor_id];
     byte* header                     = &src_adj[src_size - 1];
@@ -744,13 +744,13 @@ int scil_validate_compression(SCIL_Datatype_t datatype, const void* restrict dat
             ret = SCIL_PRECISION_ERR;
         }
         if (a.significant_digits < h.significant_digits) {
-            debug("Validation error significant_digits %d > %d\n",
+            debug("Validation error significant_digits %d < %d\n",
                   a.significant_digits,
                   h.significant_digits);
             ret = SCIL_PRECISION_ERR;
         }
         if (a.significant_bits < h.significant_bits) {
-            debug("Validation error significant_bits %d > %d\n",
+            debug("Validation error significant_bits %d < %d\n",
                   a.significant_bits,
                   h.significant_bits);
             ret = SCIL_PRECISION_ERR;

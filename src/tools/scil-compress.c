@@ -182,7 +182,9 @@ int main(int argc, char ** argv){
     assert(ret == SCIL_NO_ERR);
     if (validate) {
         ret = scil_validate_compression(input_datatype, input_data, &dims, result, buff_size, ctx, &out_accuracy);
-        assert(ret == SCIL_NO_ERR);
+        if(ret != SCIL_NO_ERR){
+          printf("SCIL validation error!\n");
+        }
     }
 
     ret = scilPr_destroy_context(ctx);

@@ -1,6 +1,6 @@
 //Supported datatypes: int8_t int16_t int32_t int64_t
 // Repeat for each data type
- 
+
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 static void scil_determine_accuracy_<DATATYPE>(const <DATATYPE> *data_1, const <DATATYPE> *data_2, const size_t length, const double relative_err_finest_abs_tolerance, scil_user_hints_t * a){
 	for(size_t i = 0; i < length; i++ ){
@@ -13,7 +13,7 @@ static void scil_determine_accuracy_<DATATYPE>(const <DATATYPE> *data_1, const <
 		// determine significant digits
 		{
 			cur.significant_digits = sizeof(<DATATYPE>)*8;
-			for(int m = cur.significant_digits -1 ; m >= 0; m--){
+			for(int m = cur.significant_digits - 1 ; m >= 0; m--){
 				int b1 = (c1>>m) & (1);
 				int b2 = (c2>>m) & (1);
 				if( b1 != b2){

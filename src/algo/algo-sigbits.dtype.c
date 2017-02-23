@@ -131,7 +131,6 @@ static uint8_t calc_sign_bit_count(uint8_t minimum_sign, uint8_t maximum_sign){
 }
 
 static uint8_t calc_exponent_bit_count(int16_t minimum_exponent, int16_t max_exponent){
-
     return (uint8_t)ceil(log2(max_exponent - minimum_exponent));
 }
 
@@ -240,7 +239,7 @@ static uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
     uint8_t shifts = MANTISSA_LENGTH_<DATATYPE_UPPER> - mantissa_bit_count;
 
     // Calculating compressed mantissa with rounding
-    uint64_t inter_mantissa = cur.p.mantissa + (cur.p.mantissa & (1UL << (shifts - 1)));
+    uint64_t inter_mantissa = cur.p.mantissa; // (cur.p.mantissa & (1UL << (shifts - 1)));
 
     // Calculating compressed exponent with potential overflow from mantissa due to rounding up and writing it
     result |= (uint64_t)(cur.p.exponent - minimum_exponent + (inter_mantissa > mask[52]));
@@ -249,9 +248,19 @@ static uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
     result <<= mantissa_bit_count;
 
     // Clear overflow bit in mantissa
-    inter_mantissa &= ~(1 << shifts);
+    //inter_mantissa &= ~(1 << shifts);
     // Write significant bits of mantissa
     result |= inter_mantissa >> shifts;
+
+    /*
+    // internal check for correctness:
+    for(int m = 0; m < mantissa_bit_count; m++){
+			int b1 = (cur.p.mantissa >> (MANTISSA_LENGTH_<DATATYPE_UPPER>-m)) & (1);
+			int b2 = (inter_mantissa >> (MANTISSA_LENGTH_<DATATYPE_UPPER>-m)) & (1);
+      printf("now: %d; %d = %d\n", m, b1, b2);
+      assert(b1 == b2);
+    }
+    */
 
     return result;
 }
@@ -330,6 +339,8 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_t* ctx,
     get_header_data_<DATATYPE>(source, count, &signs_id, &exponent_bit_count, &minimum_exponent);
 
     uint8_t bit_count_per_value = get_bit_count_per_value(signs_id, exponent_bit_count, mantissa_bit_count);
+
+    //printf("DEBUG %d %d %d\n", bit_count_per_value, exponent_bit_count, signs_id);
 
     write_header(dest, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
     dest += SCIL_SIGBITS_HEADER_SIZE;
