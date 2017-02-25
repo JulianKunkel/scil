@@ -148,12 +148,17 @@ int main(int argc, char ** argv){
   if (fake_abstol_value > 0.0){
     double max, min;
     scilU_find_minimum_maximum(input_datatype, input_data, & dims, & min, & max);
+    if (min < 0 && max < -min){
+	max = -min;
+    }
+   
     double new_abs_tol = max * fake_abstol_value;
-    //printf("setting value %f %f %f\n", min, max, new_abs_tol);
     if ( hints.absolute_tolerance > 0.0 ){
       printf("Error: don't set both the absolute_tolerance and the fake relative absolute tolerance!\n");
       exit(1);
     }
+
+    printf("setting value %f %f %f\n", min, max, new_abs_tol);
     hints.absolute_tolerance = new_abs_tol;
   }
 
