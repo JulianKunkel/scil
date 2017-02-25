@@ -131,7 +131,7 @@ static uint8_t calc_sign_bit_count(uint8_t minimum_sign, uint8_t maximum_sign){
 }
 
 static uint8_t calc_exponent_bit_count(int16_t minimum_exponent, int16_t max_exponent){
-    return (uint8_t)ceil(log2(max_exponent - minimum_exponent));
+    return (uint8_t)ceil(log2(max_exponent - minimum_exponent + 1));
 }
 
 static uint64_t round_up_byte(const uint64_t bits){
