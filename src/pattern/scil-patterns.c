@@ -182,7 +182,7 @@ void scilPa_convert_data_from_double(void * buffer, SCIL_Datatype_t datatype,  d
 		case(SCIL_TYPE_FLOAT):{
       float * buffer_real = (float*)buffer;
 			for(unsigned x = 0; x < elemCount; x++){
-				buffer_real[x] = (float) round(data[x]);
+				buffer_real[x] = (float) data[x];
 			}
 			break;
 		}
