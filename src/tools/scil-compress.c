@@ -38,6 +38,7 @@ static int cycle = 0;
 static int no_write = 0;
 static char * in_file = "";
 static char * out_file = "";
+static int compute_residual = 0;
 
 static int measure_time = 0;
 static int print_hints = 0;
@@ -72,6 +73,7 @@ int main(int argc, char ** argv){
     {'O', "out_file_format", "Output file format", OPTION_OPTIONAL_ARGUMENT, 's', & out_file_format},
     {'x', "decompress", "Infile is expected to be a binary compressed with this tool, outfile a CSV file",OPTION_FLAG, 'd', & uncompress},
     {'c', "compress", "Infile is expected to be a CSV file, outfile a binary",OPTION_FLAG, 'd' , & compress},
+    {'R', "residual", "(for decompression) compute/output the residual error instead of the data", OPTION_FLAG, 'd', & compute_residual},
     {'t', "time", "Measure time for the operation.", OPTION_FLAG, 'd', & measure_time},
     {'V', "validate", "Validate the output", OPTION_FLAG, 'd', & validate},
     {'v', "verbose", "Increase the verbosity level", OPTION_FLAG, 'd', & verbose},
@@ -151,7 +153,7 @@ int main(int argc, char ** argv){
     if (min < 0 && max < -min){
 	max = -min;
     }
-   
+
     double new_abs_tol = max * fake_abstol_value;
     if ( hints.absolute_tolerance > 0.0 ){
       printf("Error: don't set both the absolute_tolerance and the fake relative absolute tolerance!\n");
@@ -189,6 +191,10 @@ int main(int argc, char ** argv){
         ret = scil_validate_compression(input_datatype, input_data, &dims, result, buff_size, ctx, &out_accuracy);
         if(ret != SCIL_NO_ERR){
           printf("SCIL validation error!\n");
+        }
+        if(print_hints){
+          printf("Validation accuracy:");
+          scilPr_print_user_hints(& out_accuracy);
         }
     }
 
@@ -233,6 +239,11 @@ int main(int argc, char ** argv){
 
   // todo reformat into output format, if neccessary
   if (! no_write){
+    if ( compute_residual && (uncompress || cycle) ){
+      // compute the residual error
+      scilU_subtract_data(input_datatype, input_data, output_data, & dims);
+    }
+
     scilU_start_timer(& timer);
     ret = out_plugin->writeData(out_file, output_data, output_datatype, buff_size, input_datatype, dims);
     t_write = scilU_stop_timer(timer);

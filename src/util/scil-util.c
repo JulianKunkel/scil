@@ -73,6 +73,43 @@ void scilU_find_minimum_maximum(SCIL_Datatype_t datatype, byte * data, scil_dims
   }
 }
 
+void scilU_subtract_data(SCIL_Datatype_t datatype, byte * restrict  data1, byte * restrict in_out_data2, scil_dims_t * dims){
+  size_t count = scilPr_get_dims_count(dims);
+
+  switch(datatype){
+  case (SCIL_TYPE_DOUBLE): {
+    scilU_subtract_data_double((double*) data1, (double*) in_out_data2, count);
+    return;
+  }
+  case (SCIL_TYPE_FLOAT) : {
+    scilU_subtract_data_float((float*) data1, (float*) in_out_data2, count);
+    return;
+  }
+  case(SCIL_TYPE_INT8):{
+    scilU_subtract_data_int8_t((int8_t*)data1,  (int8_t*) in_out_data2, count);
+    return;
+  }
+  case(SCIL_TYPE_INT16):{
+    scilU_subtract_data_int16_t((int16_t*)data1,  (int16_t*) in_out_data2, count);
+    return;
+  }
+  case(SCIL_TYPE_INT32):{
+    scilU_subtract_data_int32_t((int32_t*)data1,  (int32_t*) in_out_data2, count);
+    return;
+  }
+  case(SCIL_TYPE_INT64):{
+    scilU_subtract_data_int64_t((int64_t*) data1, (int64_t*) in_out_data2, count);
+    return;
+  }
+  case(SCIL_TYPE_UNKNOWN) :
+  case(SCIL_TYPE_BINARY):
+  case(SCIL_TYPE_STRING):{
+    assert(0 && "unsupported");
+  }
+  }
+}
+
+
 void* safe_malloc (size_t size, const char* file, unsigned long line)
 {
     assert (size != 0);

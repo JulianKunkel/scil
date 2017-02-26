@@ -231,6 +231,9 @@ int scilU_float_equal(float val1, float val2);
 
 void scilU_find_minimum_maximum(SCIL_Datatype_t datatype, byte * data, scil_dims_t * dims, double * out_min, double * out_max);
 
+// this function substracts data2 from data1 and stores the result in data2
+void scilU_subtract_data(SCIL_Datatype_t datatype, byte * restrict  data1, byte * restrict in_out_data2, scil_dims_t * dims);
+
 
 /* Tools to iterate over the 1D buffer as a multi-dimensional data space */
 

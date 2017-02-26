@@ -88,6 +88,13 @@ void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* restrict buffer,
     *maximum = max;
 }
 
+void scilU_subtract_data_<DATATYPE>(const <DATATYPE>* restrict in, <DATATYPE>* restrict inout, size_t count){
+  for(size_t i = 0 ; i < count; i++){
+    inout[i] = in[i] - inout[i];
+  }
+}
+
+
 uint64_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum,
                                                <DATATYPE> maximum,
                                                double absolute_tolerance){

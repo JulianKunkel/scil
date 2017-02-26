@@ -17,6 +17,13 @@
                                         size_t count);
 
 /**
+ Compute the difference between two data vectors.
+ Subtract in from inout and store the result in inout
+ */
+void scilU_subtract_data_<DATATYPE>(const <DATATYPE>* restrict in, <DATATYPE>* restrict inout, size_t count);
+
+
+/**
  * \brief Finds and returns the biggest value of the given buffer.
  * \param buffer The buffer to scan
  * \param count Element count of the buffer
