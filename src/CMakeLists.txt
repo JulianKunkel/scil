@@ -178,6 +178,7 @@ include_directories(
   ${DEPS_COMPILED_DIR}/include/zfp
   ${DEPS_COMPILED_DIR}/include/fpzip
   ${DEPS_COMPILED_DIR}/include/cnoise
+	${DEPS_COMPILED_DIR}/include/sz
 )
 
 target_link_libraries(scil ${LIBZ_LIBRARIES})
@@ -185,6 +186,7 @@ target_link_libraries(scil
   ${DEPS_COMPILED_DIR}/libfpzip.a
   ${DEPS_COMPILED_DIR}/libzfp.a
   ${DEPS_COMPILED_DIR}/libcnoise.a
+	${DEPS_COMPILED_DIR}/libsz.a
   lz4
   rt
   )

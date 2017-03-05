@@ -107,17 +107,18 @@ if [[ ! -e libsz.a ]] ; then
 	echo "  Building SZ"
 	mkdir SZ || true
 	pushd SZ > /dev/null
-	CFLAGS="-I$SRC/SZ/sz/include -I$SRC/SZ/zlib"  $SRC/SZ/configure  --prefix=$TGT
+	CFLAGS="-I$SRC/SZ/sz/include -I$SRC/SZ/zlib"  $SRC/SZ/configure  --prefix=$PWD/install
 	make -j install
 	popd > /dev/null
 	BUILD=1
 fi
 
 if [[ $BUILD == 1 ]] ; then
-  mkdir -p include/fpzip include/zfp include/cnoise
+  mkdir -p include/fpzip include/zfp include/cnoise include/sz
   cp $FPZIP/inc/* include/fpzip
   cp $ZFP/inc/* include/zfp
-	cp cnoise/cnoise.h include/cnoise
+  cp cnoise/cnoise.h include/cnoise
+  cp -r ./SZ/install/include/* include/sz
 
   rm *.a || true # ignore error
   mv $(find -name "*.a") .

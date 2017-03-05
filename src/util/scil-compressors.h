@@ -15,6 +15,7 @@
 #include <algo/algo-swage.h>
 #include <algo/algo-wavelets.h>
 #include <algo/algo-allquant.h>
+#include <algo/algo-sz.h>
 
 #include <scil-algorithm.h>
 
