@@ -57,6 +57,12 @@ if [[ ! -e $SRC/cnoise/test/test_output.txt ]] ; then
 	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/example/test_output.txt -P $SRC/cnoise/test/
 fi
 
+if [[ ! -e $SRC/SZ ]] ; then
+	pushd $SRC
+	git clone https://github.com/disheng222/SZ.git
+	popd
+fi
+
 if [[ $DOWNLOAD_ONLY == 1 ]] ; then
   exit 0
 fi
@@ -97,6 +103,16 @@ if [[ ! -e libcnoise.a ]] ; then
 	BUILD=1
 fi
 
+if [[ ! -e libsz.a ]] ; then
+	echo "  Building SZ"
+	mkdir SZ || true
+	pushd SZ > /dev/null
+	CFLAGS="-I$SRC/SZ/sz/include -I$SRC/SZ/zlib"  $SRC/SZ/configure  --prefix=$TGT
+	make -j install
+	popd > /dev/null
+	BUILD=1
+fi
+
 if [[ $BUILD == 1 ]] ; then
   mkdir -p include/fpzip include/zfp include/cnoise
   cp $FPZIP/inc/* include/fpzip
@@ -104,8 +120,8 @@ if [[ $BUILD == 1 ]] ; then
 	cp cnoise/cnoise.h include/cnoise
 
   rm *.a || true # ignore error
-  cp $(find -name "*.a") .
-	echo "[OK]"
+  mv $(find -name "*.a") .
+  echo "[OK]"
 else
-	echo "[Already built]"
+  echo "[Already built]"
 fi
