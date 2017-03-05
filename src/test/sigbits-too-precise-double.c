@@ -33,5 +33,5 @@ int main(void)
     free(dest);
     free(ctx);
 
-    return ret != SCIL_PRECISION_ERR;
+    return ret;
 }

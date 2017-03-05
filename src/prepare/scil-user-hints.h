@@ -69,12 +69,6 @@ typedef struct
      * 1-3) */
     double absolute_tolerance;
 
-    /** \brief absolute tolerable error (e.g. 1 means 1%) */
-    double absolute_tolerance_percent_max;
-
-    /** \brief absolute tolerable error (e.g. 1 means 1%) */
-    double absolute_tolerance_percent_min;
-
     /** \brief Number of significant digits in decimal */
     int significant_digits;
 
