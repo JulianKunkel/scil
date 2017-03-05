@@ -107,7 +107,7 @@ if [[ ! -e libsz.a ]] ; then
 	echo "  Building SZ"
 	mkdir SZ || true
 	pushd SZ > /dev/null
-	CFLAGS="-I$SRC/SZ/sz/include -I$SRC/SZ/zlib"  $SRC/SZ/configure  --prefix=$PWD/install
+	CFLAGS="-I$SRC/SZ/sz/include -I$SRC/SZ/zlib -fPIC"  $SRC/SZ/configure  --disable-shared --prefix=$PWD/install
 	make -j install
 	popd > /dev/null
 	BUILD=1
@@ -121,7 +121,7 @@ if [[ $BUILD == 1 ]] ; then
   cp -r ./SZ/install/include/* include/sz
 
   rm *.a || true # ignore error
-  mv $(find -name "*.a") .
+  cp $(find -name "*.a") .
   echo "[OK]"
 else
   echo "[Already built]"

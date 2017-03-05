@@ -61,7 +61,7 @@ static int check_compress_lossless_needed(scil_context_t* ctx)
 static void fix_double_setting(double* dbl)
 {
     if (*dbl <= SCIL_ACCURACY_DBL_IGNORE && *dbl >= SCIL_ACCURACY_DBL_IGNORE) {
-        *dbl = DBL_MAX;
+        *dbl = 0.0;
     }
 }
 
@@ -140,9 +140,9 @@ int scilPr_create_context(scil_context_t** out_ctx,
 	}
 
     ctx->lossless_compression_needed = check_compress_lossless_needed(ctx);
-    fix_double_setting(&oh->relative_tolerance_percent);
-    fix_double_setting(&oh->relative_err_finest_abs_tolerance);
-    fix_double_setting(&oh->absolute_tolerance);
+    //fix_double_setting(&oh->relative_tolerance_percent);
+    //fix_double_setting(&oh->relative_err_finest_abs_tolerance);
+    //fix_double_setting(&oh->absolute_tolerance);
     // TODO handle float differently.
 	  // Why? hints can be double while compressing float-data.
 
