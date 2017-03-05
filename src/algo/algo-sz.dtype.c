@@ -22,31 +22,29 @@
 #include <algo/algo-sz.h>
 #include <scil-util.h>
 
+static struct sz_params * params = NULL;
 
 static void init_sz_if_needed(){
-  static int sz_initialized = 0;
-  if (sz_initialized) return;
-  sz_initialized = 1;
-
-  struct sz_params p;
-  memset(& p, -1, sizeof(p));
-  p.dataEndianType = LITTLE_ENDIAN_DATA;
-  p.max_quant_intervals = 65536;
-  p.quantization_intervals = 0;
-  //p.sol_ID = 101;
-  p.layers = 1;
-  p.sampleDistance = 100;
-  p.predThreshold = 0.97;
-  p.offset = 0;
-  p.szMode = SZ_BEST_COMPRESSION;
+  if (params) return;
+  params = malloc(sizeof(struct sz_params));
+  struct sz_params * p = params;
+  memset(p, -1, sizeof(struct sz_params));
+  p->dataEndianType = LITTLE_ENDIAN_DATA;
+  p->max_quant_intervals = 65536;
+  p->quantization_intervals = 0;
+  p->layers = 1;
+  p->sampleDistance = 100;
+  p->predThreshold = 0.97;
+  p->offset = 0;
+  p->szMode = SZ_BEST_COMPRESSION;
   //p.gzipMode = Z_BEST_SPEED;
-  p.errorBoundMode = ABS; //ABS_AND_REL
-  p.absErrBound = 0.0001;
-  p.relBoundRatio = 0.001;
-  p.pw_relBoundRatio = 0.000001;
-  p.segment_size = 32;
+  p->errorBoundMode = ABS; //ABS_AND_REL
+  p->absErrBound = 0.0001;
+  p->relBoundRatio = 0.001;
+  p->pw_relBoundRatio = 0.000001;
+  p->segment_size = 32;
 
-  SZ_Init_Params(& p);
+  SZ_Init_Params(p);
 }
 
 //Repeat for each data type
@@ -63,16 +61,20 @@ int scil_sz_compress_<DATATYPE>(const scil_context_t* ctx,
   double reltol = ctx->hints.relative_tolerance_percent / 100.0;
   int mode = 0;
   if (abstol > 0.0 && reltol > 0.0){
+    //assert(0 && "Not supported!");
+    // TODO: remember rel tolerance is based on the delta: max-min for SZ but for us it is based on max
     mode = ABS_AND_REL;
   }else if(reltol > 0.0 ){
+    // TODO: remember rel tolerance is based on the delta: max-min for SZ but for us it is based on max
     mode = REL;
   }else{
     mode = ABS;
   }
-  printf("Running SZ: with %d %f %f\n", mode, abstol, reltol);
+  //printf("Running SZ: with %d %f %f\n", mode, abstol, reltol);
 
-  int ret = SZ_compress_args2(SZ_<DATATYPE_UPPER>, source, dest, & size, mode, abstol, reltol, 0, dims->length[3], dims->length[2], dims->length[1], dims->length[0]);
-  printf("Returns: %d\n", size);
+  int ret;
+  ret = SZ_compress_args2(SZ_<DATATYPE_UPPER>, source, dest, & size, mode, abstol, reltol, 0, dims->length[3], dims->length[2], dims->length[1], dims->length[0]);
+  //printf("Returns: %d\n", size);
   if (ret == 0){
     *dest_size = size;
     return SCIL_NO_ERR;
@@ -88,7 +90,7 @@ int scil_sz_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
                                       size_t source_size){
   init_sz_if_needed();
   int size = (int) source_size;
-  printf("Decompress\n");
+  //printf("Decompress %d %d\n", size, dims->length[0]);
   int elems = SZ_decompress_args(SZ_<DATATYPE_UPPER>, source, size, (void*) dest, 0, dims->length[3], dims->length[2], dims->length[1], dims->length[0]);
 
   if (elems < 0){

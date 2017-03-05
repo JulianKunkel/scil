@@ -723,22 +723,22 @@ int scil_validate_compression(SCIL_Datatype_t datatype, const void* restrict dat
 
         // check if tolerance level is met:
         ret = SCIL_NO_ERR;
-        if (a.absolute_tolerance > h.absolute_tolerance) {
+        if (h.absolute_tolerance > 0.0 && a.absolute_tolerance > h.absolute_tolerance) {
             debug("Validation error absolute_tolerance %f > %f\n",
                   a.absolute_tolerance,
                   h.absolute_tolerance);
             ret = SCIL_PRECISION_ERR;
         }
-        if (a.relative_tolerance_percent > h.relative_tolerance_percent) {
+        if (h.relative_tolerance_percent > 0.0 && a.relative_tolerance_percent > h.relative_tolerance_percent) {
             debug("Validation error relative_tolerance_percent %f > %f\n",
                   a.relative_tolerance_percent,
                   h.relative_tolerance_percent);
             ret = SCIL_PRECISION_ERR;
         }
-        if (a.relative_err_finest_abs_tolerance >
+        if (h.relative_err_finest_abs_tolerance > 0.0 && a.relative_err_finest_abs_tolerance >
             h.relative_err_finest_abs_tolerance) {
             debug(
-                "Validation error relative_err_finest_abs_tolerance %f < %f\n",
+                "Validation error relative_err_finest_abs_tolerance %f > %f\n",
                 a.relative_err_finest_abs_tolerance,
                 h.relative_err_finest_abs_tolerance);
             ret = SCIL_PRECISION_ERR;
