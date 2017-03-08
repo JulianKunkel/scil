@@ -107,7 +107,7 @@ if [[ ! -e libsz.a ]] ; then
 	echo "  Building SZ"
 	mkdir SZ || true
 	pushd SZ > /dev/null
-	CFLAGS="-I$SRC/SZ/sz/include -I$SRC/SZ/zlib -fPIC"  $SRC/SZ/configure  --disable-shared --prefix=$PWD/install
+	CFLAGS="-I$SRC/SZ/sz/include -I$SRC/SZ/zlib -fPIC -O3"  $SRC/SZ/configure  --disable-shared --prefix=$PWD/install
 	make -j install
 	popd > /dev/null
 	BUILD=1
