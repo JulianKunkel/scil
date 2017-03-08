@@ -99,7 +99,7 @@ int scil_zfp_precision_compress_<DATATYPE>(const scil_context_t* ctx,
 
     /*  zfp_stream_set_rate(zfp, rate, type, 3, 0); */
     uint actual_precision = zfp_stream_set_precision(zfp, precision, zfp_type_<DATATYPE>);
-    assert(actual_precision == precision);
+    //assert(actual_precision == precision);
 
     size_t bufsize = zfp_stream_maximum_size(zfp, field);
     bitstream* stream = stream_open(dest, bufsize);
