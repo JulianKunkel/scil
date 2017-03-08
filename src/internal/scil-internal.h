@@ -21,11 +21,11 @@
 #include <stdio.h>
 #include <assert.h>
 
-#ifdef DEBUG
+//#ifdef DEBUG
   #define debug(...) fprintf(stderr, "[SCIL DEBUG] "__VA_ARGS__);
-#else
-  #define debug(...)
-#endif
+//#else
+//  #define debug(...)
+//#endif
 
 #ifdef DEBUG_INTERNALS
   #define debugI(...) fprintf(stderr, "[SCIL DEBUG I] "__VA_ARGS__);

@@ -4,6 +4,10 @@ if ( EXISTS ${LIBNETCDF_LIBRARIES} )
 endif()
 
 add_library(scil-tools SHARED ${FILE_PLUGINS_EXTRA} "file-csv.c" "file-plugin.c" "file-bin.c")
-target_link_libraries(scil-tools ${LIBNETCDF_LIBRARIES})
+
+if ( EXISTS ${LIBNETCDF_LIBRARIES} )
+  target_link_libraries(scil-tools ${LIBNETCDF_LIBRARIES})
+  target_compile_definitions(scil-tools PUBLIC HAVE_NETCDF)
+endif()
 
 install(TARGETS scil-tools LIBRARY DESTINATION lib)
