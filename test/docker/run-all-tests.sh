@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# ARGS=" /bin/bash $@"
 ARGS=" /data/test/docker/run-machine-test.sh $@"
 OPT="-it --rm -u $(id -u):$(id -g) -v $PWD/../../:/data/"
 ERROR=0
@@ -12,6 +13,8 @@ ERROR=$(($ERROR+$?))
 docker run $OPT -h centos6 kunkel/scil:centos6 $ARGS
 ERROR=$(($ERROR+$?))
 docker run $OPT -h centos7 kunkel/scil:centos7 $ARGS
+ERROR=$(($ERROR+$?))
+docker run $OPT -h archlinux kunkel/scil:archlinux $ARGS
 ERROR=$(($ERROR+$?))
 
 if [[ $ERROR != 0 ]] ; then
