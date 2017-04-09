@@ -1,4 +1,6 @@
 services:
   - docker
 script:
-  - bash -c "cd test/docker; docker build -t kunkel/scil:ubuntu14.04 ubuntu14.04; ./run-travis.sh"
+  - cd test/docker 
+  - docker build -t kunkel/scil:ubuntu14.04 ubuntu14.04
+  - ./run-travis.sh
