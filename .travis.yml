@@ -1,0 +1,4 @@
+services:
+  - docker
+script:
+  - bash -c "cd test/docker; ./run-travis.sh"
