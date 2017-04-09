@@ -22,6 +22,8 @@ ERROR=$(($ERROR+$?))
 
 if [[ $ERROR != 0 ]] ; then
 	echo "Errors occured: $ERROR"
+    exit 1
 else
 	echo "OK all tests passed!"
+    exit 0
 fi
