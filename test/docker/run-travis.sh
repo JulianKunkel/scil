@@ -2,7 +2,7 @@
 
 # ARGS=" /bin/bash $@"
 ARGS=" /data/test/docker/run-machine-test.sh $@"
-OPT="-it --rm -u $(id -u):$(id -g) -v $PWD/../../:/data/"
+OPT="-it --rm -v $PWD/../../:/data/"
 ERROR=0
 # While we would like to test on all systems it really slows the travis build down
 # Travis does not cache any docker images so they have to be rebuild each time
