@@ -2,6 +2,7 @@
 
 # ARGS=" /bin/bash $@"
 ARGS=" /data/test/docker/run-machine-test.sh $@"
+# We cant take the -u option with the current user here as the travis build user might not exist in the docker container
 OPT="-it --rm -v $PWD/../../:/data/"
 ERROR=0
 # While we would like to test on all systems it really slows the travis build down
