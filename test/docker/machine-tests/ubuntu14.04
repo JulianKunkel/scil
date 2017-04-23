@@ -19,11 +19,11 @@ do
 done
 
 if [[ $CLEAN == 1 ]] ; then
-   echo "Cleaning"
-   rm -rf $BUILD
+    echo "Cleaning"
+    rm -rf $BUILD
 fi
-  if [[ ! -e $BUILD/CMakeCache.txt ]] ; then
-    ./configure --build-dir=$BUILD --debug --coverage || exit 1
+if [[ ! -e $BUILD/CMakeCache.txt ]] ; then
+    ./configure --build-dir=$BUILD --debug --code-coverage || exit 1
 fi
 pushd $BUILD > /dev/null
 make || exit 1
