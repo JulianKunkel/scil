@@ -12,7 +12,6 @@ function help(){
 	echo "specify them in the traditional way and get the equivalent cmake command."
 	echo "Use the following options to change default paths."
 	echo "--prefix=<dir>           : installation prefix"
-	echo "--lz4=<dir>              : path to lz4"
 	echo "--lgsl=<dir>             : path to lib-gsl"
 	echo "--lzlib=<dir>            : path to lzlib"
 	echo "--netcdf=<dir>           : path to NetCDF"
@@ -92,7 +91,7 @@ function reconfigure(){
 	exit $?
 }
 
-set -- `getopt -u -l "help,version,debug,reconfigure,prefix:,plantuml-jar-dir:,netcdf:,with-cc:,with-cxx:,verbose,build-dir:,lzlib:,lgsl:,lz4:,code-coverage" -o "hV" -- "$@"`
+set -- `getopt -u -l "help,version,debug,reconfigure,prefix:,plantuml-jar-dir:,netcdf:,with-cc:,with-cxx:,verbose,build-dir:,lzlib:,lgsl:,code-coverage" -o "hV" -- "$@"`
 test $# -lt 1  && exit 1
 while test $# -gt 0
 do
@@ -100,7 +99,6 @@ do
 		--help) help; exit;;
 		--reconfigure) reconfigure;;
 		--version) cmake --version; exit;;
-		--lz4) check "$2" "lz4"; shift;;
 		--lgsl) check "$2" "gsl"; shift;;
 		--lzlib) check "$2" "z"; shift;;
 		--netcdf) checknetcdf "$2" ; shift;;

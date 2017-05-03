@@ -71,9 +71,6 @@ find_library(LIBZ_LIBRARIES NAMES z PATHS ENV ADDITIONAL_LIB_PATH)
 find_path(LIBGSL_INCLUDE_DIRS NAMES gsl/gsl_errno.h PATHS ENV ADDITIONAL_INC_PATH)
 find_library(LIBGSL_LIBRARIES NAMES gsl PATHS ENV ADDITIONAL_LIB_PATH)
 
-find_path(LIBLZ4_INCLUDE_DIRS NAMES lz4.h PATHS ENV ADDITIONAL_INC_PATH)
-find_library(LIBLZ4_LIBRARIES NAMES lz4 PATHS ENV ADDITIONAL_LIB_PATH)
-
 find_path(LIBNETCDF_INCLUDE_DIRS NAMES netcdf.h PATHS ENV ADDITIONAL_INC_PATH)
 find_library(LIBNETCDF_LIBRARIES NAMES netcdf PATHS ENV ADDITIONAL_LIB_PATH)
 
@@ -178,7 +175,8 @@ include_directories(
   ${DEPS_COMPILED_DIR}/include/zfp
   ${DEPS_COMPILED_DIR}/include/fpzip
   ${DEPS_COMPILED_DIR}/include/cnoise
-	${DEPS_COMPILED_DIR}/include/sz
+  ${DEPS_COMPILED_DIR}/include/sz
+  ${DEPS_COMPILED_DIR}/include/
 )
 
 target_link_libraries(scil ${LIBZ_LIBRARIES})
@@ -186,8 +184,8 @@ target_link_libraries(scil
   ${DEPS_COMPILED_DIR}/libfpzip.a
   ${DEPS_COMPILED_DIR}/libzfp.a
   ${DEPS_COMPILED_DIR}/libcnoise.a
-	${DEPS_COMPILED_DIR}/libsz.a
-  lz4
+  ${DEPS_COMPILED_DIR}/libsz.a
+  ${DEPS_COMPILED_DIR}/liblz4.a
   rt
   )
 

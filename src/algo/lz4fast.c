@@ -16,14 +16,15 @@
 #include <algo/lz4fast.h>
 
 #include <string.h>
-#include <lz4.h>
+#include <lz4/lz4.h>
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_lz4fast_compress(const scil_context_t* ctx, byte* restrict dest, size_t * restrict out_size, const byte*restrict source, const size_t source_size){
     int size;
     // store the size of the data
     *((int*) dest) = source_size;
-    size = LZ4_compress ((const char *) (source), (char *) dest + 4, source_size);
+    // normal compression, not fast
+    size = LZ4_compress_fast((const char *) (source), (char *) dest + 4, source_size, 2*source_size, 1);
     *out_size = size + 4;
 
     if (size == 0){

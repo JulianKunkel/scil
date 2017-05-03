@@ -69,6 +69,12 @@ if [[ ! -e $SRC/CubismZ ]] ; then
 	popd
 fi
 
+if [[ ! -e $SRC/lz4 ]] ; then
+	pushd $SRC
+	git clone https://github.com/lz4/lz4.git
+	popd
+fi
+
 if [[ $DOWNLOAD_ONLY == 1 ]] ; then
   exit 0
 fi
@@ -109,6 +115,17 @@ if [[ ! -e libcnoise.a ]] ; then
 	BUILD=1
 fi
 
+if [[ ! -e liblz4.a ]] ; then
+	mkdir -p include/lz4 || true
+	pushd $SRC/lz4/ > /dev/null
+	make clean || true
+	make -j 4 CFLAGS="-fPIC"
+	popd > /dev/null
+	cp $SRC/lz4/lib/lz4.h include/lz4/
+	cp $SRC/lz4/lib/liblz4.a .
+	BUILD=1
+fi
+
 if [[ ! -e libsz.a ]] ; then
 	echo "  Building SZ"
 	mkdir SZ || true
@@ -121,7 +138,6 @@ fi
 
 if [[ false ]] ; then
 	mkdir CubismZ
-CubismZ/Cubism/source
 fi
 
 if [[ $BUILD == 1 ]] ; then
