@@ -135,8 +135,9 @@ int main(int argc, char ** argv){
   size_t array_size;
 
   scil_timer timer;
+  scil_timer totalRun;
   double t_read = 0.0, t_write = 0.0, t_compress = 0.0, t_decompress = 0.0;
-
+  scilU_start_timer(& totalRun);
   scilU_start_timer(& timer);
   ret = in_plugin->readData(in_file, & input_data, & input_datatype, & dims, & read_data_size);
   if (ret != 0){
@@ -187,19 +188,6 @@ int main(int argc, char ** argv){
     ret = scil_compress(result, input_size, input_data, & dims, & buff_size, ctx);
     t_compress = scilU_stop_timer(timer);
     assert(ret == SCIL_NO_ERR);
-    if (validate) {
-        ret = scil_validate_compression(input_datatype, input_data, &dims, result, buff_size, ctx, &out_accuracy);
-        if(ret != SCIL_NO_ERR){
-          printf("SCIL validation error!\n");
-        }
-        if(print_hints){
-          printf("Validation accuracy:");
-          scilPr_print_user_hints(& out_accuracy);
-        }
-    }
-
-    ret = scilPr_destroy_context(ctx);
-    assert(ret == SCIL_NO_ERR);
 
     byte* tmp_buff = (byte*) SAFE_MALLOC(array_size);
     scilU_start_timer(& timer);
@@ -210,6 +198,20 @@ int main(int argc, char ** argv){
     free(tmp_buff);
 
     output_datatype = input_datatype;
+
+    if (validate) {
+        ret = scil_validate_compression(input_datatype, input_data, &dims, result, buff_size, ctx, &out_accuracy);
+        if(ret != SCIL_NO_ERR){
+          printf("SCIL validation error!\n");
+        }
+        if(print_hints){
+          printf("Validation accuracy:");
+          scilPr_print_user_hints(& out_accuracy);
+        }
+    }
+    ret = scilPr_destroy_context(ctx);
+    assert(ret == SCIL_NO_ERR);
+
   } else if (compress){
     printf("...compression\n");
     scilU_start_timer(& timer);
@@ -219,7 +221,13 @@ int main(int argc, char ** argv){
 
     if (validate) {
         ret = scil_validate_compression(input_datatype, input_data, &dims, output_data, buff_size, ctx, &out_accuracy);
-        assert(ret == SCIL_NO_ERR);
+        if(ret != SCIL_NO_ERR){
+          printf("SCIL validation error!\n");
+        }
+        if(print_hints){
+          printf("Validation accuracy:");
+          scilPr_print_user_hints(& out_accuracy);
+        }
     }
     ret = scilPr_destroy_context(ctx);
     assert(ret == SCIL_NO_ERR);
@@ -252,7 +260,7 @@ int main(int argc, char ** argv){
       exit(1);
     }
   }
-	double runtime = scilU_stop_timer(timer);
+	double runtime = scilU_stop_timer(totalRun);
   if(measure_time){
     printf("Size:\n");
     printf(" size, %ld\n size_compressed, %ld\n ratio, %f\n", array_size, buff_size, ((double) buff_size) / array_size);

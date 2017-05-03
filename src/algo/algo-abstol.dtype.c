@@ -89,7 +89,7 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
     scil_find_minimum_maximum_<DATATYPE>(source, count, &min, &max);
 
     // Locally assigning absolute tolerance
-    double abs_tol = ctx->hints.absolute_tolerance * 2.0;
+    double abs_tol = ctx->hints.absolute_tolerance * 1.95; // prevent rounding errors
 
     // Get needed bits per compressed number in data
     uint64_t bits_per_value = scil_calculate_bits_needed_<DATATYPE>(min, max, abs_tol);
