@@ -63,6 +63,12 @@ if [[ ! -e $SRC/SZ ]] ; then
 	popd
 fi
 
+if [[ ! -e $SRC/CubismZ ]] ; then
+	pushd $SRC
+	git clone https://github.com/cselab/CubismZ.git
+	popd
+fi
+
 if [[ $DOWNLOAD_ONLY == 1 ]] ; then
   exit 0
 fi
@@ -111,6 +117,11 @@ if [[ ! -e libsz.a ]] ; then
 	make -j install
 	popd > /dev/null
 	BUILD=1
+fi
+
+if [[ false ]] ; then
+	mkdir CubismZ
+CubismZ/Cubism/source
 fi
 
 if [[ $BUILD == 1 ]] ; then

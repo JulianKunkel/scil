@@ -94,14 +94,17 @@ void scilU_subtract_data_<DATATYPE>(const <DATATYPE>* restrict in, <DATATYPE>* r
   }
 }
 
-
 uint64_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum,
                                                <DATATYPE> maximum,
                                                double absolute_tolerance){
+    if(absolute_tolerance <= 0.0 || (double)(maximum - minimum) < absolute_tolerance){
+      return 0;
+    }
     return (uint64_t) ceil( log2( 1.0 + (double)(maximum - minimum) / absolute_tolerance ) );
 }
 
 #include <stdio.h>
+
 int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* restrict dest,
                                            const <DATATYPE>* restrict source,
                                            size_t count,
