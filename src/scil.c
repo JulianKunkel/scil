@@ -357,7 +357,7 @@ int scil_compress(byte* restrict dest,
             const int preserve = input_size - datatypes_size;
             memcpy((char*)dst + out_size, (char*)src + datatypes_size, preserve);
             out_size += preserve;
-            scilU_print_buffer(dst, out_size);
+            //scilU_print_buffer(dst, out_size);
         }
 
         remaining_compressors--;
