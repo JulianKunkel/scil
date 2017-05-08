@@ -16,6 +16,7 @@
 #include <algo/algo-wavelets.h>
 #include <algo/algo-allquant.h>
 #include <algo/algo-sz.h>
+#include <algo/precond-delta.h>
 
 #include <scil-algorithm.h>
 

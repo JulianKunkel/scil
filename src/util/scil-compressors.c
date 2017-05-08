@@ -18,7 +18,8 @@ scilI_algorithm_t* algo_array[] = {
 	& algo_swage,
 	& algo_wavelets,
 	& algo_allquant,
-	& algo_sz,
+	& algo_sz, // 13
+	& algo_precond_delta, // 14
 	NULL
 };
 
