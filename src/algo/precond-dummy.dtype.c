@@ -24,7 +24,7 @@
 
 // Repeat for each data type
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-int scil_dummy_precond_compress_<DATATYPE>(const scil_context_t* ctx, <DATATYPE>* restrict data_out, byte*restrict header, int * header_size_out, <DATATYPE>*restrict data_in, const scil_dims_t* dims){
+static int scil_dummy_precond_compress_<DATATYPE>(const scil_context_t* ctx, <DATATYPE>* restrict data_out, byte*restrict header, int * header_size_out, <DATATYPE>*restrict data_in, const scil_dims_t* dims){
   size_t size = scilPr_get_dims_size(dims, SCIL_TYPE_<DATATYPE_UPPER>);
   memcpy(data_out, data_in, size);
   memcpy(header, "DUMMY", 5);
@@ -32,7 +32,7 @@ int scil_dummy_precond_compress_<DATATYPE>(const scil_context_t* ctx, <DATATYPE>
   return SCIL_NO_ERR;
 }
 
-int scil_dummy_precond_decompress_<DATATYPE>(<DATATYPE>*restrict data_out, scil_dims_t* dims, <DATATYPE>*restrict compressed_buf_in, byte*restrict header, int * header_parsed_out){
+static int scil_dummy_precond_decompress_<DATATYPE>(<DATATYPE>*restrict data_out, scil_dims_t* dims, <DATATYPE>*restrict compressed_buf_in, byte*restrict header, int * header_parsed_out){
   size_t size = scilPr_get_dims_size(dims, SCIL_TYPE_<DATATYPE_UPPER>);
   memcpy(data_out, compressed_buf_in, size);
   if (memcmp(header-4, "DUMMY", 5) != 0){

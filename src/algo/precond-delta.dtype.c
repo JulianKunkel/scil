@@ -72,9 +72,6 @@ int scil_delta_precond_compress_<DATATYPE>(const scil_context_t* ctx, <DATATYPE>
 
 int scil_delta_precond_decompress_<DATATYPE>(<DATATYPE>*restrict data_out, scil_dims_t* dims, <DATATYPE>*restrict data_in, byte*restrict header, int * header_parsed_out){
   const size_t size = scilPr_get_dims_count(dims);
-  <DATATYPE>* din = (<DATATYPE>*) data_in;
-  <DATATYPE>* dout = (<DATATYPE>*) data_out;
-  dout[0] = din[0];
   switch(sizeof(<DATATYPE>)){
     case 8: {
       uint64_t* din = (uint64_t*) data_in;
