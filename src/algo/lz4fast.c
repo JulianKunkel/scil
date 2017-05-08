@@ -24,7 +24,7 @@ int scil_lz4fast_compress(const scil_context_t* ctx, byte* restrict dest, size_t
     // store the size of the data
     *((int*) dest) = source_size;
     // normal compression, not fast
-    size = LZ4_compress_fast((const char *) (source), (char *) dest + 4, source_size, 2*source_size, 1);
+    size = LZ4_compress_fast((const char *) (source), (char *) dest + 4, source_size, 2*source_size, 17);
     *out_size = size + 4;
 
     if (size == 0){
