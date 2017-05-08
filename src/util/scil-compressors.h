@@ -17,6 +17,7 @@
 #include <algo/algo-allquant.h>
 #include <algo/algo-sz.h>
 #include <algo/precond-delta.h>
+#include <algo/precond-fp-delta.h>
 
 #include <scil-algorithm.h>
 

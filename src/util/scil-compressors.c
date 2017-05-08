@@ -20,6 +20,7 @@ scilI_algorithm_t* algo_array[] = {
 	& algo_allquant,
 	& algo_sz, // 13
 	& algo_precond_delta, // 14
+	& algo_precond_fp_delta, // 15
 	NULL
 };
 
