@@ -189,7 +189,7 @@ int main(int argc, char ** argv){
     t_compress = scilU_stop_timer(timer);
     assert(ret == SCIL_NO_ERR);
 
-    byte* tmp_buff = (byte*) SAFE_MALLOC(array_size);
+    byte* tmp_buff = (byte*) SAFE_MALLOC(input_size);
     scilU_start_timer(& timer);
     ret = scil_decompress(input_datatype, output_data, & dims, result, buff_size, tmp_buff);
     t_decompress = scilU_stop_timer(timer);
