@@ -35,9 +35,8 @@ static int verbose = 0;
 static int compress = 0;
 static int uncompress = 0;
 static int cycle = 0;
-static int no_write = 0;
 static char * in_file = "";
-static char * out_file = "";
+static char * out_file = NULL;
 static int compute_residual = 0;
 
 static int measure_time = 0;
@@ -68,7 +67,7 @@ int main(int argc, char ** argv){
 
   option_help known_args[] = {
     {'i', "in_file", "Input file (file format depends on mode)", OPTION_REQUIRED_ARGUMENT, 's', & in_file},
-    {'o', "out_file", "Output file (file format depends on mode)", OPTION_REQUIRED_ARGUMENT, 's', & out_file},
+    {'o', "out_file", "Output file (file format depends on mode)", OPTION_OPTIONAL_ARGUMENT, 's', & out_file},
     {'I', "in_file_format", "Input file format, list shows all available formats", OPTION_OPTIONAL_ARGUMENT, 's', & in_file_format},
     {'O', "out_file_format", "Output file format", OPTION_OPTIONAL_ARGUMENT, 's', & out_file_format},
     {'x', "decompress", "Infile is expected to be a binary compressed with this tool, outfile a CSV file",OPTION_FLAG, 'd', & uncompress},
@@ -91,7 +90,6 @@ int main(int argc, char ** argv){
     {0, "hint-fake-absolute-tolerance-percent-max", "This is a fake hint. Actually it sets the abstol value based on the given percentage (enter 0.1 aka 10%% tolerance)",  OPTION_OPTIONAL_ARGUMENT, 'F', & fake_abstol_value},
 
     {0, "cycle", "For testing: Compress, then decompress and store the output. Files are CSV files",OPTION_FLAG, 'd' , & cycle},
-    {0, "no-write", "For testing: do not write the output",OPTION_FLAG, 'd' , & no_write},
     LAST_OPTION
   };
 
@@ -253,7 +251,7 @@ int main(int argc, char ** argv){
   }
 
   // todo reformat into output format, if neccessary
-  if (! no_write){
+  if (out_file != NULL){
     if ( compute_residual && (uncompress || cycle) ){
       // compute the residual error
       scilU_subtract_data(input_datatype, input_data, output_data, & dims);
