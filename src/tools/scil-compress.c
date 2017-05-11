@@ -145,6 +145,13 @@ int main(int argc, char ** argv){
     exit(1);
   }
   t_read = scilU_stop_timer(timer);
+
+  if(verbose > 0){
+    double max, min;
+    scilU_find_minimum_maximum(input_datatype, input_data, & dims, & min, & max);
+    printf("Min: %.10e Max: %.10e\n", min, max);
+  }
+
   array_size = scilPr_get_dims_size(& dims, input_datatype);
 
 
@@ -152,7 +159,7 @@ int main(int argc, char ** argv){
     double max, min;
     scilU_find_minimum_maximum(input_datatype, input_data, & dims, & min, & max);
     if (min < 0 && max < -min){
-	max = -min;
+	     max = -min;
     }
 
     double new_abs_tol = max * fake_abstol_value;

@@ -3,7 +3,7 @@ if ( EXISTS ${LIBNETCDF_LIBRARIES} )
   include_directories(${LIBNETCDF_INCLUDE_DIRS})
 endif()
 
-add_library(scil-tools SHARED ${FILE_PLUGINS_EXTRA} "file-csv.c" "file-plugin.c" "file-bin.c")
+add_library(scil-tools SHARED ${FILE_PLUGINS_EXTRA} "file-csv.c" "file-plugin.c" "file-bin.c" "file-brick-of-floats.c")
 
 if ( EXISTS ${LIBNETCDF_LIBRARIES} )
   target_link_libraries(scil-tools ${LIBNETCDF_LIBRARIES})

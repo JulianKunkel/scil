@@ -26,12 +26,14 @@ static char delim = ',';
 static int ignore_header = 0;
 static int data_type_float = 0;
 static char comment_char = '#';
+static char scientific = 0;
 
 static option_help options [] = {
   {'d', "delim", "Separator", OPTION_OPTIONAL_ARGUMENT, 'c', & delim},
   {0, "ignore-header", "Ignore the header/do not write it", OPTION_FLAG, 'd', & ignore_header},
   {'f', "float", "Use float as datatype for data without header, otherwise double.", OPTION_FLAG, 'd', & data_type_float},
   {'C', "comment-delim", "Characters used in the beginning of a line indicating a comment", OPTION_OPTIONAL_ARGUMENT, 'c', & comment_char},
+  {'S', "scientific", "Process scientific notation.", OPTION_FLAG, 'd', & scientific},
   LAST_OPTION
 };
 
@@ -135,7 +137,11 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
     x = 0;
     while( data != NULL ){
       // count the number of elements.
-      sscanf(data, "%lf", & dbl);
+      if (scientific){
+        sscanf(data, "%le", & dbl);
+      }else{
+        sscanf(data, "%lf", & dbl);
+      }
       switch(*out_datatype){
         case(SCIL_TYPE_DOUBLE):
           ((double*) input_data)[pos] = dbl;
@@ -173,10 +179,18 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
 static void printToFile(FILE * f, const byte * buf, size_t position,  SCIL_Datatype_t datatype){
   switch(datatype){
     case(SCIL_TYPE_DOUBLE):
-      fprintf(f, "%.17f", ((double*) buf)[position]);
+      if(scientific){
+        fprintf(f, "%.17e", ((double*) buf)[position]);
+      }else{
+        fprintf(f, "%.17f", ((double*) buf)[position]);
+      }
       break;
     case(SCIL_TYPE_FLOAT):
-      fprintf(f, "%.8f", (double) ((float*) buf)[position]);
+      if(scientific){
+        fprintf(f, "%.8e", (double) ((float*) buf)[position]);
+      }else{
+        fprintf(f, "%.8f", (double) ((float*) buf)[position]);
+      }
       break;
     case(SCIL_TYPE_INT8):
       fprintf(f, "%d", (int8_t) ((int8_t*) buf)[position]);
