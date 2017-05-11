@@ -67,6 +67,30 @@ static <DATATYPE> scil_unquantize_value_<DATATYPE>(uint64_t value,
     return max;
 }
 
+#include<stdio.h>
+void scil_find_minimum_maximum_with_excluded_points_<DATATYPE>(const <DATATYPE>* restrict buffer, size_t count, <DATATYPE>* minimum, <DATATYPE>* maximum, double ignore_up_to, double ignore_from){
+
+    assert(buffer != NULL);
+    assert(minimum != NULL);
+    assert(maximum != NULL);
+
+    <DATATYPE> min = INFINITY_<DATATYPE>;
+    <DATATYPE> max = NINFINITY_<DATATYPE>;
+    
+    for(size_t i = 0; i < count; ++i){
+      if ((double) buffer[i] > ignore_from)
+        continue;
+      if ((double) buffer[i] < ignore_up_to)
+        continue;
+      if (buffer[i] < min) { min = buffer[i]; }
+      if (buffer[i] > max) { max = buffer[i]; }
+    }
+
+    *minimum = min;
+    *maximum = max;
+}
+
+
 void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* restrict buffer,
                                           size_t count,
                                           <DATATYPE>* minimum,

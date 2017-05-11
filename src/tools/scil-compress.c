@@ -55,7 +55,7 @@ static scil_file_plugin_t * in_plugin = NULL;
 static scil_file_plugin_t * out_plugin = NULL;
 
 int main(int argc, char ** argv){
-  scil_context_t* ctx;
+  scil_context_t* ctx = NULL;
   scil_user_hints_t hints;
   scil_user_hints_t out_accuracy;
 
@@ -87,6 +87,8 @@ int main(int argc, char ** argv){
     {0, "hint-decomp-speed-unit", NULL,  OPTION_OPTIONAL_ARGUMENT, 'e', & hints.decomp_speed.unit},
     {0, "hint-comp-speed", NULL,  OPTION_OPTIONAL_ARGUMENT, 'f', & hints.comp_speed.multiplier},
     {0, "hint-decomp-speed", NULL,  OPTION_OPTIONAL_ARGUMENT, 'f', & hints.decomp_speed.multiplier},
+    {0, "hint-lossless-range-up-to", NULL,  OPTION_OPTIONAL_ARGUMENT, 'F', & hints.lossless_data_range_up_to},
+    {0, "hint-lossless-range-from", NULL,  OPTION_OPTIONAL_ARGUMENT, 'F', & hints.lossless_data_range_from},
     {0, "hint-fake-absolute-tolerance-percent-max", "This is a fake hint. Actually it sets the abstol value based on the given percentage (enter 0.1 aka 10%% tolerance)",  OPTION_OPTIONAL_ARGUMENT, 'F', & fake_abstol_value},
 
     {0, "cycle", "For testing: Compress, then decompress and store the output. Files are CSV files",OPTION_FLAG, 'd' , & cycle},
@@ -114,7 +116,6 @@ int main(int argc, char ** argv){
     exit(1);
   }
   ret = scilO_parseOptions(argc-parsed, argv+parsed, out_plugin->get_options(), & printhelp);
-
   if(printhelp != 0){
     printf("\nSynopsis: %s ", argv[0]);
 
@@ -146,7 +147,7 @@ int main(int argc, char ** argv){
 
   if(verbose > 0){
     double max, min;
-    scilU_find_minimum_maximum(input_datatype, input_data, & dims, & min, & max);
+    scilU_find_minimum_maximum_with_excluded_points(input_datatype, input_data, & dims, & min, & max, hints.lossless_data_range_up_to,  hints.lossless_data_range_from);
     printf("Min: %.10e Max: %.10e\n", min, max);
   }
 
@@ -155,7 +156,7 @@ int main(int argc, char ** argv){
 
   if (fake_abstol_value > 0.0){
     double max, min;
-    scilU_find_minimum_maximum(input_datatype, input_data, & dims, & min, & max);
+    scilU_find_minimum_maximum_with_excluded_points(input_datatype, input_data, & dims, & min, & max, hints.lossless_data_range_up_to,  hints.lossless_data_range_from);
     if (min < 0 && max < -min){
 	     max = -min;
     }

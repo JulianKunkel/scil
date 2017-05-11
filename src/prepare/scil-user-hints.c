@@ -47,6 +47,8 @@ void scilPr_initialize_user_hints(scil_user_hints_t* hints)
     hints->absolute_tolerance                = SCIL_ACCURACY_DBL_IGNORE;
     hints->comp_speed.unit   = SCIL_PERFORMANCE_IGNORE;
     hints->decomp_speed.unit = SCIL_PERFORMANCE_IGNORE;
+		hints->lossless_data_range_from = DBL_MAX;
+		hints->lossless_data_range_up_to = -DBL_MAX;
 }
 
 void scilPr_copy_user_hints(scil_user_hints_t * oh, const scil_user_hints_t* hints)

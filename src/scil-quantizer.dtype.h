@@ -50,6 +50,13 @@ void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* restrict buffer,
                                           <DATATYPE>* minimum,
                                           <DATATYPE>* maximum);
 
+void scil_find_minimum_maximum_with_excluded_points_<DATATYPE>(const <DATATYPE>* restrict buffer,
+                                          size_t count,
+                                          <DATATYPE>* minimum,
+                                          <DATATYPE>* maximum,
+                                        double ignore_up_to, double ignore_from);
+
+
 /**
  * \brief Calculates how many bit are needed per value, considering
  *        the quantization relevant parameters.
