@@ -24,7 +24,7 @@ int scil_quantize_compress_<DATATYPE>(const scil_context_t* ctx,
     <DATATYPE> minimum, maximum;
     scilU_find_minimum_maximum_<DATATYPE>(source, count, &minimum, &maximum);
 
-    uint8_t bits_per_value = scil_calculate_bits_needed_<DATATYPE>(minimum, maximum, ctx->hints.absolute_tolerance);
+    uint8_t bits_per_value = scil_calculate_bits_needed_<DATATYPE>(minimum, maximum, ctx->hints.absolute_tolerance, 0, NULL);
     if (bits_per_value > 64)
         return 1; // Quantizing would result in values bigger than UINT64_MAX
 

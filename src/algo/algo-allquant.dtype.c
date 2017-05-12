@@ -98,7 +98,7 @@ int scil_allquant_compress_<DATATYPE>(const scil_context_t* ctx,
     const int sig_bit = ctx->hints.significant_bits;
 
     // Get needed bits per compressed number in data
-    uint64_t bits_per_value = scil_calculate_bits_needed_<DATATYPE>(min, max, abs_tol);
+    uint64_t bits_per_value = scil_calculate_bits_needed_<DATATYPE>(min, max, abs_tol, 0, NULL);
 
     // See if allquant compression makes sense
     if(bits_per_value >= 8 * sizeof(<DATATYPE>)){

@@ -30,7 +30,7 @@ int main(void){
         printf("#Cycle %d with following attributes:\n", i);
         printf("#Absolute tolerance: %.20f, Minimum: %+.20f, Maximum: %+.20f\n", absolute_tolerance, minimum, maximum);
 
-        uint64_t bits_needed = scil_calculate_bits_needed_double(minimum, maximum, absolute_tolerance);
+        uint64_t bits_needed = scil_calculate_bits_needed_double(minimum, maximum, absolute_tolerance, 0, NULL);
 
         printf("#Bits needed per value: %lu\n", bits_needed);
 

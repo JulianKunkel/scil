@@ -20,43 +20,19 @@ static <DATATYPE> scil_unquantize_value_<DATATYPE>(uint64_t value,
     return minimum + (<DATATYPE>)(value * absolute_tolerance);
 }
 
-<DATATYPE> scil_find_minimum_<DATATYPE>(const <DATATYPE>* buffer,
-                                        size_t count){
-    assert(buffer != NULL);
 
-    <DATATYPE> min = INFINITY_<DATATYPE>;
-
-    for(size_t i = 0; i < count; ++i)
-    {
-        if(buffer[i] < min) { min = buffer[i]; }
-    }
-
-    return min;
-}
-
-<DATATYPE> scil_find_maximum_<DATATYPE>(const <DATATYPE>* buffer,
-                                        size_t count){
-
-    assert(buffer != NULL);
-
-    <DATATYPE> max = NINFINITY_<DATATYPE>;
-
-    for(size_t i = 0; i < count; ++i)
-    {
-        if(buffer[i] > max) { max = buffer[i]; }
-    }
-
-    return max;
-}
-
-
-uint64_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum,
-                                               <DATATYPE> maximum,
-                                               double absolute_tolerance){
+uint64_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum, <DATATYPE> maximum,  double absolute_tolerance, int reserved_numbers, int * next_free_number){
     if(absolute_tolerance <= 0.0 || (double)(maximum - minimum) < absolute_tolerance){
+      *next_free_number = 0;
       return 0;
     }
-    return (uint64_t) ceil( log2( 1.0 + (double)(maximum - minimum) / absolute_tolerance ) );
+    assert((next_free_number == NULL && reserved_numbers == 0) || (next_free_number != NULL) );
+    double mx = 1.0 + (double)(maximum - minimum) / absolute_tolerance ;
+    if(next_free_number != NULL){
+      *next_free_number = (int) (mx + 0.5) + 1;
+      //printf("calculate bits_needed: %f %d\n", mx, *next_free_number);
+    }
+    return (uint64_t) ceil( log2( mx + reserved_numbers ) );
 }
 
 #include <stdio.h>
@@ -71,7 +47,7 @@ int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* restrict dest,
     assert(dest != NULL);
     assert(source != NULL);
 
-    if(scil_calculate_bits_needed_<DATATYPE>(minimum, maximum, absolute_tolerance) > 53){
+    if(scil_calculate_bits_needed_<DATATYPE>(minimum, maximum, absolute_tolerance, 0, NULL) > 53){
         return SCIL_EINVAL; // Quantizing would result in values bigger than UINT64_MAX
     }
     double real_tolerance = (1 / 1.0) / absolute_tolerance;

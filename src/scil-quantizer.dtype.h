@@ -6,26 +6,6 @@
 
 //Supported datatypes: int8_t int16_t int32_t int64_t float double
 // Repeat for each data type
-/**
- * \brief Finds and returns the smallest value of the given buffer.
- * \param buffer The buffer to scan
- * \param count Element count of the buffer
- * \pre buffer != NULL
- * \return Smallest value in the buffer
- */
-<DATATYPE> scil_find_minimum_<DATATYPE>(const <DATATYPE>* buffer,
-                                        size_t count);
-
-/**
- * \brief Finds and returns the biggest value of the given buffer.
- * \param buffer The buffer to scan
- * \param count Element count of the buffer
- * \pre buffer != NULL
- * \return Biggest value in the buffer
- */
-<DATATYPE> scil_find_maximum_<DATATYPE>(const <DATATYPE>* buffer,
-                                        size_t count);
-
 
 
 /**
@@ -34,11 +14,11 @@
  * \param minimum The minimum value to quantize
  * \param maximum The maximum value to quantize
  * \param absolute_tolerance The maximum, tolerated, absolute error
+ * \param reserved_numbers additionally reserved numbers to distinguish
+ * \param the next free integer number, max be used for the reserved numbers
  * \return Bits needed per value
  */
-uint64_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum,
-                                               <DATATYPE> maximum,
-                                               double absolute_tolerance);
+uint64_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum, <DATATYPE> maximum, double absolute_tolerance, int reserved_numbers, int * next_number);
 
 /**
  * \brief Quantizes the values of the given buffer with a known minimum
