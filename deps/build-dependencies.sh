@@ -135,7 +135,7 @@ if [[ ! -e libsz.a ]] ; then
 fi
 
 if [[ false ]] ; then
-	mkdir CubismZ
+	mkdir CubismZ || true
 fi
 
 if [[ $BUILD == 1 ]] ; then
@@ -147,7 +147,7 @@ if [[ $BUILD == 1 ]] ; then
 
   rm *.a || true # ignore error
   cp $SRC/lz4/lib/lz4.h include/lz4/
-  cp $(find -name "*.a") .
+  cp ./SZ/install/lib/libzlib.a ./SZ/install/lib/libsz.a ./zfp-0.5.0/lib/libzfp.a ./cnoise/libcnoise.a ./fpzip-1.1.0/lib/libfpzip.a .
   cp $SRC/lz4/lib/liblz4.a .
   echo "[OK]"
 else
