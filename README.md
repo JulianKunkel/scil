@@ -1,4 +1,4 @@
-# Scientific Compression Library (SCIL)
+# Scientific Compression Library (SCIL) [![Build Status](https://travis-ci.org/JulianKunkel/scil.svg?branch=master)](https://travis-ci.org/JulianKunkel/scil) [![Codecov Status](https://codecov.io/github/JulianKunkel/scil/coverage.svg?branch=master)
 *****
 
 SCIL is available on [GitHub](https://github.com/JulianKunkel/scil).
