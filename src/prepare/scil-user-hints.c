@@ -49,6 +49,7 @@ void scilPr_initialize_user_hints(scil_user_hints_t* hints)
     hints->decomp_speed.unit = SCIL_PERFORMANCE_IGNORE;
 		hints->lossless_data_range_from = DBL_MAX;
 		hints->lossless_data_range_up_to = -DBL_MAX;
+		hints->fill_value = DBL_MAX;
 }
 
 void scilPr_copy_user_hints(scil_user_hints_t * oh, const scil_user_hints_t* hints)

@@ -2,26 +2,8 @@
 #include <scil-error.h>
 
 #include <assert.h>
-#include <math.h>
-#include <limits.h>
 
-#define INFINITY_double INFINITY
-#define INFINITY_float INFINITY
-
-#define NINFINITY_double -INFINITY
-#define NINFINITY_float -INFINITY
-
-#define INFINITY_int8_t CHAR_MAX
-#define NINFINITY_int8_t CHAR_MIN
-
-#define INFINITY_int16_t SHRT_MAX
-#define NINFINITY_int16_t SHRT_MIN
-
-#define INFINITY_int32_t INT_MAX
-#define NINFINITY_int32_t INT_MIN
-
-#define INFINITY_int64_t LONG_MAX
-#define NINFINITY_int64_t LONG_MIN
+#include <scil-util.h>
 
 //Supported datatypes: int8_t int16_t int32_t int64_t float double
 // Repeat for each data type
@@ -67,56 +49,6 @@ static <DATATYPE> scil_unquantize_value_<DATATYPE>(uint64_t value,
     return max;
 }
 
-#include<stdio.h>
-void scil_find_minimum_maximum_with_excluded_points_<DATATYPE>(const <DATATYPE>* restrict buffer, size_t count, <DATATYPE>* minimum, <DATATYPE>* maximum, double ignore_up_to, double ignore_from){
-
-    assert(buffer != NULL);
-    assert(minimum != NULL);
-    assert(maximum != NULL);
-
-    <DATATYPE> min = INFINITY_<DATATYPE>;
-    <DATATYPE> max = NINFINITY_<DATATYPE>;
-    
-    for(size_t i = 0; i < count; ++i){
-      if ((double) buffer[i] > ignore_from)
-        continue;
-      if ((double) buffer[i] < ignore_up_to)
-        continue;
-      if (buffer[i] < min) { min = buffer[i]; }
-      if (buffer[i] > max) { max = buffer[i]; }
-    }
-
-    *minimum = min;
-    *maximum = max;
-}
-
-
-void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* restrict buffer,
-                                          size_t count,
-                                          <DATATYPE>* minimum,
-                                          <DATATYPE>* maximum){
-
-    assert(buffer != NULL);
-    assert(minimum != NULL);
-    assert(maximum != NULL);
-
-    <DATATYPE> min = INFINITY_<DATATYPE>;
-    <DATATYPE> max = NINFINITY_<DATATYPE>;
-
-    for(size_t i = 0; i < count; ++i){
-        if (buffer[i] < min) { min = buffer[i]; }
-        if (buffer[i] > max) { max = buffer[i]; }
-    }
-
-    *minimum = min;
-    *maximum = max;
-}
-
-void scilU_subtract_data_<DATATYPE>(const <DATATYPE>* restrict in, <DATATYPE>* restrict inout, size_t count){
-  for(size_t i = 0 ; i < count; i++){
-    inout[i] = in[i] - inout[i];
-  }
-}
 
 uint64_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum,
                                                <DATATYPE> maximum,
@@ -178,7 +110,7 @@ int scil_quantize_buffer_<DATATYPE>(uint64_t* restrict dest,
     assert(source != NULL);
 
     <DATATYPE> minimum, maximum;
-    scil_find_minimum_maximum_<DATATYPE>(source, count, &minimum, &maximum);
+    scilU_find_minimum_maximum_<DATATYPE>(source, count, &minimum, &maximum);
 
     return scil_quantize_buffer_minmax_<DATATYPE>(dest, source, count, absolute_tolerance, minimum, maximum);
 }

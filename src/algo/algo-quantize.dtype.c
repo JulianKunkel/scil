@@ -7,6 +7,9 @@
 #include <scil-internal.h>
 #include <scil-quantizer.h>
 
+#include <scil-util.h>
+
+
 //Supported datatypes: float double
 // Repeat for each data type
 
@@ -19,7 +22,7 @@ int scil_quantize_compress_<DATATYPE>(const scil_context_t* ctx,
     size_t count = scilPr_get_dims_count(dims);
 
     <DATATYPE> minimum, maximum;
-    scil_find_minimum_maximum_<DATATYPE>(source, count, &minimum, &maximum);
+    scilU_find_minimum_maximum_<DATATYPE>(source, count, &minimum, &maximum);
 
     uint8_t bits_per_value = scil_calculate_bits_needed_<DATATYPE>(minimum, maximum, ctx->hints.absolute_tolerance);
     if (bits_per_value > 64)

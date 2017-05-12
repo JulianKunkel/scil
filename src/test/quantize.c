@@ -25,7 +25,7 @@ int main(void){
         double absolute_tolerance = pow(2.0, -i);
 
         double minimum, maximum;
-        scil_find_minimum_maximum_double(buf_in, count, &minimum, &maximum);
+        scilU_find_minimum_maximum_double(buf_in, count, &minimum, &maximum);
 
         printf("#Cycle %d with following attributes:\n", i);
         printf("#Absolute tolerance: %.20f, Minimum: %+.20f, Maximum: %+.20f\n", absolute_tolerance, minimum, maximum);

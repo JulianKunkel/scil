@@ -86,7 +86,7 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
 
     // Finding minimum and maximum values in data
     <DATATYPE> min, max;
-    scil_find_minimum_maximum_with_excluded_points_<DATATYPE>(source, count, &min, &max, ctx->hints.lossless_data_range_up_to,  ctx->hints.lossless_data_range_from);
+    scilU_find_minimum_maximum_with_excluded_points_<DATATYPE>(source, count, &min, &max, ctx->hints.lossless_data_range_up_to,  ctx->hints.lossless_data_range_from, ctx->hints.fill_value);
 
     // Locally assigning absolute tolerance
     double abs_tol = ctx->hints.absolute_tolerance * 1.95; // prevent rounding errors

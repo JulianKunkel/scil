@@ -90,7 +90,7 @@ int scil_allquant_compress_<DATATYPE>(const scil_context_t* ctx,
 
     // Finding minimum and maximum values in data
     <DATATYPE> min, max;
-    scil_find_minimum_maximum_<DATATYPE>(source, count, &min, &max);
+    scilU_find_minimum_maximum_<DATATYPE>(source, count, &min, &max);
 
     const double abs_tol = ctx->hints.absolute_tolerance;
     const double rel_tol = ctx->hints.relative_tolerance_percent;

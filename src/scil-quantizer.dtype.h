@@ -17,13 +17,6 @@
                                         size_t count);
 
 /**
- Compute the difference between two data vectors.
- Subtract in from inout and store the result in inout
- */
-void scilU_subtract_data_<DATATYPE>(const <DATATYPE>* restrict in, <DATATYPE>* restrict inout, size_t count);
-
-
-/**
  * \brief Finds and returns the biggest value of the given buffer.
  * \param buffer The buffer to scan
  * \param count Element count of the buffer
@@ -33,28 +26,6 @@ void scilU_subtract_data_<DATATYPE>(const <DATATYPE>* restrict in, <DATATYPE>* r
 <DATATYPE> scil_find_maximum_<DATATYPE>(const <DATATYPE>* buffer,
                                         size_t count);
 
-/**
- * \brief Finds the smallest and biggest values of a buffer and stores them
- *        to the given memory locations.
- * \param buffer The buffer to scan
- * \param count Element count of the buffer
- * \param minimum The memory location where the smallest value will be stored
- * \param maximum The memory location where the biggest value will be stored
- * \pre buffer != NULL
- * \pre minimum != NULL
- * \pre maximum != NULL
- * \return Biggest value in the buffer
- */
-void scil_find_minimum_maximum_<DATATYPE>(const <DATATYPE>* restrict buffer,
-                                          size_t count,
-                                          <DATATYPE>* minimum,
-                                          <DATATYPE>* maximum);
-
-void scil_find_minimum_maximum_with_excluded_points_<DATATYPE>(const <DATATYPE>* restrict buffer,
-                                          size_t count,
-                                          <DATATYPE>* minimum,
-                                          <DATATYPE>* maximum,
-                                        double ignore_up_to, double ignore_from);
 
 
 /**

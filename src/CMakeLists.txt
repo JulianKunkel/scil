@@ -134,6 +134,8 @@ FILE(GLOB SOURCE_COMPRESSION_DEPS ${CMAKE_SOURCE_DIR}/compression/*.c)
 FILE(GLOB SOURCE_INTERNAL_DEPS ${CMAKE_SOURCE_DIR}/internal/*.c)
 FILE(GLOB SOURCE_PREPARE_DEPS ${CMAKE_SOURCE_DIR}/prepare/*.c)
 FILE(GLOB SOURCE_UTIL_DEPS ${CMAKE_SOURCE_DIR}/util/*.c)
+list(REMOVE_ITEM SOURCE_UTIL_DEPS ${CMAKE_SOURCE_DIR}/util/scil-util-types.dtype.c)
+
 
 # MESSAGE( STATUS "Available algorithms: " ${ALGO})
 
@@ -145,6 +147,7 @@ add_library(scil SHARED scil.c scil-dummy.cpp
     ${SOURCE_UTIL_DEPS}
     ${BINARY_DEPS}
     ${CMAKE_BINARY_DIR}/scil-quantizer.c
+		${CMAKE_BINARY_DIR}/util/scil-util-types.c
     ${ALGO}
     ${DEPS_DIR}/open-simplex-noise-in-c/open-simplex-noise.c
     ${DEPS_COMPILED_DIR}/wavelet_code/alloc.c
@@ -170,6 +173,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/prepare
   ${CMAKE_SOURCE_DIR}/util
   ${CMAKE_BINARY_DIR}
+	${CMAKE_BINARY_DIR}/util
   ${DEPS_DIR}/open-simplex-noise-in-c
   ${DEPS_COMPILED_DIR}/wavelet_code
   ${DEPS_COMPILED_DIR}/include/zfp

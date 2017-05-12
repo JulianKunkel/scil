@@ -5,6 +5,8 @@
 #include <scil-quantizer.h>
 #include <scil-internal.h>
 
+#include <scil-util.h>
+
 static uint8_t start_mask[9] = {
     255, //0b11111111
     127, //0b01111111
@@ -132,7 +134,7 @@ int scil_swage_compress_<DATATYPE>(const scil_context_t* ctx,
     }else{
       // we determine the value new based on min / max
       <DATATYPE> minimum, maximum;
-      scil_find_minimum_maximum_<DATATYPE>(source, count, &minimum, &maximum);
+      scilU_find_minimum_maximum_<DATATYPE>(source, count, &minimum, &maximum);
 
     }
 

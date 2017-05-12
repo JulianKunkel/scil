@@ -81,6 +81,9 @@ typedef struct
     /** Define the value above which we shall compress lossless*/
     double lossless_data_range_from;
 
+    /** a single value to be compressed lossless */
+    double fill_value;
+
     /** \brief Settings for a multi dimensional field
      * The max steepness indicates the delta between two neighboring points that is considered to be tolerable for normal patterns.
      */

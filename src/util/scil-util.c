@@ -18,49 +18,51 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <float.h>
+
 
 #include <scil-util.h>
 #include <scil-quantizer.h>
 
-void scilU_find_minimum_maximum_with_excluded_points(SCIL_Datatype_t datatype, byte * data, scil_dims_t * dims, double * out_min, double * out_max, double ignore_to, double ignore_from){
+void scilU_find_minimum_maximum_with_excluded_points(SCIL_Datatype_t datatype, byte * data, scil_dims_t * dims, double * out_min, double * out_max, double ignore_to, double ignore_from, double fill_value){
   size_t count = scilPr_get_dims_count(dims);
 
   switch(datatype){
   case (SCIL_TYPE_DOUBLE): {
-    scil_find_minimum_maximum_with_excluded_points_double((double*) data, count, out_min, out_max, ignore_to, ignore_from);
+    scilU_find_minimum_maximum_with_excluded_points_double((double*) data, count, out_min, out_max, ignore_to, ignore_from, fill_value);
     return;
   }
   case (SCIL_TYPE_FLOAT) : {
     float min, max;
-    scil_find_minimum_maximum_with_excluded_points_float((float*) data, count, & min, & max, ignore_to, ignore_from);
+    scilU_find_minimum_maximum_with_excluded_points_float((float*) data, count, & min, & max, ignore_to, ignore_from, fill_value);
     *out_min = (double) min;
     *out_max = (double) max;
     return;
   }
   case(SCIL_TYPE_INT8):{
     int8_t min, max;
-    scil_find_minimum_maximum_with_excluded_points_int8_t((int8_t*)data, count, & min, & max, ignore_to, ignore_from);
+    scilU_find_minimum_maximum_with_excluded_points_int8_t((int8_t*)data, count, & min, & max, ignore_to, ignore_from, fill_value);
     *out_min = (double) min;
     *out_max = (double) max;
     return;
   }
   case(SCIL_TYPE_INT16):{
     int16_t min, max;
-    scil_find_minimum_maximum_with_excluded_points_int16_t((int16_t*)data, count, & min, & max, ignore_to, ignore_from);
+    scilU_find_minimum_maximum_with_excluded_points_int16_t((int16_t*)data, count, & min, & max, ignore_to, ignore_from, fill_value);
     *out_min = (double) min;
     *out_max = (double) max;
     return;
   }
   case(SCIL_TYPE_INT32):{
     int32_t min, max;
-    scil_find_minimum_maximum_with_excluded_points_int32_t((int32_t*)data, count, & min, & max, ignore_to, ignore_from);
+    scilU_find_minimum_maximum_with_excluded_points_int32_t((int32_t*)data, count, & min, & max, ignore_to, ignore_from, fill_value);
     *out_min = (double) min;
     *out_max = (double) max;
     return;
   }
   case(SCIL_TYPE_INT64):{
     int64_t min, max;
-    scil_find_minimum_maximum_with_excluded_points_int64_t((int64_t*) data, count, & min, & max, ignore_to, ignore_from);
+    scilU_find_minimum_maximum_with_excluded_points_int64_t((int64_t*) data, count, & min, & max, ignore_to, ignore_from, fill_value);
     *out_min = (double) min;
     *out_max = (double) max;
     return;
@@ -75,53 +77,7 @@ void scilU_find_minimum_maximum_with_excluded_points(SCIL_Datatype_t datatype, b
 
 void scilU_find_minimum_maximum(SCIL_Datatype_t datatype, byte * data, scil_dims_t * dims, double * out_min, double * out_max){
   size_t count = scilPr_get_dims_count(dims);
-
-  switch(datatype){
-  case (SCIL_TYPE_DOUBLE): {
-    scil_find_minimum_maximum_double((double*) data, count, out_min, out_max);
-    return;
-  }
-  case (SCIL_TYPE_FLOAT) : {
-    float min, max;
-    scil_find_minimum_maximum_float((float*) data, count, & min, & max);
-    *out_min = (double) min;
-    *out_max = (double) max;
-    return;
-  }
-  case(SCIL_TYPE_INT8):{
-    int8_t min, max;
-    scil_find_minimum_maximum_int8_t((int8_t*)data, count, & min, & max);
-    *out_min = (double) min;
-    *out_max = (double) max;
-    return;
-  }
-  case(SCIL_TYPE_INT16):{
-    int16_t min, max;
-    scil_find_minimum_maximum_int16_t((int16_t*)data, count, & min, & max);
-    *out_min = (double) min;
-    *out_max = (double) max;
-    return;
-  }
-  case(SCIL_TYPE_INT32):{
-    int32_t min, max;
-    scil_find_minimum_maximum_int32_t((int32_t*)data, count, & min, & max);
-    *out_min = (double) min;
-    *out_max = (double) max;
-    return;
-  }
-  case(SCIL_TYPE_INT64):{
-    int64_t min, max;
-    scil_find_minimum_maximum_int64_t((int64_t*) data, count, & min, & max);
-    *out_min = (double) min;
-    *out_max = (double) max;
-    return;
-  }
-  case(SCIL_TYPE_UNKNOWN) :
-  case(SCIL_TYPE_BINARY):
-  case(SCIL_TYPE_STRING):{
-    assert(0 && "unsupported min/max");
-  }
-  }
+  scilU_find_minimum_maximum_with_excluded_points(datatype, data, dims, out_min, out_max, -DBL_MAX, DBL_MAX, DBL_MAX);
 }
 
 void scilU_subtract_data(SCIL_Datatype_t datatype, byte * restrict  data1, byte * restrict in_out_data2, scil_dims_t * dims){
