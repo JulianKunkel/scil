@@ -121,8 +121,6 @@ if [[ ! -e liblz4.a ]] ; then
 	make clean || true
 	make -j 4 CFLAGS="-fPIC"
 	popd > /dev/null
-	cp $SRC/lz4/lib/lz4.h include/lz4/
-	cp $SRC/lz4/lib/liblz4.a .
 	BUILD=1
 fi
 
@@ -148,7 +146,9 @@ if [[ $BUILD == 1 ]] ; then
   cp -r ./SZ/install/include/* include/sz
 
   rm *.a || true # ignore error
+  cp $SRC/lz4/lib/lz4.h include/lz4/
   cp $(find -name "*.a") .
+  cp $SRC/lz4/lib/liblz4.a .
   echo "[OK]"
 else
   echo "[Already built]"
