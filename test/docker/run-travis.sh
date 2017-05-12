@@ -8,7 +8,7 @@ ERROR=0
 # While we would like to test on all systems it really slows the travis build down
 # Travis does not cache any docker images so they have to be rebuild each time
 # That's why we only run one test on travis for now
-docker run $OPT -h ubuntu14.04 kunkel/scil:ubuntu14.04 $ARGS
+docker run $OPT -h ubuntu16.04 kunkel/scil:ubuntu16.04 $ARGS
 ERROR=$(($ERROR+$?))
 # docker run $OPT -h ubuntu16.04 kunkel/scil:ubuntu16.04 $ARGS
 # ERROR=$(($ERROR+$?))

@@ -2,7 +2,8 @@ services:
   - docker
 script:
   - cd test/docker
-  - docker build -t kunkel/scil:ubuntu14.04 ubuntu14.04
+  - docker build -t kunkel/scil:ubuntu16.04 ubuntu16.04
   - ./run-travis.sh
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+
