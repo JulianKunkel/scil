@@ -39,11 +39,13 @@ static int print_value(option_help * o){
 
     switch(o->type){
       case('F'):{
-        pos += printf("=%.14f ", *(double*) o->variable);
+        double val = *(double*) o->variable;
+        pos += printf("=%.14e ", val);
         break;
       }
       case('f'):{
-        pos += printf("=%.6f ", (double) *(float*) o->variable);
+        double val = *(float*) o->variable;
+        pos += printf("=%.6e ", val);
         break;
       }
       case('d'):{
@@ -156,11 +158,11 @@ static int print_option_value(option_help * o){
 
     switch(o->type){
       case('F'):{
-        pos += printf("=%.14f ", *(double*) o->variable);
+        pos += printf("=%.14e ", *(double*) o->variable);
         break;
       }
       case('f'):{
-        pos += printf("=%.6f ", (double) *(float*) o->variable);
+        pos += printf("=%.6e ", (double) *(float*) o->variable);
         break;
       }
       case('d'):{
