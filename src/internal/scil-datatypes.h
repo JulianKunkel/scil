@@ -21,6 +21,20 @@ enum SCIL_Datatype {
 
 typedef enum SCIL_Datatype SCIL_Datatype_t;
 
+typedef struct{
+  union {
+    uint8_t uint8;
+    uint16_t uint16;
+    uint32_t uint32;
+    uint64_t uint64;
+    float flt;
+    double dbl;
+    char * str;
+    byte * binary;
+  } u;
+  SCIL_Datatype_t typ;
+} scil_value_t;
+
 SCIL_Datatype_t scil_str_to_datatype(const char * str);
 const char * scil_datatype_to_str(SCIL_Datatype_t typ);
 

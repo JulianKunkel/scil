@@ -76,7 +76,6 @@ void scilU_find_minimum_maximum_with_excluded_points(SCIL_Datatype_t datatype, b
 }
 
 void scilU_find_minimum_maximum(SCIL_Datatype_t datatype, byte * data, scil_dims_t * dims, double * out_min, double * out_max){
-  size_t count = scilPr_get_dims_count(dims);
   scilU_find_minimum_maximum_with_excluded_points(datatype, data, dims, out_min, out_max, -DBL_MAX, DBL_MAX, DBL_MAX);
 }
 
