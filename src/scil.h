@@ -20,6 +20,107 @@
 
 \mainpage SCIL - Scientific Compression Interface Library
 
+@startuml{scil-refactored.png}
+title Refactoring Proposal
+
+package "public interface" {
+
+    class "util" {
+        subtract_data_<T>()
+        find_minimum_maximum_<T>()
+        find_minimum_maximum_with_excluded_points_<T>()
+        determine_accuracy()
+        validate_compresssion()
+    }
+
+    class "compress" {
+        get_compressor_number()
+        get_compressor_name()
+        abstol_compress_<T>()
+        abstol_decompress_<T>()
+        algo_chooser_initialize()
+        algo_chooser_execute()
+    }
+
+    class "patterns" {
+        create_library_patterns_if_needed()
+        create_pattern()
+        change_data_scale()
+    }
+
+    class "noise" {
+        void some_method()
+    }
+
+    class "ioread" {
+        void some_method()
+    }
+}
+
+package "io" {
+    ioread -> csv
+    ioread -> bin
+    ioread -> netcdf
+    ioread -> "file-plugin"
+    ioread -> "brick-of-floats"
+}
+
+
+class "brick-of-floats"
+
+util -> option
+patterns -> "simplex-noise"
+patterns -> "basic-patterns"
+
+class "simplex-noise" {
+
+}
+
+class "basic-patterns" {
+
+}
+
+class "algos" {
+}
+
+algos -down-> lz4
+algos -down-> gzip
+
+
+class "algo-utils" {
+}
+
+util -> "types"
+util -> "error"
+
+"swage" <-down- "algo-utils"
+"quantizer" <-down- "algo-utils"
+
+class "swage" {
+    swage()
+    unswage()
+}
+
+class "quantizer" {
+}
+
+util -> "scil-core"
+noise -> "scil-core"
+patterns -> "scil-core"
+compress -> "scil-core"
+ioread -> "scil-core"
+compress -down-> algos
+algos -down-> "algo-utils"
+
+class "scil-core" {
+}
+
+class "option" {
+
+}
+
+@enduml
+
 @startuml{scil-components.png}
 title Components of SCIL
 
