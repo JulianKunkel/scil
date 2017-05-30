@@ -52,17 +52,17 @@ package "public interface" {
         void some_method()
     }
 
-    class "ioread" {
+    class "file_format" {
         void some_method()
     }
 }
 
 package "io" {
-    ioread -> csv
-    ioread -> bin
-    ioread -> netcdf
-    ioread -> "file-plugin"
-    ioread -> "brick-of-floats"
+    file_format -> csv
+    file_format -> bin
+    file_format -> netcdf
+    file_format -> "file-plugin"
+    file_format -> "brick-of-floats"
 }
 
 
@@ -108,7 +108,7 @@ util -> "scil-core"
 noise -> "scil-core"
 patterns -> "scil-core"
 compress -> "scil-core"
-ioread -> "scil-core"
+file_format -> "scil-core"
 compress -down-> algos
 algos -down-> "algo-utils"
 
