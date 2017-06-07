@@ -68,7 +68,7 @@ package "io" {
 
 class "brick-of-floats"
 
-util -> option
+"algo-utils" -down-> option
 patterns -> "simplex-noise"
 patterns -> "basic-patterns"
 
@@ -118,6 +118,14 @@ class "scil-core" {
 class "option" {
 
 }
+
+"scil-core" -down-> "scil-chain"
+"scil-core" -down-> "scil-dict"
+"scil-core" -down-> "scil-internal"
+"scil-core" -down-> "scil-algorithm"
+"scil-core" -down-> "scil-data-characteristics"
+"scil-core" -down-> "scil-hardware-limits"
+"scil-core" -down-> "scil-cca"
 
 @enduml
 
