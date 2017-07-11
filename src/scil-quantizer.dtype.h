@@ -39,7 +39,13 @@ int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* restrict buf_out,
                                            double absolute_tolerance,
                                            <DATATYPE> minimum,
                                            <DATATYPE> maximum);
-
+int scil_quantize_buffer_minmax_fill_<DATATYPE>(uint64_t* restrict buf_out,
+                                          const <DATATYPE>* restrict buf_in,
+                                          size_t count,
+                                          double absolute_tolerance,
+                                          <DATATYPE> minimum,
+                                          <DATATYPE> maximum,
+                                          double fill, int next_free_number);
 /**
 * \brief Quantizes the values of the given buffer.
 * \param buf_in The Buffer containing the data to quantize
@@ -72,7 +78,12 @@ int scil_unquantize_buffer_<DATATYPE>(<DATATYPE>* restrict buf_out,
                                       size_t count,
                                       double absolute_tolerance,
                                       <DATATYPE> minimum);
-
+int scil_unquantize_buffer_fill_<DATATYPE>(<DATATYPE>* restrict buf_out,
+                                      const uint64_t* restrict buf_in,
+                                      size_t count,
+                                      double absolute_tolerance,
+                                      <DATATYPE> minimum,
+                                      double fill_value, int next_free_number);
 // End repeat
 
 #endif /* SCIL_QUANTIZER_H_<DATATYPE> */
