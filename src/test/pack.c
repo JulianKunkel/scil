@@ -53,5 +53,14 @@ int main(){
   }
   printf("%llu == %llu\n", (long long unsigned) v64, (long long unsigned) result64);
 
+  double testVal = 2.95;
+  int64_t packed;
+  scilU_pack8((void*) & packed, testVal);
+
+  printf("%llu == %llu\n", *(unsigned long long*) &testVal, (unsigned long long) packed );
+  double unpacked = 0;
+  scilU_unpack8(& packed, & unpacked);
+  printf("%f\n", unpacked);
+  assert(testVal == unpacked);
   return 0;
 }

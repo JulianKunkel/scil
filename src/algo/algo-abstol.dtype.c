@@ -23,7 +23,7 @@
 #include <math.h>
 #include <string.h>
 
-#define SCIL_ABSTOL_HEADER_SIZE 17
+#define SCIL_ABSTOL_HEADER_SIZE 25
 #define SCIL_SMALL 0.00000000000000000000001
 
 static uint64_t round_up_byte(const uint64_t bits){

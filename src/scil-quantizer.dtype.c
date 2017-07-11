@@ -47,9 +47,6 @@ int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* restrict dest,
     assert(dest != NULL);
     assert(source != NULL);
 
-    if(scil_calculate_bits_needed_<DATATYPE>(minimum, maximum, absolute_tolerance, 0, NULL) > 53){
-        return SCIL_EINVAL; // Quantizing would result in values bigger than UINT64_MAX
-    }
     double real_tolerance = (1 / 1.0) / absolute_tolerance;
 
     for(size_t i = 0; i < count; ++i){

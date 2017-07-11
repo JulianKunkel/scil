@@ -276,11 +276,11 @@ void scilU_print_dims(scil_dims_t dims);
 
 #ifdef SCIL_LITTLE_ENDIAN
 
-#define scilU_pack4(buffer, val) *((int32_t*)buffer) = val
-#define scilU_unpack4(buffer, result_p) *result_p = *((int32_t*) buffer)
+#define scilU_pack4(buffer, val) *((int32_t*)buffer) = *(int32_t*) & val
+#define scilU_unpack4(buffer, result_p) *(int32_t*)result_p = *((int32_t*) buffer)
 
-#define scilU_pack8(buffer, val) *((int64_t*)buffer) = val
-#define scilU_unpack8(buffer, result_p) *result_p = *((int64_t*) buffer)
+#define scilU_pack8(buffer, val) *((int64_t*)buffer) = *(int64_t*) & val
+#define scilU_unpack8(buffer, result_p) *(int64_t*) result_p = *((int64_t*) buffer)
 
 #else
 
