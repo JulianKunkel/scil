@@ -39,6 +39,8 @@ static char * in_file = "";
 static char * out_file = NULL;
 static int compute_residual = 0;
 
+
+static int use_max_value_as_fill_value = 0;
 static int measure_time = 0;
 static int print_hints = 0;
 
@@ -64,7 +66,6 @@ int main(int argc, char ** argv){
   int ret;
 
   scilPr_initialize_user_hints(&hints);
-
   option_help known_args[] = {
     {'i', "in_file", "Input file (file format depends on mode)", OPTION_REQUIRED_ARGUMENT, 's', & in_file},
     {'o', "out_file", "Output file (file format depends on mode)", OPTION_OPTIONAL_ARGUMENT, 's', & out_file},
@@ -77,6 +78,7 @@ int main(int argc, char ** argv){
     {'V', "validate", "Validate the output", OPTION_FLAG, 'd', & validate},
     {'v', "verbose", "Increase the verbosity level", OPTION_FLAG, 'd', & verbose},
     {'H', "print-hints", "Print the effective hints", OPTION_FLAG, 'd', & print_hints},
+    {0, "use-max-value-as-fill", "Check for the maximum value and use it as fill value", OPTION_FLAG, 'd',  & use_max_value_as_fill_value},
     {0, "hint-force_compression_methods", NULL,  OPTION_OPTIONAL_ARGUMENT, 's', & hints.force_compression_methods},
     {0, "hint-absolute-tolerance", NULL,  OPTION_OPTIONAL_ARGUMENT, 'F', & hints.absolute_tolerance},
     {0, "hint-relative_tolerance_percent", NULL,  OPTION_OPTIONAL_ARGUMENT, 'F', & hints.relative_tolerance_percent},
@@ -145,6 +147,12 @@ int main(int argc, char ** argv){
     exit(1);
   }
   t_read = scilU_stop_timer(timer);
+
+  if (use_max_value_as_fill_value){
+    double max, min;
+    scilU_find_minimum_maximum(input_datatype, input_data, & dims, & min, & max);
+    hints.fill_value = max;
+  }
 
   if(verbose > 0){
     double max, min;
