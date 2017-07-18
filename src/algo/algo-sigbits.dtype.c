@@ -292,7 +292,7 @@ static void get_header_data_fill_<DATATYPE>(const <DATATYPE>* source,
 
 // TODO: Test this mess... Especially for the super rare exponent maximum overflow.
 // TODO: Speed up shifts with lookup table.
-static uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
+static inline uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
                                           uint8_t signs_id,
                                           uint8_t exponent_bit_count,
                                           uint8_t mantissa_bit_count,
@@ -338,7 +338,7 @@ static uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
     return result;
 }
 
-static <DATATYPE> decompress_value_<DATATYPE>(uint64_t value,
+static inline  <DATATYPE> decompress_value_<DATATYPE>(uint64_t value,
                                               uint8_t bit_count_per_value,
                                               uint8_t signs_id,
                                               uint8_t exponent_bit_count,
