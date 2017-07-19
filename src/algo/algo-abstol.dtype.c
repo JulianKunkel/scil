@@ -114,13 +114,24 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
         return SCIL_PRECISION_ERR;
     }
 
+    if(bits_per_value == 0){
+      // special case, constant, may be set to the MEAN value across all points
+      min = (max + min) / 2.0;
+    }
+
     // Get number of needed bytes for the whole compressed buffer
 
-    uint64_t* quantized_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
     // ==================== Compress ==========================================
     int header_size = write_header(dest, min, abs_tol, bits_per_value, ctx->hints.fill_value, next_free_number);
     dest += header_size;
+    if(bits_per_value == 0){
+      // constant, stop here
+      *dest_size = header_size;
+      return SCIL_NO_ERR;
+    }
     *dest_size = round_up_byte(bits_per_value * count) + header_size;
+
+    uint64_t* quantized_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
 
     if (ctx->hints.fill_value == DBL_MAX){
       // Use quantization to reduce each values bit count
@@ -159,12 +170,18 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
     size_t in_size = source_size;
     size_t count = scilPr_get_dims_count(dims);
     int next_free_number;
-    uint64_t* unswaged_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t*));
 
     // ============ Decompress ================================================
     // Parse Header
     in += read_header(in, &in_size, &min, &abs_tol, &bits_per_value, &fill_value, & next_free_number);
+    if(bits_per_value == 0){
+      for(size_t i = 0; i < count; ++i){
+        dest[i] = (<DATATYPE>) min;
+      }
+      return SCIL_NO_ERR;
+    }
 
+    uint64_t* unswaged_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t*));
     // Unpacking buffer
     if(scil_unswage(unswaged_buffer, in, count, bits_per_value)){
         return SCIL_BUFFER_ERR;
