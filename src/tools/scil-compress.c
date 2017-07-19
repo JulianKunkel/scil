@@ -176,7 +176,7 @@ int main(int argc, char ** argv){
       exit(1);
     }
 
-    printf("setting value %f %f %f\n", min, max, new_abs_tol);
+    printf("fake abstol: setting value %f %f %f\n", min, max, new_abs_tol);
     hints.absolute_tolerance = new_abs_tol;
   }
 

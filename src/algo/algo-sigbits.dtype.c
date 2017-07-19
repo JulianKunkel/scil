@@ -24,8 +24,6 @@
 
 #include <math.h>
 
-#define SCIL_SIGBITS_HEADER_SIZE 13
-
 static uint64_t mask[] = {
     0,
     1,
@@ -82,7 +80,7 @@ static uint64_t mask[] = {
     4503599627370495,
 };
 
-static void read_header(const byte* source,
+static int read_header(const byte* source,
                         size_t* source_size,
                         uint8_t* signs_id,
                         uint8_t* exponent_bit_count,
@@ -90,41 +88,41 @@ static void read_header(const byte* source,
                         int16_t* minimum_exponent,
                         double *fill_value,
                         uint8_t *fill_value_exponent){
+    const byte * start = source;
 
     *signs_id = *((uint8_t*)source);
     source += 1;
-    *source_size -= 1;
 
     *exponent_bit_count = *((uint8_t*)source);
     source += 1;
-    *source_size -= 1;
 
     *mantissa_bit_count = *((uint8_t*)source);
     source += 1;
-    *source_size -= 1;
 
     *minimum_exponent = *((int16_t*)source);
     source += 2;
-    *source_size -= 2;
 
     scilU_unpack8(source, fill_value);
     source += 8;
-    *source_size -= 8;
 
     if(*fill_value != DBL_MAX){
       *fill_value_exponent = *((int8_t*)source);
       source += 1;
-      *source_size -= 1;
     }
+
+    int size = (int) (source - start);
+    *source_size -= size;
+    return size;
 }
 
-static void write_header(byte* dest,
+static int write_header(byte* dest,
                          uint8_t signs_id,
                          uint8_t exponent_bit_count,
                          uint8_t mantissa_bit_count,
                          uint16_t minimum_exponent,
                          double fill_value,
                          uint8_t fill_value_exponent){
+    byte * start = dest;
 
     *dest = signs_id;
     ++dest;
@@ -145,6 +143,8 @@ static void write_header(byte* dest,
       *dest = fill_value_exponent;
       ++dest;
     }
+
+    return (int) (dest - start);
 }
 
 static uint8_t calc_sign_bit_count(uint8_t minimum_sign, uint8_t maximum_sign){
@@ -469,10 +469,10 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_t* ctx,
 
     uint8_t fill_value_exponent = 127;
 
-    write_header(dest, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, ctx->hints.fill_value, fill_value_exponent);
-    dest += SCIL_SIGBITS_HEADER_SIZE;
+    int header = write_header(dest, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, ctx->hints.fill_value, fill_value_exponent);
+    dest += header;
 
-    *dest_size = round_up_byte(bit_count_per_value * count) + SCIL_SIGBITS_HEADER_SIZE;
+    *dest_size = round_up_byte(bit_count_per_value * count) + header;
 
     int ret = SCIL_NO_ERR;
 
@@ -527,8 +527,8 @@ int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
     uint8_t signs_id, exponent_bit_count, mantissa_bit_count;
     int16_t minimum_exponent;
     uint8_t fill_value_exponent;
-    read_header(source, &source_size_cp, &signs_id, &exponent_bit_count, &mantissa_bit_count, &minimum_exponent, &fill_value, &fill_value_exponent);
-    source += SCIL_SIGBITS_HEADER_SIZE;
+    int header = read_header(source, &source_size_cp, &signs_id, &exponent_bit_count, &mantissa_bit_count, &minimum_exponent, &fill_value, &fill_value_exponent);
+    source += header;
 
     uint8_t bit_count_per_value = get_bit_count_per_value(signs_id, exponent_bit_count, mantissa_bit_count);
 
