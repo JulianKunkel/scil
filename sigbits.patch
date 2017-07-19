@@ -1,0 +1,225 @@
+diff --git a/src/algo/algo-sigbits.dtype.c b/src/algo/algo-sigbits.dtype.c
+index 6382f56..aff0662 100644
+--- a/src/algo/algo-sigbits.dtype.c
++++ b/src/algo/algo-sigbits.dtype.c
+@@ -87,7 +87,7 @@ static int read_header(const byte* source,
+                         uint8_t* mantissa_bit_count,
+                         int16_t* minimum_exponent,
+                         double *fill_value,
+-                        uint8_t *fill_value_exponent){
++                        int16_t *fill_value_exponent){
+     const byte * start = source;
+ 
+     *signs_id = *((uint8_t*)source);
+@@ -106,8 +106,8 @@ static int read_header(const byte* source,
+     source += 8;
+ 
+     if(*fill_value != DBL_MAX){
+-      *fill_value_exponent = *((int8_t*)source);
+-      source += 1;
++      scilU_unpack2(source, fill_value_exponent);
++      source += 2;
+     }
+ 
+     int size = (int) (source - start);
+@@ -121,7 +121,7 @@ static int write_header(byte* dest,
+                          uint8_t mantissa_bit_count,
+                          uint16_t minimum_exponent,
+                          double fill_value,
+-                         uint8_t fill_value_exponent){
++                         int16_t fill_value_exponent){
+     byte * start = dest;
+ 
+     *dest = signs_id;
+@@ -140,8 +140,8 @@ static int write_header(byte* dest,
+     dest += 8;
+ 
+     if (fill_value != DBL_MAX){
+-      *dest = fill_value_exponent;
+-      ++dest;
++      scilU_pack2(dest, fill_value_exponent);
++      dest += 2;
+     }
+ 
+     return (int) (dest - start);
+@@ -354,7 +354,7 @@ static inline  <DATATYPE> decompress_value_<DATATYPE>(uint64_t value,
+     return cur.f;
+ }
+ 
+-static int compress_buffer_<DATATYPE>(uint64_t* restrict dest,
++static int compress_buffer_<DATATYPE>(uint<DATATYPE_SIZE>_t* restrict dest,
+                                       const <DATATYPE>* restrict source,
+                                       size_t count,
+                                       uint8_t signs_id,
+@@ -369,7 +369,7 @@ static int compress_buffer_<DATATYPE>(uint64_t* restrict dest,
+     return SCIL_NO_ERR;
+ }
+ 
+-static int compress_buffer_fill_<DATATYPE>(uint64_t* restrict dest,
++static int compress_buffer_fill_<DATATYPE>(uint<DATATYPE_SIZE>_t* restrict dest,
+                                       const <DATATYPE>* restrict source,
+                                       size_t count,
+                                       uint8_t signs_id,
+@@ -377,17 +377,16 @@ static int compress_buffer_fill_<DATATYPE>(uint64_t* restrict dest,
+                                       uint8_t mantissa_bit_count,
+                                       int16_t minimum_exponent,
+                                       double fill_value,
+-                                      uint8_t fill_value_exponent){
++                                      int16_t fill_value_exponent){
++    uint64_t fill_mask = 0;
++    fill_mask |= fill_value_exponent;
++    fill_mask <<= mantissa_bit_count;
+ 
+     for(size_t i = 0; i < count; ++i){
+       if (source[i] != fill_value){
+         dest[i] = compress_value_<DATATYPE>(source[i], signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
+       }else{
+-        uint64_t result = 0;
+-
+-        result |= fill_value_exponent;
+-        result <<= mantissa_bit_count;
+-        dest[i] = result;
++        dest[i] = fill_mask;
+       }
+     }
+ 
+@@ -395,7 +394,7 @@ static int compress_buffer_fill_<DATATYPE>(uint64_t* restrict dest,
+ }
+ 
+ static int decompress_buffer_<DATATYPE>(<DATATYPE>* restrict dest,
+-                                        const uint64_t* restrict source,
++                                        const uint<DATATYPE_SIZE>_t* restrict source,
+                                         size_t count,
+                                         uint8_t bit_count_per_value,
+                                         uint8_t signs_id,
+@@ -411,7 +410,7 @@ static int decompress_buffer_<DATATYPE>(<DATATYPE>* restrict dest,
+ }
+ 
+ static int decompress_buffer_fill_<DATATYPE>(<DATATYPE>* restrict dest,
+-                                        const uint64_t* restrict source,
++                                        const uint<DATATYPE_SIZE>_t* restrict source,
+                                         size_t count,
+                                         uint8_t bit_count_per_value,
+                                         uint8_t signs_id,
+@@ -419,9 +418,11 @@ static int decompress_buffer_fill_<DATATYPE>(<DATATYPE>* restrict dest,
+                                         uint8_t mantissa_bit_count,
+                                         int16_t minimum_exponent,
+                                         double fill_value,
+-                                        uint8_t fill_value_exponent){
++                                        int16_t fill_value_exponent){
+ 
+-    uint64_t fill_mask = fill_value_exponent << (mantissa_bit_count-1);
++    uint64_t fill_mask = 0;
++    fill_mask |= fill_value_exponent;
++    fill_mask <<= mantissa_bit_count;
+ 
+     for(size_t i = 0; i < count; ++i){
+       if (source[i] != fill_mask){
+@@ -464,46 +465,47 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_t* ctx,
+     }else{ // use the fill value
+       get_header_data_fill_<DATATYPE>(source, count, &signs_id, &exponent_bit_count, &minimum_exponent, ctx->hints.fill_value);
+     }
+-
+     uint8_t bit_count_per_value = get_bit_count_per_value(signs_id, exponent_bit_count, mantissa_bit_count);
+ 
+-    uint8_t fill_value_exponent = 127;
++    int16_t fill_value_exponent = minimum_exponent - 1;
++    // TODO add a proper sanity CHECK
+ 
+     int header = write_header(dest, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, ctx->hints.fill_value, fill_value_exponent);
+     dest += header;
+ 
+-    *dest_size = round_up_byte(bit_count_per_value * count) + header;
++    //*dest_size = round_up_byte(bit_count_per_value * count) + header;
++    *dest_size = <DATATYPE_SIZE_BYTE> * count + header;
+ 
+     int ret = SCIL_NO_ERR;
+ 
+     // ==================== Compression ========================================
+ 
+     // Allocate intermediate buffer
+-    uint64_t* compressed_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
++    //uint64_t* compressed_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
+ 
+     if (ctx->hints.fill_value == DBL_MAX){
+       // Compress each value in source buffer
+-      if(compress_buffer_<DATATYPE>(compressed_buffer, source, count, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent)){
++      if(compress_buffer_<DATATYPE>((uint<DATATYPE_SIZE>_t*)dest, source, count, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent)){
+         ret = SCIL_BUFFER_ERR;
+         goto comp_cleanup;
+       }
+     }else{ // don't compress the fill value
+-      if(compress_buffer_fill_<DATATYPE>(compressed_buffer, source, count, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, ctx->hints.fill_value, fill_value_exponent)){
++      if(compress_buffer_fill_<DATATYPE>((uint<DATATYPE_SIZE>_t*) dest, source, count, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, ctx->hints.fill_value, fill_value_exponent)){
+         ret = SCIL_BUFFER_ERR;
+         goto comp_cleanup;
+       }
+     }
+ 
+     // Pack compressed values tightly
+-    if(scil_swage(dest, compressed_buffer, count, (uint8_t)bit_count_per_value)){
+-        ret = SCIL_BUFFER_ERR;
+-        goto comp_cleanup;
+-    }
++    //if(scil_swage(dest, compressed_buffer, count, (uint8_t)bit_count_per_value)){
++    //    ret = SCIL_BUFFER_ERR;
++    //    goto comp_cleanup;
++    //}
+ 
+     // ==================== Cleanup ============================================
+ 
+     comp_cleanup:
+-    free(compressed_buffer);
++    //free(compressed_buffer);
+     return ret;
+ }
+ 
+@@ -526,7 +528,7 @@ int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
+ 
+     uint8_t signs_id, exponent_bit_count, mantissa_bit_count;
+     int16_t minimum_exponent;
+-    uint8_t fill_value_exponent;
++    int16_t fill_value_exponent;
+     int header = read_header(source, &source_size_cp, &signs_id, &exponent_bit_count, &mantissa_bit_count, &minimum_exponent, &fill_value, &fill_value_exponent);
+     source += header;
+ 
+@@ -534,23 +536,23 @@ int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
+ 
+     // ==================== Decompression ======================================
+ 
+-    uint64_t* unswaged_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
++    //uint64_t* unswaged_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
+ 
+     int ret = SCIL_NO_ERR;
+ 
+-    if(scil_unswage(unswaged_buffer, source, count, bit_count_per_value)){
+-        ret = SCIL_BUFFER_ERR;
+-        goto decomp_cleanup;
+-    }
++    //if(scil_unswage(unswaged_buffer, source, count, bit_count_per_value)){
++    //    ret = SCIL_BUFFER_ERR;
++    //    goto decomp_cleanup;
++    //}
+ 
+     if (fill_value == DBL_MAX){
+       // Deompress each value in source buffer
+-      if(decompress_buffer_<DATATYPE>(dest, unswaged_buffer, count, bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent) ){
++      if(decompress_buffer_<DATATYPE>(dest, (uint<DATATYPE_SIZE>_t*) source, count, bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent) ){
+           ret = SCIL_BUFFER_ERR;
+           goto decomp_cleanup;
+       }
+     }else{ // set fill value
+-      if(decompress_buffer_fill_<DATATYPE>(dest, unswaged_buffer, count, bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, fill_value, fill_value_exponent) ){
++      if(decompress_buffer_fill_<DATATYPE>(dest, (uint<DATATYPE_SIZE>_t*) source, count, bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, fill_value, fill_value_exponent) ){
+           ret = SCIL_BUFFER_ERR;
+           goto decomp_cleanup;
+       }
+@@ -559,7 +561,7 @@ int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
+     // ==================== Cleanup ============================================
+ 
+     decomp_cleanup:
+-    free(unswaged_buffer);
++    //free(unswaged_buffer);
+     return ret;
+ }
+ 
