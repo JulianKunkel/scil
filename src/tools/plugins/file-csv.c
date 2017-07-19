@@ -226,7 +226,7 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
     printToFile(f, buf, 0, buf_datatype);
     for(size_t x = 1; x < dims.length[0]; x+=1){
       fprintf(f, "%c", delim);
-      printToFile(f,  buf, x, buf_datatype);
+      printToFile(f, buf, x, buf_datatype);
     }
     fprintf(f, "\n");
   }else if(dims.dims == 2){
@@ -241,10 +241,11 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
   }else if(dims.dims == 3){
     for(size_t z = 0; z < dims.length[2]; z+=1){
       for(size_t y = 0; y < dims.length[1]; y+=1){
-        printToFile(f, buf, y * dims.length[0] + z * dims.length[1], buf_datatype);
+        size_t offset = (y + z * dims.length[1]) * dims.length[0];
+        printToFile(f, buf, offset, buf_datatype);
         for(size_t x = 1; x < dims.length[0]; x+=1){
           fprintf(f, "%c", delim);
-          printToFile(f, buf, x + y * dims.length[0] + z * dims.length[1], buf_datatype);
+          printToFile(f, buf, x + offset, buf_datatype);
         }
         fprintf(f, "\n");
       }
@@ -253,10 +254,11 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
     for(size_t w = 0; w < dims.length[3]; w+=1){
       for(size_t z = 0; z < dims.length[2]; z+=1){
         for(size_t y = 0; y < dims.length[1]; y+=1){
-          printToFile(f, buf, y * dims.length[0] + z * dims.length[1] + w * dims.length[2], buf_datatype);
+          size_t offset = dims.length[0] * (y + dims.length[1] * (z + w * dims.length[2]));
+          printToFile(f, buf, offset, buf_datatype);
           for(size_t x = 1; x < dims.length[0]; x+=1){
             fprintf(f, "%c", delim);
-            printToFile(f, buf, x + y * dims.length[0] + z * dims.length[1] + w * dims.length[2], buf_datatype);
+            printToFile(f, buf, x + offset, buf_datatype);
           }
           fprintf(f, "\n");
         }
