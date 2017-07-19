@@ -7,8 +7,10 @@ import sys
 import os
 import fnmatch
 
+
 def replaceFunc(data, d):
-  return data.replace("<DATATYPE>", d).replace("<DATATYPE_UPPER>", d.upper().replace("_T", ""))
+  datatype_size = { "float": 4,"double": 8,"int8_t" : 1,"int16_t":2,"int32_t":4,"int64_t":8 }
+  return data.replace("<DATATYPE>", d).replace("<DATATYPE_UPPER>", d.upper().replace("_T", "")).replace("<DATATYPE_SIZE>", str(datatype_size[d] * 8)).replace("<DATATYPE_SIZE_BYTE>", str(datatype_size[d]))
 
 def createFunctionList(datatypes_list):
   DATATYPES_FULL=["float","double","int8_t","int16_t","int32_t","int64_t"]
@@ -57,7 +59,7 @@ def parsefile(infile, outfile):
     m = re.search("CREATE_INITIALIZER[(](.*)[)]", l)
     if(m):
       init_name = m.group(1)
-      all_supported.extend(datatypes_list)      
+      all_supported.extend(datatypes_list)
       datatypes_functions = createFunctionList(all_supported)
 
       datatypes_list = []
