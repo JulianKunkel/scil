@@ -23,8 +23,6 @@
 #include <math.h>
 #include <string.h>
 
-#define SCIL_SMALL 0.00000000000000000000001
-
 static uint64_t round_up_byte(const uint64_t bits){
 
     uint8_t a = bits % 8;
@@ -104,7 +102,7 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
     scilU_find_minimum_maximum_with_excluded_points_<DATATYPE>(source, count, &min, &max, ctx->hints.lossless_data_range_up_to,  ctx->hints.lossless_data_range_from, ctx->hints.fill_value);
 
     // Locally assigning absolute tolerance
-    double abs_tol = ctx->hints.absolute_tolerance * 1.95; // prevent rounding errors
+    double abs_tol = ctx->hints.absolute_tolerance; // prevent rounding errors
 
     int next_free_number;
     int reserved = 0;
