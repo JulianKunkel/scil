@@ -15,7 +15,7 @@ uint64_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum, <DATATYPE> ma
       return 0;
     }
     assert((next_free_number == NULL && reserved_numbers == 0) || (next_free_number != NULL) );
-    double mx = 1.0 + (double)(maximum - minimum) / absolute_tolerance;
+    double mx = 1.0 + ((double)maximum - (double)minimum) / absolute_tolerance;
     if(next_free_number != NULL){
       *next_free_number = (int) (mx + 0.5) + 1;
       //printf("calculate bits_needed: %f %d\n", mx, *next_free_number);
