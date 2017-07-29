@@ -7,6 +7,10 @@ SCIL is available on [GitHub](https://github.com/JulianKunkel/scil).
 
 Detailed information how to install required software packages are provided in the directory: 
   * test/docker/<distribution>/Dockerfile
+The commands provided after the RUN instruction are those necessary to install prerequisites.
+
+Once these are installed use, e.g., ./configure --prefix=$PWD/install
+Note that SCIL requires to be built out of tree, meaning one may not use "cmake ./" but instead call cmake from an empty directory.
 
 When running configure, the system will automatically install additional requirements.
 
