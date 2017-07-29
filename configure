@@ -2,8 +2,9 @@
 
 PARAMETERS="$0 $*"
 CMAKEFLAGS=
-SRCDIR=$(dirname $(readlink -f $0))/src
+SRCDIR=$(dirname "$(readlink -f "$0")")/src
 CURPATH="$PWD"
+
 
 function help(){
 	echo ""
@@ -148,7 +149,7 @@ if test -n "$cxxbin"; then
 	CMAKEFLAGS="$CMAKEFLAGS -DCMAKE_CXX_COMPILER:FILEPATH=$cxxbin"
 fi
 
-COMMAND="mkdir -p $buildDIR && cd $buildDIR && echo $PARAMETERS > configure.log ; rm CMakeCache.txt 2>/dev/null; cmake $CMAKEFLAGS $SRCDIR"
+COMMAND="mkdir -p $buildDIR && cd $buildDIR && echo $PARAMETERS > configure.log ; rm CMakeCache.txt 2>/dev/null; cmake $CMAKEFLAGS \"$SRCDIR\""
 
 if [[ "$VERBOSE" == "YES" ]] ; then
 	echo "Your current configure options translate more or less to:"
