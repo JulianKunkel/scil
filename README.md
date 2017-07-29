@@ -5,24 +5,10 @@ SCIL is available on [GitHub](https://github.com/JulianKunkel/scil).
 
 ## Prerequisites
 
-Name/Version 
+Detailed information how to install required software packages are provided in the directory: 
+  * test/docker/<distribution>/Dockerfile
 
-* gcc
-* g++
-* lz4
-* zlib
-* libgsl-dev
-
-The following requirements are automatically downloaded and installed.
-
-* zlib    1.28        [Src](http://www.zlib.net/)
-* fpzip   1.1.0      [Src](http://computation.llnl.gov/projects/floating-point-compression)
-
-### Installation prerequisites on Ubuntu
-
-The following command installs all requirements for an Ubuntu 15.10/16.04 System:
-
-		apt-get install g++ gcc liblz4-dev zlib1g-dev libopenjpeg-dev
+When running configure, the system will automatically install additional requirements.
 
 ***************************
 
