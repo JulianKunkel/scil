@@ -56,7 +56,7 @@ int scil_sz_compress_<DATATYPE>(const scil_context_t* ctx,
                                     <DATATYPE>* restrict source,
                                     const scil_dims_t* dims){
   init_sz_if_needed();
-  int size = 0;
+  size_t size = 0;
   double abstol = ctx->hints.absolute_tolerance;
   double reltol = ctx->hints.relative_tolerance_percent / 100.0;
   int mode = 0;
