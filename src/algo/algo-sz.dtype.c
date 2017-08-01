@@ -73,7 +73,7 @@ int scil_sz_compress_<DATATYPE>(const scil_context_t* ctx,
   //printf("Running SZ: with %d %f %f\n", mode, abstol, reltol);
 
   int ret;
-  ret = SZ_compress_args2(SZ_<DATATYPE_UPPER>, source, dest, & size, mode, abstol, reltol, 0, dims->length[3], dims->length[2], dims->length[1], dims->length[0]);
+  ret = SZ_compress_args2(SZ_<DATATYPE_UPPER>, source, dest, & size, mode, abstol, reltol, 0.0, 0, 0, dims->length[3], dims->length[2], dims->length[1], dims->length[0]);
   //printf("Returns: %d\n", size);
   if (ret == 0){
     *dest_size = size;

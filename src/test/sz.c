@@ -7,7 +7,7 @@
 int main(void){
   size_t buff_size = SIZE*sizeof(double);
   double * data = malloc(buff_size);
-  int out_size;
+  size_t out_size;
 
   for(int i=0; i < SIZE; i++){
     data[i] = i;
@@ -36,7 +36,7 @@ int main(void){
 
   SZ_Init_Params(& p);
   //SZ_Init("sz.config");
-  int ret = SZ_compress_args2(SZ_DOUBLE, data, out_buff, & out_size, ABS, 10.0, 0.0,  0,0,0,0, SIZE);
+  int ret = SZ_compress_args2(SZ_DOUBLE, data, out_buff, & out_size, ABS, 10.0, 0.0,  0.0,0,0,0,0,0, SIZE);
   printf("%d %d\n", ret, out_size);
 
   double * result = malloc(buff_size);
