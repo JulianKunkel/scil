@@ -7,7 +7,8 @@ enum scil_error_code {
     SCIL_MEMORY_ERR,
     SCIL_EINVAL,
     SCIL_UNKNOWN_ERR,
-    SCIL_PRECISION_ERR
+    SCIL_PRECISION_ERR,
+    SCIL_FILL_VAL_ERR
 };
 
 const char* scil_error_get_message(enum scil_error_code err);
