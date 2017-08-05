@@ -26,7 +26,7 @@ static int size_x = 500;
 static int size_y = 500;
 static int size_z = 100;
 static int size_za = 0;
-static int swap_order = 0;
+static int swap_order = 1;
 static SCIL_Datatype_t datatype = SCIL_TYPE_FLOAT;
 
 static option_help options [] = {
