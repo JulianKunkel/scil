@@ -153,8 +153,17 @@ static uint8_t calc_sign_bit_count(uint8_t minimum_sign, uint8_t maximum_sign){
     return minimum_sign == maximum_sign ? minimum_sign : 2;
 }
 
-static uint8_t calc_exponent_bit_count(int16_t minimum_exponent, int16_t max_exponent){
-    return (uint8_t)ceil(log2(max_exponent - minimum_exponent + 1));
+static uint8_t calc_exponent_bit_count(int16_t minimum_exponent, int16_t maximum_exponent, uint16_t datatype_maximum, uint8_t flag_fill_value){
+
+    uint8_t bit_exponent_count = (uint8_t)ceil(log2(maximum_exponent - minimum_exponent + 1));
+
+    if (flag_fill_value){
+      if (((maximum_exponent - minimum_exponent) == mask[bit_exponent_count]) && (bit_exponent_count + 1 < datatype_maximum))
+        return ++bit_exponent_count;
+      else return bit_exponent_count;
+    }
+
+    return bit_exponent_count;
 }
 
 static uint64_t round_up_byte(const uint64_t bits){
@@ -409,7 +418,7 @@ static void get_header_data_<DATATYPE>(const <DATATYPE>* source,
                                           &maximum_exponent);
 
     *signs_id = calc_sign_bit_count(minimum_sign, maximum_sign);
-    *exponent_bit_count = calc_exponent_bit_count(*minimum_exponent, maximum_exponent);
+    *exponent_bit_count = calc_exponent_bit_count(*minimum_exponent, maximum_exponent, EXPONENT_LENGTH_<DATATYPE_UPPER> , 0);
 }
 
 static void get_header_data_fill_<DATATYPE>(const <DATATYPE>* source,
@@ -441,7 +450,7 @@ static void get_header_data_fill_<DATATYPE>(const <DATATYPE>* source,
 
     *signs_id = calc_sign_bit_count(minimum_sign, maximum_sign);
 
-    *exponent_bit_count = calc_exponent_bit_count(*minimum_exponent, maximum_exponent);
+    *exponent_bit_count = calc_exponent_bit_count(*minimum_exponent, maximum_exponent, EXPONENT_LENGTH_<DATATYPE_UPPER> , 1);
 
     datatype_cast_<DATATYPE> cur;
 
@@ -450,18 +459,11 @@ static void get_header_data_fill_<DATATYPE>(const <DATATYPE>* source,
     cur.p.mantissa = 0;
     cur.p.exponent = 0;
 
-    if(maximum_exponent != mask[EXPONENT_LENGTH_<DATATYPE_UPPER>-1]){
-
-      cur.p.exponent = maximum_exponent + 1;
-    } /*//use or not... CHECK
-
-    else if (*exponent_bit_count < EXPONENT_LENGTH_<DATATYPE_UPPER> - 1){
-
-      *exponent_bit_count += 1;
-      cur.p.exponent = *maximum_exponent + 1;
-
-    } */else {
-      /* Find first free exponent number between min and max exponents
+    if((*exponent_bit_count + 1 >= EXPONENT_LENGTH_<DATATYPE_UPPER>) && ((maximum_exponent - *minimum_exponent) != mask[*exponent_bit_count])){
+      /* If we have maximal number of bits and
+      we didn't increase the number of bits (because max-min diff != max)
+      then...
+      Find first free exponent number between min and max exponents
       (first zero bit number in keys will be set as cur.p.exponent) */
         int i = ((int)*minimum_exponent + 1) >> 3;
         int j = ((int)*minimum_exponent + 1) % 8;
@@ -478,7 +480,9 @@ static void get_header_data_fill_<DATATYPE>(const <DATATYPE>* source,
           }
           j=0;
         }
-      }
+    } else {
+      cur.p.exponent = maximum_exponent + 1;
+    }
 
     /* If the free exponent was not found => error.
     We have no space to place fill value. */
