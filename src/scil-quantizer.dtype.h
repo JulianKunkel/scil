@@ -18,7 +18,7 @@
  * \param the next free integer number, max be used for the reserved numbers
  * \return Bits needed per value
  */
-uint64_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum, <DATATYPE> maximum, double absolute_tolerance, int reserved_numbers, int * next_number);
+uint8_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum, <DATATYPE> maximum, double absolute_tolerance, int reserved_numbers, uint64_t * next_number);
 
 /**
  * \brief Quantizes the values of the given buffer with a known minimum
@@ -45,7 +45,7 @@ int scil_quantize_buffer_minmax_fill_<DATATYPE>(uint64_t* restrict buf_out,
                                           double absolute_tolerance,
                                           <DATATYPE> minimum,
                                           <DATATYPE> maximum,
-                                          double fill, int next_free_number);
+                                          double fill, uint64_t next_free_number);
 /**
 * \brief Quantizes the values of the given buffer.
 * \param buf_in The Buffer containing the data to quantize
@@ -83,7 +83,7 @@ int scil_unquantize_buffer_fill_<DATATYPE>(<DATATYPE>* restrict buf_out,
                                       size_t count,
                                       double absolute_tolerance,
                                       <DATATYPE> minimum,
-                                      double fill_value, int next_free_number);
+                                      double fill_value, uint64_t next_free_number);
 // End repeat
 
 #endif /* SCIL_QUANTIZER_H_<DATATYPE> */

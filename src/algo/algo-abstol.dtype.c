@@ -37,7 +37,7 @@ static int read_header(const byte* source,
                         double* absolute_tolerance,
                         uint8_t* bits_per_value,
                         double * fill_value,
-                      int * next_free_number){
+                        uint64_t * next_free_number){
   const byte * start = source;
   scilU_unpack8(source, minimum);
   source += 8;
@@ -52,8 +52,8 @@ static int read_header(const byte* source,
   source += 8;
 
   if(*fill_value != DBL_MAX){
-    scilU_unpack4(source, next_free_number);
-    source += 4;
+    *next_free_number = *(uint64_t*)source;
+    source += 8;
   }
 
   int size = (int) (source - start);
@@ -61,7 +61,7 @@ static int read_header(const byte* source,
   return size;
 }
 
-static int write_header(byte* dest, double minimum, double absolute_tolerance, uint8_t bits_per_value, double fill_value, int next_free_number){
+static int write_header(byte* dest, double minimum, double absolute_tolerance, uint8_t bits_per_value, double fill_value, uint64_t next_free_number){
   byte * start = dest;
   scilU_pack8(dest, minimum);
   dest += 8;
@@ -74,9 +74,10 @@ static int write_header(byte* dest, double minimum, double absolute_tolerance, u
 
   scilU_pack8(dest, fill_value);
   dest += 8;
+
   if (fill_value != DBL_MAX){
-    scilU_pack4(dest, next_free_number);
-    dest += 4;
+    *(uint64_t*)dest = next_free_number;
+    dest += 8;
   }
   return (int) (dest - start);
 }
@@ -104,10 +105,10 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
     // Locally assigning absolute tolerance
     double abs_tol = ctx->hints.absolute_tolerance; // prevent rounding errors
 
-    int next_free_number;
+    uint64_t next_free_number;
     int reserved = 0;
     // Get needed bits per compressed number in data
-    uint64_t bits_per_value = scil_calculate_bits_needed_<DATATYPE>(min, max, abs_tol, reserved, & next_free_number);
+    uint8_t bits_per_value = scil_calculate_bits_needed_<DATATYPE>(min, max, abs_tol, reserved, & next_free_number);
 
     // See if abstol compression makes sense
     if(bits_per_value >= 8 * sizeof(<DATATYPE>)){
@@ -129,7 +130,7 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
       *dest_size = header_size;
       return SCIL_NO_ERR;
     }
-    *dest_size = round_up_byte(bits_per_value * count) + header_size;
+    *dest_size = round_up_byte((uint64_t)bits_per_value * count) + header_size;
 
     uint64_t* quantized_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
 
@@ -145,7 +146,7 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
     }
 
     // Pack data in quantized buffer tightly
-    if(scil_swage(dest, quantized_buffer, count, (uint8_t)bits_per_value)){
+    if(scil_swage(dest, quantized_buffer, count, bits_per_value)){
         return SCIL_BUFFER_ERR;
     }
     // ========================================================================
@@ -169,7 +170,7 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
     byte* in = source;
     size_t in_size = source_size;
     size_t count = scilPr_get_dims_count(dims);
-    int next_free_number;
+    uint64_t next_free_number;
 
     // ============ Decompress ================================================
     // Parse Header
