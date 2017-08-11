@@ -107,8 +107,8 @@ static int read_header(const byte* source,
     source += 8;
 
     if(*fill_value != DBL_MAX){
-      *fill_value_mask = *((int64_t*)source);
-      source += 4;
+      *fill_value_mask = *((uint64_t*)source);
+      source += 8;
     }
 
     int size = (int) (source - start);
@@ -141,8 +141,8 @@ static int write_header(byte* dest,
     dest += 8;
 
     if (fill_value != DBL_MAX){
-      *((int64_t*)dest) = fill_value_mask;
-      dest += 4;
+      *((uint64_t*)dest) = fill_value_mask;
+      dest += 8;
     }
 
     return (int) (dest - start);
@@ -389,8 +389,7 @@ static int decompress_buffer_fill_<DATATYPE>(<DATATYPE>* restrict dest,
                                         uint8_t mantissa_bit_count,
                                         int16_t minimum_exponent,
                                         double fill_value,
-                                        uint16_t fill_value_mask){
-
+                                        uint64_t fill_value_mask){
     for(size_t i = 0; i < count; ++i){
       if (source[i] != fill_value_mask){
         dest[i] = decompress_value_<DATATYPE>(source[i], bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
@@ -599,7 +598,7 @@ int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 
     uint8_t signs_id, exponent_bit_count, mantissa_bit_count;
     int16_t minimum_exponent;
-    uint64_t fill_value_mask;
+    uint64_t fill_value_mask = 0;
     int header = read_header(source, &source_size_cp, &signs_id, &exponent_bit_count, &mantissa_bit_count, &minimum_exponent, &fill_value, &fill_value_mask);
     source += header;
 
