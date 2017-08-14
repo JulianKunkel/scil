@@ -25,6 +25,45 @@
 // Repeat for each data type
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+
+static int read_header_<DATATYPE>(const byte* source,
+                        size_t source_size,
+                        double* absolute_tolerance,
+                        double * fill_value,
+                        <DATATYPE> * next_free_number){
+  const byte * start = source;
+
+  scilU_unpack8(source, absolute_tolerance);
+  source += 8;
+
+  scilU_unpack8(source, fill_value);
+  source += 8;
+
+  if(*fill_value != DBL_MAX){
+    *next_free_number = *(double*)source;
+    source += 8;
+  }
+
+  int size = (int) (source - start);
+  return size;
+}
+
+static int write_header_<DATATYPE>(byte* dest, double absolute_tolerance, double fill_value, <DATATYPE> next_free_number){
+  byte * start = dest;
+
+  scilU_pack8(dest, absolute_tolerance);
+  dest += 8;
+
+  scilU_pack8(dest, fill_value);
+  dest += 8;
+
+  if (fill_value != DBL_MAX){
+    *(double*)dest = next_free_number;
+    dest += 8;
+  }
+  return (int) (dest - start);
+}
+
 int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
                         byte * restrict dest,
                         size_t* restrict dest_size,
@@ -32,21 +71,40 @@ int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
                         const scil_dims_t* dims)
 {
     int ret = 0;
-
     *dest_size = 0;
 
-    *((double*)dest) = (ctx->hints.absolute_tolerance == SCIL_ACCURACY_DBL_FINEST) ? 0 : ctx->hints.absolute_tolerance;
-    dest += 8;
-    *dest_size += 8;
+    <DATATYPE>* in = source;
+
+    // Element count in buffer to compress
+    size_t count = scilPr_get_dims_count(dims);
+
+    double abs_tol = (ctx->hints.absolute_tolerance == SCIL_ACCURACY_DBL_FINEST) ? 0 : ctx->hints.absolute_tolerance;
+
+    // Finding minimum and maximum values in data
+    <DATATYPE> min, max;
+    scilU_find_minimum_maximum_with_excluded_points_<DATATYPE>(in, count, &min, &max, ctx->hints.lossless_data_range_up_to,  ctx->hints.lossless_data_range_from, ctx->hints.fill_value);
+
+    <DATATYPE> next_free_number = max + 2 * abs_tol;
+
+    int header_size = write_header_<DATATYPE>(dest, abs_tol, ctx->hints.fill_value, next_free_number);
+    dest += header_size;
+    *dest_size += header_size;
+
+    if (ctx->hints.fill_value != DBL_MAX){
+      for (int i = 0; i < count; i++)
+        if (in[i] == ctx->hints.fill_value){
+          in[i] = next_free_number;
+        }
+      }
 
     // Compress
     zfp_field* field = NULL;
 
     switch(dims->dims){
-        case 1: field = zfp_field_1d(source, zfp_type_<DATATYPE>, dims->length[0]); break;
-        case 2: field = zfp_field_2d(source, zfp_type_<DATATYPE>, dims->length[0], dims->length[1]); break;
-        case 3: field = zfp_field_3d(source, zfp_type_<DATATYPE>, dims->length[0], dims->length[1], dims->length[2]); break;
-        default: field = zfp_field_1d(source, zfp_type_<DATATYPE>, scilPr_get_dims_count(dims));
+        case 1: field = zfp_field_1d(in, zfp_type_<DATATYPE>, dims->length[0]); break;
+        case 2: field = zfp_field_2d(in, zfp_type_<DATATYPE>, dims->length[0], dims->length[1]); break;
+        case 3: field = zfp_field_3d(in, zfp_type_<DATATYPE>, dims->length[0], dims->length[1], dims->length[2]); break;
+        default: field = zfp_field_1d(in, zfp_type_<DATATYPE>, scilPr_get_dims_count(dims));
     }
 
     zfp_stream* zfp = zfp_stream_open(NULL);
@@ -80,9 +138,13 @@ int scil_zfp_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
                             const size_t in_size)
 {
     int ret = 0;
+    double tolerance, fill_value;
+    <DATATYPE> next_free_number;
 
-    double tolerance = *((double*)compressed_buf_in);
-    compressed_buf_in += 8;
+    int size = in_size;
+
+    size -= read_header_<DATATYPE>(compressed_buf_in, in_size, &tolerance, &fill_value, & next_free_number);
+    compressed_buf_in += in_size - size;
 
     // Decompress
     zfp_field* field = NULL;
@@ -113,6 +175,13 @@ int scil_zfp_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
     zfp_field_free(field);
     zfp_stream_close(zfp);
     stream_close(stream);
+
+    if (fill_value != DBL_MAX){
+      for (int i = 0; i < scilPr_get_dims_count(dims); i++)
+        if (data_out[i] == next_free_number){
+          data_out[i] = fill_value;
+        }
+    }
 
     return ret;
 }
