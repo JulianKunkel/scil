@@ -120,7 +120,7 @@ static int write_header(byte* dest,
                          uint8_t signs_id,
                          uint8_t exponent_bit_count,
                          uint8_t mantissa_bit_count,
-                         uint16_t minimum_exponent,
+                         int16_t minimum_exponent,
                          double fill_value,
                          uint64_t fill_value_mask){
     byte * start = dest;
