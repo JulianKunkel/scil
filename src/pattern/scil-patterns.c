@@ -58,6 +58,11 @@ typedef struct{
 static library_pattern * library = NULL;
 static int library_size = 0;
 static int library_capacity = 100;
+static int library_seed = 0;
+
+void scilPa_set_random_seed(int val){
+  library_seed  = val;
+}
 
 int scilPa_get_available_patterns_count()
 {
@@ -100,7 +105,7 @@ int scilPa_create_pattern_double(double * buffer, const scil_dims_t* dims, const
   if (num == -1){
     return SCIL_EINVAL;
   }
-  return patterns[num]->create(buffer, dims, mn, mx, arg, arg2);
+  return patterns[num]->create(buffer, dims, mn, mx, arg, arg2, library_seed);
 }
 
 static void library_add(char * pattern, char * name, float mn, float mx, float arg, float arg2, int mutator_count, ...){
@@ -134,24 +139,24 @@ static void create_library_patterns_if_needed(){
   initialized = 1;
   library = malloc(sizeof(library_pattern) * library_capacity);
 
-  library_add("random", "randomRep10-100", 1, 100, -1, 0,    1, scilPa_repeater, 10.0);
-  library_add("random", "randomRep2-100", 1, 100, -1, 0,    1, scilPa_repeater, 2.0);
+  library_add("random", "randomRep10-100", 1, 100,  0, -1,     1, scilPa_repeater, 10.0);
+  library_add("random", "randomRep2-100", 1, 100,  0, -1,      1, scilPa_repeater, 2.0);
 
-  library_add("random", "randomRep10-1-+1", -1, 1,  -1, 0,    1, scilPa_repeater, 10.0);
-  library_add("random", "randomRep2-1-+1", -1, 1,  -1, 0,    1, scilPa_repeater, 2.0);
+  library_add("random", "randomRep10-1-+1", -1, 1,  0,  -1,    1, scilPa_repeater, 10.0);
+  library_add("random", "randomRep2-1-+1", -1, 1,   0, -1,     1, scilPa_repeater, 2.0);
 
-  library_add("random", "randomIpol10-100", 1, 100, -1, 0,   1, scilPa_interpolator, 10.0);
-  library_add("random", "randomIpol2-100", 1, 100, -1, 0,   1, scilPa_interpolator, 2.0);
+  library_add("random", "randomIpol10-100", 1, 100, 0,  -1,   1, scilPa_interpolator, 10.0);
+  library_add("random", "randomIpol2-100", 1, 100,  0, -1,    1, scilPa_interpolator, 2.0);
 
-  library_add("random", "randomIpol10-1-+1", -1, 1, -1, 0,   1, scilPa_interpolator, 10.0);
-  library_add("random", "randomIpol2-1-+1", -1, 1, -1, 0,   1, scilPa_interpolator, 2.0);
+  library_add("random", "randomIpol10-1-+1", -1, 1, 0,  -1,   1, scilPa_interpolator, 10.0);
+  library_add("random", "randomIpol2-1-+1", -1, 1,  0, -1,    1, scilPa_interpolator, 2.0);
 
   library_add("constant", "constant0", 0, -1, -1, 0, 0);
   library_add("constant", "constant35", 35.3335353, -1, -1, 0, 0);
 
-  library_add("random", "random0-1", 0, 1, -1, 0, 0);
-  library_add("random", "random1-100", 1, 100, -1, 0, 0);
-  library_add("random", "random-1-+1", -1, 1, -1, 0, 0);
+  library_add("random", "random0-1", 0, 1, 0,  -1, 0);
+  library_add("random", "random1-100", 1, 100, 0,  -1, 0);
+  library_add("random", "random-1-+1", -1, 1, 0,  -1, 0);
 
   library_add("steps", "steps2", 0, 100, 2, 0, 0);
   library_add("steps", "steps16", 0, 100, 16, 0, 0);

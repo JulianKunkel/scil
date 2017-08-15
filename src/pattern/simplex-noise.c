@@ -22,16 +22,15 @@
 
 #include <open-simplex-noise.h>
 
-static int simplex(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2){
+static int simplex(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2, int seed){
   const int frequencyCount = (int) arg2;
-  double highFrequency = (double)arg;
+  double highFrequency = (double) arg;
 
   if( scilU_double_equal(mn, mx) || frequencyCount <= 0 ){
     return SCIL_EINVAL;
   }
 
   struct osn_context *ctx;
-  int64_t seed = 4711;
   open_simplex_noise(seed, &ctx);
 
   int64_t max_potenz = 1<<frequencyCount;

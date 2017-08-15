@@ -18,6 +18,8 @@
 
 #include <scil-dims.h>
 
+void scilPa_set_random_seed(int val);
+
 int   scilPa_get_available_patterns_count();
 char* scilPa_get_pattern_name(int index);
 int   scilPa_get_pattern_index(const char* name);

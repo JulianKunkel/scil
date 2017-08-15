@@ -29,6 +29,7 @@ int main(int argc, char ** argv){
 	scil_dims_t dims;
   int parsed;
   int x = 10, y = 0, z = 0, w = 0;
+  int seed = 0;
   int printhelp = 0;
   char * check_pattern = "all";
   char * datatype_str = "double";
@@ -41,6 +42,7 @@ int main(int argc, char ** argv){
     {'y', NULL, "Cardinality in Y direction", OPTION_OPTIONAL_ARGUMENT, 'd', & y},
     {'z', NULL, "Cardinality in Z direction", OPTION_OPTIONAL_ARGUMENT, 'd', & z},
     {'w', NULL, "Cardinality in W direction", OPTION_OPTIONAL_ARGUMENT, 'd', & w},
+    {'s', "seed", "The random seed", OPTION_OPTIONAL_ARGUMENT, 'd', & seed},
     {'p', "pattern", "The pattern to use (or all)", OPTION_OPTIONAL_ARGUMENT, 's', & check_pattern },
     {'D', "datatype", "The datatype to use", OPTION_OPTIONAL_ARGUMENT, 's', & datatype_str},
     {'O', "out_file_format", "Output file format", OPTION_OPTIONAL_ARGUMENT, 's', & out_file_format},
@@ -78,6 +80,8 @@ int main(int argc, char ** argv){
     printf("\n");
     exit(1);
   }
+
+  scilPa_set_random_seed(seed);
 
   scilPr_initialize_dims_4d(& dims, x, y, z, w);
 

@@ -19,7 +19,7 @@
 #include <scil-dims.h>
 
 typedef struct scil_pattern {
-    int (*create)(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2);
+    int (*create)(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2, int random_seed);
   char * name;
 } scil_pattern_t;
 

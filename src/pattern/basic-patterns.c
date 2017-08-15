@@ -25,7 +25,7 @@
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-static int constant(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2){
+static int constant(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2, int seed){
   size_t count = scilPr_get_dims_count(dims);
   for (size_t i=0; i < count; i++){
     buffer[i] = mn;
@@ -105,7 +105,7 @@ static int steps4d(double* buffer, const scil_dims_t* dims, double mn, double mx
     return SCIL_NO_ERR;
 }
 
-static int steps(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2)
+static int steps(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2, int seed)
 {
     int corrected_arg = arg < 2.0 ? 2 : (int)arg;
 
@@ -179,7 +179,7 @@ static int linear4d(double* buffer, const scil_dims_t* dims, double mn, double m
   return SCIL_NO_ERR;
 }
 
-static int linear(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2)
+static int linear(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2, int seed)
 {
     switch(dims->dims){
     case 1: return linear1d(buffer, dims, mn, mx);
@@ -190,8 +190,8 @@ static int linear(double* buffer, const scil_dims_t* dims, double mn, double mx,
     }
 }
 
-static int rnd(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2){
-  srand((int) arg);
+static int rnd(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2, int seed){
+  srand(seed);
   size_t count = scilPr_get_dims_count(dims);
   double delta = (mx - mn);
   for (size_t i=0; i < count; i++){
@@ -353,7 +353,7 @@ static int p_sin4d(double* buffer, const scil_dims_t* dims, double base_freq, in
     return SCIL_NO_ERR;
 }
 
-static int p_sin(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2)
+static int p_sin(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2, int seed)
 {
   double base_freq = (double)arg;
   const int freq_count = (int) arg2;
@@ -402,7 +402,7 @@ static void m_poly_func(double* data,
 }
 
 
-static int poly4(double* data, const scil_dims_t* dims, double mn, double mx, double arg, double arg2){
+static int poly4(double* data, const scil_dims_t* dims, double mn, double mx, double arg, double arg2, int seed){
   scil_dims_t pos;
   scilPr_copy_dims(&pos, dims);
   memset(pos.length, 0, sizeof(size_t) * pos.dims);
