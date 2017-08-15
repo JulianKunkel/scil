@@ -47,11 +47,11 @@ double expected_upper_value(double orig_value) {
 
 int main(void){
 
-    size_t count = 10;
+    size_t count = 16;
 
     scil_user_hints_t hints;
     scilPr_initialize_user_hints(&hints);
-    hints.significant_bits = 2;
+    hints.significant_bits = 1;
     hints.force_compression_methods = "3";
 
     scil_context_t* context;
@@ -79,14 +79,14 @@ int main(void){
     int errors = 0;
     printf("#Expected lower value,Expected upper value,Value after comp-decomp,Status\n");
     for (size_t i = 0; i < count; ++i) {
-        double lower = expected_lower_value(buffer_in[i]); 
-        double upper = expected_upper_value(buffer_in[i]); 
+        double lower = expected_lower_value(buffer_in[i]);
+        double upper = expected_upper_value(buffer_in[i]);
         if ((buffer_end[i] != lower) && (buffer_end[i] != upper)) {
-            printf("%f,%f,%f,Error\n", lower, upper, buffer_end[i]);
+            printf("%f, %f,%f,%f,Error\n", buffer_in[i], lower, upper, buffer_end[i]);
             errors++;
         }
         else
-            printf("%f,%f,%f,Ok\n", lower, upper, buffer_end[i]);
+            printf("%f, %f,%f,%f,Ok\n", buffer_in[i], lower, upper, buffer_end[i]);
     }
 
     free(buffer_in);

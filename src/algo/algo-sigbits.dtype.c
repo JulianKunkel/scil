@@ -286,10 +286,11 @@ static inline uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
     uint8_t shifts = MANTISSA_LENGTH_<DATATYPE_UPPER> - mantissa_bit_count;
 
     // Calculating compressed mantissa with rounding
-    uint64_t inter_mantissa = cur.p.mantissa; // (cur.p.mantissa & (1UL << (shifts - 1)));
-
+    uint64_t chkbit = (cur.p.mantissa >> (shifts - 1)) & 1;
+    uint64_t mantissa_shifted = (cur.p.mantissa >> shifts) + chkbit;
+    uint64_t sign_overflow = (1 << mantissa_bit_count) == mantissa_shifted;
     // Calculating compressed exponent with potential overflow from mantissa due to rounding up and writing it
-    result |= (uint64_t)(cur.p.exponent - minimum_exponent + (inter_mantissa > mask[52]));
+    result |= (uint64_t)(cur.p.exponent - minimum_exponent + sign_overflow);
 
     // Shifting to get space for mantissa
     result <<= mantissa_bit_count;
@@ -297,8 +298,11 @@ static inline uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
     // Clear overflow bit in mantissa
     //inter_mantissa &= ~(1 << shifts);
     // Write significant bits of mantissa
-    result |= inter_mantissa >> shifts;
+    if(! sign_overflow){
+      result |= mantissa_shifted;
+    }
 
+    //printf("C: %llde %lldm %lld %lld %lld\n", cur.p.exponent, cur.p.mantissa, chkbit, mantissa_shifted, sign_overflow);
     /*
     // internal check for correctness:
     for(int m = 0; m < mantissa_bit_count; m++){
