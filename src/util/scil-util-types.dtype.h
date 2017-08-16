@@ -23,6 +23,10 @@
 #define INFINITY_int64_t LONG_MAX
 #define NINFINITY_int64_t LONG_MIN
 
+#define MAX_EXPONENT_double 2047
+#define MAX_EXPONENT_float 255
+
+
 //Supported datatypes: int8_t int16_t int32_t int64_t float double
 // Repeat for each data type
 

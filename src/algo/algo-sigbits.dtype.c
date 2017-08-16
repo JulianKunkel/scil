@@ -279,11 +279,21 @@ static inline uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
 
     // Calculate potentionally compressed sign bit, writing it and shifting to get space for exponent bits
     if(signs_id == 2){
-        result = (uint64_t)cur.p.sign << exponent_bit_count;
+        result = (uint64_t) cur.p.sign << exponent_bit_count;
     }
 
     // Amount of bitshifts to do at various points
     uint8_t shifts = MANTISSA_LENGTH_<DATATYPE_UPPER> - mantissa_bit_count;
+
+    if(cur.p.exponent == MAX_EXPONENT_<DATATYPE>){ // with 1 sigbit we cannot encode infty
+        // Infty is no problem as the mantissa is 0
+        // NaN has any mantissa != 0, set the mantissa to 1 then
+        result |= (uint64_t)(cur.p.exponent - minimum_exponent);
+        result <<= mantissa_bit_count;
+        result |= (cur.p.mantissa != 0);
+        //printf("%lld %lld\n", result, cur.p.mantissa);
+        return result;
+    }
 
     // Calculating compressed mantissa with rounding
     uint64_t chkbit = (cur.p.mantissa >> (shifts - 1)) & 1;
@@ -295,24 +305,10 @@ static inline uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
     // Shifting to get space for mantissa
     result <<= mantissa_bit_count;
 
-    // Clear overflow bit in mantissa
-    //inter_mantissa &= ~(1 << shifts);
     // Write significant bits of mantissa
     if(! sign_overflow){
       result |= mantissa_shifted;
     }
-
-    //printf("C: %llde %lldm %lld %lld %lld\n", cur.p.exponent, cur.p.mantissa, chkbit, mantissa_shifted, sign_overflow);
-    /*
-    // internal check for correctness:
-    for(int m = 0; m < mantissa_bit_count; m++){
-			int b1 = (cur.p.mantissa >> (MANTISSA_LENGTH_<DATATYPE_UPPER>-m)) & (1);
-			int b2 = (inter_mantissa >> (MANTISSA_LENGTH_<DATATYPE_UPPER>-m)) & (1);
-      printf("now: %d; %d = %d\n", m, b1, b2);
-      assert(b1 ==cur.p.exponent b2);
-    }
-    */
-
     return result;
 }
 
@@ -517,9 +513,10 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_t* ctx,
 
     // ==================== Initialization =====================================
 
-    int8_t mantissa_bit_count = ctx->hints.significant_bits - 1;
+    uint8_t mantissa_bit_count = ctx->hints.significant_bits - 1;
+
     // Check whether sigbit compression makes sense
-    if(mantissa_bit_count == SCIL_ACCURACY_INT_FINEST){
+    if(mantissa_bit_count == SCIL_ACCURACY_INT_FINEST || ctx->hints.significant_bits == 0 || mantissa_bit_count >= MANTISSA_LENGTH_<DATATYPE_UPPER>){
         return SCIL_PRECISION_ERR;
     }
 
