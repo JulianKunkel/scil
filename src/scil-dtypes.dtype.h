@@ -18,18 +18,26 @@ static void scil_determine_accuracy_<DATATYPE>(const <DATATYPE> *data_1, const <
 			f2.f = c2;
 			//printf("checking %f %f\n", (double) c1, (double) c2);
 
-			if (f1.p.sign != f2.p.sign || f1.p.exponent != f2.p.exponent){
+			if (f1.p.sign != f2.p.sign ){
 				cur.significant_bits = 0;
 				//printf("fall exponent different\n");
 			}else{
+				// check exponent
+				uint64_t diff = (uint64_t) f1.p.exponent - (uint64_t) f2.p.exponent;
+				if(diff > 1){
+					cur.significant_bits = 0;
+					break;
+				}
+				if(diff == 1){
+					// wrap around
+					f1.p.mantissa -= 1;
+				}
+
+				uint64_t res = f1.p.mantissa > f2.p.mantissa ? f1.p.mantissa - f2.p.mantissa : f2.p.mantissa - f1.p.mantissa;
 				// check mantissa, bit by bit
-				//printf("%lld %lld\n", f1.p.mantissa, f2.p.mantissa);
 				cur.significant_bits = MANTISSA_LENGTH_<DATATYPE_UPPER>;
-				for(int m = MANTISSA_LENGTH_<DATATYPE_UPPER>-1 ; m >= 0; m--){
-					int b1 = (f1.p.mantissa>>m) & (1);
-					int b2 = (f2.p.mantissa>>m) & (1);
-					//printf("%d: %d %d\n", m, b1, b2);
-					if( b1 != b2){
+				for(int m = MANTISSA_LENGTH_<DATATYPE_UPPER> - 1; m >= 0; m--){
+					if( ((res >> m) & 1) != 0){
 						cur.significant_bits = MANTISSA_LENGTH_<DATATYPE_UPPER> - (int) m;
 						//printf("significant bits:%d\n", cur.significant_bits);
 						break;
