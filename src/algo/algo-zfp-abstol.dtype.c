@@ -91,12 +91,15 @@ int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
     dest += header_size;
     *dest_size += header_size;
 
-    if (ctx->hints.fill_value != DBL_MAX)
+    if (ctx->hints.fill_value != DBL_MAX){
+      const <DATATYPE> fill_value_d = (<DATATYPE>) ctx->hints.fill_value;
+      const <DATATYPE> next_free_d = (<DATATYPE>)next_free_number;
       for (int i = 0; i < count; i++){
-        if (in[i] == (<DATATYPE>)ctx->hints.fill_value){
-          in[i] = (<DATATYPE>)next_free_number;
+        if (in[i] == fill_value_d){
+          in[i] = next_free_d;
         }
       }
+    }
 
     // Compress
     zfp_field* field = NULL;
@@ -178,12 +181,14 @@ int scil_zfp_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
     zfp_stream_close(zfp);
     stream_close(stream);
 
-    if (fill_value != DBL_MAX)
+    if (fill_value != DBL_MAX){
+      const <DATATYPE> fill_value_d = (<DATATYPE>)fill_value;
       for (int i = 0; i < count; i++){
         if (fabs(next_free_number - data_out[i]) <= tolerance){
-          data_out[i] = (<DATATYPE>)fill_value;
+          data_out[i] = fill_value_d;
         }
       }
+    }
 
     return ret;
 }
