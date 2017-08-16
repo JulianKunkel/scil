@@ -76,22 +76,22 @@ int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
     // Element count in buffer to compress
     size_t count = scilPr_get_dims_count(dims);
 
-    <DATATYPE>* in = (<DATATYPE>*)SAFE_MALLOC(count * sizeof(<DATATYPE>));
-    memcpy(in, source, count * sizeof(<DATATYPE>));
+    double next_free_number = 0;
+
+    <DATATYPE>* in = source;
 
     double abs_tol = (ctx->hints.absolute_tolerance == SCIL_ACCURACY_DBL_FINEST) ? 0 : ctx->hints.absolute_tolerance;
 
-    // Finding minimum and maximum values in data
-    <DATATYPE> min, max;
-    scilU_find_minimum_maximum_with_excluded_points_<DATATYPE>(in, count, &min, &max, ctx->hints.lossless_data_range_up_to,  ctx->hints.lossless_data_range_from, ctx->hints.fill_value);
-
-    double next_free_number = max + 2 * abs_tol;
-
-    int header_size = write_header(dest, abs_tol, ctx->hints.fill_value, next_free_number);
-    dest += header_size;
-    *dest_size += header_size;
-
     if (ctx->hints.fill_value != DBL_MAX){
+      in = (<DATATYPE>*)SAFE_MALLOC(count * sizeof(<DATATYPE>));
+      memcpy(in, source, count * sizeof(<DATATYPE>));
+
+      // Finding minimum and maximum values in data
+      <DATATYPE> min, max;
+      scilU_find_minimum_maximum_with_excluded_points_<DATATYPE>(in, count, &min, &max, ctx->hints.lossless_data_range_up_to,  ctx->hints.lossless_data_range_from, ctx->hints.fill_value);
+
+      next_free_number = max + 2 * abs_tol;
+
       const <DATATYPE> fill_value_d = (<DATATYPE>) ctx->hints.fill_value;
       const <DATATYPE> next_free_d = (<DATATYPE>)next_free_number;
       for (int i = 0; i < count; i++){
@@ -100,6 +100,10 @@ int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
         }
       }
     }
+
+    int header_size = write_header(dest, abs_tol, ctx->hints.fill_value, next_free_number);
+    dest += header_size;
+    *dest_size += header_size;
 
     // Compress
     zfp_field* field = NULL;
@@ -131,7 +135,10 @@ int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
     zfp_field_free(field);
     zfp_stream_close(zfp);
     stream_close(stream);
-    free(in);
+
+    if (ctx->hints.fill_value != DBL_MAX){
+      free(in);
+    }
 
     return ret;
 }
