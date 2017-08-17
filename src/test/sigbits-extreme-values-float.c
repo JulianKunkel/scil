@@ -23,22 +23,23 @@
 
     For IEEE 754 standard see
     https://en.wikipedia.org/wiki/IEEE_754
-    https://en.wikipedia.org/wiki/Double-precision_floating-point_format
+    https://en.wikipedia.org/wiki/Single-precision_floating-point_format
+    https://www.h-schmidt.net/FloatConverter/IEEE754.html
 */
 
 #define count 9
-double input_values[count];
-double expected_1bit[count];
-double expected_2bit[count];
-double expected_pre2max_bits[count];
-double expected_premax_bits[count];
-double *expected_max_bits = input_values;
+float input_values[count];
+float expected_1bit[count];
+float expected_2bit[count];
+float expected_pre2max_bits[count];
+float expected_premax_bits[count];
+float *expected_max_bits = input_values;
 
 void init() {
     int i = -1;
 
 /*  There are two signed representations of 0
-    having exponent -1022, encoded as 0
+    having exponent -126, encoded as 0
       this is called denormalized
       we do NOT have fixed 1.0 + mantissa but 0.0 + mantissa
       same exponent is used as with encoding 1
@@ -67,57 +68,57 @@ void init() {
         input_values[i]);
 
 /*  Now test the minimal normal positive value
-    having exponent -1022, encoded as 1
+    having exponent -126, encoded as 1
     and mantissa 0, meaning 1.0
 
     Compression should always be precise
     as mantissa 0 should not cause any overflow
 
-    http://www.binaryconvert.com/result_double.html?hexadecimal=0010000000000000
+    http://www.binaryconvert.com/result_float.html?hexadecimal=00800000
 */
-    input_values[++i] = 2.22507385850720138309023271733E-308;
+    input_values[++i] = 1.17549435082228750796873653722E-38;
     expected_1bit[i] = input_values[i];
     expected_2bit[i] = input_values[i];
     expected_pre2max_bits[i] = input_values[i];
     expected_premax_bits[i] = input_values[i];
 
 /*  Now test the minimal denormalized positive value
-    having exponent -1022, encoded as 0
-    and mantissa 0.0 + 2^-52
+    having exponent -126, encoded as 0
+    and mantissa 0.0 + 2^-23
 
-    Rounding up only happens on 52 sigbits, still denormalized
+    Rounding up only happens on 23 sigbits, still denormalized
 
     TODO Rounding down causes min. denormalized value to be 0.0
     TODO This ruins reltol interpretation of sigbits!
     TODO Is this the best we can do? Give some better definition!
 
-    http://www.binaryconvert.com/result_double.html?hexadecimal=0000000000000001
+    http://www.binaryconvert.com/result_float.html?hexadecimal=00000001
 */
-    input_values[++i] = 4.94065645841246544176568792868E-324;
+    input_values[++i] = 1.40129846432481707092372958329E-45;
     expected_1bit[i] = 0.0;
     expected_2bit[i] = 0.0;
     expected_pre2max_bits[i] = 0.0;
     expected_premax_bits[i] = input_values[i] * 2.0;
 
 /*  Also test maximal denormalized positive value
-    having exponent -1022, encoded as 0
-    and mantissa 0.0 + (1 − 2^−52)
+    having exponent -126, encoded as 0
+    and mantissa 0.0 + (1 − 2^−23)
 
-    Rounding up for any compression level < 53 sigbits
+    Rounding up for any compression level < 24 sigbits
     Result should be minimal normal positive value
 
-    http://www.binaryconvert.com/result_double.html?hexadecimal=000FFFFFFFFFFFFF
+    http://www.binaryconvert.com/result_float.html?hexadecimal=007FFFFF
 */
-    input_values[++i] = 2.22507385850720088902458687609E-308;
-    expected_1bit[i] = 2.22507385850720138309023271733E-308;
+    input_values[++i] = 1.17549421069244107548702944485E-38;
+    expected_1bit[i] = 1.17549435082228750796873653722E-38;
     expected_2bit[i] = expected_1bit[i];
     expected_pre2max_bits[i] = expected_1bit[i];
     expected_premax_bits[i] = expected_1bit[i];
 
 /*  There is +/- infinity
-    having maximal exponent 1024, encoded as 2047
+    having maximal exponent 128, encoded as 255
       this exponent is not used for number range
-      valid numbers have exp. 1023 max because of this infinity / NaN rule
+      valid numbers have exp. 127 max because of this infinity / NaN rule
     having mantissa 0
     sign bit is used
 
@@ -141,9 +142,9 @@ void init() {
         input_values[i]);
 
 /*  There is NaN (not a number)
-    having maximal exponent 1024, encoded as 2047
+    having maximal exponent 128, encoded as 255
       this exponent is not used for number range
-      valid numbers have exp. 1023 max because of this infinity / NaN rule
+      valid numbers have exp. 127 max because of this infinity / NaN rule
     having any mantissa != 0
     having any sign bit
 
@@ -156,7 +157,7 @@ void init() {
     Also force maximum bitmask, which is NaN
     and is big/little endian independent
     and would cause overflow if mantissa handled as number
-    http://www.binaryconvert.com/result_double.html?hexadecimal=FFFFFFFFFFFFFFFF
+    http://www.binaryconvert.com/result_float.html?hexadecimal=FFFFFFFF
 */
     input_values[++i] = 0.0/0.0;
     expected_1bit[i] = input_values[i];
@@ -164,8 +165,8 @@ void init() {
     expected_pre2max_bits[i] = input_values[i];
     expected_premax_bits[i] = input_values[i];
 
-    unsigned long bitmask = 0xFFFFFFFFFFFFFFFF;
-    input_values[++i] = *((double*)(&bitmask));
+    unsigned long bitmask = 0xFFFFFFFF;
+    input_values[++i] = *((float*)(&bitmask));
     expected_1bit[i] = input_values[i];
     expected_2bit[i] = input_values[i];
     expected_pre2max_bits[i] = input_values[i];
@@ -182,23 +183,23 @@ void init() {
         input_values[i], i);
 }
 
-double expected_value(char sigbits, size_t i) {
+float expected_value(char sigbits, size_t i) {
     switch(sigbits) {
         case 1:
             return expected_1bit[i];
         case 2:
             return expected_2bit[i];
         // Remember: sigbits = mantissa bits + 1
-        case MANTISSA_LENGTH_DOUBLE - 1:
+        case MANTISSA_LENGTH_FLOAT - 1:
             return expected_pre2max_bits[i];
-        case MANTISSA_LENGTH_DOUBLE:
+        case MANTISSA_LENGTH_FLOAT:
             return expected_premax_bits[i];
-        case MANTISSA_LENGTH_DOUBLE + 1:
+        case MANTISSA_LENGTH_FLOAT + 1:
             return expected_max_bits[i];
     }
 }
 
-int same_value(double expected, double test) {
+int same_value(float expected, float test) {
     if (expected != expected) {
         // expect NaN, looks strange but is correct
         return test != test;
@@ -214,7 +215,7 @@ int test_sigbits(char sigbits) {
     printf("#Testing sigbit algorithm with hint 'number of sigbits' = %d\n", sigbits);
 
     scil_context_t* context;
-    int ret = scilPr_create_context(&context, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+    int ret = scilPr_create_context(&context, SCIL_TYPE_FLOAT, 0, NULL, &hints);
 
     if(ret != SCIL_NO_ERR){
       return -2;
@@ -223,13 +224,13 @@ int test_sigbits(char sigbits) {
     scil_dims_t dims;
     scilPr_initialize_dims_1d(&dims, count);
 
-    size_t uncompressed_size = scilPr_get_dims_size(&dims, SCIL_TYPE_DOUBLE);
-    size_t compressed_size   = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
+    size_t uncompressed_size = scilPr_get_dims_size(&dims, SCIL_TYPE_FLOAT);
+    size_t compressed_size   = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_FLOAT);
 
-    double* buffer_in  = (double*)malloc(uncompressed_size);
+    float* buffer_in  = (float*)malloc(uncompressed_size);
     byte* buffer_out   = (byte*)malloc(compressed_size);
     byte* buffer_tmp   = (byte*)malloc(compressed_size / 2);
-    double* buffer_end = (double*)malloc(uncompressed_size);
+    float* buffer_end = (float*)malloc(uncompressed_size);
 
     for(size_t i = 0; i < count; ++i){
         buffer_in[i] = input_values[i];
@@ -237,7 +238,7 @@ int test_sigbits(char sigbits) {
 
     size_t out_size;
     ret = scil_compress(buffer_out, compressed_size, buffer_in, &dims, &out_size, context);
-    scil_decompress(SCIL_TYPE_DOUBLE, buffer_end, &dims, buffer_out, out_size, buffer_tmp);
+    scil_decompress(SCIL_TYPE_FLOAT, buffer_end, &dims, buffer_out, out_size, buffer_tmp);
 
     if(ret != SCIL_NO_ERR){
       return -1;
@@ -246,7 +247,7 @@ int test_sigbits(char sigbits) {
     int errors = 0;
     printf("#Input value,Expected value,Value after comp-decomp,Status\n");
     for (size_t i = 0; i < count; ++i) {
-        double expected = expected_value(sigbits, i);
+        float expected = expected_value(sigbits, i);
         printf("%12.4e,%12.4e,%12.4e", buffer_in[i], expected, buffer_end[i]);
         if (same_value(expected, buffer_end[i])) {
             printf(",Ok\n");
@@ -273,9 +274,9 @@ int main(void) {
     errors += test_sigbits(1);
     errors += test_sigbits(2);
     // Remember: sigbits = mantissa bits + 1
-    errors += test_sigbits(MANTISSA_LENGTH_DOUBLE-1);
-    errors += test_sigbits(MANTISSA_LENGTH_DOUBLE);
-    if(test_sigbits(MANTISSA_LENGTH_DOUBLE + 1) != -1){
+    errors += test_sigbits(MANTISSA_LENGTH_FLOAT-1);
+    errors += test_sigbits(MANTISSA_LENGTH_FLOAT);
+    if(test_sigbits(MANTISSA_LENGTH_FLOAT + 1) != -1){
       errors++;
     }
     return errors;
