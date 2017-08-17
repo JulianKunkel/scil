@@ -9,7 +9,7 @@ static void scil_determine_accuracy_<DATATYPE>(const <DATATYPE> *data_1, const <
 		const <DATATYPE> err = c2 > c1 ? c2 - c1 : c1 - c2;
 
 		scil_user_hints_t cur;
-		cur.absolute_tolerance = err;
+		cur.absolute_tolerance = err;				
 		// determine significant digits
 		{
 			cur.significant_digits = sizeof(<DATATYPE>)*8;

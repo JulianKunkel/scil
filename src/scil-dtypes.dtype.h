@@ -8,7 +8,7 @@ static void scil_determine_accuracy_<DATATYPE>(const <DATATYPE> *data_1, const <
 	for(size_t i = 0; i < length; i++ ){
 		const <DATATYPE> c1 = data_1[i];
 		const <DATATYPE> c2 = data_2[i];
-		const <DATATYPE> err = (<DATATYPE>) fabs(c2 - c1);
+		const double err = c2 > c1 ? c2 - c1 : c1 - c2;
 		scil_user_hints_t cur;
 		cur.absolute_tolerance = err;
 		// determine significant digits
@@ -49,17 +49,12 @@ static void scil_determine_accuracy_<DATATYPE>(const <DATATYPE> *data_1, const <
 		// determine relative tolerance
 		cur.relative_tolerance_percent = 0;
 		cur.relative_err_finest_abs_tolerance = 0;
-		if (err >= (<DATATYPE>) relative_err_finest_abs_tolerance){
+		if (err >= relative_err_finest_abs_tolerance){
 			if (c1 == 0 && c2 != 0){
 				cur.relative_tolerance_percent = INFINITY;
 			}else{
 				// sign check not needed
-				//if (c2 < 0 && c1 > 0 || c2 > 0 && c1 < 0){
-					// signs are different
-					cur.relative_tolerance_percent = fabs(1 - c2 / c1);
-				//}else{
-				//	cur.relative_tolerance_percent = 1 - c2 / c1;
-				//}
+				cur.relative_tolerance_percent = fabs(1 - c2 / c1);
 			}
 		}else{
 			cur.relative_err_finest_abs_tolerance = err;

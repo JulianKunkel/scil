@@ -677,7 +677,7 @@ void scil_determine_accuracy(SCIL_Datatype_t datatype,
 		}
 
     // convert significant_digits in bits to 10 decimals
-    a.significant_digits =     scilU_convert_significant_bits_to_decimals(a.significant_bits);
+    a.significant_digits = scilU_convert_significant_bits_to_decimals(a.significant_bits);
     a.relative_tolerance_percent *= 100.0;
 
     if (a.relative_err_finest_abs_tolerance == 0) {
@@ -724,10 +724,12 @@ int scil_validate_compression(SCIL_Datatype_t datatype, const void* restrict dat
         // check if tolerance level is met:
         ret = SCIL_NO_ERR;
         if (h.absolute_tolerance > 0.0 && a.absolute_tolerance > h.absolute_tolerance) {
+          if(datatype != SCIL_TYPE_FLOAT || (a.absolute_tolerance - h.absolute_tolerance) > FLT_FINEST_SUB_float){
             debug("Validation error absolute_tolerance %f > %f\n",
                   a.absolute_tolerance,
                   h.absolute_tolerance);
             ret = SCIL_PRECISION_ERR;
+          }
         }
         if (h.relative_tolerance_percent > 0.0 && a.relative_tolerance_percent > h.relative_tolerance_percent) {
             debug("Validation error relative_tolerance_percent %f > %f\n",
