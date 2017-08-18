@@ -513,10 +513,21 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_t* ctx,
 
     // ==================== Initialization =====================================
 
+    // If neither hint 'sigbits' nor 'reltol' is given,
+    // this initializes to -1 as unsigned = 255
+    // and will fail the test mantissa_bit_count >= MANTISSA_LENGTH_<DATATYPE_UPPER>
     uint8_t mantissa_bit_count = ctx->hints.significant_bits - 1;
 
+    // Calculate mantissa bits from hint 'reltol', apply when more strict
+    if (ctx->hints.relative_tolerance_percent > 0.0) {
+        uint8_t mantissa_bits_rel = scilU_relative_tolerance_to_significant_bits(ctx->hints.relative_tolerance_percent) - 1;
+        if (ctx->hints.significant_bits == 0 || mantissa_bits_rel > mantissa_bit_count)
+            mantissa_bit_count = mantissa_bits_rel;
+    }
+    //printf("#mantissa_bit_count = %d\n", mantissa_bit_count);
+
     // Check whether sigbit compression makes sense
-    if(mantissa_bit_count == SCIL_ACCURACY_INT_FINEST || ctx->hints.significant_bits == 0 || mantissa_bit_count >= MANTISSA_LENGTH_<DATATYPE_UPPER>){
+    if(mantissa_bit_count == SCIL_ACCURACY_INT_FINEST || mantissa_bit_count >= MANTISSA_LENGTH_<DATATYPE_UPPER>){
         return SCIL_PRECISION_ERR;
     }
 

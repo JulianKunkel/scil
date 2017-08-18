@@ -254,6 +254,12 @@ int scilU_convert_significant_bits_to_decimals(int bits){
 
 
 uint8_t scilU_relative_tolerance_to_significant_bits(double rel_tol){
+  // Result of this function can not be negative as for the used return type,
+  // but the formula in theory could be. This would mean we could even
+  // compress the exponent, but not implemented yet.
+  // Also 1 sigbits means 0 mantissa bits, hence minimal return value.
+  if (rel_tol > 50.0)
+      return 1;
 	return (uint8_t)ceil(log2(100.0 / rel_tol));
 }
 
