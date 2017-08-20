@@ -36,6 +36,7 @@ double *expected_max_bits = input_values;
 
 void init() {
     int i = -1;
+    datatype_cast_double f;
 
 /*  There are two signed representations of 0
     having exponent -1022, encoded as 0
@@ -75,7 +76,10 @@ void init() {
 
     http://www.binaryconvert.com/result_double.html?hexadecimal=0010000000000000
 */
-    input_values[++i] = 2.22507385850720138309023271733E-308;
+    f.p.exponent = 1; //2.22507385850720088902458687609E-308;
+    f.p.mantissa = 0;
+    f.p.sign = 0;
+    input_values[++i] = f.f;
     expected_1bit[i] = input_values[i];
     expected_2bit[i] = input_values[i];
     expected_pre2max_bits[i] = input_values[i];
