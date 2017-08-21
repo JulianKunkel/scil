@@ -13,6 +13,9 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
+/* Remember: due to the machine epsilon of the floating-point data representation,
+the maximum decompression error would be slightly larger than the specified error bound in some cases.*/
+
 #include <assert.h>
 #include <math.h>
 #include <string.h>
