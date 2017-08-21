@@ -4,7 +4,6 @@
 #include <assert.h>
 
 #include <scil-util.h>
-#include <stdio.h>
 
 //Supported datatypes: int8_t int16_t int32_t int64_t float double
 // Repeat for each data type
@@ -37,7 +36,7 @@ int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* restrict dest,
     double real_tolerance = 1 / absolute_tolerance;
 
     for(size_t i = 0; i < count; ++i){
-        dest[i] = (((uint64_t) ( ((double) (source[i] - minimum)) * real_tolerance ) + 1)>>1)<<1 ;
+        dest[i] = (uint64_t) round(((double)source[i] - minimum) * real_tolerance);
     }
 
     return SCIL_NO_ERR;
