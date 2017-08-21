@@ -152,6 +152,10 @@ void init() {
     and hence may be rounded up, causing exponent to overflow.
     Such problem could be fixed to just stay with any NaN
 
+    With 1 sigbit it's impossible to have mantissa != 0
+    so we can't expect NaN but only infinity.
+    Turns out the result is -infinity, we accept.
+
     0.0/0.0 undefined, causes NaN but don't know which bitmask
 
     Also force maximum bitmask, which is NaN
@@ -160,14 +164,14 @@ void init() {
     http://www.binaryconvert.com/result_float.html?hexadecimal=FFFFFFFF
 */
     input_values[++i] = 0.0/0.0;
-    expected_1bit[i] = input_values[i];
+    expected_1bit[i] = -1.0/0.0;
     expected_2bit[i] = input_values[i];
     expected_pre2max_bits[i] = input_values[i];
     expected_premax_bits[i] = input_values[i];
 
     unsigned long bitmask = 0xFFFFFFFF;
     input_values[++i] = *((float*)(&bitmask));
-    expected_1bit[i] = input_values[i];
+    expected_1bit[i] = -1.0/0.0;
     expected_2bit[i] = input_values[i];
     expected_pre2max_bits[i] = input_values[i];
     expected_premax_bits[i] = input_values[i];
