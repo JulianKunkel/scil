@@ -21,7 +21,7 @@ int main(void)
     scil_user_hints_t hints;
     scilPr_initialize_user_hints(&hints);
     hints.force_compression_methods = "3";
-    hints.significant_bits          = 64;
+    hints.significant_bits          = 53;
 
     scil_context_t* ctx;
     scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
@@ -33,5 +33,9 @@ int main(void)
     free(dest);
     free(ctx);
 
+    if (ret == SCIL_PRECISION_ERR)
+      return 0;
+    if (ret == 0)
+      return -1;
     return ret;
 }
