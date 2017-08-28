@@ -12,7 +12,9 @@
 uint8_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum, <DATATYPE> maximum,  double absolute_tolerance, int reserved_numbers, uint64_t * next_free_number){
   absolute_tolerance = absolute_tolerance * 2.0;
   if(absolute_tolerance <= 0.0 || (double)(maximum - minimum) < absolute_tolerance){
-    *next_free_number = 0;
+    if(next_free_number != NULL){
+      *next_free_number = 0;
+    }
     return 0;
   }
   assert((next_free_number == NULL && reserved_numbers == 0) || (next_free_number != NULL) );

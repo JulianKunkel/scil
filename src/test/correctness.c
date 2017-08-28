@@ -40,7 +40,6 @@ int test_correctness(const char* name, double* buffer_in, scil_dims_t dims)
     const size_t c_size = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
 
     double* buffer_uncompressed = (double*) malloc(c_size);
-
     allocate(byte, buffer_out, c_size);
     allocate(byte, tmp_buff, c_size);
 
@@ -67,6 +66,10 @@ int test_correctness(const char* name, double* buffer_in, scil_dims_t dims)
         } else {
             sprintf(compression_name, "%s", scilU_get_compressor_name(i));
             hints.force_compression_methods = compression_name;
+        }
+        if(strcmp(compression_name,"sz") == 0){
+          printf("Skipping compressor for now!\n");
+          continue;
         }
 
         int ret = scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
