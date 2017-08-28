@@ -79,6 +79,16 @@ static uint64_t mask[] = {
     1125899906842623,
     2251799813685247,
     4503599627370495,
+    9007199254740991,
+    18014398509481983,
+    36028797018963967,
+    72057594037927935,
+    144115188075855871,
+    288230376151711743,
+    576460752303423487,
+    1152921504606846975,
+    2305843009213693951,
+    4611686018427387903
 };
 
 static int read_header(const byte* source,
@@ -120,7 +130,7 @@ static int write_header(byte* dest,
                          uint8_t signs_id,
                          uint8_t exponent_bit_count,
                          uint8_t mantissa_bit_count,
-                         uint16_t minimum_exponent,
+                         int16_t minimum_exponent,
                          double fill_value,
                          uint64_t fill_value_mask){
     byte * start = dest;
@@ -155,15 +165,12 @@ static uint8_t calc_sign_bit_count(uint8_t minimum_sign, uint8_t maximum_sign){
 
 static uint8_t calc_exponent_bit_count(int16_t minimum_exponent, int16_t maximum_exponent, uint16_t datatype_maximum, uint8_t flag_fill_value){
     const int16_t exp_delta = maximum_exponent - minimum_exponent  + 1;
-
     uint8_t bit_exponent_count = (uint8_t)ceil(log2(exp_delta + 1));
 
     if (flag_fill_value){
-      if ((exp_delta == mask[bit_exponent_count]) && (bit_exponent_count + 1 < datatype_maximum)){
+      if ((exp_delta == mask[bit_exponent_count]) && (bit_exponent_count + 1 < datatype_maximum))
         return ++bit_exponent_count;
-      }else {
-        return bit_exponent_count;
-      }
+      else return bit_exponent_count;
     }
 
     return bit_exponent_count;
@@ -282,11 +289,21 @@ static inline uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
 
     // Calculate potentionally compressed sign bit, writing it and shifting to get space for exponent bits
     if(signs_id == 2){
-        result = (uint64_t)cur.p.sign << exponent_bit_count;
+        result = (uint64_t) cur.p.sign << exponent_bit_count;
     }
 
     // Amount of bitshifts to do at various points
     uint8_t shifts = MANTISSA_LENGTH_<DATATYPE_UPPER> - mantissa_bit_count;
+
+    if(cur.p.exponent == MAX_EXPONENT_<DATATYPE>){ // with 1 sigbit we cannot encode infty
+        // Infty is no problem as the mantissa is 0
+        // NaN has any mantissa != 0, set the mantissa to 1 then
+        result |= (uint64_t)(cur.p.exponent - minimum_exponent);
+        result <<= mantissa_bit_count;
+        result |= (cur.p.mantissa != 0);
+        //printf("%lld %lld\n", result, cur.p.mantissa);
+        return result;
+    }
 
     // Calculating compressed mantissa with rounding
     uint64_t chkbit = (cur.p.mantissa >> (shifts - 1)) & 1;
@@ -298,24 +315,10 @@ static inline uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
     // Shifting to get space for mantissa
     result <<= mantissa_bit_count;
 
-    // Clear overflow bit in mantissa
-    //inter_mantissa &= ~(1 << shifts);
     // Write significant bits of mantissa
     if(! sign_overflow){
       result |= mantissa_shifted;
     }
-
-    //printf("C: %llde %lldm %lld %lld %lld\n", cur.p.exponent, cur.p.mantissa, chkbit, mantissa_shifted, sign_overflow);
-    /*
-    // internal check for correctness:
-    for(int m = 0; m < mantissa_bit_count; m++){
-			int b1 = (cur.p.mantissa >> (MANTISSA_LENGTH_<DATATYPE_UPPER>-m)) & (1);
-			int b2 = (inter_mantissa >> (MANTISSA_LENGTH_<DATATYPE_UPPER>-m)) & (1);
-      printf("now: %d; %d = %d\n", m, b1, b2);
-      assert(b1 ==cur.p.exponent b2);
-    }
-    */
-
     return result;
 }
 
@@ -520,9 +523,21 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_t* ctx,
 
     // ==================== Initialization =====================================
 
-    int8_t mantissa_bit_count = ctx->hints.significant_bits - 1;
+    // If neither hint 'sigbits' nor 'reltol' is given,
+    // this initializes to -1 as unsigned = 255
+    // and will fail the test mantissa_bit_count >= MANTISSA_LENGTH_<DATATYPE_UPPER>
+    uint8_t mantissa_bit_count = ctx->hints.significant_bits - 1;
+
+    // Calculate mantissa bits from hint 'reltol', apply when more strict
+    if (ctx->hints.relative_tolerance_percent > 0.0) {
+        uint8_t mantissa_bits_rel = scilU_relative_tolerance_to_significant_bits(ctx->hints.relative_tolerance_percent) - 1;
+        if (ctx->hints.significant_bits == 0 || mantissa_bits_rel > mantissa_bit_count)
+            mantissa_bit_count = mantissa_bits_rel;
+    }
+    //printf("#mantissa_bit_count = %d\n", mantissa_bit_count);
+
     // Check whether sigbit compression makes sense
-    if(mantissa_bit_count == SCIL_ACCURACY_INT_FINEST){
+    if(mantissa_bit_count == SCIL_ACCURACY_INT_FINEST || mantissa_bit_count >= MANTISSA_LENGTH_<DATATYPE_UPPER>){
         return SCIL_PRECISION_ERR;
     }
 
