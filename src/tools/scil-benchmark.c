@@ -161,7 +161,7 @@ int main(int argc, char** argv){
 			continue;
 		}
 
-		for(int d=0; d < SCIL_DATATYPE_NUMERIC_MAX; d++ ){
+		for(int d=SCIL_DATATYPE_NUMERIC_MIN; d < SCIL_DATATYPE_NUMERIC_MAX; d++ ){
 			ret = scilPa_create_library_pattern(buffer_in, d, &dims, i);
 			assert( ret == SCIL_NO_ERR);
 			benchmark(f, d, name, (byte*) buffer_in, dims);

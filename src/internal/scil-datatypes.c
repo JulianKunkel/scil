@@ -3,14 +3,14 @@
 #include <scil-datatypes.h>
 
 static char * dtype_names[] = {
+    "unknown",
     "float",
+    "float16",
     "double",
     "int8",
     "int16",
     "int32",
     "int64",
-    "string",
-    "binary",
     NULL
 };
 
