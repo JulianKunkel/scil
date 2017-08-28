@@ -61,12 +61,10 @@ int main(void){
             printf("#Needed bits for quantized values > 53.\n");
 
             if(ret != SCIL_EINVAL){
-                printf("#FAILURE: scil_quantize_buffer did the quantization even though quantized values need more than 53 bits.");
-                return 1;
+                printf("#FAILURE: scil_quantize_buffer did the quantization even though quantized values need more than 53 bits.\n");
             }
             printf("\n");
-        }
-        else{
+        }else{
             // Success testing
             printf("#Needed bits for quantized values <= 53.\n");
 
@@ -75,11 +73,13 @@ int main(void){
             //printf("#before,after\n");
             for(size_t j = 0; j < count; ++j){
                 //printf("%+.20f,%+.20f\n", buf_in[j], buf_end[j]);
-                if( fabs(buf_in[j] - buf_end[j]) > absolute_tolerance ){
+                double delta = fabs(buf_in[j] - buf_end[j]);
+                double error = (delta > absolute_tolerance) ? delta - absolute_tolerance : 0;
+                if( error > FLT_FINEST_SUB_double*10 ){
                     printf("#FAILURE: value at index %lu was after quantizing not in the tolerated error margin.\n", j);
                     printf("#Before: %+.20f == %lu\n", buf_in[j], buf_out[j]);
                     printf("#After:  %+.20f\n", buf_end[j]);
-                    printf("#Difference: %.20f\n", fabs(buf_in[j] - buf_end[j]) );
+                    printf("#Difference: %.20f -- error exceeds by: %.20f\n", delta, error);
                     printf("#Error tol.: %.20f\n", absolute_tolerance );
                     printf("#Max. prec.: %.20f\n", d_max_prec);
                     return 1;

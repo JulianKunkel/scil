@@ -42,7 +42,7 @@ void test(char * name, size_t expected_size, int check_compressed_output){
 
   size_t out_size = -1;
   ret = scil_compress(buff, size, data, & dims, & out_size,  ctx);
-  printf("%d %lld\n", ret, (long long) out_size);
+  printf("%d measure: %lld exp: %lld\n", ret, (long long) out_size, (long long) expected_size);
   assert(ret == SCIL_NO_ERR && "ERROR COMPRESSION");
 
   // check a range of output, as newer versions of LZ4 behave differently.
@@ -85,20 +85,20 @@ int main(){
   test("dummy-precond,dummy-precond", 93, 1);
   test("dummy-precond,dummy-precond,dummy-precond,dummy-precond", 105, 1);
 
-  test("dummy-precond,lz4", 58, 0);
-  test("dummy-precond,dummy-precond,lz4", 64, 0);
-  test("dummy-precond,dummy-precond,dummy-precond,lz4", 71, 0);
+  test("dummy-precond,lz4", 61, 0);
+  test("dummy-precond,dummy-precond,lz4", 67, 0);
+  test("dummy-precond,dummy-precond,dummy-precond,lz4", 75, 0);
 
-  test("lz4", 56, 0);
-  test("zfp-abstol", 98, 0);
+  test("lz4", 59, 0);
+  test("zfp-abstol", 106, 0);
 
-  test("zfp-abstol,lz4", 47, 0);
+  test("zfp-abstol,lz4", 53, 0);
 
-  test("dummy-precond,zfp-abstol", 104, 0);
-  test("dummy-precond,dummy-precond,zfp-abstol", 110, 0);
+  test("dummy-precond,zfp-abstol", 112, 0);
+  test("dummy-precond,dummy-precond,zfp-abstol", 118, 0);
 
-  test("dummy-precond,zfp-abstol,lz4", 49, 0);
-  test("dummy-precond,dummy-precond,zfp-abstol,lz4", 55, 0);
+  test("dummy-precond,zfp-abstol,lz4", 55, 0);
+  test("dummy-precond,dummy-precond,zfp-abstol,lz4", 61, 0);
 
   free(buff);
 

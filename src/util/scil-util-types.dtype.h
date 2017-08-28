@@ -29,7 +29,7 @@
 #define MAX_PRECISION_double 15
 #define MAX_PRECISION_float 7
 
-#define FLT_FINEST_SUB_double  0.00000000000001
+#define FLT_FINEST_SUB_double  0.0000000000001
 #define FLT_FINEST_SUB_float 0.000001
 
 

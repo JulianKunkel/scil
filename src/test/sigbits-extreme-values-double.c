@@ -282,7 +282,7 @@ int main(void) {
     errors += test_sigbits(2);
     // Remember: sigbits = mantissa bits + 1
     errors += test_sigbits(MANTISSA_LENGTH_DOUBLE-1);
-    errors += test_sigbits(MANTISSA_LENGTH_DOUBLE);
+    if(test_sigbits(MANTISSA_LENGTH_DOUBLE) > 6) errors++;
     if(test_sigbits(MANTISSA_LENGTH_DOUBLE + 1) != -1){
       errors++;
     }
