@@ -98,7 +98,8 @@ static int read_header(const byte* source,
                         uint8_t* mantissa_bit_count,
                         int16_t* minimum_exponent,
                         double *fill_value,
-                        uint64_t *fill_value_mask){
+                        uint64_t *fill_value_mask,
+                        uint64_t *zero_value_mask){
     const byte * start = source;
 
     *signs_id = *((uint8_t*)source);
@@ -121,6 +122,11 @@ static int read_header(const byte* source,
       source += 8;
     }
 
+    if(*minimum_exponent > 0){
+      *zero_value_mask = *((uint64_t*)source);
+      source += 8;
+    }
+
     int size = (int) (source - start);
     *source_size -= size;
     return size;
@@ -132,7 +138,8 @@ static int write_header(byte* dest,
                          uint8_t mantissa_bit_count,
                          int16_t minimum_exponent,
                          double fill_value,
-                         uint64_t fill_value_mask){
+                         uint64_t fill_value_mask,
+                         uint64_t zero_value_mask){
     byte * start = dest;
 
     *dest = signs_id;
@@ -155,6 +162,11 @@ static int write_header(byte* dest,
       dest += 8;
     }
 
+    if (minimum_exponent > 0){
+      *((uint64_t*)dest) = zero_value_mask;
+      dest += 8;
+    }
+
     return (int) (dest - start);
 }
 
@@ -163,14 +175,21 @@ static uint8_t calc_sign_bit_count(uint8_t minimum_sign, uint8_t maximum_sign){
     return minimum_sign == maximum_sign ? minimum_sign : 2;
 }
 
-static uint8_t calc_exponent_bit_count(int16_t minimum_exponent, int16_t maximum_exponent, uint16_t datatype_maximum, uint8_t flag_fill_value){
-    const int16_t exp_delta = maximum_exponent - minimum_exponent  + 1;
+static uint8_t calc_exponent_bit_count(int16_t minimum_exponent, int16_t maximum_exponent, uint16_t datatype_maximum, uint8_t flag_fill_value, uint8_t flag_zero_value){
+    // Did the reservation for 1 rounding up exponent earlier
+    const int16_t exp_delta = maximum_exponent - minimum_exponent;
     uint8_t bit_exponent_count = (uint8_t)ceil(log2(exp_delta + 1));
 
     if (flag_fill_value){
       if ((exp_delta == mask[bit_exponent_count]) && (bit_exponent_count + 1 < datatype_maximum))
-        return ++bit_exponent_count;
-      else return bit_exponent_count;
+        ++bit_exponent_count;
+    }
+    // Every value with exponent < finest_value_exponent will turn 0
+    // but will be encoded with another special exponent to reduce
+    // exponent_bit_count (real 0 always extents the range to the bottom)
+    if (flag_zero_value){
+      if ((exp_delta == mask[bit_exponent_count]) && (bit_exponent_count + 1 < datatype_maximum))
+        ++bit_exponent_count;
     }
 
     return bit_exponent_count;
@@ -219,7 +238,8 @@ static void find_minimums_and_maximums_<DATATYPE>(const <DATATYPE>* buffer,
                                                   uint8_t* minimum_sign,
                                                   uint8_t* maximum_sign,
                                                   int16_t* minimum_exponent,
-                                                  int16_t* maximum_exponent){
+                                                  int16_t* maximum_exponent,
+                                                  int16_t finest_exponent){
 
     *minimum_sign = 1;
     *maximum_sign = 0;
@@ -232,11 +252,19 @@ static void find_minimums_and_maximums_<DATATYPE>(const <DATATYPE>* buffer,
         datatype_cast_<DATATYPE> cur;
         cur.f = buffer[i];
 
-        if(*minimum_sign != 0 && cur.p.sign < *minimum_sign) { *minimum_sign = cur.p.sign; }
-        if(*maximum_sign != 1 && cur.p.sign > *maximum_sign) { *maximum_sign = cur.p.sign; }
+        if(cur.p.exponent >= finest_exponent) {
+          if(*minimum_sign != 0 && cur.p.sign < *minimum_sign) { *minimum_sign = cur.p.sign; }
+          if(*maximum_sign != 1 && cur.p.sign > *maximum_sign) { *maximum_sign = cur.p.sign; }
 
-        if(cur.p.exponent < *minimum_exponent) { *minimum_exponent = cur.p.exponent; }
-        if(cur.p.exponent > *maximum_exponent) { *maximum_exponent = cur.p.exponent; }
+          if(cur.p.exponent < *minimum_exponent) { *minimum_exponent = cur.p.exponent; }
+          if(cur.p.exponent > *maximum_exponent) { *maximum_exponent = cur.p.exponent; }
+        }
+    }
+
+    // Maybe cur.p.exponent >= finest_exponent doesn't match for any value
+    // then min/max still on useless init-value
+    if (*maximum_exponent < *minimum_exponent) {
+      *maximum_exponent = *minimum_exponent = finest_exponent;
     }
 }
 
@@ -247,6 +275,7 @@ static void find_minimums_and_maximums_fill_<DATATYPE>(const <DATATYPE>* buffer,
                                                   int16_t* minimum_exponent,
                                                   int16_t* maximum_exponent,
                                                   double fill_value,
+                                                  int16_t finest_exponent,
                                                   byte *keys){
 
     *minimum_sign = 1;
@@ -255,37 +284,47 @@ static void find_minimums_and_maximums_fill_<DATATYPE>(const <DATATYPE>* buffer,
     *minimum_exponent = 0x7fff;
     *maximum_exponent = -*minimum_exponent;
 
-    for(size_t i = 0; i < size; ++i){
+    for(size_t i = 0; i < size; ++i) {
+        if (buffer[i] != fill_value) {
+            datatype_cast_<DATATYPE> cur;
+            cur.f = buffer[i];
 
-        if (buffer[i] != fill_value)
-        {
-        datatype_cast_<DATATYPE> cur;
-        cur.f = buffer[i];
+            if(cur.p.exponent >= finest_exponent) {
+              if(*minimum_sign != 0 && cur.p.sign < *minimum_sign) { *minimum_sign = cur.p.sign; }
+              if(*maximum_sign != 1 && cur.p.sign > *maximum_sign) { *maximum_sign = cur.p.sign; }
 
-        if(*minimum_sign != 0 && cur.p.sign < *minimum_sign) { *minimum_sign = cur.p.sign; }
-        if(*maximum_sign != 1 && cur.p.sign > *maximum_sign) { *maximum_sign = cur.p.sign; }
+              if(cur.p.exponent < *minimum_exponent) { *minimum_exponent = cur.p.exponent; }
+              if(cur.p.exponent > *maximum_exponent) { *maximum_exponent = cur.p.exponent; }
 
-        if(cur.p.exponent < *minimum_exponent) { *minimum_exponent = cur.p.exponent; }
-        if(cur.p.exponent > *maximum_exponent) { *maximum_exponent = cur.p.exponent; }
-
-        /*It sets for each exponent existing in buffer 1 bit flag */
-        keys[cur.p.exponent >> 3] |= 1 << (cur.p.exponent % 8);
-      }
+              /*It sets for each exponent existing in buffer 1 bit flag */
+              keys[cur.p.exponent >> 3] |= 1 << (cur.p.exponent % 8);
+            }
+        }
     }
 }
 
-// TODO: Test this mess... Especially for the super rare exponent maximum overflow.
 // TODO: Speed up shifts with lookup table.
 static inline uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
                                           uint8_t signs_id,
                                           uint8_t exponent_bit_count,
                                           uint8_t mantissa_bit_count,
-                                          int16_t minimum_exponent){
+                                          int16_t minimum_exponent,
+                                          uint64_t zero_value_mask,
+                                          uint64_t finest_value_mask){
 
     uint64_t result = 0;
 
     datatype_cast_<DATATYPE> cur;
     cur.f = value;
+
+    // For minimum_exponent all values with exponent < finest value's exponent
+    // are ignored, so if we see one here it is meant to be rounded
+    // down to zero if another exponent smaller or up to finest
+    if(cur.p.exponent < minimum_exponent - 1) {
+        return zero_value_mask;
+    } else if(cur.p.exponent < minimum_exponent) {
+        return finest_value_mask;
+    }
 
     // Calculate potentionally compressed sign bit, writing it and shifting to get space for exponent bits
     if(signs_id == 2){
@@ -344,10 +383,23 @@ static int compress_buffer_<DATATYPE>(uint64_t* restrict dest,
                                       uint8_t signs_id,
                                       uint8_t exponent_bit_count,
                                       uint8_t mantissa_bit_count,
-                                      int16_t minimum_exponent){
+                                      int16_t minimum_exponent,
+                                      uint64_t zero_value_mask){
+
+    datatype_cast_<DATATYPE> finest;
+    finest.p.sign = 0;
+    finest.p.mantissa = 0;
+    finest.p.exponent = minimum_exponent;
+    uint64_t finest_value_mask = compress_value_<DATATYPE>(
+                                          finest.f,
+                                          signs_id,
+                                          exponent_bit_count,
+                                          mantissa_bit_count,
+                                          minimum_exponent,
+                                          zero_value_mask, 0);
 
     for(size_t i = 0; i < count; ++i){
-        dest[i] = compress_value_<DATATYPE>(source[i], signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
+        dest[i] = compress_value_<DATATYPE>(source[i], signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, zero_value_mask, finest_value_mask);
     }
 
     return SCIL_NO_ERR;
@@ -361,11 +413,24 @@ static int compress_buffer_fill_<DATATYPE>(uint64_t* restrict dest,
                                       uint8_t mantissa_bit_count,
                                       int16_t minimum_exponent,
                                       double fill_value,
-                                      uint64_t fill_value_mask){
+                                      uint64_t fill_value_mask,
+                                      uint64_t zero_value_mask){
+
+    datatype_cast_<DATATYPE> finest;
+    finest.p.sign = 0;
+    finest.p.mantissa = 0;
+    finest.p.exponent = minimum_exponent;
+    uint64_t finest_value_mask = compress_value_<DATATYPE>(
+                                          finest.f,
+                                          signs_id,
+                                          exponent_bit_count,
+                                          mantissa_bit_count,
+                                          minimum_exponent,
+                                          zero_value_mask, 0);
 
     for(size_t i = 0; i < count; ++i){
       if (source[i] != fill_value){
-        dest[i] = compress_value_<DATATYPE>(source[i], signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
+        dest[i] = compress_value_<DATATYPE>(source[i], signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, zero_value_mask, finest_value_mask);
       }else{
         dest[i] = fill_value_mask;
       }
@@ -381,10 +446,15 @@ static int decompress_buffer_<DATATYPE>(<DATATYPE>* restrict dest,
                                         uint8_t signs_id,
                                         uint8_t exponent_bit_count,
                                         uint8_t mantissa_bit_count,
-                                        int16_t minimum_exponent){
+                                        int16_t minimum_exponent,
+                                        uint64_t zero_value_mask){
 
     for (size_t i = 0; i < count; ++i) {
+      if (source[i] == zero_value_mask){
+        dest[i] = 0.0;
+      } else {
         dest[i] = decompress_value_<DATATYPE>(source[i], bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
+      }
     }
 
     return SCIL_NO_ERR;
@@ -399,12 +469,15 @@ static int decompress_buffer_fill_<DATATYPE>(<DATATYPE>* restrict dest,
                                         uint8_t mantissa_bit_count,
                                         int16_t minimum_exponent,
                                         double fill_value,
-                                        uint64_t fill_value_mask){
+                                        uint64_t fill_value_mask,
+                                        uint64_t zero_value_mask){
     for(size_t i = 0; i < count; ++i){
-      if (source[i] != fill_value_mask){
-        dest[i] = decompress_value_<DATATYPE>(source[i], bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
-      }else{
+      if (source[i] == fill_value_mask){
         dest[i] = fill_value;
+      } else if (source[i] == zero_value_mask){
+        dest[i] = 0.0;
+      } else {
+        dest[i] = decompress_value_<DATATYPE>(source[i], bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
       }
     }
 
@@ -415,19 +488,53 @@ static void get_header_data_<DATATYPE>(const <DATATYPE>* source,
                                        size_t count,
                                        uint8_t* signs_id,
                                        uint8_t* exponent_bit_count,
-                                       int16_t* minimum_exponent){
+                                       uint8_t mantissa_bit_count,
+                                       int16_t* minimum_exponent,
+                                       int16_t finest_exponent,
+                                       uint64_t *zero_value_mask){
 
     uint8_t minimum_sign, maximum_sign;
     int16_t maximum_exponent;
+
     find_minimums_and_maximums_<DATATYPE>(source,
                                           count,
                                           &minimum_sign,
                                           &maximum_sign,
                                           minimum_exponent,
-                                          &maximum_exponent);
+                                          &maximum_exponent,
+                                          finest_exponent);
+
+    int need_zero_value_mask = (*minimum_exponent > 0);
+
+    // reserve 1 exponent for rounding up
+    // will be used for zero_value_mask also
+    if (maximum_exponent < MAX_EXPONENT_<DATATYPE>) {
+        maximum_exponent++;
+    }
 
     *signs_id = calc_sign_bit_count(minimum_sign, maximum_sign);
-    *exponent_bit_count = calc_exponent_bit_count(*minimum_exponent, maximum_exponent, EXPONENT_LENGTH_<DATATYPE_UPPER> , 0);
+    *exponent_bit_count = calc_exponent_bit_count(*minimum_exponent, maximum_exponent, EXPONENT_LENGTH_<DATATYPE_UPPER> , 0, need_zero_value_mask);
+
+    // A slim approach to get the zero_value_mask
+    *zero_value_mask = 0;
+    if (need_zero_value_mask) {
+        datatype_cast_<DATATYPE> cur;
+        cur.p.sign = 0;
+        cur.p.mantissa = 0;
+        cur.p.exponent = 0;
+        if (maximum_exponent + 1 <= MAX_EXPONENT_<DATATYPE>) {
+          cur.p.exponent = maximum_exponent + 1;
+        }
+        if (cur.p.exponent){
+          *zero_value_mask = compress_value_<DATATYPE>(
+                                              cur.f,
+                                              *signs_id,
+                                              *exponent_bit_count,
+                                              mantissa_bit_count,
+                                              *minimum_exponent,
+                                              0, 0);
+        }
+    }
 }
 
 static void get_header_data_fill_<DATATYPE>(const <DATATYPE>* source,
@@ -437,10 +544,13 @@ static void get_header_data_fill_<DATATYPE>(const <DATATYPE>* source,
                                        uint8_t mantissa_bit_count,
                                        int16_t* minimum_exponent,
                                        double fill_value,
-                                       uint64_t *fill_value_mask){
+                                       uint64_t *fill_value_mask,
+                                       int16_t finest_exponent,
+                                       uint64_t *zero_value_mask){
 
     int16_t maximum_exponent;
     uint8_t minimum_sign, maximum_sign;
+
     byte *keys = (byte*)SAFE_MALLOC((EXPONENT_LENGTH_<DATATYPE_UPPER> - 1) << 2);
     memset(keys, 0, (EXPONENT_LENGTH_<DATATYPE_UPPER> - 1) << 2);
 
@@ -451,15 +561,22 @@ static void get_header_data_fill_<DATATYPE>(const <DATATYPE>* source,
                                           minimum_exponent,
                                           &maximum_exponent,
                                           fill_value,
+                                          finest_exponent,
                                           keys);
 
     /*printf("Check array with exponents from source\n");
     for(int i=0; i<32;i++)
       printf("%i ", keys[i]);*/
 
-    *signs_id = calc_sign_bit_count(minimum_sign, maximum_sign);
+    // reserve 1 exponent for rounding up
+    // will be used for fill_value_mask and zero_value_mask also
+    if (maximum_exponent < MAX_EXPONENT_<DATATYPE>) {
+        maximum_exponent++;
+    }
 
-    *exponent_bit_count = calc_exponent_bit_count(*minimum_exponent, maximum_exponent, EXPONENT_LENGTH_<DATATYPE_UPPER> , 1);
+    int need_zero_value_mask = (*minimum_exponent > 0);
+    *signs_id = calc_sign_bit_count(minimum_sign, maximum_sign);
+    *exponent_bit_count = calc_exponent_bit_count(*minimum_exponent, maximum_exponent, EXPONENT_LENGTH_<DATATYPE_UPPER> , 1, need_zero_value_mask);
 
     datatype_cast_<DATATYPE> cur;
 
@@ -468,6 +585,7 @@ static void get_header_data_fill_<DATATYPE>(const <DATATYPE>* source,
     cur.p.mantissa = 0;
     cur.p.exponent = 0;
 
+    // TODO: Test this case. Does it happen? Extend to zero_value_mask
     if((*exponent_bit_count + 1 >= EXPONENT_LENGTH_<DATATYPE_UPPER>) && ((maximum_exponent - *minimum_exponent) != mask[*exponent_bit_count])){
       /* If we have maximal number of bits and
       we didn't increase the number of bits (because max-min diff != max)
@@ -502,7 +620,26 @@ static void get_header_data_fill_<DATATYPE>(const <DATATYPE>* source,
                                           *signs_id,
                                           *exponent_bit_count,
                                           mantissa_bit_count,
-                                          *minimum_exponent);
+                                          *minimum_exponent,
+                                          0, 0);
+    }
+
+    // A more slim approach to get the zero_value_mask
+    *zero_value_mask = 0;
+    if (need_zero_value_mask) {
+        cur.p.exponent = 0;
+        if (maximum_exponent + 2 <= MAX_EXPONENT_<DATATYPE>) {
+          cur.p.exponent = maximum_exponent + 2;
+        }
+        if (cur.p.exponent){
+          *zero_value_mask = compress_value_<DATATYPE>(
+                                              cur.f,
+                                              *signs_id,
+                                              *exponent_bit_count,
+                                              mantissa_bit_count,
+                                              *minimum_exponent,
+                                              0, 0);
+        }
     }
 
     free(keys);
@@ -536,6 +673,17 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_t* ctx,
     }
     //printf("#mantissa_bit_count = %d\n", mantissa_bit_count);
 
+    /* Check for finest absolute tolerance.
+       Intention is to reduce the amount of used exponents to save bits there.
+       So we only need all exponents below finest_exponent to turn either
+       to zero (must not be encoded by minimum possible exponent -> zero_value_mask)
+       or to the finest value (use min. value with finest_exponent for continuity).
+       Rounding threshold is half of "reduced finest", just 1 exponent less
+    */
+    double finest_value = ctx->hints.relative_err_finest_abs_tolerance;
+    datatype_cast_double finest;
+    finest.f = finest_value;
+
     // Check whether sigbit compression makes sense
     if(mantissa_bit_count == SCIL_ACCURACY_INT_FINEST || mantissa_bit_count >= MANTISSA_LENGTH_<DATATYPE_UPPER>){
         return SCIL_PRECISION_ERR;
@@ -545,21 +693,23 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_t* ctx,
 
     uint8_t signs_id, exponent_bit_count;
     int16_t minimum_exponent;
-    uint64_t fill_value_mask;
+    uint64_t fill_value_mask, zero_value_mask;
 
     if (ctx->hints.fill_value == DBL_MAX){
-      get_header_data_<DATATYPE>(source, count, &signs_id, &exponent_bit_count, &minimum_exponent);
+      get_header_data_<DATATYPE>(source, count, &signs_id, &exponent_bit_count, mantissa_bit_count, &minimum_exponent, finest.p.exponent, &zero_value_mask);
     }else{ // use the fill value
-      get_header_data_fill_<DATATYPE>(source, count, &signs_id, &exponent_bit_count, mantissa_bit_count, &minimum_exponent, ctx->hints.fill_value, &fill_value_mask);
+      get_header_data_fill_<DATATYPE>(source, count, &signs_id, &exponent_bit_count, mantissa_bit_count, &minimum_exponent, ctx->hints.fill_value, &fill_value_mask, finest.p.exponent, &zero_value_mask);
 
       if(!fill_value_mask){
         return SCIL_FILL_VAL_ERR;
       }
+      //if(!zero_value_mask) is ok, it's just the normal 0.0 then
     }
 
     uint8_t bit_count_per_value = get_bit_count_per_value(signs_id, exponent_bit_count, mantissa_bit_count);
 
-    int header = write_header(dest, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, ctx->hints.fill_value, fill_value_mask);
+    // About finest: After finding min/max, the minimum_exponent will be the finest_exponent, so we use minimum_exponent from now on
+    int header = write_header(dest, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, ctx->hints.fill_value, fill_value_mask, zero_value_mask);
     dest += header;
 
     *dest_size = round_up_byte(bit_count_per_value * count) + header;
@@ -573,12 +723,12 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_t* ctx,
 
     if (ctx->hints.fill_value == DBL_MAX){
       // Compress each value in source buffer
-      if(compress_buffer_<DATATYPE>(compressed_buffer, source, count, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent)){
+      if(compress_buffer_<DATATYPE>(compressed_buffer, source, count, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, zero_value_mask)){
         ret = SCIL_BUFFER_ERR;
         goto comp_cleanup;
       }
     }else{ // don't compress the fill value
-      if(compress_buffer_fill_<DATATYPE>(compressed_buffer, source, count, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, ctx->hints.fill_value, fill_value_mask)){
+      if(compress_buffer_fill_<DATATYPE>(compressed_buffer, source, count, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, ctx->hints.fill_value, fill_value_mask, zero_value_mask)){
         ret = SCIL_BUFFER_ERR;
         goto comp_cleanup;
       }
@@ -620,8 +770,8 @@ int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 
     uint8_t signs_id, exponent_bit_count, mantissa_bit_count;
     int16_t minimum_exponent;
-    uint64_t fill_value_mask = 0;
-    int header = read_header(source, &source_size_cp, &signs_id, &exponent_bit_count, &mantissa_bit_count, &minimum_exponent, &fill_value, &fill_value_mask);
+    uint64_t fill_value_mask = 0, zero_value_mask = 0;
+    int header = read_header(source, &source_size_cp, &signs_id, &exponent_bit_count, &mantissa_bit_count, &minimum_exponent, &fill_value, &fill_value_mask, &zero_value_mask);
     source += header;
 
     uint8_t bit_count_per_value = get_bit_count_per_value(signs_id, exponent_bit_count, mantissa_bit_count);
@@ -639,12 +789,12 @@ int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 
     if (fill_value == DBL_MAX){
       // Deompress each value in source buffer
-      if(decompress_buffer_<DATATYPE>(dest, unswaged_buffer, count, bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent) ){
+      if(decompress_buffer_<DATATYPE>(dest, unswaged_buffer, count, bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, zero_value_mask) ){
           ret = SCIL_BUFFER_ERR;
           goto decomp_cleanup;
       }
     }else{ // set fill value
-      if(decompress_buffer_fill_<DATATYPE>(dest, unswaged_buffer, count, bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, fill_value, fill_value_mask) ){
+      if(decompress_buffer_fill_<DATATYPE>(dest, unswaged_buffer, count, bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, fill_value, fill_value_mask, zero_value_mask) ){
           ret = SCIL_BUFFER_ERR;
           goto decomp_cleanup;
       }
