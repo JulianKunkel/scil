@@ -60,6 +60,10 @@ fi
 if [[ ! -e "$SRC/SZ" ]] ; then
 	pushd "$SRC"
 	git clone https://github.com/disheng222/SZ.git
+	# problems with unstable most recent version, freezed to stable version
+	# TODO: check for stable versions on larger timescale cycles
+	cd SZ
+	git reset --hard 85d43e0920f87082f97f270619b977fd16d8e3bd
 	popd
 fi
 
