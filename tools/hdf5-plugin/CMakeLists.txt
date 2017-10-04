@@ -34,3 +34,4 @@ SUBDIRS (test)
 
 ## Installation
 install(TARGETS hdf5-filter-scil LIBRARY DESTINATION lib)
+install(FILES scil-hdf5-plugin.h DESTINATION include)
