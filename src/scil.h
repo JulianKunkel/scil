@@ -346,7 +346,6 @@ folder "Install directory"{
 #include <stdint.h>
 #include <stdlib.h>
 
-#include <scil-dict.h>
 #include <scil-dims.h>
 #include <scil-context.h>
 #include <scil-error.h>
