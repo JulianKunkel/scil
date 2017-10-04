@@ -200,7 +200,7 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 
 	assert(ret == SCIL_NO_ERR);
 
-	config->dst_size = scilPr_get_compressed_data_size_limit(cfg_p->type, & cfg_p->dims);
+	config->dst_size = scilPr_get_compressed_data_size_limit(& cfg_p->dims, cfg_p->type);
 
 	// now we store the options with the dataset, this is actually not needed...
 	return H5Pmodify_filter( pList, SCIL_ID, H5Z_FLAG_MANDATORY, cd_size, cd_values );
@@ -216,7 +216,7 @@ static size_t compressorFilter(unsigned int flags, size_t cd_nelmts, const unsig
 		// uncompress
 		plugin_config_persisted* cfg_p = ((plugin_config_persisted *) cd_values);
 
-		const size_t buff_size = scilPr_get_compressed_data_size_limit(cfg_p->type, & cfg_p->dims);
+		const size_t buff_size = scilPr_get_compressed_data_size_limit(& cfg_p->dims, cfg_p->type);
 		byte * buffer = (byte*) malloc(buff_size);
 
 		byte * in_buf = ((byte**) buf)[0];
