@@ -10,3 +10,5 @@ HDF5=/home/anastasiia/git/scil/tools/hdf5-plugin/test/fortran/install
 cd build/
 make -j
 make install
+
+export HDF5_PLUGIN_PATH=$SCIL/lib

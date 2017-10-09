@@ -36,7 +36,7 @@ int main(){
   hid_t dcpl = H5Pcreate(H5P_DATASET_CREATE);
   hsize_t chunk_size[2] = {2,5};
   H5Pset_chunk(dcpl, 2, chunk_size);
-  H5Pset_filter(dcpl, SCIL_ID, H5Z_FLAG_MANDATORY, 0, NULL);
+  H5Pset_filter(dcpl, (H5Z_filter_t)SCIL_ID, H5Z_FLAG_MANDATORY, 0, NULL);
 
   scil_user_hints_t h;
   scilPr_initialize_user_hints(& h);
@@ -83,7 +83,10 @@ int main(){
   }
 
   H5Dclose(dset);
+  H5Pclose(dcpl);
+  H5Sclose(data_space);
   H5Fclose(fid);
+  H5close();
 
   return 0;
 }

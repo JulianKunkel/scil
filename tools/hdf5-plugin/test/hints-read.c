@@ -29,10 +29,10 @@
 int main(){
   hid_t fid;
   herr_t err;
-  hid_t data_space;
+  //hid_t data_space;
   
-  hsize_t dims[2] = {4,10};
-  data_space = H5Screate_simple (2, dims, NULL);
+  //hsize_t dims[2] = {4,10};
+  //data_space = H5Screate_simple (2, dims, NULL);
 
   double * data = (double*) malloc(sizeof(double)*10*4);
 
@@ -47,7 +47,7 @@ int main(){
 
 
   fid = H5Fopen("test-example.h5", H5F_ACC_RDONLY, H5P_DEFAULT);
-  hid_t dset = H5Dopen(fid, "dset", data_space);
+  hid_t dset = H5Dopen(fid, "dset", H5P_DEFAULT);
 
 
   err = H5Dread( dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
