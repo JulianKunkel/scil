@@ -255,9 +255,12 @@ static size_t compressorFilter(unsigned int flags, size_t cd_nelmts, const unsig
 
 
 herr_t H5Pset_scil_user_hints_t(hid_t dcpl, scil_user_hints_t * hints){
+	// TODO fixme, duplicate memory structure
 	unsigned cd_values[2];
+	scil_user_hints_t * hints_new = malloc(sizeof(scil_user_hints_t));
+	memcpy(hints_new, hints, sizeof(scil_user_hints_t));
 	//printf("set %p \n", old_hints);
-	memcpy(& cd_values[0], & hints, sizeof(void *));
+	memcpy(& cd_values[0], & hints_new, sizeof(void *));
 	//printf("set %u %u \n", cd_values[0], cd_values[1]);
 
 	return H5Pmodify_filter( dcpl, SCIL_ID, H5Z_FLAG_MANDATORY, 2, (unsigned*) cd_values );
