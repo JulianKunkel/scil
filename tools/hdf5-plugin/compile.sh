@@ -1,14 +1,13 @@
 #!/bin/bash
 rm build/ -rf
 
-SCIL=/home/anastasiia/sw/install
-HDF5=/home/anastasiia/git/scil/tools/hdf5-plugin/test/fortran/install
+PREFIX=$PWD/../../install/
 
 
-./configure --prefix=$SCIL --with-scil=$SCIL --with-hdf5=$HDF5
+./configure --prefix=$PREFIX --with-scil=$PREFIX --with-hdf5=$PREFIX
 
 cd build/
 make -j
 make install
 
-export HDF5_PLUGIN_PATH=$SCIL/lib
+export HDF5_PLUGIN_PATH=$PREFIX/lib
