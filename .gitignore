@@ -25,3 +25,7 @@ deps/
 .clang_complete
 !build-dependencies.sh
 !Makefile-fpzip-1.1.0
+*.h5
+*.exe
+*.mod
+*.nc
