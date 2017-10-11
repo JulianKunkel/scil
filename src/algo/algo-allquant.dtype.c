@@ -233,14 +233,53 @@ static uint64_t get_mantissa_double(uint64_t value, uint8_t mantissa_bit_count){
 //Supported datatypes: double float
 // Repeat for each data type
 
-static void find_minimums_and_maximums_<DATATYPE>(const <DATATYPE>* buffer,
-                                                  const size_t size,
-                                                  uint8_t* minimum_sign,
-                                                  uint8_t* maximum_sign,
-                                                  int16_t* minimum_exponent,
-                                                  int16_t* maximum_exponent,
-                                                  int16_t finest_exponent,
-                                                  int16_t abstol_min_exponent){
+// To optimize compression we need some statistics about the data.
+// There are 5 relevant regions on the number line:
+//
+// absneg | relneg | zero | relpos | abspos (fill)
+//        ^        ^      ^        ^
+// abstol-border  finest-border   abstol-border
+//
+// zero   Values below "finest" are allowed to be changed to 0.
+//        Only values with an exponent < finest_exponent - 1 will do so.
+//        Standard encoding of zero wastes a lot of bits, so they will get
+//        a special encoding.
+// rel*   For small values the relative error is relevant.
+//        These Will be handled with reltol/sigbits algorithm.
+// abs*   For big values the absolute error resulting from reltol-algo
+//        gets too large. To be fine with "abstol" hint also, we need to
+//        run abstol-algo (quantization) on those.
+// fill   If fill value is set, this will be reproduced exactly as is.
+//        Therefor stored in header data and encoded special.
+//
+// Values in different ranges are encoded differently, maybe with different
+// amount of bits. We need to store wich algo was used per value. To do this
+// most efficient we do some huffman code. Therefor we need statistics.
+typedef struct region_stats_<DATATYPE> {
+    datatype_cast_<DATATYPE> min;
+    datatype_cast_<DATATYPE> max;
+    size_t count;
+} region_stats_<DATATYPE>;
+
+typedef struct allquant_stats_<DATATYPE> {
+    region_stats_<DATATYPE> absneg;
+    region_stats_<DATATYPE> relneg;
+    region_stats_<DATATYPE> zero;
+    region_stats_<DATATYPE> relpos;
+    region_stats_<DATATYPE> abspos;
+    region_stats_<DATATYPE> fill;
+} allquant_stats_<DATATYPE>;
+
+static void find_statistics_<DATATYPE>(const <DATATYPE>* buffer,
+                                       const size_t size,
+                                       uint8_t* minimum_sign,
+                                       uint8_t* maximum_sign,
+                                       int16_t* minimum_exponent,
+                                       int16_t* maximum_exponent,
+                                       allquant_stats_<DATATYPE>* stats,
+                                       double fill_value,
+                                       int16_t finest_exponent,
+                                       int16_t abstol_min_exponent){
 
     *minimum_sign = 1;
     *maximum_sign = 0;
@@ -248,17 +287,82 @@ static void find_minimums_and_maximums_<DATATYPE>(const <DATATYPE>* buffer,
     *minimum_exponent = 0x7fff;
     *maximum_exponent = -*minimum_exponent;
 
+    stats->absneg.min.f = INFINITY_<DATATYPE>;
+    stats->absneg.max.f = NINFINITY_<DATATYPE>;
+    stats->absneg.count = 0;
+    stats->relneg.min.f = INFINITY_<DATATYPE>;
+    stats->relneg.max.f = NINFINITY_<DATATYPE>;
+    stats->relneg.count = 0;
+    stats->zero.min.f = INFINITY_<DATATYPE>;
+    stats->zero.max.f = NINFINITY_<DATATYPE>;
+    stats->zero.count = 0;
+    stats->relpos.min.f = INFINITY_<DATATYPE>;
+    stats->relpos.max.f = NINFINITY_<DATATYPE>;
+    stats->relpos.count = 0;
+    stats->abspos.min.f = INFINITY_<DATATYPE>;
+    stats->abspos.max.f = NINFINITY_<DATATYPE>;
+    stats->abspos.count = 0;
+    stats->fill.min.f = (<DATATYPE>)fill_value;
+    stats->fill.max.f = (<DATATYPE>)fill_value;
+    stats->fill.count = 0;
+
     for(size_t i = 0; i < size; ++i){
 
         datatype_cast_<DATATYPE> cur;
         cur.f = buffer[i];
 
+        if(cur.f == fill_value && fill_value != DBL_MAX) {
+            stats->fill.count++;
+        } else if(cur.p.exponent < finest_exponent - 1) {
+            if(cur.f > stats->zero.max.f) stats->zero.max.f = cur.f;
+            if(cur.f < stats->zero.min.f) stats->zero.min.f = cur.f;
+            stats->zero.count++;
+        } else if(cur.p.exponent < finest_exponent) {
+            if(cur.p.sign) {
+                stats->relneg.max.p.sign = 1;
+                stats->relneg.max.p.exponent = finest_exponent;
+                stats->relneg.max.p.mantissa = 0;
+                if(stats->relneg.max.f < stats->relneg.min.f)
+                    stats->relneg.min.f = stats->relneg.max.f;
+                stats->relneg.count++;
+            } else {
+                stats->relpos.min.p.sign = 0;
+                stats->relpos.min.p.exponent = finest_exponent;
+                stats->relpos.min.p.mantissa = 0;
+                if(stats->relpos.min.f > stats->relpos.max.f)
+                    stats->relpos.max.f = stats->relpos.min.f;
+                stats->relpos.count++;
+            }
+        } else if(cur.p.exponent < abstol_min_exponent) {
+            if(cur.p.sign) {
+                if(cur.f > stats->relneg.max.f) stats->relneg.max.f = cur.f;
+                if(cur.f < stats->relneg.min.f) stats->relneg.min.f = cur.f;
+                stats->relneg.count++;
+            } else {
+                if(cur.f > stats->relpos.max.f) stats->relpos.max.f = cur.f;
+                if(cur.f < stats->relpos.min.f) stats->relpos.min.f = cur.f;
+                stats->relpos.count++;
+            }
+        } else {
+            if(cur.p.sign) {
+                if(cur.f > stats->absneg.max.f) stats->absneg.max.f = cur.f;
+                if(cur.f < stats->absneg.min.f) stats->absneg.min.f = cur.f;
+                stats->absneg.count++;
+            } else {
+                if(cur.f > stats->abspos.max.f) stats->abspos.max.f = cur.f;
+                if(cur.f < stats->abspos.min.f) stats->abspos.min.f = cur.f;
+                stats->abspos.count++;
+            }
+        }
+
         if(cur.p.exponent >= finest_exponent) {
           if(*minimum_sign != 0 && cur.p.sign < *minimum_sign) { *minimum_sign = cur.p.sign; }
           if(*maximum_sign != 1 && cur.p.sign > *maximum_sign) { *maximum_sign = cur.p.sign; }
 
-          if(cur.p.exponent < *minimum_exponent) { *minimum_exponent = cur.p.exponent; }
-          if(cur.p.exponent > *maximum_exponent) { *maximum_exponent = cur.p.exponent; }
+          if(cur.p.exponent < abstol_min_exponent) {
+            if(cur.p.exponent < *minimum_exponent) { *minimum_exponent = cur.p.exponent; }
+            if(cur.p.exponent > *maximum_exponent) { *maximum_exponent = cur.p.exponent; }
+          }
         }
     }
 
@@ -269,16 +373,16 @@ static void find_minimums_and_maximums_<DATATYPE>(const <DATATYPE>* buffer,
     }
 }
 
-static void find_minimums_and_maximums_fill_<DATATYPE>(const <DATATYPE>* buffer,
-                                                  const size_t size,
-                                                  uint8_t* minimum_sign,
-                                                  uint8_t* maximum_sign,
-                                                  int16_t* minimum_exponent,
-                                                  int16_t* maximum_exponent,
-                                                  double fill_value,
-                                                  int16_t finest_exponent,
-                                                  int16_t abstol_min_exponent,
-                                                  byte *keys){
+static void find_statistics_fill_<DATATYPE>(const <DATATYPE>* buffer,
+                                            const size_t size,
+                                            uint8_t* minimum_sign,
+                                            uint8_t* maximum_sign,
+                                            int16_t* minimum_exponent,
+                                            int16_t* maximum_exponent,
+                                            double fill_value,
+                                            int16_t finest_exponent,
+                                            int16_t abstol_min_exponent,
+                                            byte *keys){
 
     *minimum_sign = 1;
     *maximum_sign = 0;
@@ -295,11 +399,13 @@ static void find_minimums_and_maximums_fill_<DATATYPE>(const <DATATYPE>* buffer,
               if(*minimum_sign != 0 && cur.p.sign < *minimum_sign) { *minimum_sign = cur.p.sign; }
               if(*maximum_sign != 1 && cur.p.sign > *maximum_sign) { *maximum_sign = cur.p.sign; }
 
-              if(cur.p.exponent < *minimum_exponent) { *minimum_exponent = cur.p.exponent; }
-              if(cur.p.exponent > *maximum_exponent) { *maximum_exponent = cur.p.exponent; }
+              if(cur.p.exponent < abstol_min_exponent) {
+                if(cur.p.exponent < *minimum_exponent) { *minimum_exponent = cur.p.exponent; }
+                if(cur.p.exponent > *maximum_exponent) { *maximum_exponent = cur.p.exponent; }
 
-              /*It sets for each exponent existing in buffer 1 bit flag */
-              keys[cur.p.exponent >> 3] |= 1 << (cur.p.exponent % 8);
+                /*It sets for each exponent existing in buffer 1 bit flag */
+                keys[cur.p.exponent >> 3] |= 1 << (cur.p.exponent % 8);
+              }
             }
         }
     }
@@ -499,14 +605,18 @@ static void get_header_data_<DATATYPE>(const <DATATYPE>* source,
     uint8_t minimum_sign, maximum_sign;
     int16_t maximum_exponent;
 
-    find_minimums_and_maximums_<DATATYPE>(source,
-                                          count,
-                                          &minimum_sign,
-                                          &maximum_sign,
-                                          minimum_exponent,
-                                          &maximum_exponent,
-                                          finest_exponent,
-                                          abstol_min_exponent);
+    allquant_stats_<DATATYPE> stats;
+
+    find_statistics_<DATATYPE>(source,
+                               count,
+                               &minimum_sign,
+                               &maximum_sign,
+                               minimum_exponent,
+                               &maximum_exponent,
+                               &stats,
+                               DBL_MAX,
+                               finest_exponent,
+                               abstol_min_exponent);
 
     int need_zero_value_mask = (*minimum_exponent > 0);
 
@@ -559,16 +669,16 @@ static void get_header_data_fill_<DATATYPE>(const <DATATYPE>* source,
     byte *keys = (byte*)SAFE_MALLOC((EXPONENT_LENGTH_<DATATYPE_UPPER> - 1) << 2);
     memset(keys, 0, (EXPONENT_LENGTH_<DATATYPE_UPPER> - 1) << 2);
 
-    find_minimums_and_maximums_fill_<DATATYPE>(source,
-                                          count,
-                                          &minimum_sign,
-                                          &maximum_sign,
-                                          minimum_exponent,
-                                          &maximum_exponent,
-                                          fill_value,
-                                          finest_exponent,
-                                          abstol_min_exponent,
-                                          keys);
+    find_statistics_fill_<DATATYPE>(source,
+                                    count,
+                                    &minimum_sign,
+                                    &maximum_sign,
+                                    minimum_exponent,
+                                    &maximum_exponent,
+                                    fill_value,
+                                    finest_exponent,
+                                    abstol_min_exponent,
+                                    keys);
 
     /*printf("Check array with exponents from source\n");
     for(int i=0; i<32;i++)
