@@ -26,8 +26,8 @@
 #include <string.h>
 
 // this file is automatically created
-#include "scil-dtypes.h"
-#include "scil-dtypes-int.h"
+#include <scil-dtypes-functions.h>
+#include <scil-dtypes-functions-int.h>
 
 #define CHECK_COMPRESSOR_ID(compressor_id)               \
     if (compressor_id >= scilU_get_available_compressor_count()) { \

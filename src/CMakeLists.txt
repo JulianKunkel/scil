@@ -126,8 +126,8 @@ list(REMOVE_ITEM ALGO ${REMOVE})
 FILE(GLOB BINARY_DEPS ${CMAKE_BINARY_DIR}/scil-*.c)
 FILE(GLOB SOURCE_DEPS ${CMAKE_SOURCE_DIR}/scil-*.c)
 
-FILE(GLOB REMOVE ${CMAKE_SOURCE_DIR}/scil-*.dtype.c)
-list(REMOVE_ITEM SOURCE_DEPS ${REMOVE})
+#FILE(GLOB REMOVE ${CMAKE_SOURCE_DIR}/scil-*.dtype.c)
+#list(REMOVE_ITEM SOURCE_DEPS ${REMOVE})
 
 
 FILE(GLOB SOURCE_COMPRESSION_DEPS ${CMAKE_SOURCE_DIR}/compression/*.c)
@@ -139,15 +139,17 @@ list(REMOVE_ITEM SOURCE_UTIL_DEPS ${CMAKE_SOURCE_DIR}/util/scil-util-types.dtype
 
 # MESSAGE( STATUS "Available algorithms: " ${ALGO})
 
-add_library(scil SHARED scil.c scil-dummy.cpp
+add_library(scil SHARED compression/scil.c core/scil-dummy.cpp
+		algo/util/scil-swager.c
+		${CMAKE_BINARY_DIR}/algo/util/scil-quantizer.c
     ${SOURCE_DEPS}
     ${SOURCE_COMPRESSION_DEPS}
     ${SOURCE_INTERNAL_DEPS}
     ${SOURCE_PREPARE_DEPS}
     ${SOURCE_UTIL_DEPS}
     ${BINARY_DEPS}
-    ${CMAKE_BINARY_DIR}/scil-quantizer.c
-		${CMAKE_BINARY_DIR}/util/scil-util-types.c
+    ${CMAKE_BINARY_DIR}/algo/util/scil-quantizer.c
+    ${CMAKE_BINARY_DIR}/util/scil-util-types.c
     ${ALGO}
     ${DEPS_DIR}/open-simplex-noise-in-c/open-simplex-noise.c
     ${DEPS_COMPILED_DIR}/wavelet_code/alloc.c
@@ -172,6 +174,10 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/pattern
   ${CMAKE_SOURCE_DIR}/prepare
   ${CMAKE_SOURCE_DIR}/util
+	${CMAKE_SOURCE_DIR}/core
+	${CMAKE_SOURCE_DIR}/algo/util
+	${CMAKE_BINARY_DIR}/algo/util
+	${CMAKE_BINARY_DIR}/compression
   ${CMAKE_BINARY_DIR}
 	${CMAKE_BINARY_DIR}/util
   ${DEPS_DIR}/open-simplex-noise-in-c
