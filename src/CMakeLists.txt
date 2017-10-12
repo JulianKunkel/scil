@@ -227,6 +227,7 @@ add_feature_info(plantuml plantuml  "PlantUML for documentation" URL http://de.p
 SUBDIRS (test)
 SUBDIRS (tools)
 SUBDIRS (pattern)
+SUBDIRS (file-formats)
 
 
 ## Installation

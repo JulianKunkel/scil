@@ -20,7 +20,7 @@
 #include <string.h>
 
 #include <scil-util.h>
-#include <plugins/file-bin.h>
+#include <file-formats/file-bin.h>
 
 static option_help options [] = {
   LAST_OPTION

@@ -20,7 +20,7 @@
 #include <string.h>
 
 #include <scil-util.h>
-#include <plugins/file-brick-of-floats.h>
+#include <file-formats/file-brick-of-floats.h>
 
 static int size_x = 500;
 static int size_y = 500;

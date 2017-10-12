@@ -20,7 +20,7 @@
 #include <string.h>
 
 #include <scil-util.h>
-#include <plugins/file-csv.h>
+#include <file-formats/file-csv.h>
 
 static char delim = ',';
 static int ignore_header = 0;

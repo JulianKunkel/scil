@@ -13,11 +13,11 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SCIL_PLUGIN_FILETYPE_BIN_H
-#define SCIL_PLUGIN_FILETYPE_BIN_H
+#ifndef SCIL_PLUGIN_FILETYPE_NETCDF_H
+#define SCIL_PLUGIN_FILETYPE_NETCDF_H
 
-#include <plugins/file-plugin.h>
+#include <file-formats/file-plugin.h>
 
-scil_file_plugin_t bin_plugin;
+scil_file_plugin_t netcdf_plugin;
 
 #endif

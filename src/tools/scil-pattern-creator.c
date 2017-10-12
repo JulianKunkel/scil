@@ -22,7 +22,7 @@
 #include <scil-patterns.h>
 #include <scil-util.h>
 #include <scil-option.h>
-#include <plugins/file-plugin.h>
+#include <file-formats/file-plugin.h>
 
 int main(int argc, char ** argv){
   int ret;

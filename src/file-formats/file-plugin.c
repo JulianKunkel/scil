@@ -16,14 +16,14 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <plugins/file-plugin.h>
+#include <file-formats/file-plugin.h>
 
-#include <plugins/file-csv.h>
-#include <plugins/file-bin.h>
-#include <plugins/file-brick-of-floats.h>
+#include <file-formats/file-csv.h>
+#include <file-formats/file-bin.h>
+#include <file-formats/file-brick-of-floats.h>
 
 #ifdef HAVE_NETCDF
-#include <plugins/file-netcdf.h>
+#include <file-formats/file-netcdf.h>
 #endif
 
 static scil_file_plugin_t * file_plugins[] = {

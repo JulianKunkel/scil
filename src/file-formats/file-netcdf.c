@@ -21,7 +21,7 @@
 #include <netcdf.h>
 
 #include <scil-util.h>
-#include <plugins/file-netcdf.h>
+#include <file-formats/file-netcdf.h>
 
 static char * netcdf_varname = "";
 

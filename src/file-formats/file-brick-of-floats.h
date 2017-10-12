@@ -13,11 +13,11 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SCIL_PLUGIN_FILETYPE_CSV_H
-#define SCIL_PLUGIN_FILETYPE_CSV_H
+#ifndef SCIL_PLUGIN_FILETYPE_BOF_H
+#define SCIL_PLUGIN_FILETYPE_BOF_H
 
-#include <plugins/file-plugin.h>
+#include <file-formats/file-plugin.h>
 
-scil_file_plugin_t csv_plugin;
+scil_file_plugin_t brick_of_floats_plugin;
 
 #endif
