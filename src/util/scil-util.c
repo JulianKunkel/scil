@@ -24,6 +24,15 @@
 #include <scil-util.h>
 #include <scil-quantizer.h>
 
+void * scilU_safe_malloc(size_t size){
+  void * p = malloc(size);
+  if( p == NULL ){
+    printf("[SCIL] Could not allocate %lld bytes\n", (long long) size);
+    exit(1);
+  }
+  return p;
+}
+
 void scilU_find_minimum_maximum_with_excluded_points(SCIL_Datatype_t datatype, byte * data, scil_dims_t * dims, double * out_min, double * out_max, double ignore_to, double ignore_from, double fill_value){
   size_t count = scilPr_get_dims_count(dims);
 

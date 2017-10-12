@@ -76,7 +76,7 @@ int scilPr_create_context(scil_context_t** out_ctx,
   scil_context_t* ctx;
   *out_ctx = NULL;
 
-  ctx = (scil_context_t*)SAFE_MALLOC(sizeof(scil_context_t));
+  ctx = (scil_context_t*)scilU_safe_malloc(sizeof(scil_context_t));
   memset(ctx, 0, sizeof(scil_context_t));
 
   ctx->pipeline_params = scilI_dict_create(30);

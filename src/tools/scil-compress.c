@@ -193,18 +193,18 @@ int main(int argc, char ** argv){
   size_t buff_size, input_size;
 
   input_size = scilPr_get_compressed_data_size_limit(&dims, input_datatype);
-  output_data = (byte*) SAFE_MALLOC(input_size);
+  output_data = (byte*) scilU_safe_malloc(input_size);
 
   if (cycle || (! compress && ! uncompress) ){
     printf("...compression and decompression\n");
-    byte* result = (byte*) SAFE_MALLOC(input_size);
+    byte* result = (byte*) scilU_safe_malloc(input_size);
 
     scilU_start_timer(& timer);
     ret = scil_compress(result, input_size, input_data, & dims, & buff_size, ctx);
     t_compress = scilU_stop_timer(timer);
     assert(ret == SCIL_NO_ERR);
 
-    byte* tmp_buff = (byte*) SAFE_MALLOC(input_size);
+    byte* tmp_buff = (byte*) scilU_safe_malloc(input_size);
     scilU_start_timer(& timer);
     ret = scil_decompress(input_datatype, output_data, & dims, result, buff_size, tmp_buff);
     t_decompress = scilU_stop_timer(timer);
@@ -250,7 +250,7 @@ int main(int argc, char ** argv){
     output_datatype = SCIL_TYPE_BINARY;
   } else if (uncompress){
     printf("...decompression\n");
-    byte* tmp_buff = (byte*) SAFE_MALLOC(input_size);
+    byte* tmp_buff = (byte*) scilU_safe_malloc(input_size);
     scilU_start_timer(& timer);
     ret = scil_decompress(input_datatype, output_data, & dims, input_data, read_data_size, tmp_buff);
     t_decompress = scilU_stop_timer(timer);

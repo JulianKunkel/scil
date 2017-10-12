@@ -23,7 +23,7 @@
 int main(int argc, char** argv){
     int count = 100;
 
-    Bytef* buf = (Bytef*)SAFE_MALLOC(count * sizeof(Bytef));
+    Bytef* buf = (Bytef*)scilU_safe_malloc(count * sizeof(Bytef));
 
     for(int i = 0; i < count; ++i){
         buf[i] = i % 10;
@@ -32,14 +32,14 @@ int main(int argc, char** argv){
     printf("\n\n");
 
     uLongf c_size = compressBound(count);
-    Bytef* c_buf = (Bytef*)SAFE_MALLOC(c_size);
+    Bytef* c_buf = (Bytef*)scilU_safe_malloc(c_size);
 
     int ret = compress(c_buf, &c_size, buf, count);
     printf("%lu\n", c_size);
     printf("%d\n\n", ret);
 
     uLongf u_size = count;
-    Bytef* u_buf = (Bytef*)SAFE_MALLOC(u_size);
+    Bytef* u_buf = (Bytef*)scilU_safe_malloc(u_size);
     memset(u_buf, 0, u_size);
 
     ret = uncompress(u_buf, &u_size, c_buf, c_size);

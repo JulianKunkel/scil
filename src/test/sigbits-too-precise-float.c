@@ -9,7 +9,7 @@ int main()
 {
     const size_t count = 100;
 
-    float* source = (float*)SAFE_MALLOC(count * sizeof(float));
+    float* source = (float*)scilU_safe_malloc(count * sizeof(float));
 
     scil_dims_t dims;
     scilPr_initialize_dims_1d(&dims, count);
@@ -17,7 +17,7 @@ int main()
     scilPa_create_pattern(source, SCIL_TYPE_FLOAT, &dims, "random", -100.0f, 100.0f, 0.0f, 0.0f);
 
     size_t dest_size = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_FLOAT);
-    byte* dest       = (byte*)SAFE_MALLOC(dest_size);
+    byte* dest       = (byte*)scilU_safe_malloc(dest_size);
 
     scil_user_hints_t hints;
     scilPr_initialize_user_hints(&hints);

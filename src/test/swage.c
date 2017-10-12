@@ -14,9 +14,9 @@ int main(void){
 
     const uint64_t buf_size = count * sizeof(uint64_t);
 
-    uint64_t* buf_in  = (uint64_t*)SAFE_MALLOC(buf_size);
-    byte*     buf_out = (byte*)SAFE_MALLOC(buf_size);
-    uint64_t* buf_end = (uint64_t*)SAFE_MALLOC(buf_size);
+    uint64_t* buf_in  = (uint64_t*)scilU_safe_malloc(buf_size);
+    byte*     buf_out = (byte*)scilU_safe_malloc(buf_size);
+    uint64_t* buf_end = (uint64_t*)scilU_safe_malloc(buf_size);
 
     srand((unsigned)time(NULL));
 

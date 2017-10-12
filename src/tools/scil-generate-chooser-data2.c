@@ -519,7 +519,7 @@ static void evaluate_compression_algorithm(double *buffer, scil_dims_t *dims, ch
 
     size_t source_size = scilPr_get_dims_size(dims, SCIL_TYPE_DOUBLE);
     size_t dest_size   = scilPr_get_compressed_data_size_limit(dims, SCIL_TYPE_DOUBLE);
-    byte* dest         = (byte*)SAFE_MALLOC(dest_size);
+    byte* dest         = (byte*)scilU_safe_malloc(dest_size);
 
     // Compression analysis
     clock_t start = clock();
@@ -536,8 +536,8 @@ static void evaluate_compression_algorithm(double *buffer, scil_dims_t *dims, ch
 
     current_data.compratio = (double)source_size / dest_size;
 
-    double *decompd = (double *)SAFE_MALLOC(source_size);
-    byte *temp = (byte *)SAFE_MALLOC(dest_size);
+    double *decompd = (double *)scilU_safe_malloc(source_size);
+    byte *temp = (byte *)scilU_safe_malloc(dest_size);
 
     // Decompression analysis
     start = clock();

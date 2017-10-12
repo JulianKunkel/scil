@@ -83,7 +83,7 @@ int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
     double abs_tol = (ctx->hints.absolute_tolerance == SCIL_ACCURACY_DBL_FINEST) ? 0 : ctx->hints.absolute_tolerance;
 
     if (ctx->hints.fill_value != DBL_MAX){
-      in = (<DATATYPE>*)SAFE_MALLOC(count * sizeof(<DATATYPE>));
+      in = (<DATATYPE>*)scilU_safe_malloc(count * sizeof(<DATATYPE>));
       memcpy(in, source, count * sizeof(<DATATYPE>));
 
       // Finding minimum and maximum values in data

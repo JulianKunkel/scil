@@ -108,7 +108,7 @@ int scil_allquant_compress_<DATATYPE>(const scil_context_t* ctx,
     // Get number of needed bytes for the whole compressed buffer
     *dest_size = round_up_byte(bits_per_value * count) + SCIL_ABSTOL_HEADER_SIZE;
 
-    uint64_t* quantized_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
+    uint64_t* quantized_buffer = (uint64_t*)scilU_safe_malloc(count * sizeof(uint64_t));
 
     // ==================== Compress ==========================================
     write_header(dest, min, abs_tol, bits_per_value);
@@ -144,7 +144,7 @@ int scil_allquant_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
     byte* in = source;
     size_t in_size = source_size;
     size_t count = scilPr_get_dims_count(dims);
-    uint64_t* unswaged_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t*));
+    uint64_t* unswaged_buffer = (uint64_t*)scilU_safe_malloc(count * sizeof(uint64_t*));
 
     // ============ Decompress ================================================
     // Parse Header

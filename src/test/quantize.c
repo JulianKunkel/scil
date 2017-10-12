@@ -9,9 +9,9 @@ int main(void){
 
     const size_t count = 1000000;
 
-    double*   buf_in  = (double*)SAFE_MALLOC(count * sizeof(double));
-    uint64_t* buf_out = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
-    double*   buf_end = (double*)SAFE_MALLOC(count * sizeof(double));
+    double*   buf_in  = (double*)scilU_safe_malloc(count * sizeof(double));
+    uint64_t* buf_out = (uint64_t*)scilU_safe_malloc(count * sizeof(uint64_t));
+    double*   buf_end = (double*)scilU_safe_malloc(count * sizeof(double));
 
     srand((unsigned)time(NULL));
 

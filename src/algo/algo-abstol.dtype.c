@@ -132,7 +132,7 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
     }
     *dest_size = round_up_byte((uint64_t)bits_per_value * count) + header_size;
 
-    uint64_t* quantized_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
+    uint64_t* quantized_buffer = (uint64_t*)scilU_safe_malloc(count * sizeof(uint64_t));
 
     if (ctx->hints.fill_value == DBL_MAX){
       // Use quantization to reduce each values bit count
@@ -182,7 +182,7 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
       return SCIL_NO_ERR;
     }
 
-    uint64_t* unswaged_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t*));
+    uint64_t* unswaged_buffer = (uint64_t*)scilU_safe_malloc(count * sizeof(uint64_t*));
     // Unpacking buffer
     if(scil_unswage(unswaged_buffer, in, count, bits_per_value)){
         return SCIL_BUFFER_ERR;

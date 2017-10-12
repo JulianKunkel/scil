@@ -20,7 +20,6 @@
  * \file
  * \brief Contains miscellanious useful functions.
  * \author Julian Kunkel <juliankunkel@googlemail.com>
- * \author Lennart Braun <3braun@informatik.uni-hamburg.de>
  * \author Armin Schaare <3schaare@informatik.uni-hamburg.de>
  */
 
@@ -53,97 +52,7 @@
 
 #define DATATYPE_LENGTH(type) (type == SCIL_TYPE_FLOAT ? sizeof(float) : type == SCIL_TYPE_DOUBLE ? sizeof(double) : type == SCIL_TYPE_INT8 ? sizeof(int8_t) : type == SCIL_TYPE_INT16 ? sizeof(int16_t) : type == SCIL_TYPE_INT32 ? sizeof(int32_t) : type == SCIL_TYPE_INT64 ? sizeof(int64_t) : 1)
 
-/**
- * \brief Allocates a buffer with error checking.
- *
- * Uses malloc for allocation.
- *
- * \param size Length of requested memory in bytes.
- * \param file Filename to display in error message.
- * \param line Line to display in error message.
- * \pre size != 0
- * \return Pointer to allocated buffer.
- * \post Allocation successfull or exit with error message.
- */
-void* safe_malloc (size_t size, const char* file, unsigned long line);
-
-
-/**
- * \brief Allocates a buffer with error checking.
- *
- * Uses calloc for allocation.
- *
- * \param nmemb Number of elements.
- * \param size Length of one element.
- * \param file Filename to display in error message.
- * \param line Line to display in error message.
- * \pre nmemb != 0
- * \pre size != 0
- * \return Pointer to allocated buffer.
- * \post Allocation successfull or exit with error message.
- */
-void* safe_calloc (size_t nmemb, size_t size, const char* file, unsigned long line);
-
-
-/**
- * \brief Reallocates a buffer with error checking.
- *
- * Uses realloc for allocation.
- *
- * \param ptr  Pointer to the original buffer.
- * \param size Length of requested memory in bytes.
- * \param file Filename to display in error message.
- * \param line Line to display in error message.
- * \pre size != 0
- * \return Pointer to allocated buffer.
- * \post Allocation successfull or exit with error message.
- */
-void* safe_realloc (void* ptr, size_t size, const char* file, unsigned long line);
-
-
-/**
- * \brief Shortcut for safe_malloc().
- * \param size Length of requested memory in bytes.
- */
-#define SAFE_MALLOC(size) safe_malloc(size, __FILE__, __LINE__)
-
-
-/**
- * \brief Shortcut for safe_calloc().
- * \param nmemb Number of elements.
- * \param size Length of one element in bytes.
- */
-#define SAFE_CALLOC(nmemb, size) safe_calloc(nmemb, size, __FILE__, __LINE__)
-
-
-/**
- * \brief Shortcut for safe_realloc().
- * \param ptr  Pointer to an allocated buffer.
- * \param size Length of requested memory in bytes.
- */
-#define SAFE_REALLOC(ptr, size) safe_realloc(ptr, size, __FILE__, __LINE__)
-
-/**
- * \brief Opens a file with error checking.
- * \param path Path of the file to open.
- * \param args fopen argument string.
- * \param file Filename to display in error message.
- * \param line Line to display in error message.
- * \pre path != NULL
- * \pre args != NULL
- * \return Pointer to opened file.
- * \post Opened file successfully or exit with error message.
- */
-FILE* safe_fopen(const char* path, const char* args, const char* src, unsigned long line);
-
-/**
- * \brief Shortcut for safe_fopen().
- * \param path Path of the file to open.
- * \param args fopen argument string.
- */
-#define SAFE_FOPEN(path, args) safe_fopen(path, args, __FILE__, __LINE__)
-
-
+void * scilU_safe_malloc(size_t size);
 
 typedef union {
   struct {

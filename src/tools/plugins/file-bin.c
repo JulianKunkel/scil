@@ -65,7 +65,7 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
   input_data_size = ftell(f) - curr_pos;
   fseek(f, curr_pos, SEEK_SET);
 
-  byte * input_data = (byte*) SAFE_MALLOC(input_data_size);
+  byte * input_data = (byte*) scilU_safe_malloc(input_data_size);
 
   if(fread(input_data, 1, input_data_size, f) == 0)
   {

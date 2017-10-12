@@ -29,13 +29,13 @@ char* read_data(const char* path){
 
 	assert(path != NULL);
 
-	FILE* file = SAFE_FOPEN(path, "rb");
+	FILE* file = fopen(path, "rb");
 
 	fseek(file, 0, SEEK_END);
 	size_t size = (size_t)ftell(file);
 	rewind(file);
 
-	char* buf = (char*)SAFE_MALLOC(size+1);
+	char* buf = (char*)scilU_safe_malloc(size+1);
 
 	size_t result = fread(buf, 1, size, file);
 	if(result != size){
@@ -54,7 +54,7 @@ void write_data(void* buf, size_t num, uint8_t size, char* path){
 	assert(num != 0);
 	assert(path != NULL);
 
-	FILE* file = SAFE_FOPEN(path, "wb");
+	FILE* file = fopen(path, "wb");
 	fwrite(buf, size, num, file);
 	fclose(file);
 }
@@ -96,7 +96,7 @@ int main(){
 	const size_t count = 100;
 	size_t u_buf_size = count * sizeof(double);
 
-	double * u_buf = (double *)SAFE_MALLOC(u_buf_size);
+	double * u_buf = (double *)scilU_safe_malloc(u_buf_size);
 	printf("U ");
 	for(size_t i = 0; i < count; ++i)
 	{
@@ -108,7 +108,7 @@ int main(){
 	printf("U size: %lu\n", u_buf_size);
 
 	size_t c_buf_size = u_buf_size + SCIL_BLOCK_HEADER_MAX_SIZE;
-	byte * c_buf = (byte*)SAFE_MALLOC(c_buf_size*4);
+	byte * c_buf = (byte*)scilU_safe_malloc(c_buf_size*4);
 
 	scil_dims_t dims;
 	scilPr_initialize_dims_1d(& dims, count);
@@ -117,7 +117,7 @@ int main(){
 
 	printf("C size: %lu\n", c_buf_size);
 
-	double * data_out = (double*)SAFE_MALLOC(u_buf_size);
+	double * data_out = (double*)scilU_safe_malloc(u_buf_size);
 	ret = scil_decompress(SCIL_TYPE_DOUBLE, data_out, & dims, c_buf, c_buf_size, & c_buf[c_buf_size*2]);
 
 	printf("Decompression %d\n", ret);

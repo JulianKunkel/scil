@@ -11,7 +11,7 @@ void test(int datatype, void * source){
   scil_dims_t dims;
   scilPr_initialize_dims_1d(&dims, count);
   size_t dest_size = scilPr_get_compressed_data_size_limit(&dims, datatype);
-  byte* dest       = (byte*) SAFE_MALLOC(dest_size);
+  byte* dest       = (byte*) scilU_safe_malloc(dest_size);
 
   scil_user_hints_t hints;
   scilPr_initialize_user_hints(&hints);

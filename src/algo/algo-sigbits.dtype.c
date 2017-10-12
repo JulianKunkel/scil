@@ -551,7 +551,7 @@ static void get_header_data_fill_<DATATYPE>(const <DATATYPE>* source,
     int16_t maximum_exponent;
     uint8_t minimum_sign, maximum_sign;
 
-    byte *keys = (byte*)SAFE_MALLOC((EXPONENT_LENGTH_<DATATYPE_UPPER> - 1) << 2);
+    byte *keys = (byte*)scilU_safe_malloc((EXPONENT_LENGTH_<DATATYPE_UPPER> - 1) << 2);
     memset(keys, 0, (EXPONENT_LENGTH_<DATATYPE_UPPER> - 1) << 2);
 
     find_minimums_and_maximums_fill_<DATATYPE>(source,
@@ -719,7 +719,7 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_t* ctx,
     // ==================== Compression ========================================
 
     // Allocate intermediate buffer
-    uint64_t* compressed_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
+    uint64_t* compressed_buffer = (uint64_t*)scilU_safe_malloc(count * sizeof(uint64_t));
 
     if (ctx->hints.fill_value == DBL_MAX){
       // Compress each value in source buffer
@@ -778,7 +778,7 @@ int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 
     // ==================== Decompression ======================================
 
-    uint64_t* unswaged_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
+    uint64_t* unswaged_buffer = (uint64_t*)scilU_safe_malloc(count * sizeof(uint64_t));
 
     int ret = SCIL_NO_ERR;
 
