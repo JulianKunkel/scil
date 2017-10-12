@@ -28,7 +28,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#include <file-formats/file-plugin.h>
+#include <file-formats/scil-file-format.h>
 
 static int validate = 0;
 static int verbose = 0;

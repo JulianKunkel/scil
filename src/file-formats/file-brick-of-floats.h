@@ -16,7 +16,7 @@
 #ifndef SCIL_PLUGIN_FILETYPE_BOF_H
 #define SCIL_PLUGIN_FILETYPE_BOF_H
 
-#include <file-formats/file-plugin.h>
+#include <file-formats/scil-file-format.h>
 
 scil_file_plugin_t brick_of_floats_plugin;
 

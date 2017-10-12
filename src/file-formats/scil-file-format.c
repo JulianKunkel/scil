@@ -16,7 +16,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <file-formats/file-plugin.h>
+#include <file-formats/scil-file-format.h>
 
 #include <file-formats/file-csv.h>
 #include <file-formats/file-bin.h>
