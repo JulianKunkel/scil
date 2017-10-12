@@ -132,7 +132,7 @@ FILE(GLOB SOURCE_DEPS ${CMAKE_SOURCE_DIR}/scil-*.c)
 
 FILE(GLOB SOURCE_COMPRESSION_DEPS ${CMAKE_SOURCE_DIR}/compression/*.c)
 FILE(GLOB SOURCE_INTERNAL_DEPS ${CMAKE_SOURCE_DIR}/internal/*.c)
-FILE(GLOB SOURCE_PREPARE_DEPS ${CMAKE_SOURCE_DIR}/prepare/*.c)
+FILE(GLOB SOURCE_CORE_DEPS ${CMAKE_SOURCE_DIR}/core/*.c)
 FILE(GLOB SOURCE_UTIL_DEPS ${CMAKE_SOURCE_DIR}/util/*.c)
 list(REMOVE_ITEM SOURCE_UTIL_DEPS ${CMAKE_SOURCE_DIR}/util/scil-util-types.dtype.c)
 
@@ -145,7 +145,7 @@ add_library(scil SHARED compression/scil.c core/scil-dummy.cpp
     ${SOURCE_DEPS}
     ${SOURCE_COMPRESSION_DEPS}
     ${SOURCE_INTERNAL_DEPS}
-    ${SOURCE_PREPARE_DEPS}
+    ${SOURCE_CORE_DEPS}
     ${SOURCE_UTIL_DEPS}
     ${BINARY_DEPS}
     ${CMAKE_BINARY_DIR}/algo/util/scil-quantizer.c
@@ -172,7 +172,6 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/compression
   ${CMAKE_SOURCE_DIR}/internal
   ${CMAKE_SOURCE_DIR}/pattern
-  ${CMAKE_SOURCE_DIR}/prepare
   ${CMAKE_SOURCE_DIR}/util
 	${CMAKE_SOURCE_DIR}/core
 	${CMAKE_SOURCE_DIR}/algo/util
@@ -242,7 +241,7 @@ configure_file("${DEV_DIR}/scil.pc.in" "scil.pc" @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/scil.pc"  DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
 install(TARGETS scil LIBRARY DESTINATION lib)
 install(FILES scil.h DESTINATION include)
-install(FILES util/scil-util.h util/scil-error.h util/scil-compressors.h prepare/scil-dims.h prepare/scil-context.h prepare/scil-user-hints.h internal/scil-datatypes.h internal/scil-cca.h internal/scil-dict.h ${CMAKE_CURRENT_BINARY_DIR}/util/scil-util-types.h DESTINATION include)
+install(FILES util/scil-util.h util/scil-error.h util/scil-compressors.h core/scil-dims.h core/scil-context.h core/scil-user-hints.h internal/scil-datatypes.h internal/scil-cca.h internal/scil-dict.h ${CMAKE_CURRENT_BINARY_DIR}/util/scil-util-types.h DESTINATION include)
 
 ##
 feature_summary(WHAT ALL)

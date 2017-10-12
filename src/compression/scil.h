@@ -146,7 +146,7 @@ folder "src/" {
     component "error" #Wheat
   }
 
-  folder "prepare"{
+  folder "core"{
     component "memory-allocation" #Wheat
     component "user hints" #Wheat
     component "context" #Wheat

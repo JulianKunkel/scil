@@ -22,7 +22,9 @@
 #include <time.h>
 
 #include <scil.h>
-#include <scil-prepare.h>
+#include <scil-context.h>
+#include <scil-dims.h>
+#include <scil-user-hints.h>
 #include <scil-util.h>
 
 char* read_data(const char* path){
