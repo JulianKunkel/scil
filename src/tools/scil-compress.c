@@ -17,7 +17,7 @@
  * This tool will compress / decompress a CSV
  */
 
-#include <scil-compression.h>
+#include <scil.h>
 #include <scil-error.h>
 #include <scil-option.h>
 #include <scil-util.h>

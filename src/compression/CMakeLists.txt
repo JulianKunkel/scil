@@ -52,12 +52,9 @@ target_link_libraries(scil
 
 
 install(TARGETS scil LIBRARY DESTINATION lib)
-install(FILES scil.h DESTINATION include)
-install(FILES
-	internal/scil-datatypes.h
-	internal/scil-cca.h
-	internal/scil-dict.h
-	${CMAKE_CURRENT_BINARY_DIR}/util/scil-util-types.h
- DESTINATION include)
+install(FILES 
+	scil.h 
+	scil-context.h
+	DESTINATION include)
 
 SUBDIRS (test)

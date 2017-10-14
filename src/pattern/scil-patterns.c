@@ -237,7 +237,7 @@ void scilPa_convert_data_from_double(void * buffer, SCIL_Datatype_t datatype,  d
 int scilPa_create_pattern(void * buffer, SCIL_Datatype_t datatype, const scil_dims_t* dims, const char* name, double mn, double mx, double arg, double arg2){
   double * data;
   if (datatype != SCIL_TYPE_DOUBLE){
-    int doubleSize = scilPr_get_compressed_data_size_limit( dims, datatype);
+    int doubleSize = scilPr_get_compressed_data_size_limit(dims, datatype);
     data = malloc(doubleSize * sizeof(double));
   }else{
     data = (double*) buffer;

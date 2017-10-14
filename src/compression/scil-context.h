@@ -1,7 +1,12 @@
 #ifndef SCIL_CONTEXT_H
 #define SCIL_CONTEXT_H
 
-#include <scil-cca.h>
+#include <scil-datatypes.h>
+#include <scil-user-hints.h>
+#include <scil-dims.h>
+
+struct scil_context;
+typedef struct scil_context scil_context_t;
 
 /**
  * \brief Creation of a compression context

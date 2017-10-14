@@ -14,8 +14,9 @@
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
 // This file is the skeleton for each simple test.
-#include <scil-compression.h>
+#include <scil.h>
 #include <scil-error.h>
+#include <scil-util.h>
 
 #include <assert.h>
 #include <stdio.h>

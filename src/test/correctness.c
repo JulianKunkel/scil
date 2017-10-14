@@ -15,7 +15,7 @@
 
 #include <scil-error.h>
 
-#include <scil-compression.h>
+#include <scil.h>
 #include <scil-compressor.h>
 #include <scil-data-characteristics.h>
 #include <scil-patterns.h>

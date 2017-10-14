@@ -3,7 +3,8 @@
 
 #include <scil-error.h>
 #include <scil-datatypes.h>
-#include <scil-context.h>
-
+#include <scil-context-impl.h>
 #include <scil-debug.h>
+#include <scil-compressor.h>
+
 #endif

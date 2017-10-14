@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#include <scil-compression.h>
+#include <scil.h>
 
 /**
  * \brief Packs data in a given buffer bit-perfectly

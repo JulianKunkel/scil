@@ -1,6 +1,7 @@
 #include <stdio.h>
 
-#include <scil-compression.h>
+#include <scil.h>
+#include <scil-util.h>
 
 int main(void){
 

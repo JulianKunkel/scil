@@ -21,9 +21,9 @@
 #include <hdf5.h>
 #include <string.h>
 
-#include <scil-compression.hdf5-plugin.h>
+#include <scil-hdf5-plugin.h>
 
-#include <scil-compression.h>
+#include <scil.h>
 #include <scil-util.h>
 
 #define DEBUG

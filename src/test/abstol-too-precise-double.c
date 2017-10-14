@@ -1,6 +1,6 @@
 //#include <stdint.h>
 
-#include <scil-compression.h>
+#include <scil.h>
 #include <scil-error.h>
 #include <scil-util.h>
 

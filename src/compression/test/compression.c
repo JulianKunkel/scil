@@ -21,7 +21,7 @@
 #include <math.h>
 #include <time.h>
 
-#include <scil-compression.h>
+#include <scil.h>
 #include <scil-context.h>
 #include <scil-dims.h>
 #include <scil-user-hints.h>

@@ -1,4 +1,4 @@
-#include <scil-chain.h>
+#include <scil-compression-chain.h>
 
 #include <scil-compressor.h>
 #include <scil-error.h>
@@ -6,7 +6,7 @@
 
 #include <string.h>
 
-int scilI_create_chain(scilI_chain_t* chain, const char* str_in)
+int scilI_create_chain(scil_compression_chain_t* chain, const char* str_in)
 {
     char *saveptr, *token;
     char str[4096];
@@ -81,7 +81,7 @@ int scilI_create_chain(scilI_chain_t* chain, const char* str_in)
     return SCIL_NO_ERR;
 }
 
-int scilI_chain_is_applicable(const scilI_chain_t* chain, SCIL_Datatype_t datatype){
+int scilI_chain_is_applicable(const scil_compression_chain_t* chain, SCIL_Datatype_t datatype){
   // TODO complete me
   if(chain->data_compressor){
     scilI_algorithm_t* algo = chain->data_compressor;

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#include <scil-compression.h>
+#include <scil.h>
 #include <scil-util.h>
 
 /*  We test some extreme numbers like NaN, Infinity, 0, see below

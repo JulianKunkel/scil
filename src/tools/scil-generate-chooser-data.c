@@ -22,7 +22,7 @@
 #include <math.h>
 #include <pthread.h>
 
-#include <scil-compression.h>
+#include <scil.h>
 #include <scil-algo-chooser.h>
 #include <scil-debug.h>
 #include <scil-patterns.h>

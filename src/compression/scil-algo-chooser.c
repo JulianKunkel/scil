@@ -13,10 +13,11 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
-#include <scil-algo-chooser.h>
-
-#include <scil-chain.h>
 #include <scil-config.h>
+
+#include <scil-context-impl.h>
+#include <scil-algo-chooser.h>
+#include <scil-compression-chain.h>
 #include <scil-data-characteristics.h>
 #include <scil-error.h>
 #include <scil-hardware-limits.h>
@@ -26,7 +27,7 @@
 #include <string.h>
 
 typedef struct{
-  scilI_chain_t chain;
+  scil_compression_chain_t chain;
   float randomness;
   float c_speed;
   float d_speed;
@@ -136,7 +137,7 @@ void scilC_algo_chooser_execute(const void* restrict source,
                                 const scil_dims_t* dims,
                                 scil_context_t* ctx)
 {
-  scilI_chain_t * chain = &ctx->chain;
+  scil_compression_chain_t * chain = &ctx->chain;
   int ret;
 
   // at the moment we only set the compression algorith once

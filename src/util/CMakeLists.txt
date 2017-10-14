@@ -24,6 +24,6 @@ target_link_libraries(scil-util
 add_dependencies(scil-util trigger_datatype_variants)
 
 install(TARGETS scil-util LIBRARY DESTINATION lib)
-install(FILES scil-util.h scil-error.h DESTINATION include)
+install(FILES scil-util.h ${CMAKE_CURRENT_BINARY_DIR}/scil-util-types.h DESTINATION include)
 
 SUBDIRS(test)

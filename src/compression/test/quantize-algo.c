@@ -2,7 +2,8 @@
 #include <math.h>
 #include <time.h>
 
-#include <scil-compression.h>
+#include <scil.h>
+#include <scil-util.h>
 
 size_t count = 1000;
 scil_user_hints_t hints;

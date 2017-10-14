@@ -18,6 +18,7 @@
 #include <algo/precond-dummy.h>
 
 #include <scil-error.h>
+#include <scil-util.h>
 
 #include <string.h>
 

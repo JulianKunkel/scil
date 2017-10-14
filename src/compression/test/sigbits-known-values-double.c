@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <time.h>
 
-#include <scil-compression.h>
+#include <scil.h>
+#include <scil-util.h>
 
 /*  We test the numbers 1 to 10 compressed with x bits
-    x bits = 
+    x bits =
       1   not stored bit for fixed 1.0 + stored mantissa
       x-1 real mantissa bits
     so we have:
@@ -12,8 +13,8 @@
       1   1.0
       2   1.0, 1.5
       3   1.0, 1.25, 1.5, 1.75
-    
-    We also know the sigbit algorithm should round 
+
+    We also know the sigbit algorithm should round
       to lower value for input <  (lower + upper)/2
       to upper value for input >= (lower + upper)/2
     as this minimizes the resulting relative error.

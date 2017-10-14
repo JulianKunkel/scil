@@ -1,7 +1,7 @@
 #include <string.h>
 
 #include <scil-util.h>
-#include <scil-compression.h>
+#include <scil.h>
 
 #include <scil-debug.h>
 #include <scil-patterns.h>

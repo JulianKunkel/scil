@@ -28,7 +28,7 @@ set (CMAKE_C_FLAGS_RELEASE "-O3")
 
 include_directories(${CMAKE_SOURCE_DIR}/ ${CMAKE_BINARY_DIR} ${HDF5_INCLUDE_DIR} ${SCIL_INCLUDE_DIRS} ${MPI_C_INCLUDE_PATH})
 add_library(hdf5-filter-scil SHARED scil-plugin.c)
-target_link_libraries(hdf5-filter-scil -L${HDF5_LIBRARY_DIRS} -L${SCIL_LIBRARY_DIRS} ${HDF5_LIBRARIES} ${SCIL_LIBRARIES})
+target_link_libraries(hdf5-filter-scil -L${SCIL_LIBRARY_DIRS} ${HDF5_LIBRARIES} ${SCIL_LIBRARIES})
 
 SUBDIRS (test)
 

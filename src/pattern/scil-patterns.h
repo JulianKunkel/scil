@@ -17,6 +17,7 @@
 #define SCIL_PATTERN_H
 
 #include <scil-dims.h>
+#include <scil-datatypes.h>
 
 void scilPa_set_random_seed(int val);
 

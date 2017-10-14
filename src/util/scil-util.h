@@ -76,6 +76,19 @@ typedef union {
 
 #pragma GCC diagnostic pop
 
+/*
+ * \brief Returns the byte size of data with its dimensional configuration given by dims.
+ * data.
+ * \param dims Dimensional configuration of the data
+ * \param type The datas type (i.e. float, double, etc.)
+ * \return Byte size of the data
+ */
+size_t scilPr_get_dims_size(const scil_dims_t* dims, enum SCIL_Datatype type);
+
+/*
+ * \brief Return the minimum size of the compression buffer needed.
+ */
+size_t scilPr_get_compressed_data_size_limit(const scil_dims_t* dims, enum SCIL_Datatype datatype);
 
 /**
  * \brief Writes dimensional information into buffer

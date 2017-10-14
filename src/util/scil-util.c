@@ -428,3 +428,21 @@ void scilU_print_dims(scil_dims_t pos){
   }
   printf(") ");
 }
+
+
+size_t scilPr_get_dims_size(const scil_dims_t* dims, enum SCIL_Datatype datatype)
+{
+    if (dims->dims == 0) {
+        return 0;
+    }
+    size_t result = 1;
+    for (uint8_t i = 0; i < dims->dims; ++i) {
+        result *= dims->length[i];
+    }
+    return result * DATATYPE_LENGTH(datatype);
+}
+
+size_t scilPr_get_compressed_data_size_limit(const scil_dims_t* dims, enum SCIL_Datatype datatype)
+{
+    return scilPr_get_dims_size(dims, datatype) * 4 + SCIL_BLOCK_HEADER_MAX_SIZE;
+}

@@ -18,9 +18,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <scil-compression.h>
+#include <scil.h>
 
-#include <scil-compression.hdf5-plugin.h>
+#include <scil-hdf5-plugin.h>
 
 // use the plugin to compress some floating point data.
 
@@ -30,7 +30,7 @@ int main(){
   hid_t fid;
   herr_t err;
   //hid_t data_space;
-  
+
   //hsize_t dims[2] = {4,10};
   //data_space = H5Screate_simple (2, dims, NULL);
 

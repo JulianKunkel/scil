@@ -124,7 +124,7 @@ class "option" {
 "scil-core" -down-> "scil-internal"
 "scil-core" -down-> "scil-algorithm"
 "scil-core" -down-> "scil-data-characteristics"
-"scil-core" -down-> "scil-compression.hardware-limits"
+"scil-core" -down-> "scil.hardware-limits"
 "scil-core" -down-> "scil-cca"
 
 @enduml
@@ -237,8 +237,8 @@ folder "src/" {
   }
 
   frame "libscil" {
-      interface "scil-compression.h" #Orange
-      interface "scil-compression.h" #Orange
+      interface "scil.h" #Orange
+      interface "scil.h" #Orange
       interface "scil-util.h" #Orange
       interface "scil-prepare.h" #Orange
 
@@ -264,8 +264,8 @@ folder "Install directory"{
   }
 
   folder "include/"{
-  artifact [ scil-compression.h]
-  artifact [ scil-compression.h]
+  artifact [ scil.h]
+  artifact [ scil.h]
   artifact [ scil-util.h]
   artifact [ scil-prepare.h]
 
@@ -305,7 +305,7 @@ folder "Install directory"{
 
      frame "libscil" {
          'component X #PowderBlue
-         interface "scil-compression.h" #Orange
+         interface "scil.h" #Orange
          component "scil-algo-chooser" #Wheat
 
          'note left of X
@@ -336,7 +336,7 @@ folder "Install directory"{
      }
    }
 
-   [libhdf5-filter-scil] --> [scil-compression.h] : use
+   [libhdf5-filter-scil] --> [scil.h] : use
  @enduml
   */
 
@@ -421,5 +421,6 @@ int scil_validate_compression(SCIL_Datatype_t datatype,
                               const size_t compressed_size,
                               const scil_context_t* ctx,
                               scil_user_hints_t* out_accuracy);
+
 
 #endif
