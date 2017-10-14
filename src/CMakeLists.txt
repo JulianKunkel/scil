@@ -41,18 +41,20 @@ else()
 endif()
 endif()
 
+set(COMPILER_OPTIONS "-pipe -Wall -Wno-unused-parameter -Wextra -Wfloat-equal -fdata-sections -ffunction-sections -Wl,--gc-sections  -Wl,--version-script=${CMAKE_SOURCE_DIR}/symbols.map")
+# -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt
+# -fvisibility=hidden -Wl,--print-gc-sections
 
-# compile flags
-set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -std=gnu99 -pipe -Wall -Wno-unused-parameter -Wextra -Wfloat-equal -fdata-sections -ffunction-sections -Wl,--gc-sections")
-# -fdiagnostics-color=always
-# -fvisibility=hidden -fvisibility-inlines-hidden -Wl,--print-gc-sections
-set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -pedantic -pipe -Wall -Wextra -Wfloat-equal -fdata-sections -ffunction-sections -Wl,--gc-sections -Wl,--retain-symbols-file=${CMAKE_SOURCE_DIR}/symbols.txt")
+# compile flags, striping symbols that are not with scil prefix to prevent collisions
+set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -std=gnu99 ${COMPILER_OPTIONS}")
+set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${COMPILER_OPTIONS}")
 # -Wl,--no-allow-shlib-undefined  does not work with Centos7 / older GCC
 
 if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6")
 else()
-set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -Wdouble-promotion -flto -pedantic-errors -pedantic")
-set ( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wdouble-promotion -flto -pedantic-errors -pedantic")
+set (NEW_CFLAGS "-Wdouble-promotion -flto -pedantic-errors -pedantic")  #-fdiagnostics-color=always
+set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} ${NEW_CFLAGS}")
+set (CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fvisibility-inlines-hidden ${NEW_CFLAGS}")
 endif()
 
 

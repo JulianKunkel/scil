@@ -19,7 +19,10 @@ add_library(scil-util SHARED
 target_link_libraries(scil-util
 	${GCOV_LIBRARIES}
 	m
-	rt)
+	rt
+)
+
+# target_link_libraries(scil-util INTERFACE  "-Wl,--retain-symbols-file=${CMAKE_CURRENT_SOURCE_DIR}/symbols.txt")
 
 add_dependencies(scil-util trigger_datatype_variants)
 

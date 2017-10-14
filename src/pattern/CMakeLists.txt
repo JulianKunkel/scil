@@ -17,7 +17,10 @@ add_library(scil-patterns SHARED
 
 target_link_libraries(scil-patterns
   scil-util
-  m)
+  m
+)
+
+# target_link_libraries(scil-patterns INTERFACE  "-Wl,--retain-symbols-file=${CMAKE_CURRENT_SOURCE_DIR}/symbols.txt")
 
 install(TARGETS scil-patterns LIBRARY DESTINATION lib)
 install(FILES scil-patterns.h DESTINATION include)
