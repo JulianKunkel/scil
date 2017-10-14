@@ -1,7 +1,7 @@
 #include <scil-util.h>
 #include <scil-compression.h>
 
-#include <scil-internal.h>
+#include <scil-debug.h>
 #include <scil-patterns.h>
 
 const size_t count = 10;

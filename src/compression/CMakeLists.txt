@@ -59,3 +59,5 @@ install(FILES
 	internal/scil-dict.h
 	${CMAKE_CURRENT_BINARY_DIR}/util/scil-util-types.h
  DESTINATION include)
+
+SUBDIRS (test)

@@ -58,7 +58,7 @@ The source directory is split into several components:
     * util: utilities for the individual algorithms
 * core: core datatypes and functions that are accessible by users
 * pattern: library for several synthetic patterns
-* test: unit and system-integration test code for any component
+* test: system-integration test code
 * tools: command line tools
   * util: utility functions for command line tools
     * file-formats: file formats library for tools

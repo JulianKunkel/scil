@@ -2,7 +2,7 @@
 
 #include <scil-compression.h>
 #include <scil-error.h>
-#include <scil-internal.h>
+#include <scil-debug.h>
 #include <scil-patterns.h>
 #include <scil-util.h>
 

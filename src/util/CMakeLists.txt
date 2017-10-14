@@ -18,9 +18,12 @@ add_library(scil-util SHARED
 
 target_link_libraries(scil-util
 	${GCOV_LIBRARIES}
+	m
 	rt)
 
 add_dependencies(scil-util trigger_datatype_variants)
 
 install(TARGETS scil-util LIBRARY DESTINATION lib)
 install(FILES scil-util.h scil-error.h DESTINATION include)
+
+SUBDIRS(test)
