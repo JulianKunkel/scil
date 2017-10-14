@@ -21,7 +21,7 @@
 #include <scil-pattern-internal.h>
 
 #include <scil-error.h>
-#include <scil-internal.h>
+#include <scil-debug.h>
 #include <scil-util.h>
 
 #include <basic-patterns.h>

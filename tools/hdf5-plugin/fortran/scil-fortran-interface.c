@@ -3,9 +3,9 @@
 #include <hdf5.h>
 #include <string.h>
 
-#include <scil-hdf5-plugin.h>
+#include <scil-compression.hdf5-plugin.h>
 
-#include <scil.h>
+#include <scil-compression.h>
 #include <scil-util.h>
 
 void h5pset_scil_compression_hints_f_(int32_t * prop_id_p,

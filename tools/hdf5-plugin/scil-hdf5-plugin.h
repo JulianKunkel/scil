@@ -19,7 +19,7 @@
 #define H5_HAVE_FILTER_SCIL
 #define SCIL_ID 32003
 
-#include <scil.h>
+#include <scil-compression.h>
 
 /*
  * Primitive versions for providing hints to HDF5 data sets

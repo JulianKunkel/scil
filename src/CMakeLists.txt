@@ -61,10 +61,6 @@ set (CMAKE_CXX_FLAGS_DEBUG "-O0 -g3")
 
 set (CMAKE_C_FLAGS_RELEASE "-O3")
 
-set (SCIL_ALGO_SOURCE ${CMAKE_SOURCE_DIR}/algo)
-set (SCIL_ALGO_BINARY ${CMAKE_BINARY_DIR}/algo)
-
-
 find_path(LIBZ_INCLUDE_DIRS NAMES zlib.h PATHS ENV ADDITIONAL_INC_PATH)
 find_library(LIBZ_LIBRARIES NAMES z PATHS ENV ADDITIONAL_LIB_PATH)
 
@@ -109,94 +105,20 @@ message(STATUS "Endianess: ${ENDIANESS}")
 
 #########################
 
+include_directories(
+  ${CMAKE_SOURCE_DIR}
+  ${CMAKE_BINARY_DIR}
+)
+
 
 # run during configure:
 execute_process(COMMAND ${DEPS_DIR}/build-dependencies.sh) # WORKING_DIRECTORY ${DEPS_DIR}
 execute_process(COMMAND ${DEV_DIR}/create-datatype-variants.py ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/)
 
-#
-# set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:${DEPS_DIR}/openjpeg/lib/pkgconfig/")
-# pkg_search_module(OPENJPEG REQUIRED libopenjp2)
-
-
-FILE(GLOB ALGO ${CMAKE_SOURCE_DIR}/algo/*.c ${CMAKE_BINARY_DIR}/algo/*.c)
-FILE(GLOB REMOVE ${CMAKE_SOURCE_DIR}/algo/*.dtype.c)
-list(REMOVE_ITEM ALGO ${REMOVE})
-
-FILE(GLOB BINARY_DEPS ${CMAKE_BINARY_DIR}/scil-*.c)
-FILE(GLOB SOURCE_DEPS ${CMAKE_SOURCE_DIR}/scil-*.c)
-
-#FILE(GLOB REMOVE ${CMAKE_SOURCE_DIR}/scil-*.dtype.c)
-#list(REMOVE_ITEM SOURCE_DEPS ${REMOVE})
-
-
-FILE(GLOB SOURCE_COMPRESSION_DEPS ${CMAKE_SOURCE_DIR}/compression/*.c)
-FILE(GLOB SOURCE_INTERNAL_DEPS ${CMAKE_SOURCE_DIR}/internal/*.c)
-FILE(GLOB SOURCE_CORE_DEPS ${CMAKE_SOURCE_DIR}/core/*.c)
-FILE(GLOB SOURCE_UTIL_DEPS ${CMAKE_SOURCE_DIR}/util/*.c)
-list(REMOVE_ITEM SOURCE_UTIL_DEPS ${CMAKE_SOURCE_DIR}/util/scil-util-types.dtype.c)
-
-
-# MESSAGE( STATUS "Available algorithms: " ${ALGO})
-
-add_library(scil SHARED compression/scil.c core/scil-dummy.cpp
-		algo/util/scil-swager.c
-		${CMAKE_BINARY_DIR}/algo/util/scil-quantizer.c
-    ${SOURCE_DEPS}
-    ${SOURCE_COMPRESSION_DEPS}
-    ${SOURCE_INTERNAL_DEPS}
-    ${SOURCE_CORE_DEPS}
-    ${SOURCE_UTIL_DEPS}
-    ${BINARY_DEPS}
-    ${CMAKE_BINARY_DIR}/algo/util/scil-quantizer.c
-    ${CMAKE_BINARY_DIR}/util/scil-util-types.c
-    ${ALGO}
-    ${DEPS_DIR}/open-simplex-noise-in-c/open-simplex-noise.c
-    ${DEPS_COMPILED_DIR}/wavelet_code/alloc.c
-    ${DEPS_COMPILED_DIR}/wavelet_code/wav_basic.c
-    ${DEPS_COMPILED_DIR}/wavelet_code/wav_trf.c
-)
-target_link_libraries(scil m ${GCOV_LIBRARIES})
-
 add_custom_target(
     trigger_datatype_variants
     ALL COMMAND ${DEV_DIR}/create-datatype-variants.py ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/)
 
-add_dependencies(scil trigger_datatype_variants)
-
-# for specific algorithms
-include_directories(
-  ${LIBZ_INCLUDE_DIRS}
-  ${CMAKE_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/tools
-  ${CMAKE_SOURCE_DIR}/compression
-  ${CMAKE_SOURCE_DIR}/internal
-  ${CMAKE_SOURCE_DIR}/pattern
-  ${CMAKE_SOURCE_DIR}/util
-	${CMAKE_SOURCE_DIR}/core
-	${CMAKE_SOURCE_DIR}/algo/util
-	${CMAKE_BINARY_DIR}/algo/util
-	${CMAKE_BINARY_DIR}/compression
-  ${CMAKE_BINARY_DIR}
-	${CMAKE_BINARY_DIR}/util
-  ${DEPS_DIR}/open-simplex-noise-in-c
-  ${DEPS_COMPILED_DIR}/wavelet_code
-  ${DEPS_COMPILED_DIR}/include/zfp
-  ${DEPS_COMPILED_DIR}/include/fpzip
-  ${DEPS_COMPILED_DIR}/include/cnoise
-  ${DEPS_COMPILED_DIR}/include/sz
-  ${DEPS_COMPILED_DIR}/include/
-)
-
-target_link_libraries(scil ${LIBZ_LIBRARIES})
-target_link_libraries(scil
-  ${DEPS_COMPILED_DIR}/libfpzip.a
-  ${DEPS_COMPILED_DIR}/libzfp.a
-  ${DEPS_COMPILED_DIR}/libcnoise.a
-  ${DEPS_COMPILED_DIR}/libsz.a
-  ${DEPS_COMPILED_DIR}/liblz4.a
-  rt
-  )
 
 configure_file("${CMAKE_SOURCE_DIR}/scil-config.h.in" "scil-config.h" @ONLY)
 
@@ -229,19 +151,18 @@ add_feature_info(plantuml plantuml  "PlantUML for documentation" URL http://de.p
 ##### END Documentation
 
 
-SUBDIRS (test)
-SUBDIRS (tools)
+SUBDIRS (core)
+SUBDIRS (util)
 SUBDIRS (pattern)
-SUBDIRS (file-formats)
 
+SUBDIRS (compression)
+SUBDIRS (tools)
+SUBDIRS (test)
 
 ## Installation
 configure_file("${DEV_DIR}/scil.pc.in" "scil.pc" @ONLY)
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/scil.pc"  DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
-install(TARGETS scil LIBRARY DESTINATION lib)
-install(FILES scil.h DESTINATION include)
-install(FILES util/scil-util.h util/scil-error.h util/scil-compressors.h core/scil-dims.h core/scil-context.h core/scil-user-hints.h internal/scil-datatypes.h internal/scil-cca.h internal/scil-dict.h ${CMAKE_CURRENT_BINARY_DIR}/util/scil-util-types.h DESTINATION include)
 
 ##
 feature_summary(WHAT ALL)

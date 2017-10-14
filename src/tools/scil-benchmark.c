@@ -18,10 +18,11 @@
 #include <string.h>
 #include <errno.h>
 
-#include <scil-compressors.h>
+#include <scil-compression.h>
+#include <scil-compressor.h>
 #include <scil-data-characteristics.h>
 #include <scil-error.h>
-#include <scil-internal.h>
+#include <scil-debug.h>
 #include <scil-patterns.h>
 #include <scil-util.h>
 

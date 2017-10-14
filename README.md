@@ -5,7 +5,7 @@ SCIL is available on [GitHub](https://github.com/JulianKunkel/scil).
 
 ## Prerequisites
 
-Detailed information how to install required software packages are provided in the directory: 
+Detailed information how to install required software packages are provided in the directory:
   * test/docker/<distribution>/Dockerfile
 The commands provided after the RUN instruction are those necessary to install prerequisites.
 
@@ -39,3 +39,28 @@ When running configure, the system will automatically install additional require
 		make install
 
 + You have to copy the HDF5 wrapper to the plugin install directory of HDF5!
+
+## Directory structure
+
+* dev: contains tools for development
+* deps: contains tools to automatically setup dependencies
+* doc: contains some documentations (more when you run make)
+* src: the source code of the core libraries provided, see below for details
+* test-docker: contains scripts to setup a docker test environment for various distributions
+* tools: additional tools using SCIL
+
+### ./src -- the source directory
+
+The source directory is split into several components:
+
+* compression: the compression library
+  * algo: all compression algorithms
+    * util: utilities for the individual algorithms
+* core: core datatypes and functions that are accessible by users
+* pattern: library for several synthetic patterns
+* test: unit and system-integration test code for any component
+* tools: command line tools
+  * util: utility functions for command line tools
+    * file-formats: file formats library for tools
+* util: supportive functions that may be used by any other library and function but
+        usually NOT by end-users. Util shall not have any dependency to any external component except to core.

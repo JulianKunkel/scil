@@ -1,4 +1,4 @@
-#include <scil.h>
+#include <scil-compression.h>
 #include <scil-error.h>
 #include <scil-util.h>
 

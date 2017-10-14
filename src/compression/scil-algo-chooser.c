@@ -20,7 +20,7 @@
 #include <scil-data-characteristics.h>
 #include <scil-error.h>
 #include <scil-hardware-limits.h>
-#include <scil-internal.h>
+#include <scil-debug.h>
 
 #include <stdio.h>
 #include <string.h>

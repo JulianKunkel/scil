@@ -18,9 +18,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <scil.h>
+#include <scil-compression.h>
 
-#include <scil-hdf5-plugin.h>
+#include <scil-compression.hdf5-plugin.h>
 
 // use the plugin to compress some floating point data.
 

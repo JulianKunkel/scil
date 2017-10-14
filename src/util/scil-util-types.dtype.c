@@ -1,8 +1,7 @@
 #include <assert.h>
 
 #include <scil-util.h>
-#include <scil-internal.h>
-
+#include <scil-debug.h>
 
 //Supported datatypes: int8_t int16_t int32_t int64_t float double
 // Repeat for each data type

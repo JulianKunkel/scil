@@ -21,8 +21,8 @@
 #include <float.h>
 
 
+#include <scil-user-hints.h>
 #include <scil-util.h>
-#include <scil-quantizer.h>
 
 void * scilU_safe_malloc(size_t size){
   void * p = malloc(size);
@@ -324,12 +324,6 @@ double scilU_stop_timer(scil_timer t1){
 void print_time (scil_timer time, FILE* file)
 {
     fprintf(file, "%lu.%09lu", time.tv_sec, time.tv_nsec);
-}
-
-void scilU_critical_error(const char * msg){
-  printf("Critical error: %s\n", msg);
-  // printf("%d", 1/0);
-  exit(1);
 }
 
 int scilU_double_equal(double val1, double val2){

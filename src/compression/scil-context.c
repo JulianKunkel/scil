@@ -1,11 +1,12 @@
 #include <scil-context.h>
 
-#include <scil-compressors.h>
+#include <scil-compressor.h>
 #include <scil-algo-chooser.h>
 #include <scil-chain.h>
 #include <scil-hardware-limits.h>
 #include <scil-util.h>
-#include <scil-internal.h>
+#include <scil-debug.h>
+#include <scil-error.h>
 
 #include <assert.h>
 #include <float.h>
@@ -19,20 +20,7 @@ static void initialize()
     if (initialized) {
         return;
     }
-
-    // verify correctness of algo_array
-    int i = 0;
-    for (scilI_algorithm_t **algo = algo_array; *algo != NULL;
-         algo++, i++) {
-        if ((*algo)->compressor_id != i) {
-					printf("id_%i i=%i",(*algo)->compressor_id,i);
-            scilU_critical_error("compressor ID does not match!");
-        }
-        if ((*algo)->type == SCIL_COMPRESSOR_TYPE_INDIVIDUAL_BYTES) {
-            // we expect that all byte compressors are lossless
-            (*algo)->is_lossy = 0;
-        }
-    }
+    scil_initialize_compressors();
 
     scilI_initialize_hardware_limits();
     scilC_algo_chooser_initialize();

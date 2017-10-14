@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#include <scil.h>
+#include <scil-compression.h>
 
 /*  We test the numbers 1 to 10 compressed with x bits
     x bits = 

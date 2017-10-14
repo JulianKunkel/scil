@@ -17,7 +17,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include <scil.h>
+#include <scil-compression.h>
 
 #define SUCCESS 0
 

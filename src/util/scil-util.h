@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <scil.h>
+#include <scil-dims.h>
 #include <scil-util-types.h>
 
 /**
@@ -128,9 +128,6 @@ double scilU_stop_timer(scil_timer t1);
 void print_time (scil_timer time, FILE* file);
 
 double scilU_time_to_double (scil_timer t);
-
-
-void scilU_critical_error(const char * msg);
 
 void scilU_print_buffer(char * dest, size_t out_size);
 uint8_t scilU_relative_tolerance_to_significant_bits(double rel_tol);
