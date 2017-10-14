@@ -4,7 +4,6 @@
 #include <scil.h>
 
 #include <scil-debug.h>
-#include <scil-patterns.h>
 
 
 int main(void)
