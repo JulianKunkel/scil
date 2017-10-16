@@ -1,7 +1,7 @@
 project (${PROJECT_NAME})
 
 include_directories(
-  ${CMAKE_SOURCE_DIR}/core
+  ${CMAKE_SOURCE_DIR}/base
   ${CMAKE_SOURCE_DIR}/util
   ${CMAKE_BINARY_DIR}/util
   ${CMAKE_SOURCE_DIR}/compression

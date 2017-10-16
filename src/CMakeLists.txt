@@ -153,7 +153,7 @@ add_feature_info(plantuml plantuml  "PlantUML for documentation" URL http://de.p
 ##### END Documentation
 
 
-SUBDIRS (core)
+SUBDIRS (base)
 SUBDIRS (util)
 SUBDIRS (pattern)
 

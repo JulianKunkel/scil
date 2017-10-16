@@ -1,5 +1,5 @@
 include_directories(
-	${CMAKE_SOURCE_DIR}/core
+	${CMAKE_SOURCE_DIR}/base
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -8,8 +8,8 @@ FILE(GLOB UTIL_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.c ${CMAKE_CURRENT_BINARY_DIR}
 FILE(GLOB REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/*.dtype.c)
 list(REMOVE_ITEM UTIL_FILES ${REMOVE})
 
-# add files from src/core directory
-FILE(GLOB CORE_FILES ${CMAKE_SOURCE_DIR}/core/*.c ${CMAKE_BINARY_DIR}/core/*.c)
+# add files from src/base directory
+FILE(GLOB CORE_FILES ${CMAKE_SOURCE_DIR}/base/*.c ${CMAKE_BINARY_DIR}/base/*.c)
 
 add_library(scil-util SHARED
 	${UTIL_FILES}

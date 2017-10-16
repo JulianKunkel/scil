@@ -1,5 +1,5 @@
 include_directories(
-	${CMAKE_SOURCE_DIR}/core
+	${CMAKE_SOURCE_DIR}/base
   ${CMAKE_SOURCE_DIR}/compression
   ${CMAKE_SOURCE_DIR}/pattern
   ${CMAKE_SOURCE_DIR}/util

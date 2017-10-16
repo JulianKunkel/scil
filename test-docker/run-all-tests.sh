@@ -1,7 +1,8 @@
 #!/bin/bash
 
+cd $(dirname "$0")
 # ARGS=" /bin/bash $@"
-ARGS=" /data/test/docker/run-machine-test.sh $@"
+ARGS=" /data/test-docker/run-machine-test.sh $@"
 OPT="-it --rm -u $(id -u):$(id -g) -v $PWD/../:/data/"
 ERROR=0
 docker run $OPT -h ubuntu14.04 kunkel/scil:ubuntu14.04 $ARGS

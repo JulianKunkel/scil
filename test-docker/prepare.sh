@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd $(dirname "$0")
+
 echo "Checking docker"
 docker ps
 if [ $? != 0 ] ; then

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Running test for $HOSTNAME"
-SCRIPT=/data/test/docker/machine-tests/$HOSTNAME
+SCRIPT=/data/test-docker/machine-tests/$HOSTNAME
 if [ -e $SCRIPT ] ; then
   BUILD=/data/build-docker/$HOSTNAME/
   mkdir -p $BUILD
