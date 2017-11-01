@@ -94,7 +94,7 @@ void scilC_algo_chooser_initialize(){
         continue;
       }
       *pos = 0;
-      ret = scilI_add_hardware_limit(& buff[1], & pos[1]);
+      ret = scilU_add_hardware_limit(& buff[1], & pos[1]);
       if (ret != SCIL_NO_ERR){
         warn("Invalid configuration line \"%s\"\n", buff);
       }
@@ -110,7 +110,7 @@ void scilC_algo_chooser_initialize(){
       continue;
     }
     name[strlen(name)-1] = 0;
-    ret = scilI_create_chain(& e->chain, name);
+    ret = scilU_chain_create(& e->chain, name);
     if (ret != SCIL_NO_ERR){
       warn("Parsing configuration line \"%s\"; could not parse compressor chain \"%s\"\n", buff, name);
       continue;
@@ -149,18 +149,18 @@ void scilC_algo_chooser_execute(const void* restrict source,
     if (strcmp(chainEnv, "lossless") == 0){
       ctx->lossless_compression_needed = 1;
     }else{
-      ret = scilI_create_chain(chain, chainEnv);
+      ret = scilU_chain_create(chain, chainEnv);
       if (ret != SCIL_NO_ERR){
         critical("The environment variable SCIL_FORCE_COMPRESSION_CHAIN is invalid with \"%s\"\n", chainEnv);
       }
       return;
     }
   }
-  const size_t count = scilPr_get_dims_count(dims);
+  const size_t count = scil_dims_get_count(dims);
 
   if (count < 10){
     // always use memcopy for small data
-    ret = scilI_create_chain(chain, "memcopy");
+    ret = scilU_chain_create(chain, "memcopy");
     return;
   }
 
@@ -171,16 +171,16 @@ void scilC_algo_chooser_execute(const void* restrict source,
     in_size = count;
   }
 
-  float r = scilI_get_data_randomness(source, in_size, buffer, out_size);
+  float r = scilU_get_data_randomness(source, in_size, buffer, out_size);
   if (ctx->lossless_compression_needed){
       // we can only select byte compressors compress because data must be accurate!
   }
   // TODO: pick the best algorithm for the settings given in ctx...
 
   if (r > 95){
-    ret = scilI_create_chain(chain, "memcopy");
+    ret = scilU_chain_create(chain, "memcopy");
   }else{
-    ret = scilI_create_chain(chain, "lz4");
+    ret = scilU_chain_create(chain, "lz4");
   }
   assert(ret == SCIL_NO_ERR);
 }

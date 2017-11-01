@@ -9,19 +9,19 @@ int main(void){
     size_t count = 1000;
 
     scil_user_hints_t hints;
-    scilPr_initialize_user_hints(&hints);
+    scil_user_hints_initialize(&hints);
     //hints.relative_tolerance_percent = 5.0;
     hints.significant_bits = 11;
     hints.force_compression_methods = "3";
 
     scil_context_t* context;
-    scilPr_create_context(&context, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+    scil_context_create(&context, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
 
     scil_dims_t dims;
-    scilPr_initialize_dims_1d(&dims, count);
+    scil_dims_initialize_1d(&dims, count);
 
-    size_t uncompressed_size = scilPr_get_dims_size(&dims, SCIL_TYPE_DOUBLE);
-    size_t compressed_size   = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
+    size_t uncompressed_size = scil_dims_get_size(&dims, SCIL_TYPE_DOUBLE);
+    size_t compressed_size   = scil_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
 
     double* buffer_in  = (double*)malloc(uncompressed_size);
     byte* buffer_out   = (byte*)malloc(compressed_size);
@@ -58,7 +58,7 @@ int main(void){
     free(buffer_tmp);
     free(buffer_end);
 
-    //scilPr_destroy_context(context);
+    //scil_destroy_context(context);
 
     return 0;
 }

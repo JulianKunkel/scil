@@ -100,7 +100,7 @@ int scil_sz_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
     printf("SZ DError: %d\n", elems);
     return SCIL_UNKNOWN_ERR;
   }
-  size_t count = scilPr_get_dims_count(dims);
+  size_t count = scil_dims_get_count(dims);
   if (count != (size_t) elems){
     printf("SZ Short read %d instead of %d!\n", elems, (int) count);
     return SCIL_UNKNOWN_ERR;
@@ -112,7 +112,7 @@ int scil_sz_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
 
 
 
-scilI_algorithm_t algo_sz = {
+scilU_algorithm_t algo_sz = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_sz)
     },

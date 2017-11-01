@@ -39,7 +39,7 @@ int main(){
   H5Pset_filter(dcpl, (H5Z_filter_t)SCIL_ID, H5Z_FLAG_MANDATORY, 0, NULL);
 
   scil_user_hints_t h;
-  scilPr_initialize_user_hints(& h);
+  scil_user_hints_initialize(& h);
   h.significant_digits = 12;
   h.absolute_tolerance = 1.0;
   h.comp_speed.unit = SCIL_PERFORMANCE_MIB;

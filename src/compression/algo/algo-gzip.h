@@ -46,6 +46,6 @@ int scil_gzip_compress(const scil_context_t* ctx, byte* restrict dest, size_t* r
  */
 int scil_gzip_decompress(byte*restrict data_out, size_t buff_size, const byte*restrict compressed_buf_in, const size_t in_size, size_t * uncomp_size_out);
 
-extern scilI_algorithm_t algo_gzip;
+extern scilU_algorithm_t algo_gzip;
 
 #endif

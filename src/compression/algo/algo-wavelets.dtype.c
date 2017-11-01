@@ -163,7 +163,7 @@ int  scil_wavelets_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
 }
 // End repeat
 
-scilI_algorithm_t algo_wavelets = {
+scilU_algorithm_t algo_wavelets = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_wavelets)
     },

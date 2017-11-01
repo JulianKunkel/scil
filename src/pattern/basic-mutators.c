@@ -39,8 +39,8 @@ static void m_interpolator_func(double* data, const scil_dims_t* pos, const scil
 
   scil_dims_t start;
   scil_dims_t end;
-  scilPr_copy_dims(&end, pos);
-  scilPr_copy_dims(&start, pos);
+  scil_dims_copy(&end, pos);
+  scil_dims_copy(&start, pos);
 
   start.length[d] = start.length[d] / l * l;
   end.length[d] = (end.length[d]) / l * l + l;
@@ -55,14 +55,14 @@ static void m_interpolator_func(double* data, const scil_dims_t* pos, const scil
   //scilU_print_dims(start);
   //scilU_print_dims(end);
 
-  double start_v = data[scilG_data_pos(&start, size)];
-  double end_v =   data[scilG_data_pos(&end, size)];
+  double start_v = data[scilU_data_pos(&start, size)];
+  double end_v =   data[scilU_data_pos(&end, size)];
 
   // use cosine interpolation
   weight = (1-cos(weight*M_PI))/2;
   double val = (1.0-weight) * start_v + weight * end_v;
   //printf("%.2f %.1f \n", weight, val);
-  data[scilG_data_pos(pos, size)] = val;
+  data[scilU_data_pos(pos, size)] = val;
 }
 
 static void m_interpolator(double* data, const scil_dims_t* dims, double arg){
@@ -70,12 +70,12 @@ static void m_interpolator(double* data, const scil_dims_t* dims, double arg){
   assert(l > 1);
 
   scil_dims_t ende;
-  scilPr_copy_dims(&ende, dims);
+  scil_dims_copy(&ende, dims);
   scil_dims_t final;
-  scilPr_copy_dims(&final, dims);
+  scil_dims_copy(&final, dims);
 
   scil_dims_t pos;
-  scilPr_copy_dims(&pos, dims);
+  scil_dims_copy(&pos, dims);
   memset(pos.length, 0, sizeof(size_t)*pos.dims);
 
   int stride[pos.dims];
@@ -88,26 +88,26 @@ static void m_interpolator(double* data, const scil_dims_t* dims, double arg){
     stride[i] = 1;
 
     interpolator_data_1D_t inter_data = {i, stride, l};
-    scilG_iter(data, dims, &pos, &final, stride, & m_interpolator_func, & inter_data );
+    scilU_iter(data, dims, &pos, &final, stride, & m_interpolator_func, & inter_data );
 
     for(int j=0; j < pos.dims; j++){
       ende.length[j] = dims->length[j] - 1;
     }
     ende.length[i] = 0;
-    scilG_iter(data, dims, &ende, dims, stride, & m_interpolator_func, & inter_data );
+    scilU_iter(data, dims, &ende, dims, stride, & m_interpolator_func, & inter_data );
   }
 }
 
-scilPa_mutator scilPa_interpolator = &m_interpolator;
+scilP_mutator scilP_interpolator = &m_interpolator;
 
 static void m_repeater_func_i(double* data, const scil_dims_t* pos, const scil_dims_t* size, int* iter, const void* user_ptr){
-  data[scilG_data_pos(pos, size)] = *((double*) user_ptr);
+  data[scilU_data_pos(pos, size)] = *((double*) user_ptr);
 }
 
 static void m_repeater_func(double* data, const scil_dims_t* pos, const scil_dims_t* size, int* iter, const void* user_ptr){
   int l = *((int *) user_ptr);
 
-  double val = data[scilG_data_pos(pos, size)];
+  double val = data[scilU_data_pos(pos, size)];
   scil_dims_t extend;
   for(int j=0; j < pos->dims; j++){
     if (pos->length[j] + l < size->length[j] ){
@@ -116,7 +116,7 @@ static void m_repeater_func(double* data, const scil_dims_t* pos, const scil_dim
       extend.length[j] = size->length[j];
     }
   }
-  scilG_iter(data, size, pos, &extend, NULL, & m_repeater_func_i, & val );
+  scilU_iter(data, size, pos, &extend, NULL, & m_repeater_func_i, & val );
 }
 
 static void m_repeater(double* data, const scil_dims_t* dims, double arg){
@@ -124,7 +124,7 @@ static void m_repeater(double* data, const scil_dims_t* dims, double arg){
   assert(l > 1);
 
   scil_dims_t pos;
-  scilPr_copy_dims(&pos, dims);
+  scil_dims_copy(&pos, dims);
   memset(pos.length, 0, sizeof(size_t)*pos.dims);
 
   int stride[pos.dims];
@@ -132,7 +132,7 @@ static void m_repeater(double* data, const scil_dims_t* dims, double arg){
     stride[i] = l;
   }
 
-  scilG_iter(data, dims, &pos, dims, stride, & m_repeater_func, & l );
+  scilU_iter(data, dims, &pos, dims, stride, & m_repeater_func, & l );
 }
 
-scilPa_mutator scilPa_repeater = & m_repeater;
+scilP_mutator scilP_repeater = & m_repeater;

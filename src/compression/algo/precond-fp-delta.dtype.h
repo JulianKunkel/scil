@@ -22,6 +22,6 @@
  * This example algorithm takes blocks of a given size and subtracts the minimum of each block from all data points within the block. The minimum is stored on the metadata.
  */
 
-extern scilI_algorithm_t algo_precond_fp_delta;
+extern scilU_algorithm_t algo_precond_fp_delta;
 
 #endif

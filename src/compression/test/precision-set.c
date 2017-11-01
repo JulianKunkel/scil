@@ -29,25 +29,25 @@ static void test(enum SCIL_Datatype type, int digits, int bits, int expected_dig
 
   int ret;
   scil_user_hints_t h;
-  scilPr_initialize_user_hints(& h);
+  scil_user_hints_initialize(& h);
 
   h.significant_digits = digits;
   h.significant_bits = bits;
 
   scil_context_t* ctx;
-  ret = scilPr_create_context(&ctx, type, 0, NULL, & h);
+  ret = scil_context_create(&ctx, type, 0, NULL, & h);
   assert(ret == SCIL_NO_ERR);
   // retrieve effectively set hints:
-  scil_user_hints_t e = scilPr_get_effective_hints(ctx);
+  scil_user_hints_t e = scil_get_effective_hints(ctx);
 
-  scilPr_print_user_hints(& e);
+  scil_user_hints_print(& e);
 
   if (e.significant_bits != SCIL_ACCURACY_INT_FINEST){
     assert(e.significant_digits == expected_digits);
     assert(e.significant_bits == expected_bits);
   }
 
-  ret = scilPr_destroy_context(ctx);
+  ret = scil_destroy_context(ctx);
   assert(ret == SCIL_NO_ERR);
 }
 

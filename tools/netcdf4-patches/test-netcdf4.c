@@ -110,7 +110,7 @@ main(int argc, char *argv[]) {
     int varid_k;		  /* varid for chunked */
     int varid_x;		  /* varid for compressed */
 		scil_user_hints_t scil_hints;
-		scilPr_initialize_user_hints(& scil_hints);
+		scil_user_hints_initialize(& scil_hints);
 
     float *varxy, *varxz, *varyz;    /* 2D memory slabs used for I/O */
     int mm;

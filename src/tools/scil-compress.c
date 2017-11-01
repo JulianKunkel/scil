@@ -65,7 +65,7 @@ int main(int argc, char ** argv){
 
   int ret;
 
-  scilPr_initialize_user_hints(&hints);
+  scil_user_hints_initialize(&hints);
   option_help known_args[] = {
     {'i', "in_file", "Input file (file format depends on mode)", OPTION_REQUIRED_ARGUMENT, 's', & in_file},
     {'o', "out_file", "Output file (file format depends on mode)", OPTION_OPTIONAL_ARGUMENT, 's', & out_file},
@@ -160,7 +160,7 @@ int main(int argc, char ** argv){
     printf("Min: %.10e Max: %.10e\n", min, max);
   }
 
-  array_size = scilPr_get_dims_size(& dims, input_datatype);
+  array_size = scil_dims_get_size(& dims, input_datatype);
 
 
   if (fake_abstol_value > 0.0){
@@ -180,19 +180,19 @@ int main(int argc, char ** argv){
     hints.absolute_tolerance = new_abs_tol;
   }
 
-  ret = scilPr_create_context(&ctx, input_datatype, 0, NULL, &hints);
+  ret = scil_context_create(&ctx, input_datatype, 0, NULL, &hints);
   assert(ret == SCIL_NO_ERR);
 
   if (print_hints){
     printf("Effective hints (only needed for compression)\n");
-    scil_user_hints_t e = scilPr_get_effective_hints(ctx);
-    scilPr_print_user_hints(& e);
+    scil_user_hints_t e = scil_get_effective_hints(ctx);
+    scil_user_hints_print(& e);
   }
 
 
   size_t buff_size, input_size;
 
-  input_size = scilPr_get_compressed_data_size_limit(&dims, input_datatype);
+  input_size = scil_get_compressed_data_size_limit(&dims, input_datatype);
   output_data = (byte*) scilU_safe_malloc(input_size);
 
   if (cycle || (! compress && ! uncompress) ){
@@ -221,10 +221,10 @@ int main(int argc, char ** argv){
         }
         if(print_hints){
           printf("Validation accuracy:");
-          scilPr_print_user_hints(& out_accuracy);
+          scil_user_hints_print(& out_accuracy);
         }
     }
-    ret = scilPr_destroy_context(ctx);
+    ret = scil_destroy_context(ctx);
     assert(ret == SCIL_NO_ERR);
 
   } else if (compress){
@@ -241,10 +241,10 @@ int main(int argc, char ** argv){
         }
         if(print_hints){
           printf("Validation accuracy:");
-          scilPr_print_user_hints(& out_accuracy);
+          scil_user_hints_print(& out_accuracy);
         }
     }
-    ret = scilPr_destroy_context(ctx);
+    ret = scil_destroy_context(ctx);
     assert(ret == SCIL_NO_ERR);
 
     output_datatype = SCIL_TYPE_BINARY;

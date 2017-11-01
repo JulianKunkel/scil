@@ -88,12 +88,12 @@ int main(){
 	scil_user_hints_t hints;
 	int ret;
 
-	scilPr_initialize_user_hints(& hints);
+	scil_user_hints_initialize(& hints);
 	hints.force_compression_methods = "1";
 	hints.absolute_tolerance = 0.5;
 	//hints.relative_tolerance_percent = 1.0;
 	hints.significant_bits = 5;
-	scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+	scil_context_create(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
 
 	const size_t count = 100;
 	size_t u_buf_size = count * sizeof(double);
@@ -113,7 +113,7 @@ int main(){
 	byte * c_buf = (byte*)scilU_safe_malloc(c_buf_size*4);
 
 	scil_dims_t dims;
-	scilPr_initialize_dims_1d(& dims, count);
+	scil_dims_initialize_1d(& dims, count);
 
 	ret = scil_compress(c_buf, c_buf_size, u_buf, & dims, &c_buf_size, ctx);
 
@@ -138,18 +138,18 @@ int main(){
 	double f2 = 10.5;
 
 	scil_dims_t dims1;
-	scilPr_initialize_dims_1d(&dims1, 1);
+	scil_dims_initialize_1d(&dims1, 1);
 
 	scil_determine_accuracy(SCIL_TYPE_DOUBLE, & f1, &f2, & dims1, 0.01, & accuracy);
-	scilPr_print_user_hints(& accuracy);
+	scil_user_hints_print(& accuracy);
 
 	scil_determine_accuracy(SCIL_TYPE_DOUBLE, & f1, &f2, & dims1, 0.51, & accuracy);
-	scilPr_print_user_hints(& accuracy);
+	scil_user_hints_print(& accuracy);
 
 	ret = scil_validate_compression(SCIL_TYPE_DOUBLE, u_buf, & dims, c_buf, c_buf_size, ctx, & accuracy);
 
 	printf("\nscil_validate_compression returned %s\n", ret == 0 ? "OK" : "ERROR");
-	scilPr_print_user_hints(& accuracy);
+	scil_user_hints_print(& accuracy);
 
 	free(c_buf);
 	free(data_out);

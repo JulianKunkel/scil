@@ -53,6 +53,6 @@ int scil_wavelets_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_dims
 // End repeat
 
 
-extern scilI_algorithm_t algo_wavelets;
+extern scilU_algorithm_t algo_wavelets;
 
 #endif

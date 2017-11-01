@@ -121,9 +121,9 @@ int scil_swage_compress_<DATATYPE>(const scil_context_t* ctx,
                                    <DATATYPE>*restrict source,
                                    const scil_dims_t* dims)
 {
-    scilI_dict_element_t* elem = scilI_dict_get(ctx->pipeline_params, "bits_per_value");
+    scilU_dict_element_t* elem = scilU_dict_get(ctx->pipeline_params, "bits_per_value");
     uint8_t bits_per_value;
-    size_t count = scilPr_get_dims_count(dims);
+    size_t count = scil_dims_get_count(dims);
     if( elem ){
       char* bpv_str = elem->value;
       bits_per_value = strtol(bpv_str, (char**)NULL, 10);
@@ -150,7 +150,7 @@ int scil_swage_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
     uint8_t bits_per_value = 0;
 
 
-    if (scil_unswage_<DATATYPE>(dest, source, scilPr_get_dims_count(dims), bits_per_value))
+    if (scil_unswage_<DATATYPE>(dest, source, scil_dims_get_count(dims), bits_per_value))
     {
         return 1;
     }
@@ -159,7 +159,7 @@ int scil_swage_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 }
 // End repeat
 
-scilI_algorithm_t algo_swage = {
+scilU_algorithm_t algo_swage = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_swage)
     },

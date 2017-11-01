@@ -63,7 +63,7 @@ int scil_zfp_precision_compress_<DATATYPE>(const scil_context_t* ctx,
 
     // Compress
     zfp_field* field = NULL;
-    size_t count = scilPr_get_dims_count(dims);
+    size_t count = scil_dims_get_count(dims);
 
     switch(dims->dims){
         case 1: field = zfp_field_1d(source, zfp_type_<DATATYPE>, dims->length[0]); break;
@@ -137,7 +137,7 @@ int scil_zfp_precision_decompress_<DATATYPE>(   <DATATYPE>*restrict data_out,
         case 1: field = zfp_field_1d(data_out, zfp_type_<DATATYPE>, dims->length[0]); break;
         case 2: field = zfp_field_2d(data_out, zfp_type_<DATATYPE>, dims->length[0], dims->length[1]); break;
         case 3: field = zfp_field_3d(data_out, zfp_type_<DATATYPE>, dims->length[0], dims->length[1], dims->length[2]); break;
-        default: field = zfp_field_1d(data_out, zfp_type_<DATATYPE>, scilPr_get_dims_count(dims));
+        default: field = zfp_field_1d(data_out, zfp_type_<DATATYPE>, scil_dims_get_count(dims));
     }
 
     zfp_stream* zfp = zfp_stream_open(NULL);
@@ -165,7 +165,7 @@ int scil_zfp_precision_decompress_<DATATYPE>(   <DATATYPE>*restrict data_out,
 
 // End repeat
 
-scilI_algorithm_t algo_zfp_precision = {
+scilU_algorithm_t algo_zfp_precision = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_zfp_precision)
     },

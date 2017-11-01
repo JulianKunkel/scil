@@ -18,6 +18,6 @@
 #define SCIL_PRECOND_DELTA_H_
 #include <scil-algorithm-impl.h>
 
-extern scilI_algorithm_t algo_precond_delta;
+extern scilU_algorithm_t algo_precond_delta;
 
 #endif

@@ -18,6 +18,6 @@ int scil_swage_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 
 // End repeat
 
-extern scilI_algorithm_t algo_swage;
+extern scilU_algorithm_t algo_swage;
 
 #endif /* SCIL_SWAGE_H_<DATATYPE> */

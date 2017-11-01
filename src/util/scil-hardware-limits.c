@@ -27,11 +27,11 @@ static const char* hardware_names[] = {
   NULL
 };
 
-void scilI_initialize_hardware_limits(){
+void scilU_initialize_hardware_limits(){
   memset(hardware_limits, 0, sizeof(float)* HARDWARE_MAX);
 }
 
-int scilI_add_hardware_limit(const char* name, const char* str){
+int scilU_add_hardware_limit(const char* name, const char* str){
   char** pos = (char**) hardware_names;
   int i = 0;
   while(*pos != NULL){

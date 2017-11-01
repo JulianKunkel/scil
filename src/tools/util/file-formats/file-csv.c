@@ -78,7 +78,7 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
             printf("Invalid header!\n");
             continue;
           }
-          scilPr_initialize_dims_4d(out_dims, dims[0], dims[1], dims[2], dims[3]);
+          scil_dims_initialize_4d(out_dims, dims[0], dims[1], dims[2], dims[3]);
           foundHeader = 1;
           break;
         }
@@ -119,12 +119,12 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
     }
 
     if(y > 1){
-      scilPr_initialize_dims_2d(out_dims, x, y);
+      scil_dims_initialize_2d(out_dims, x, y);
     }else{
-      scilPr_initialize_dims_1d(out_dims, x);
+      scil_dims_initialize_1d(out_dims, x);
     }
   }
-  byte * input_data = (byte*) malloc(scilPr_get_compressed_data_size_limit(out_dims, *out_datatype));
+  byte * input_data = (byte*) malloc(scil_get_compressed_data_size_limit(out_dims, *out_datatype));
 
 
   fd = fopen(name, "r");

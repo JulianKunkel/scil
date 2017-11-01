@@ -6,7 +6,7 @@
 
 #include <string.h>
 
-int scilI_create_chain(scil_compression_chain_t* chain, const char* str_in)
+int scilU_chain_create(scil_compression_chain_t* chain, const char* str_in)
 {
     char *saveptr, *token;
     char str[4096];
@@ -20,7 +20,7 @@ int scilI_create_chain(scil_compression_chain_t* chain, const char* str_in)
 
     char lossy = 0;
     for (int i = 0; token != NULL; i++) {
-        scilI_algorithm_t* algo = scilI_find_compressor_by_name(token);
+        scilU_algorithm_t* algo = scilU_find_compressor_by_name(token);
         if (algo == NULL) {
             printf("Error: could not find compressor: %s\n", token);
             return SCIL_EINVAL;
@@ -81,10 +81,10 @@ int scilI_create_chain(scil_compression_chain_t* chain, const char* str_in)
     return SCIL_NO_ERR;
 }
 
-int scilI_chain_is_applicable(const scil_compression_chain_t* chain, SCIL_Datatype_t datatype){
+int scilU_chain_is_applicable(const scil_compression_chain_t* chain, SCIL_Datatype_t datatype){
   // TODO complete me
   if(chain->data_compressor){
-    scilI_algorithm_t* algo = chain->data_compressor;
+    scilU_algorithm_t* algo = chain->data_compressor;
     switch (datatype) {
       case (SCIL_TYPE_FLOAT):
         if ( ! algo->c.DNtype.compress_float ){
@@ -123,7 +123,7 @@ int scilI_chain_is_applicable(const scil_compression_chain_t* chain, SCIL_Dataty
       }
   }else if (chain->converter){
     // elementary datatype must be supported.
-    scilI_algorithm_t* algo = chain->converter;
+    scilU_algorithm_t* algo = chain->converter;
     switch (datatype) {
     case (SCIL_TYPE_FLOAT):
       if ( ! algo->c.Ctype.compress_float ){

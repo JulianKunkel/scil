@@ -685,7 +685,7 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_t* ctx,
         return SCIL_PRECISION_ERR;
     }
 
-    size_t count = scilPr_get_dims_count(dims);
+    size_t count = scil_dims_get_count(dims);
 
     uint8_t signs_id, exponent_bit_count;
     int16_t minimum_exponent;
@@ -760,7 +760,7 @@ int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 
     // ==================== Initialization =====================================
 
-    size_t count = scilPr_get_dims_count(dims);
+    size_t count = scil_dims_get_count(dims);
 
     size_t source_size_cp = source_size;
 
@@ -805,7 +805,7 @@ int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 
 // End repeat
 
-scilI_algorithm_t algo_sigbits = {
+scilU_algorithm_t algo_sigbits = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_sigbits)
     },

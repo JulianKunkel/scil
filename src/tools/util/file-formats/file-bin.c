@@ -90,7 +90,7 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
   if(buf_datatype == SCIL_TYPE_BINARY){
     buffer_in_size = elements;
   }else{
-     buffer_in_size = scilPr_get_dims_size(& dims, buf_datatype);
+     buffer_in_size = scil_dims_get_size(& dims, buf_datatype);
   }
 
   if (fwrite(& orig_datatype, 1, sizeof(SCIL_Datatype_t), f) == 0)

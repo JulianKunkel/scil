@@ -21,24 +21,24 @@ int test_reltol(double tolerance) {
     size_t count = 1000;
 
     scil_user_hints_t hints;
-    scilPr_initialize_user_hints(&hints);
+    scil_user_hints_initialize(&hints);
     hints.relative_tolerance_percent = tolerance;
     //hints.significant_bits = 11;
     hints.force_compression_methods = "3";
     //printf("#Testing sigbit algorithm with hint 'relative tolerance' = %f %%\n", tolerance);
 
     scil_context_t* context;
-    int ret = scilPr_create_context(&context, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+    int ret = scil_context_create(&context, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
     if(ret != SCIL_NO_ERR){
-        //printf("#Error on scilPr_create_context(): %s\n", scil_error_get_message(ret));
+        //printf("#Error on scil_context_create(): %s\n", scil_error_get_message(ret));
         return -2;
     }
 
     scil_dims_t dims;
-    scilPr_initialize_dims_1d(&dims, count);
+    scil_dims_initialize_1d(&dims, count);
 
-    size_t uncompressed_size = scilPr_get_dims_size(&dims, SCIL_TYPE_DOUBLE);
-    size_t compressed_size   = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
+    size_t uncompressed_size = scil_dims_get_size(&dims, SCIL_TYPE_DOUBLE);
+    size_t compressed_size   = scil_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
 
     double* buffer_in  = (double*)malloc(uncompressed_size);
     byte* buffer_out   = (byte*)malloc(compressed_size);
@@ -83,7 +83,7 @@ int test_reltol(double tolerance) {
     free(buffer_tmp);
     free(buffer_end);
 
-    //scilPr_destroy_context(context);
+    //scil_destroy_context(context);
 
     return errors;
 }

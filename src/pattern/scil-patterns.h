@@ -19,16 +19,16 @@
 #include <scil-dims.h>
 #include <scil-datatypes.h>
 
-void scilPa_set_random_seed(int val);
+void scilP_set_random_seed(int val);
 
-int   scilPa_get_available_patterns_count();
-char* scilPa_get_pattern_name(int index);
-int   scilPa_get_pattern_index(const char* name);
+int   scilP_get_available_patterns_count();
+char* scilP_get_pattern_name(int index);
+int   scilP_get_pattern_index(const char* name);
 
 /*
  * Create the pattern selected by num with the arguments
  */
-int scilPa_create_pattern_double(double * buffer,
+int scilP_create_pattern_double(double * buffer,
                                  const scil_dims_t* dims,
                                  const char* name,
                                  double mn,
@@ -36,7 +36,7 @@ int scilPa_create_pattern_double(double * buffer,
                                  double arg,
                                  double arg2);
 
-int scilPa_create_pattern(void * buffer, SCIL_Datatype_t datatype,
+int scilP_create_pattern(void * buffer, SCIL_Datatype_t datatype,
                                 const scil_dims_t* dims,
                                 const char* name,
                                 double mn,
@@ -44,14 +44,14 @@ int scilPa_create_pattern(void * buffer, SCIL_Datatype_t datatype,
                                 double arg,
                                 double arg2);
 
-void scilPa_convert_data_from_double(void * out, SCIL_Datatype_t datatype,  double * in, const scil_dims_t* dims);
+void scilP_convert_data_from_double(void * out, SCIL_Datatype_t datatype,  double * in, const scil_dims_t* dims);
 
 /*
  * The pattern library contains a list of useful patterns.
  */
-int scilPa_get_pattern_library_size();
-char* scilPa_get_library_pattern_name(int pattern);
+int scilP_get_pattern_library_size();
+char* scilP_get_library_pattern_name(int pattern);
 
-int scilPa_create_library_pattern(void * buffer, SCIL_Datatype_t datatype, const scil_dims_t* dims, int pattern);
+int scilP_create_library_pattern(void * buffer, SCIL_Datatype_t datatype, const scil_dims_t* dims, int pattern);
 
 #endif // SCIL_PATTERN_H

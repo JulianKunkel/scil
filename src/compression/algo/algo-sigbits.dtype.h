@@ -51,6 +51,6 @@ int scil_sigbits_decompress_<DATATYPE>( <DATATYPE>*restrict dest, scil_dims_t* d
 // End repeat
 
 
-extern scilI_algorithm_t algo_sigbits;
+extern scilU_algorithm_t algo_sigbits;
 
 #endif /* SCIL_SIGBITS_H_ */

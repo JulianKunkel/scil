@@ -40,6 +40,6 @@ int scil_allquant_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
                                       size_t in_size);
 // End repeat
 
-extern scilI_algorithm_t algo_allquant;
+extern scilU_algorithm_t algo_allquant;
 
 #endif

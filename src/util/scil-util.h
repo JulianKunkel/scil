@@ -83,12 +83,12 @@ typedef union {
  * \param type The datas type (i.e. float, double, etc.)
  * \return Byte size of the data
  */
-size_t scilPr_get_dims_size(const scil_dims_t* dims, enum SCIL_Datatype type);
+size_t scil_dims_get_size(const scil_dims_t* dims, enum SCIL_Datatype type);
 
 /*
  * \brief Return the minimum size of the compression buffer needed.
  */
-size_t scilPr_get_compressed_data_size_limit(const scil_dims_t* dims, enum SCIL_Datatype datatype);
+size_t scil_get_compressed_data_size_limit(const scil_dims_t* dims, enum SCIL_Datatype datatype);
 
 /**
  * \brief Writes dimensional information into buffer
@@ -161,7 +161,7 @@ void scilU_subtract_data(SCIL_Datatype_t datatype, byte * restrict  data1, byte 
 
 /* Tools to iterate over the 1D buffer as a multi-dimensional data space */
 
-typedef void(*scilG_iterfunc)(double* data,
+typedef void(*scilU_iterfunc)(double* data,
                               const scil_dims_t* pos,
                               const scil_dims_t* size,
                               int* iter,
@@ -170,19 +170,19 @@ typedef void(*scilG_iterfunc)(double* data,
 /*
  * \brief Convert the current position in a ND array to the position of the original 1D data array.
  */
-size_t scilG_data_pos(const scil_dims_t* pos, const scil_dims_t* size);
+size_t scilU_data_pos(const scil_dims_t* pos, const scil_dims_t* size);
 
 
 /*
  * \brief iterate over the ND array of dimensions dims starting from offset to end in steps based on the array iter.
  * For each element the function func is invoked with the user_ptr as argument.
  */
-void scilG_iter(double* data,
+void scilU_iter(double* data,
                 const scil_dims_t* dims,
                 const scil_dims_t* offset,
                 const scil_dims_t* end,
                 int* iter,
-                scilG_iterfunc func,
+                scilU_iterfunc func,
                 const void* user_ptr);
 
 void scilU_print_dims(scil_dims_t dims);

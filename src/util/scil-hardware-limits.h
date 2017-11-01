@@ -22,9 +22,9 @@ enum hardware_limit_e{
   HARDWARE_MAX
 };
 
-void scilI_initialize_hardware_limits();
+void scilU_initialize_hardware_limits();
 
-int scilI_add_hardware_limit(const char* name, const char* str);
+int scilU_add_hardware_limit(const char* name, const char* str);
 
 
 #endif // SCIL_HARDWARE_LIMITS_H

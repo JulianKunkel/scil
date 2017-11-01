@@ -24,7 +24,7 @@
 #include <ctype.h>
 #include <string.h>
 
-static scilI_algorithm_t* algo_array[] = {
+static scilU_algorithm_t* algo_array[] = {
 	& algo_memcopy,
 	& algo_abstol,
 	& algo_gzip,
@@ -47,7 +47,7 @@ static scilI_algorithm_t* algo_array[] = {
 void scil_initialize_compressors(){
     // verify correctness of algo_array
     int i = 0;
-    for (scilI_algorithm_t **algo = algo_array; *algo != NULL;
+    for (scilU_algorithm_t **algo = algo_array; *algo != NULL;
          algo++, i++) {
         if ((*algo)->compressor_id != i) {
 					printf("id_%i i=%i",(*algo)->compressor_id,i);
@@ -60,7 +60,7 @@ void scil_initialize_compressors(){
     }
 }
 
-scilI_algorithm_t* scil_get_compressor(int number){
+scilU_algorithm_t* scil_get_compressor(int number){
 	return algo_array[number];
 }
 
@@ -72,7 +72,7 @@ int scilU_get_available_compressor_count()
 		return count;
 	}
 
-	scilI_algorithm_t ** cur = algo_array;
+	scilU_algorithm_t ** cur = algo_array;
 	count = 0;
 	// count
 	while(*cur != NULL){
@@ -91,7 +91,7 @@ const char* scilU_get_compressor_name(int number)
 
 int scilU_get_compressor_number(const char* name)
 {
-    scilI_algorithm_t** cur = algo_array;
+    scilU_algorithm_t** cur = algo_array;
     int count                        = 0;
 
     // check if this is a number
@@ -119,7 +119,7 @@ int scilU_get_compressor_number(const char* name)
 }
 
 
-scilI_algorithm_t* scilI_find_compressor_by_name(const char* name)
+scilU_algorithm_t* scilU_find_compressor_by_name(const char* name)
 {
     int num = scilU_get_compressor_number(name);
     if (num < 0 || num >= scilU_get_available_compressor_count()) {

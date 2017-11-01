@@ -30,16 +30,16 @@ static void initVarDims(double* data, const scil_dims_t* pos, const scil_dims_t*
   for(int i=0; i < pos->dims; i++){
     val = val * 10 + pos->length[i];
   }
-  data[scilG_data_pos(pos, size)] = val;
+  data[scilU_data_pos(pos, size)] = val;
 }
 
 static void addVarDims(double* data, const scil_dims_t* pos, const scil_dims_t* size, int* iter, const void* user_ptr){
   double* val = (double*) user_ptr;
-  *val += data[scilG_data_pos(pos, size)];
+  *val += data[scilU_data_pos(pos, size)];
 }
 
 static void printVarDims(double* data, const scil_dims_t* pos, const scil_dims_t* size, int* iter, const void* user_ptr){
-  printf("%.0f ", data[scilG_data_pos(pos, size)]);
+  printf("%.0f ", data[scilU_data_pos(pos, size)]);
   size_t x = pos->dims - 1;
   if (pos->length[x] == size->length[x] - 1){
     printf("\n");
@@ -62,36 +62,36 @@ int main(){
 
   scil_dims_t offset;
 
-  scilPr_initialize_dims_3d(& dims, 10,10,10);
-  scilPr_initialize_dims_4d(& offset, 0,0,0,0);
-  scilG_iter(data, &dims, &offset, &dims, NULL, & initVarDims, NULL );
-  scilG_iter(data, &dims, &offset, &dims, NULL, & printVarDims, NULL );
+  scil_dims_initialize_3d(& dims, 10,10,10);
+  scil_dims_initialize_4d(& offset, 0,0,0,0);
+  scilU_iter(data, &dims, &offset, &dims, NULL, & initVarDims, NULL );
+  scilU_iter(data, &dims, &offset, &dims, NULL, & printVarDims, NULL );
 
-  scilPr_initialize_dims_1d(& dims, 10);
-  scilG_iter(data, &dims, &offset, &dims, NULL, & printVarDimsOffsets, NULL );
+  scil_dims_initialize_1d(& dims, 10);
+  scilU_iter(data, &dims, &offset, &dims, NULL, & printVarDimsOffsets, NULL );
 
-  scilPr_initialize_dims_2d(& dims, 3, 2);
-  scilG_iter(data, &dims, &offset, &dims, NULL, & printVarDimsOffsets, NULL );
+  scil_dims_initialize_2d(& dims, 3, 2);
+  scilU_iter(data, &dims, &offset, &dims, NULL, & printVarDimsOffsets, NULL );
 
-  scilPr_initialize_dims_3d(& dims, 3, 2, 3);
-  scilG_iter(data, &dims, &offset, &dims, NULL, & printVarDimsOffsets, NULL );
+  scil_dims_initialize_3d(& dims, 3, 2, 3);
+  scilU_iter(data, &dims, &offset, &dims, NULL, & printVarDimsOffsets, NULL );
 
-  scilPr_initialize_dims_3d(& dims, 3, 1, 2);
-  scilG_iter(data, &dims, &offset, &dims, NULL, & printVarDimsOffsets, NULL );
-  scilPr_initialize_dims_4d(& dims, 3, 1, 2, 1);
-  scilG_iter(data, &dims, &offset, &dims, NULL, & printVarDimsOffsets, NULL );
+  scil_dims_initialize_3d(& dims, 3, 1, 2);
+  scilU_iter(data, &dims, &offset, &dims, NULL, & printVarDimsOffsets, NULL );
+  scil_dims_initialize_4d(& dims, 3, 1, 2, 1);
+  scilU_iter(data, &dims, &offset, &dims, NULL, & printVarDimsOffsets, NULL );
 
-  printf("\nOther scilG_iter steps\n");
-  scilPr_initialize_dims_1d(& dims, 10);
-  scilG_iter(data, &dims, &offset, &dims, (int[]){3}, & printVarDimsOffsets, NULL);
-  scilPr_initialize_dims_2d(& dims, 10, 10);
-  scilG_iter(data, &dims, &offset, &dims, (int[]){3,3}, & printVarDimsOffsets, NULL );
-  scilPr_initialize_dims_3d(& dims, 10, 10, 10);
-  scilG_iter(data, &dims, &offset, &dims, (int[]){6,6,6}, & printVarDimsOffsets, NULL);
+  printf("\nOther scilU_iter steps\n");
+  scil_dims_initialize_1d(& dims, 10);
+  scilU_iter(data, &dims, &offset, &dims, (int[]){3}, & printVarDimsOffsets, NULL);
+  scil_dims_initialize_2d(& dims, 10, 10);
+  scilU_iter(data, &dims, &offset, &dims, (int[]){3,3}, & printVarDimsOffsets, NULL );
+  scil_dims_initialize_3d(& dims, 10, 10, 10);
+  scilU_iter(data, &dims, &offset, &dims, (int[]){6,6,6}, & printVarDimsOffsets, NULL);
 
   double value = 0;
-  scilPr_initialize_dims_3d(& dims, 10,10,10);
-  scilG_iter(data, &dims, &offset, &dims, NULL, & addVarDims, &value );
+  scil_dims_initialize_3d(& dims, 10,10,10);
+  scilU_iter(data, &dims, &offset, &dims, NULL, & addVarDims, &value );
   printf("Sum: %.0f\n", value);
   assert(scilU_double_equal(value, 499500.0));
 

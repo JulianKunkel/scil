@@ -104,12 +104,12 @@ typedef struct scil_compression_algorithm {
 
   enum compressor_type type;
   char is_lossy; // byte compressors are expected to be lossless anyway
-} scilI_algorithm_t;
+} scilU_algorithm_t;
 
 void scil_initialize_compressors();
 
-scilI_algorithm_t* scil_get_compressor(int number);
-scilI_algorithm_t* scilI_find_compressor_by_name(const char* name);
+scilU_algorithm_t* scil_get_compressor(int number);
+scilU_algorithm_t* scilU_find_compressor_by_name(const char* name);
 
 /*
  \brief Returns the number of available compression schemes.

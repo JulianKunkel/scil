@@ -50,6 +50,6 @@ int scil_zfp_precision_compress_<DATATYPE>(const scil_context_t* ctx, byte* rest
 int scil_zfp_precision_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_dims_t* dims, byte*restrict compressed_buf_in, const size_t in_size);
 // End repeat
 
-extern scilI_algorithm_t algo_zfp_precision;
+extern scilU_algorithm_t algo_zfp_precision;
 
 #endif /* SCIL_ZFP_PRECISION_H_<DATATYPE> */

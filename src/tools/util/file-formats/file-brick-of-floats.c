@@ -49,10 +49,10 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
     return SCIL_EINVAL;
   }
   *out_datatype = datatype;
-  scilPr_initialize_dims_4d(out_dims, size_x, size_y, size_z, size_za);
-  const size_t data_size = scilPr_get_dims_size(out_dims, *out_datatype);
+  scil_dims_initialize_4d(out_dims, size_x, size_y, size_z, size_za);
+  const size_t data_size = scil_dims_get_size(out_dims, *out_datatype);
 
-  byte * input_data = (byte*) malloc(scilPr_get_compressed_data_size_limit(out_dims, *out_datatype));
+  byte * input_data = (byte*) malloc(scil_get_compressed_data_size_limit(out_dims, *out_datatype));
   //assert(size_y != 0 && size_z != 0 && size_za == 0 && size_x != 0);
 
   // index=x+dim_x×(y+dim_y×z)
@@ -86,7 +86,7 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
     return SCIL_EINVAL;
   }
   assert(buf_datatype == orig_datatype);
-  const size_t data_size = scilPr_get_dims_size(& dims, buf_datatype);
+  const size_t data_size = scil_dims_get_size(& dims, buf_datatype);
   size_t ret = fwrite(buf, data_size, 1, fd);
   if (ret != 1){
     printf("Error while writing data from %s\n", name);

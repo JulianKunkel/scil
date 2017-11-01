@@ -5,14 +5,14 @@
 #include <assert.h>
 #include <string.h>
 
-void scilPr_initialize_dims_1d(scil_dims_t* dims, size_t dim1)
+void scil_dims_initialize_1d(scil_dims_t* dims, size_t dim1)
 {
   memset(dims, 0, sizeof(scil_dims_t));
   dims->dims      = 1;
   dims->length[0] = dim1;
 }
 
-void scilPr_initialize_dims_2d(scil_dims_t* dims, size_t dim1, size_t dim2)
+void scil_dims_initialize_2d(scil_dims_t* dims, size_t dim1, size_t dim2)
 {
   memset(dims, 0, sizeof(scil_dims_t));
   dims->dims      = 2;
@@ -20,7 +20,7 @@ void scilPr_initialize_dims_2d(scil_dims_t* dims, size_t dim1, size_t dim2)
   dims->length[1] = dim2;
 }
 
-void scilPr_initialize_dims_3d(scil_dims_t* dims, size_t dim1, size_t dim2, size_t dim3)
+void scil_dims_initialize_3d(scil_dims_t* dims, size_t dim1, size_t dim2, size_t dim3)
 {
   memset(dims, 0, sizeof(scil_dims_t));
 	dims->dims = 3;
@@ -29,7 +29,7 @@ void scilPr_initialize_dims_3d(scil_dims_t* dims, size_t dim1, size_t dim2, size
 	dims->length[2] = dim3;
 }
 
-void scilPr_initialize_dims_4d(scil_dims_t* dims, size_t dim1, size_t dim2, size_t dim3, size_t dim4)
+void scil_dims_initialize_4d(scil_dims_t* dims, size_t dim1, size_t dim2, size_t dim3, size_t dim4)
 {
 	dims->dims = 4;
 	dims->length[0] = dim1;
@@ -47,7 +47,7 @@ void scilPr_initialize_dims_4d(scil_dims_t* dims, size_t dim1, size_t dim2, size
   }
 }
 
-void scilPr_initialize_dims_array(scil_dims_t* dims, uint8_t count, const size_t* length)
+void scil_dims_initialize_array(scil_dims_t* dims, uint8_t count, const size_t* length)
 {
   memset(dims, 0, sizeof(scil_dims_t));
   dims->dims = count;
@@ -55,13 +55,13 @@ void scilPr_initialize_dims_array(scil_dims_t* dims, uint8_t count, const size_t
   memcpy(&dims->length, length, count * sizeof(size_t));
 }
 
-void scilPr_copy_dims(scil_dims_t* out_dims, const scil_dims_t* in_dims)
+void scil_dims_copy(scil_dims_t* out_dims, const scil_dims_t* in_dims)
 {
 	out_dims->dims = in_dims->dims;
 	memcpy(out_dims->length, &in_dims->length, in_dims->dims * sizeof(size_t));
 }
 
-size_t scilPr_get_dims_count(const scil_dims_t* dims)
+size_t scil_dims_get_count(const scil_dims_t* dims)
 {
     size_t result = 1;
     for (uint8_t i = 0; i < dims->dims; ++i) {

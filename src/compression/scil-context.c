@@ -22,7 +22,7 @@ static void initialize()
     }
     scil_initialize_compressors();
 
-    scilI_initialize_hardware_limits();
+    scilU_initialize_hardware_limits();
     scilC_algo_chooser_initialize();
     initialized = 1;
 }
@@ -53,7 +53,7 @@ static void fix_double_setting(double* dbl)
     }
 }
 
-int scilPr_create_context(scil_context_t** out_ctx,
+int scil_context_create(scil_context_t** out_ctx,
                           SCIL_Datatype_t datatype,
                           int special_values_count,
                           void* special_values,
@@ -67,7 +67,7 @@ int scilPr_create_context(scil_context_t** out_ctx,
   ctx = (scil_context_t*)scilU_safe_malloc(sizeof(scil_context_t));
   memset(ctx, 0, sizeof(scil_context_t));
 
-  ctx->pipeline_params = scilI_dict_create(30);
+  ctx->pipeline_params = scilU_dict_create(30);
 
   ctx->datatype = datatype;
 	ctx->special_values_count = special_values_count;
@@ -80,7 +80,7 @@ int scilPr_create_context(scil_context_t** out_ctx,
 
   scil_user_hints_t* oh;
   oh = & ctx->hints;
-	scilPr_copy_user_hints(oh, hints);
+	scil_user_hints_copy(oh, hints);
 
 	// adjust accuracy needed
 	switch(datatype){
@@ -136,9 +136,9 @@ int scilPr_create_context(scil_context_t** out_ctx,
 
     if (oh->force_compression_methods != NULL) {
         // now we can prefill the compression pipeline
-        ret = scilI_create_chain(&ctx->chain, hints->force_compression_methods);
+        ret = scilU_chain_create(&ctx->chain, hints->force_compression_methods);
         if (ret == SCIL_NO_ERR ){
-          ret = scilI_chain_is_applicable(&ctx->chain, datatype);
+          ret = scilU_chain_is_applicable(&ctx->chain, datatype);
           if (ret == SCIL_NO_ERR ){
             oh->force_compression_methods = strdup(oh->force_compression_methods);
           }
@@ -154,7 +154,7 @@ int scilPr_create_context(scil_context_t** out_ctx,
     return ret;
 }
 
-int scilPr_destroy_context(scil_context_t* out_ctx)
+int scil_destroy_context(scil_context_t* out_ctx)
 {
     free(out_ctx->hints.force_compression_methods);
     free(out_ctx);
@@ -163,7 +163,7 @@ int scilPr_destroy_context(scil_context_t* out_ctx)
     return SCIL_NO_ERR;
 }
 
-scil_user_hints_t scilPr_get_effective_hints(const scil_context_t* ctx)
+scil_user_hints_t scil_get_effective_hints(const scil_context_t* ctx)
 {
     return ctx->hints;
 }

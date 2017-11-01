@@ -140,23 +140,23 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
 
       switch(rh_ndims){
         case(1):
-        scilPr_initialize_dims_1d(out_dims, lengthp[0]);
+        scil_dims_initialize_1d(out_dims, lengthp[0]);
         break;
         case(2):
-        scilPr_initialize_dims_2d(out_dims, lengthp[0], lengthp[1]);
+        scil_dims_initialize_2d(out_dims, lengthp[0], lengthp[1]);
         break;
         case(3):
-        scilPr_initialize_dims_3d(out_dims, lengthp[0], lengthp[1], lengthp[2]);
+        scil_dims_initialize_3d(out_dims, lengthp[0], lengthp[1], lengthp[2]);
         break;
         case(4):
-        scilPr_initialize_dims_4d(out_dims, lengthp[0], lengthp[1], lengthp[2], lengthp[3]);
+        scil_dims_initialize_4d(out_dims, lengthp[0], lengthp[1], lengthp[2], lengthp[3]);
         break;
         default:
         printf("ERROR: not supported number of dimensions\n");
         return 1;
       }
 
-      input_data = (byte*) malloc(scilPr_get_compressed_data_size_limit(out_dims, *out_datatype));
+      input_data = (byte*) malloc(scil_get_compressed_data_size_limit(out_dims, *out_datatype));
 
       switch(*out_datatype){
         case(SCIL_TYPE_DOUBLE):
@@ -192,7 +192,7 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
 
   printf("*** SUCCESS reading example file %s!\n", name);
 
-  *read_size = scilPr_get_dims_size(out_dims, *out_datatype);
+  *read_size = scil_dims_get_size(out_dims, *out_datatype);
   *out_buf = input_data;
   return 0;
 }

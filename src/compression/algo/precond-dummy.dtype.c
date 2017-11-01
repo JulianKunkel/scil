@@ -26,7 +26,7 @@
 // Repeat for each data type
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 static int scil_dummy_precond_compress_<DATATYPE>(const scil_context_t* ctx, <DATATYPE>* restrict data_out, byte*restrict header, int * header_size_out, <DATATYPE>*restrict data_in, const scil_dims_t* dims){
-  size_t size = scilPr_get_dims_size(dims, SCIL_TYPE_<DATATYPE_UPPER>);
+  size_t size = scil_dims_get_size(dims, SCIL_TYPE_<DATATYPE_UPPER>);
   memcpy(data_out, data_in, size);
   memcpy(header, "DUMMY", 5);
   *header_size_out = 5;
@@ -34,7 +34,7 @@ static int scil_dummy_precond_compress_<DATATYPE>(const scil_context_t* ctx, <DA
 }
 
 static int scil_dummy_precond_decompress_<DATATYPE>(<DATATYPE>*restrict data_out, scil_dims_t* dims, <DATATYPE>*restrict compressed_buf_in, byte*restrict header, int * header_parsed_out){
-  size_t size = scilPr_get_dims_size(dims, SCIL_TYPE_<DATATYPE_UPPER>);
+  size_t size = scil_dims_get_size(dims, SCIL_TYPE_<DATATYPE_UPPER>);
   memcpy(data_out, compressed_buf_in, size);
   if (memcmp(header-4, "DUMMY", 5) != 0){
     return SCIL_BUFFER_ERR;
@@ -46,7 +46,7 @@ static int scil_dummy_precond_decompress_<DATATYPE>(<DATATYPE>*restrict data_out
 // End repeat
 
 
-scilI_algorithm_t algo_precond_dummy = {
+scilU_algorithm_t algo_precond_dummy = {
     .c.PFtype = {
         CREATE_INITIALIZER(scil_dummy_precond)
     },

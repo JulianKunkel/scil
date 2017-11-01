@@ -74,7 +74,7 @@ int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
     *dest_size = 0;
 
     // Element count in buffer to compress
-    size_t count = scilPr_get_dims_count(dims);
+    size_t count = scil_dims_get_count(dims);
 
     double next_free_number = 0;
 
@@ -112,7 +112,7 @@ int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
         case 1: field = zfp_field_1d(in, zfp_type_<DATATYPE>, dims->length[0]); break;
         case 2: field = zfp_field_2d(in, zfp_type_<DATATYPE>, dims->length[0], dims->length[1]); break;
         case 3: field = zfp_field_3d(in, zfp_type_<DATATYPE>, dims->length[0], dims->length[1], dims->length[2]); break;
-        default: field = zfp_field_1d(in, zfp_type_<DATATYPE>, scilPr_get_dims_count(dims));
+        default: field = zfp_field_1d(in, zfp_type_<DATATYPE>, scil_dims_get_count(dims));
     }
 
     zfp_stream* zfp = zfp_stream_open(NULL);
@@ -153,7 +153,7 @@ int scil_zfp_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
     double tolerance, fill_value;
     double next_free_number;
     int size = in_size;
-    size_t count = scilPr_get_dims_count(dims);
+    size_t count = scil_dims_get_count(dims);
 
     size -= read_header(compressed_buf_in, in_size, &tolerance, &fill_value, & next_free_number);
     compressed_buf_in += in_size - size;
@@ -202,7 +202,7 @@ int scil_zfp_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
 
 // End repeat
 
-scilI_algorithm_t algo_zfp_abstol = {
+scilU_algorithm_t algo_zfp_abstol = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_zfp_abstol)
     },

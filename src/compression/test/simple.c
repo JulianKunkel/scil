@@ -30,16 +30,16 @@ int main(){
   scil_dims_t dims;
   int ret;
 
-  scilPr_initialize_user_hints(& hints);
+  scil_user_hints_initialize(& hints);
   hints.force_compression_methods = "dummy-precond";
-  ret = scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+  ret = scil_context_create(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
   assert(ret == SCIL_NO_ERR);
 
   size_t size;
   byte * buff;
 
-  scilPr_initialize_dims_1d(& dims, 0);
-  size = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
+  scil_dims_initialize_1d(& dims, 0);
+  size = scil_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
   buff = malloc(size);
 
   double data[] = {1};
@@ -49,7 +49,7 @@ int main(){
   assert(ret == SCIL_NO_ERR);
   assert(out_size == 1);
 
-  scilPr_destroy_context(ctx);
+  scil_destroy_context(ctx);
 
   free(buff);
 

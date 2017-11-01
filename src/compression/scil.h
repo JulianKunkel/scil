@@ -135,6 +135,18 @@ title Components of SCIL
 folder "src/" {
 
   folder "compression" {
+    folder "algo"{
+      frame "FP Preconditoner"{
+      }
+      frame "FP Converter INT"{
+      }
+      frame "INT Preconditioner"{
+      }
+      frame "DATATYPE Byte"{
+      }
+      frame "Byte"{
+      }
+    }
     component "algo-chooser" #Wheat
     component "chain execution" #Wheat
   }
@@ -143,37 +155,21 @@ folder "src/" {
     component "print" #Wheat
     component "accuracy" #Wheat
     component "validate" #Wheat
-    component "error" #Wheat
-  }
-
-  folder "core"{
-    component "memory-allocation" #Wheat
-    component "user hints" #Wheat
-    component "context" #Wheat
-    component "dims" #Wheat
-  }
-
-  folder "internal"{
+    component "grid iterators" #Wheat
     component "memory" #Wheat
     component "timer" #Wheat
     component "marshalling" #Wheat
     component "data statistics" #Wheat
     component "data conversion" #Wheat
     component "dictionary" #Wheat
-    component "grid iterators" #Wheat
+    component "error" #Wheat
   }
 
-  folder "algo"{
-    frame "FP Preconditoner"{
-    }
-    frame "FP Converter INT"{
-    }
-    frame "INT Preconditioner"{
-    }
-    frame "DATATYPE Byte"{
-    }
-    frame "Byte"{
-    }
+  folder "base"{
+    component "memory-allocation" #Wheat
+    component "user hints" #Wheat
+    component "context" #Wheat
+    component "dims" #Wheat
   }
 
   folder "pattern"{
@@ -391,7 +387,7 @@ int scil_compress(byte* restrict dest,
  * \pre datatype == 0 || datatype == 1
  * \pre dest != NULL
  * \pre source != NULL
- * \pre tmp_buff != NULL with a size of scilPr_get_compressed_data_size_limit() / 2
+ * \pre tmp_buff != NULL with a size of scil_get_compressed_data_size_limit() / 2
  * \return Success state of the decompression
  */
 int scil_decompress(SCIL_Datatype_t datatype,
@@ -406,7 +402,7 @@ void scil_determine_accuracy(SCIL_Datatype_t datatype,
                              const void* restrict data_2,
                              scil_dims_t* dims,
                              const double relative_err_finest_abs_tolerance,
-                             scil_user_hints_t* out_hints);
+                             scil_user_hints_t *out_hints);
 
 /**
  \brief Test method: check if the conditions as specified by ctx are met by
@@ -420,7 +416,7 @@ int scil_validate_compression(SCIL_Datatype_t datatype,
                               byte* restrict data_compressed,
                               const size_t compressed_size,
                               const scil_context_t* ctx,
-                              scil_user_hints_t* out_accuracy);
+                              scil_user_hints_t *out_accuracy);
 
 
 #endif

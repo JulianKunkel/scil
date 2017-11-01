@@ -96,7 +96,7 @@ int scil_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
     assert(dims != NULL);
 
     // Element count in buffer to compress
-    size_t count = scilPr_get_dims_count(dims);
+    size_t count = scil_dims_get_count(dims);
 
     // Finding minimum and maximum values in data
     <DATATYPE> min, max;
@@ -169,7 +169,7 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
     uint8_t bits_per_value;
     byte* in = source;
     size_t in_size = source_size;
-    size_t count = scilPr_get_dims_count(dims);
+    size_t count = scil_dims_get_count(dims);
     uint64_t next_free_number;
 
     // ============ Decompress ================================================
@@ -208,7 +208,7 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
 
 
 
-scilI_algorithm_t algo_abstol = {
+scilU_algorithm_t algo_abstol = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_abstol)
     },

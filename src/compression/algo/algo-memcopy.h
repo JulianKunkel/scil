@@ -40,6 +40,6 @@ int scil_memcopy_compress(const scil_context_t* ctx, byte* restrict dest, size_t
  */
 int scil_memcopy_decompress(byte*restrict data_out, size_t buff_size, const byte*restrict compressed_buf_in, const size_t in_size, size_t * uncomp_size_out);
 
-extern scilI_algorithm_t algo_memcopy;
+extern scilU_algorithm_t algo_memcopy;
 
 #endif

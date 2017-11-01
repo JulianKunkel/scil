@@ -58,6 +58,6 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
                                       size_t in_size);
 // End repeat
 
-extern scilI_algorithm_t algo_abstol;
+extern scilU_algorithm_t algo_abstol;
 
 #endif /* SCIL_ABSTOL_H_<DATATYPE> */

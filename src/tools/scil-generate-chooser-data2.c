@@ -497,7 +497,7 @@ static int set_data_characteristics(const double *data, const scil_dims_t *dims)
 static void evaluate_compression_algorithm(double *buffer, scil_dims_t *dims, char algo){
 
     scil_user_hints_t hints;
-    scilPr_initialize_user_hints(&hints);
+    scil_user_hints_initialize(&hints);
 
     hints.force_compression_methods  = strndup(&algo, 1);
     hints.absolute_tolerance         = current_data.abs_tol;
@@ -515,10 +515,10 @@ static void evaluate_compression_algorithm(double *buffer, scil_dims_t *dims, ch
     }
 
     scil_context_t* ctx;
-    scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+    scil_context_create(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
 
-    size_t source_size = scilPr_get_dims_size(dims, SCIL_TYPE_DOUBLE);
-    size_t dest_size   = scilPr_get_compressed_data_size_limit(dims, SCIL_TYPE_DOUBLE);
+    size_t source_size = scil_dims_get_size(dims, SCIL_TYPE_DOUBLE);
+    size_t dest_size   = scil_get_compressed_data_size_limit(dims, SCIL_TYPE_DOUBLE);
     byte* dest         = (byte*)scilU_safe_malloc(dest_size);
 
     // Compression analysis
@@ -554,7 +554,7 @@ static void evaluate_compression_algorithm(double *buffer, scil_dims_t *dims, ch
 
     write_line();
 
-    scilPr_destroy_context(ctx);
+    scil_destroy_context(ctx);
     free(dest);
     free(decompd);
     free(temp);
@@ -584,13 +584,13 @@ static void generate_ecount_dims_data(){
 
                 scil_dims_t dims;
                 switch(current_data.dims){
-                    case 1: scilPr_initialize_dims_1d(&dims, side); break;
-                    case 2: scilPr_initialize_dims_2d(&dims, side, side); break;
-                    case 3: scilPr_initialize_dims_3d(&dims, side, side, side); break;
-                    case 4: scilPr_initialize_dims_4d(&dims, side, side, side, side); break;
+                    case 1: scil_dims_initialize_1d(&dims, side); break;
+                    case 2: scil_dims_initialize_2d(&dims, side, side); break;
+                    case 3: scil_dims_initialize_3d(&dims, side, side, side); break;
+                    case 4: scil_dims_initialize_4d(&dims, side, side, side, side); break;
                 }
 
-                current_data.count = scilPr_get_dims_count(&dims);
+                current_data.count = scil_dims_get_count(&dims);
 
                 allocate(double, data_buffer, current_data.count);
 
@@ -622,21 +622,21 @@ static void generate_dims_data(){
 
             scil_dims_t dims;
             switch(dims_i){
-                case 1: scilPr_initialize_dims_1d(&dims, side); break;
-                case 2: scilPr_initialize_dims_2d(&dims, side, side); break;
-                case 3: scilPr_initialize_dims_3d(&dims, side, side, side); break;
-                case 4: scilPr_initialize_dims_4d(&dims, side, side, side, side); break;
+                case 1: scil_dims_initialize_1d(&dims, side); break;
+                case 2: scil_dims_initialize_2d(&dims, side, side); break;
+                case 3: scil_dims_initialize_3d(&dims, side, side, side); break;
+                case 4: scil_dims_initialize_4d(&dims, side, side, side, side); break;
             }
 
-            current_data.size  = scilPr_get_dims_size(&dims, SCIL_TYPE_DOUBLE);
-            current_data.count = scilPr_get_dims_count(&dims);
+            current_data.size  = scil_dims_get_size(&dims, SCIL_TYPE_DOUBLE);
+            current_data.count = scil_dims_get_count(&dims);
 
             allocate(double, data_buffer, current_data.count);
 
             if (pattern_i < 2) {
                 printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name); fflush(stdout);
                 double min = pattern_i == 0 ? 0 : DEFAULT_MIN;
-                scilPa_create_pattern_double(data_buffer, &dims, name, min, DEFAULT_MAX, 0.0, 0.0);
+                scilP_create_pattern_double(data_buffer, &dims, name, min, DEFAULT_MAX, 0.0, 0.0);
                 printf("Done!\n");
 
                 set_data_characteristics(data_buffer, &dims);
@@ -649,7 +649,7 @@ static void generate_dims_data(){
                 if (pattern_i == 2) {
                     printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name); fflush(stdout);
                     double min = pattern_i == 0 ? 0 : DEFAULT_MIN;
-                    scilPa_create_pattern_double(data_buffer, &dims, name, min, DEFAULT_MAX, arg1, 0.0);
+                    scilP_create_pattern_double(data_buffer, &dims, name, min, DEFAULT_MAX, arg1, 0.0);
                     printf("Done!\n");
 
                     set_data_characteristics(data_buffer, &dims);
@@ -662,7 +662,7 @@ static void generate_dims_data(){
 
                     printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name); fflush(stdout);
                     double min = pattern_i == 0 ? 0 : DEFAULT_MIN;
-                    scilPa_create_pattern_double(data_buffer, &dims, name, min, DEFAULT_MAX, arg1, arg2);
+                    scilP_create_pattern_double(data_buffer, &dims, name, min, DEFAULT_MAX, arg1, arg2);
                     printf("Done!\n");
 
                     set_data_characteristics(data_buffer, &dims);
@@ -684,10 +684,10 @@ static void generate_stddev_data(){
     size_t side = (size_t)pow(DEFAULT_ECOUNT, 1.0/DEFAULT_DIM);
 
     scil_dims_t dims;
-    scilPr_initialize_dims_2d(&dims, side, side);
+    scil_dims_initialize_2d(&dims, side, side);
 
-    current_data.size  = scilPr_get_dims_size(&dims, SCIL_TYPE_DOUBLE);
-    current_data.count = scilPr_get_dims_count(&dims);
+    current_data.size  = scil_dims_get_size(&dims, SCIL_TYPE_DOUBLE);
+    current_data.count = scil_dims_get_count(&dims);
 
     allocate(double, data_buffer, current_data.count);
 
@@ -701,7 +701,7 @@ static void generate_stddev_data(){
             if (pattern_i < 2) {
                 printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name); fflush(stdout);
                 double min = pattern_i == 0 ? 0 : -mult;
-                scilPa_create_pattern_double(data_buffer, &dims, name, min, mult, 0.0, 0.0);
+                scilP_create_pattern_double(data_buffer, &dims, name, min, mult, 0.0, 0.0);
                 printf("Done!\n");
 
                 set_data_characteristics(data_buffer, &dims);
@@ -713,7 +713,7 @@ static void generate_stddev_data(){
             for(uint8_t arg1 = 1; arg1 <= 16; ++arg1) {
                 if (pattern_i == 2) {
                     printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name); fflush(stdout);
-                    scilPa_create_pattern_double(data_buffer, &dims, name, -mult, mult, arg1, 0.0);
+                    scilP_create_pattern_double(data_buffer, &dims, name, -mult, mult, arg1, 0.0);
                     printf("Done!\n");
 
                     set_data_characteristics(data_buffer, &dims);
@@ -725,7 +725,7 @@ static void generate_stddev_data(){
                 for(uint8_t arg2 = 1; arg2 <= 16; ++arg2) {
 
                     printf("Generating buffer of %lu values with the %s pattern... ", current_data.count, name); fflush(stdout);
-                    scilPa_create_pattern_double(data_buffer, &dims, name, -mult, mult, arg1, arg2);
+                    scilP_create_pattern_double(data_buffer, &dims, name, -mult, mult, arg1, arg2);
                     printf("Done!\n");
 
                     set_data_characteristics(data_buffer, &dims);
@@ -758,14 +758,14 @@ static void generate_data(){
 
     scil_dims_t dims;
     switch(current_data.dims){
-        case 1: scilPr_initialize_dims_1d(&dims, side); break;
-        case 2: scilPr_initialize_dims_2d(&dims, side, side); break;
-        case 3: scilPr_initialize_dims_3d(&dims, side, side, side); break;
-        case 4: scilPr_initialize_dims_4d(&dims, side, side, side, side); break;
+        case 1: scil_dims_initialize_1d(&dims, side); break;
+        case 2: scil_dims_initialize_2d(&dims, side, side); break;
+        case 3: scil_dims_initialize_3d(&dims, side, side, side); break;
+        case 4: scil_dims_initialize_4d(&dims, side, side, side, side); break;
     }
 
-    current_data.size  = scilPr_get_dims_size(&dims, SCIL_TYPE_DOUBLE);
-    current_data.count = scilPr_get_dims_count(&dims);
+    current_data.size  = scil_dims_get_size(&dims, SCIL_TYPE_DOUBLE);
+    current_data.count = scil_dims_get_count(&dims);
 
     allocate(double, data_buffer, current_data.count);
 
@@ -790,7 +790,7 @@ static void generate_data(){
 
     if (pid == 0) { min = point_a; }
 
-    scilPa_create_pattern_double(data_buffer, &dims, name, min, max, arg1, arg2);
+    scilP_create_pattern_double(data_buffer, &dims, name, min, max, arg1, arg2);
 
     printf("Done!\n");
 

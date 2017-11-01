@@ -38,7 +38,7 @@ static int simplex(double* buffer, const scil_dims_t* dims, double mn, double mx
 
   switch(dims->dims){
     case (1):{
-      size_t count = scilPr_get_dims_count(dims);
+      size_t count = scil_dims_get_count(dims);
       for (size_t i=0; i < count; i++){
         buffer[i] = 0;
         int64_t potenz = max_potenz;
@@ -108,7 +108,7 @@ static int simplex(double* buffer, const scil_dims_t* dims, double mn, double mx
   }
 
   // fix min + max, first identify min/max
-  scilPI_change_data_scale(buffer, dims, mn, mx);
+  scilP_change_data_scale(buffer, dims, mn, mx);
 
   open_simplex_noise_free(ctx);
 

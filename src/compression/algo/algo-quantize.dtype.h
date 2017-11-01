@@ -18,6 +18,6 @@ int scil_quantize_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 
 // End repeat
 
-extern scilI_algorithm_t algo_quantize;
+extern scilU_algorithm_t algo_quantize;
 
 #endif /* SCIL_QUANTIZE_H_<DATATYPE> */

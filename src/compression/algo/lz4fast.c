@@ -45,7 +45,7 @@ int scil_lz4fast_decompress(byte*restrict dest, size_t buff_size, const byte*res
     return 0;
 }
 
-scilI_algorithm_t algo_lz4fast = {
+scilU_algorithm_t algo_lz4fast = {
     .c.Btype = {
         scil_lz4fast_compress,
         scil_lz4fast_decompress

@@ -26,7 +26,7 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 static int constant(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2, int seed){
-  size_t count = scilPr_get_dims_count(dims);
+  size_t count = scil_dims_get_count(dims);
   for (size_t i=0; i < count; i++){
     buffer[i] = mn;
   }
@@ -135,7 +135,7 @@ static void rotate2d(double* a, double* b, double* c, double mn, double mx, size
 
 static int linear1d(double* buffer, const scil_dims_t* dims, double mn, double mx)
 {
-    size_t nmemb = scilPr_get_dims_count(dims);
+    size_t nmemb = scil_dims_get_count(dims);
     double r   = random() / RAND_MAX;
     double a    = r > 0.5 ? mn : mx;
     double last = r > 0.5 ? mx : mn;
@@ -192,7 +192,7 @@ static int linear(double* buffer, const scil_dims_t* dims, double mn, double mx,
 
 static int rnd(double* buffer, const scil_dims_t* dims, double mn, double mx, double arg, double arg2, int seed){
   srand(seed);
-  size_t count = scilPr_get_dims_count(dims);
+  size_t count = scil_dims_get_count(dims);
   double delta = (mx - mn);
   for (size_t i=0; i < count; i++){
     buffer[i] = (double) mn + (random() / ((double) RAND_MAX))*delta;
@@ -371,7 +371,7 @@ static int p_sin(double* buffer, const scil_dims_t* dims, double mn, double mx, 
       case 4: ret = p_sin4d(buffer, dims, base_freq, freq_count); break;
   }
 
-  scilPI_change_data_scale(buffer, dims, mn, mx);
+  scilP_change_data_scale(buffer, dims, mn, mx);
 
   return ret;
 }
@@ -398,13 +398,13 @@ static void m_poly_func(double* data,
         val += new;
     }
 
-    data[scilG_data_pos(pos, size)] = val;
+    data[scilU_data_pos(pos, size)] = val;
 }
 
 
 static int poly4(double* data, const scil_dims_t* dims, double mn, double mx, double arg, double arg2, int seed){
   scil_dims_t pos;
-  scilPr_copy_dims(&pos, dims);
+  scil_dims_copy(&pos, dims);
   memset(pos.length, 0, sizeof(size_t) * pos.dims);
 
   srand((int) arg);
@@ -429,10 +429,10 @@ static int poly4(double* data, const scil_dims_t* dims, double mn, double mx, do
     usr.values[(d+1)*usr.points - 1] = dims->length[d];
   }
 
-  scilG_iter(data, dims, &pos, dims, NULL, & m_poly_func, &usr );
+  scilU_iter(data, dims, &pos, dims, NULL, & m_poly_func, &usr );
   free(usr.values);
 
-  scilPI_change_data_scale(data, dims, mn, mx);
+  scilP_change_data_scale(data, dims, mn, mx);
 
   return SCIL_NO_ERR;
 }

@@ -14,22 +14,22 @@ int main(void){
     size_t i,j;
 
     scil_user_hints_t hints;
-    scilPr_initialize_user_hints(&hints);
+    scil_user_hints_initialize(&hints);
     hints.absolute_tolerance = 0.005;
     hints.force_compression_methods = "11";
 
     scil_context_t* context;
-    scilPr_create_context(&context, SCIL_TYPE_FLOAT, 0, NULL, &hints);
+    scil_context_create(&context, SCIL_TYPE_FLOAT, 0, NULL, &hints);
 
     //2D
 
     scil_dims_t dims;
-    scilPr_initialize_dims_2d(&dims, count1, count2);
+    scil_dims_initialize_2d(&dims, count1, count2);
 
     printf("TEST WAVELETS\n>COMPRESSION\n");
 
-    size_t uncompressed_size = scilPr_get_dims_size(&dims, SCIL_TYPE_FLOAT);
-    size_t compressed_size   = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_FLOAT);
+    size_t uncompressed_size = scil_dims_get_size(&dims, SCIL_TYPE_FLOAT);
+    size_t compressed_size   = scil_get_compressed_data_size_limit(&dims, SCIL_TYPE_FLOAT);
 
     float* buffer_in  = (float*)malloc(uncompressed_size);
     byte* buffer_out   = (byte*)malloc(compressed_size);
@@ -84,7 +84,7 @@ int main(void){
     free(buffer_tmp);
     free(buffer_end);
 
-    //scilPr_destroy_context(context);
+    //scil_destroy_context(context);
 
     return 0;
 }

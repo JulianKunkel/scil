@@ -53,6 +53,6 @@ int scil_fpzip_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_dims_t*
 // End repeat
 
 
-extern scilI_algorithm_t algo_fpzip;
+extern scilU_algorithm_t algo_fpzip;
 
 #endif

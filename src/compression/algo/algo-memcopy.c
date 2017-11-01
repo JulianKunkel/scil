@@ -33,7 +33,7 @@ int scil_memcopy_decompress(byte*restrict dest, size_t buff_size, const byte*res
     return 0;
 }
 
-scilI_algorithm_t algo_memcopy = {
+scilU_algorithm_t algo_memcopy = {
     .c.Btype = {
         scil_memcopy_compress,
         scil_memcopy_decompress

@@ -31,7 +31,7 @@ typedef struct
 {
     enum scil_performance_unit unit;
     float multiplier;
-} scilPr_performance_hint_t;
+} scil_performance_hint_t;
 
 // ############################################################################
 // ## scil_user_hints_t
@@ -92,18 +92,18 @@ typedef struct
     double field_max_steepness;
 
     /** Describes the performance requirements for the compressors */
-    scilPr_performance_hint_t comp_speed;
-    scilPr_performance_hint_t decomp_speed;
+    scil_performance_hint_t comp_speed;
+    scil_performance_hint_t decomp_speed;
 
     /** \brief */
     char *force_compression_methods;
 
 } scil_user_hints_t;
 
-void scilPr_initialize_user_hints(scil_user_hints_t * hints);
+void scil_user_hints_initialize(scil_user_hints_t * hints);
 
-void scilPr_copy_user_hints(scil_user_hints_t * out, const scil_user_hints_t* hints);
+void scil_user_hints_copy(scil_user_hints_t * out, const scil_user_hints_t* hints);
 
-void scilPr_print_user_hints(const scil_user_hints_t* hints);
+void scil_user_hints_print(const scil_user_hints_t* hints);
 
 #endif // SCIL_USER_HINTS_H

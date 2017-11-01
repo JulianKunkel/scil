@@ -38,7 +38,7 @@ void test(char * name, size_t expected_size, int check_compressed_output){
   int ret;
   printf("Running %s\n", name);
   hints.force_compression_methods = name;
-  ret = scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+  ret = scil_context_create(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
   assert(ret == SCIL_NO_ERR);
 
   size_t out_size = -1;
@@ -54,7 +54,7 @@ void test(char * name, size_t expected_size, int check_compressed_output){
     assert( memcmp(& buff[1], data, sizeof(data)) == 0);
   }
 
-  ret = scilPr_destroy_context(ctx);
+  ret = scil_destroy_context(ctx);
   assert(ret == SCIL_NO_ERR);
 
   memset(data_check, 0, sizeof(data_check));
@@ -73,11 +73,11 @@ void test(char * name, size_t expected_size, int check_compressed_output){
 }
 
 int main(){
-  scilPr_initialize_user_hints(& hints);
+  scil_user_hints_initialize(& hints);
   hints.absolute_tolerance = SCIL_ACCURACY_DBL_FINEST;
 
-  scilPr_initialize_dims_1d(& dims, 10);
-  size = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
+  scil_dims_initialize_1d(& dims, 10);
+  size = scil_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
   buff = malloc(size*10);
   tmpBuff = malloc(size*10);
   assert(sizeof(data) == 80);

@@ -40,6 +40,6 @@ int scil_lz4fast_compress(const scil_context_t* ctx, byte* restrict dest, size_t
  */
 int scil_lz4fast_decompress(byte*restrict dest, size_t buff_size, const byte*restrict src, const size_t in_size, size_t * uncomp_size_out);
 
-extern scilI_algorithm_t algo_lz4fast;
+extern scilU_algorithm_t algo_lz4fast;
 
 #endif

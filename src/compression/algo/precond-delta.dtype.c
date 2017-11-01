@@ -27,7 +27,7 @@
 // Repeat for each data type
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 int scil_delta_precond_compress_<DATATYPE>(const scil_context_t* ctx, <DATATYPE>* restrict data_out, byte*restrict header, int * header_size_out, <DATATYPE>*restrict data_in, const scil_dims_t* dims){
-  const size_t size = scilPr_get_dims_count(dims);
+  const size_t size = scil_dims_get_count(dims);
   switch(sizeof(<DATATYPE>)){
     case 8: {
       uint64_t* din = (uint64_t*) data_in;
@@ -71,7 +71,7 @@ int scil_delta_precond_compress_<DATATYPE>(const scil_context_t* ctx, <DATATYPE>
 }
 
 int scil_delta_precond_decompress_<DATATYPE>(<DATATYPE>*restrict data_out, scil_dims_t* dims, <DATATYPE>*restrict data_in, byte*restrict header, int * header_parsed_out){
-  const size_t size = scilPr_get_dims_count(dims);
+  const size_t size = scil_dims_get_count(dims);
   switch(sizeof(<DATATYPE>)){
     case 8: {
       uint64_t* din = (uint64_t*) data_in;
@@ -117,7 +117,7 @@ int scil_delta_precond_decompress_<DATATYPE>(<DATATYPE>*restrict data_out, scil_
 // End repeat
 
 
-scilI_algorithm_t algo_precond_delta = {
+scilU_algorithm_t algo_precond_delta = {
     .c.PFtype = {
         CREATE_INITIALIZER(scil_delta_precond)
     },

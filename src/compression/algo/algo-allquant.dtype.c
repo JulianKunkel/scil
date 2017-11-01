@@ -86,7 +86,7 @@ int scil_allquant_compress_<DATATYPE>(const scil_context_t* ctx,
     assert(dims != NULL);
 
     // Element count in buffer to compress
-    size_t count = scilPr_get_dims_count(dims);
+    size_t count = scil_dims_get_count(dims);
 
     // Finding minimum and maximum values in data
     <DATATYPE> min, max;
@@ -143,7 +143,7 @@ int scil_allquant_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
     uint8_t bits_per_value;
     byte* in = source;
     size_t in_size = source_size;
-    size_t count = scilPr_get_dims_count(dims);
+    size_t count = scil_dims_get_count(dims);
     uint64_t* unswaged_buffer = (uint64_t*)scilU_safe_malloc(count * sizeof(uint64_t*));
 
     // ============ Decompress ================================================
@@ -170,7 +170,7 @@ int scil_allquant_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
 
 
 
-scilI_algorithm_t algo_allquant = {
+scilU_algorithm_t algo_allquant = {
     .c.DNtype = {
         CREATE_INITIALIZER(scil_allquant)
     },

@@ -16,7 +16,7 @@ int scil_quantize_compress_<DATATYPE>(const scil_context_t* ctx,
                                       <DATATYPE>*restrict source,
                                       const scil_dims_t* dims)
 {
-    size_t count = scilPr_get_dims_count(dims);
+    size_t count = scil_dims_get_count(dims);
 
     <DATATYPE> minimum, maximum;
     scilU_find_minimum_maximum_<DATATYPE>(source, count, &minimum, &maximum);
@@ -36,7 +36,7 @@ int scil_quantize_compress_<DATATYPE>(const scil_context_t* ctx,
 
     char value[2];
     snprintf(value, 2, "%u", bits_per_value);
-    scilI_dict_put(ctx->pipeline_params, "bits_per_value", value);
+    scilU_dict_put(ctx->pipeline_params, "bits_per_value", value);
 
     return scil_quantize_buffer_minmax_<DATATYPE>((uint64_t*)dest, source, count, ctx->hints.absolute_tolerance, minimum, maximum);
 }
@@ -52,11 +52,11 @@ int scil_quantize_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
     double abstol  = *(double*)source;
     ++source;
 
-    return scil_unquantize_buffer_<DATATYPE>(dest, (uint64_t*)source, scilPr_get_dims_count(dims), abstol, minimum);
+    return scil_unquantize_buffer_<DATATYPE>(dest, (uint64_t*)source, scil_dims_get_count(dims), abstol, minimum);
 }
 // End repeat
 
-scilI_algorithm_t algo_quantize = {
+scilU_algorithm_t algo_quantize = {
     .c.Ctype = {
         CREATE_INITIALIZER(scil_quantize)
     },

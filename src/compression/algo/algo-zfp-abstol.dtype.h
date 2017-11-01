@@ -51,6 +51,6 @@ int scil_zfp_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict data_out, scil_di
 // End repeat
 
 
-extern scilI_algorithm_t algo_zfp_abstol;
+extern scilU_algorithm_t algo_zfp_abstol;
 
 #endif /* SCIL_ZFP_ABSTOL_H_<DATATYPE> */

@@ -12,10 +12,10 @@ scil_context_t* context;
 
 int test_quantize_float(){
 
-    scilPr_create_context(&context, SCIL_TYPE_FLOAT, 0, NULL, &hints);
+    scil_context_create(&context, SCIL_TYPE_FLOAT, 0, NULL, &hints);
 
-    size_t uncompressed_size = scilPr_get_dims_size(&dims, SCIL_TYPE_FLOAT);
-    size_t compressed_size   = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_FLOAT);
+    size_t uncompressed_size = scil_dims_get_size(&dims, SCIL_TYPE_FLOAT);
+    size_t compressed_size   = scil_get_compressed_data_size_limit(&dims, SCIL_TYPE_FLOAT);
 
     float* buffer_in  = (float*)malloc(uncompressed_size);
     byte* buffer_out  = (byte*)malloc(compressed_size);
@@ -53,10 +53,10 @@ int test_quantize_float(){
 }
 int test_quantize_double(){
 
-    scilPr_create_context(&context, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+    scil_context_create(&context, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
 
-    size_t uncompressed_size = scilPr_get_dims_size(&dims, SCIL_TYPE_DOUBLE);
-    size_t compressed_size   = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
+    size_t uncompressed_size = scil_dims_get_size(&dims, SCIL_TYPE_DOUBLE);
+    size_t compressed_size   = scil_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
 
     double* buffer_in  = (double*)malloc(uncompressed_size);
     byte* buffer_out   = (byte*)malloc(compressed_size);
@@ -97,11 +97,11 @@ int main(void){
 
     srand((unsigned)time(NULL));
 
-    scilPr_initialize_user_hints(&hints);
+    scil_user_hints_initialize(&hints);
     hints.absolute_tolerance = 0.05;
     hints.force_compression_methods = "9";
 
-    scilPr_initialize_dims_1d(&dims, count);
+    scil_dims_initialize_1d(&dims, count);
 
     unsigned char ret = 0;
 

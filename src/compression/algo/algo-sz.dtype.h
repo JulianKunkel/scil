@@ -50,6 +50,6 @@ int scil_sz_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
                                       size_t in_size);
 // End repeat
 
-extern scilI_algorithm_t algo_sz;
+extern scilU_algorithm_t algo_sz;
 
 #endif /* SCIL_ABSTOL_H_<DATATYPE> */

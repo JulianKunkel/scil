@@ -18,6 +18,6 @@
 #define SCIL_DUMMY_H_
 #include <scil-algorithm-impl.h>
 
-extern scilI_algorithm_t algo_precond_dummy;
+extern scilU_algorithm_t algo_precond_dummy;
 
 #endif

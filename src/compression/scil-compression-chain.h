@@ -27,8 +27,8 @@ typedef struct scil_compression_chain {
 } scil_compression_chain_t;
 
 
-int scilI_create_chain(scil_compression_chain_t* chain, const char* str_in);
+int scilU_chain_create(scil_compression_chain_t* chain, const char* str_in);
 
-int scilI_chain_is_applicable(const scil_compression_chain_t* chain, SCIL_Datatype_t datatype);
+int scilU_chain_is_applicable(const scil_compression_chain_t* chain, SCIL_Datatype_t datatype);
 
 #endif // SCIL_CCA_H

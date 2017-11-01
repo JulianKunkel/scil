@@ -17,7 +17,7 @@ struct scil_context {
   scil_compression_chain_t chain;
 
   /** \brief Dictionary for pipeline internal parameters */
-  scilI_dict_t * pipeline_params;
+  scilU_dict_t * pipeline_params;
 } ;
 
 
