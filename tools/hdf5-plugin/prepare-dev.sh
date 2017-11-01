@@ -24,12 +24,7 @@ pushd hdf5-1.8.19
 	CFLAGS="-g -O0" \
 	CXXFLAGS="-g -O0"
 
+make -j 4
 make -j 4 install
 
 popd
-
-# Install SCIL plugin
-./configure --with-scil=$PREFIX --with-hdf5=$PREFIX --prefix=$PREFIX
-cd build
-make
-make -j install

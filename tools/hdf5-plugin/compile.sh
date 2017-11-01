@@ -7,7 +7,7 @@ PREFIX=$PWD/../../install/
 ./configure --prefix=$PREFIX --with-scil=$PREFIX --with-hdf5=$PREFIX
 
 cd build/
-make -j
-make install
+make -j 4
+make -j 4 install
 
 export HDF5_PLUGIN_PATH=$PREFIX/lib
