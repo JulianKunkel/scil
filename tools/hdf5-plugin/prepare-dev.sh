@@ -16,7 +16,7 @@ pushd hdf5-1.8.19
 	--enable-static \
 	--enable-parallel \
 	--enable-build-mode=debug \
-	--enable-fortran \
+	#--enable-fortran \
 	CC="mpicc" \
 	FC="mpif90" \
 	F77="mpi77" \
