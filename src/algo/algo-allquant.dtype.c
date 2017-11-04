@@ -14,16 +14,14 @@
 // along with SCIL.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <algo/algo-allquant.h>
+#include <algo/huffman.h>
 
 #include <scil.h>
 
 #include <scil-error.h>
 #include <scil-internal.h>
-#include <scil-swager.h>
 #include <scil-util.h>
-
-#include <math.h>
-#include <string.h>
+#include <scil-quantizer.h>
 
 static uint64_t mask[] = {
     0,
@@ -91,108 +89,20 @@ static uint64_t mask[] = {
     4611686018427387903
 };
 
-static int read_header(const byte* source,
-                        size_t* source_size,
-                        uint8_t* signs_id,
-                        uint8_t* exponent_bit_count,
-                        uint8_t* mantissa_bit_count,
-                        int16_t* minimum_exponent,
-                        double *fill_value,
-                        uint64_t *fill_value_mask,
-                        uint64_t *zero_value_mask){
-    const byte * start = source;
-
-    *signs_id = *((uint8_t*)source);
-    source += 1;
-
-    *exponent_bit_count = *((uint8_t*)source);
-    source += 1;
-
-    *mantissa_bit_count = *((uint8_t*)source);
-    source += 1;
-
-    *minimum_exponent = *((int16_t*)source);
-    source += 2;
-
-    scilU_unpack8(source, fill_value);
-    source += 8;
-
-    if(*fill_value != DBL_MAX){
-      *fill_value_mask = *((uint64_t*)source);
-      source += 8;
-    }
-
-    if(*minimum_exponent > 0){
-      *zero_value_mask = *((uint64_t*)source);
-      source += 8;
-    }
-
-    int size = (int) (source - start);
-    *source_size -= size;
-    return size;
+static uint8_t calc_exponent_bit_count(int16_t minimum_exponent, int16_t maximum_exponent, uint16_t datatype_max_exponent){
+    int16_t exp_delta = maximum_exponent - minimum_exponent;
+    // reserve +1 exponent for rounding up
+    if (maximum_exponent < datatype_max_exponent)
+        exp_delta++;
+    uint8_t exponent_bit_count = (uint8_t)ceil(log2(exp_delta + 1));
+    return exponent_bit_count;
 }
 
-static int write_header(byte* dest,
-                         uint8_t signs_id,
-                         uint8_t exponent_bit_count,
-                         uint8_t mantissa_bit_count,
-                         int16_t minimum_exponent,
-                         double fill_value,
-                         uint64_t fill_value_mask,
-                         uint64_t zero_value_mask){
-    byte * start = dest;
-
-    *dest = signs_id;
-    ++dest;
-
-    *dest = exponent_bit_count;
-    ++dest;
-
-    *dest = mantissa_bit_count;
-    ++dest;
-
-    *((int16_t*)dest) = minimum_exponent;
-    dest += 2;
-
-    scilU_pack8(dest, fill_value);
-    dest += 8;
-
-    if (fill_value != DBL_MAX){
-      *((uint64_t*)dest) = fill_value_mask;
-      dest += 8;
-    }
-
-    if (minimum_exponent > 0){
-      *((uint64_t*)dest) = zero_value_mask;
-      dest += 8;
-    }
-
-    return (int) (dest - start);
-}
-
-static uint8_t calc_sign_bit_count(uint8_t minimum_sign, uint8_t maximum_sign){
-
-    return minimum_sign == maximum_sign ? minimum_sign : 2;
-}
-
-static uint8_t calc_exponent_bit_count(int16_t minimum_exponent, int16_t maximum_exponent, uint16_t datatype_maximum, uint8_t flag_fill_value, uint8_t flag_zero_value){
-    // Did the reservation for 1 rounding up exponent earlier
-    const int16_t exp_delta = maximum_exponent - minimum_exponent;
-    uint8_t bit_exponent_count = (uint8_t)ceil(log2(exp_delta + 1));
-
-    if (flag_fill_value){
-      if ((exp_delta == mask[bit_exponent_count]) && (bit_exponent_count + 1 < datatype_maximum))
-        ++bit_exponent_count;
-    }
-    // Every value with exponent < finest_value_exponent will turn 0
-    // but will be encoded with another special exponent to reduce
-    // exponent_bit_count (real 0 always extents the range to the bottom)
-    if (flag_zero_value){
-      if ((exp_delta == mask[bit_exponent_count]) && (bit_exponent_count + 1 < datatype_maximum))
-        ++bit_exponent_count;
-    }
-
-    return bit_exponent_count;
+static uint8_t get_prefix_mask(uint8_t prefix_bit_count) {
+    uint8_t mask = 1 << prefix_bit_count;
+    mask--;
+    mask <<= 8 - prefix_bit_count;
+    return mask;
 }
 
 static uint64_t round_up_byte(const uint64_t bits){
@@ -201,18 +111,6 @@ static uint64_t round_up_byte(const uint64_t bits){
     if(a == 0)
         return bits / 8;
     return 1 + (bits - a) / 8;
-}
-
-static uint8_t get_bit_count_per_value(uint8_t signs_id, uint8_t exponent_bit_count, uint8_t mantissa_bit_count){
-
-    return (signs_id == 2) + exponent_bit_count + mantissa_bit_count;
-}
-
-static uint8_t get_sign(uint64_t value, uint8_t bits_per_value, uint8_t signs_id){
-
-    if(signs_id != 2) return signs_id;
-
-    return value >> (bits_per_value - 1);
 }
 
 static int16_t get_exponent(uint64_t value, uint8_t exponent_bit_count, uint8_t mantissa_bit_count, int16_t minimum_exponent){
@@ -230,11 +128,114 @@ static uint64_t get_mantissa_double(uint64_t value, uint8_t mantissa_bit_count){
     return (value & mask[mantissa_bit_count]) << (MANTISSA_LENGTH_DOUBLE - mantissa_bit_count);
 }
 
+// Taken from scil-swager.c, but now working with steps of 1 value
+
+static uint8_t start_mask[9] = {
+    255, //0b11111111
+    127, //0b01111111
+    63,  //0b00111111
+    31,  //0b00011111
+    15,  //0b00001111
+    7,   //0b00000111
+    3,   //0b00000011
+    1,   //0b00000001
+    0    //0b00000000
+};
+
+static uint8_t end_mask[9] = {
+    0,         //0b00000000
+    255 - 127, //0b10000000
+    255 - 63,  //0b11000000
+    255 - 31,  //0b11100000
+    255 - 15,  //0b11110000
+    255 - 7,   //0b11111000
+    255 - 3,   //0b11111100
+    255 - 1,   //0b11111110
+    255        //0b11111111
+};
+
+// Can do negative right shifts!! (left shifts)
+static byte right_shift_64(uint64_t value, int amount){
+    return (byte)(amount >= 0 ?
+        value >> amount :
+        value << -amount);
+}
+
+static uint64_t right_shift_8(byte value, int amount){
+    return (amount >= 0 ?
+        ((uint64_t)value) >> amount :
+        ((uint64_t)value) << -amount);
+}
+
+static void swage_value(byte* restrict buf_out,
+                        const uint64_t value_in,
+                        const uint8_t bit_count,
+                        size_t* bit_index) {
+
+    size_t start_byte = *bit_index / 8;
+    size_t end_byte   = (*bit_index + bit_count) / 8;
+    uint8_t bit_offset = *bit_index % 8;
+
+    int8_t right_shifts = bit_count + bit_offset - 8;
+
+    // Write to first byte
+
+    // Set remaining bits in start_byte to 0
+    buf_out[start_byte] &= end_mask[bit_offset];
+    // Write as much bits of number as possible to remaining bits
+    buf_out[start_byte] |= right_shift_64(value_in, right_shifts);
+
+    // Write to following bytes
+    uint8_t k = 1;
+    for(uint64_t j = start_byte + 1; j <= end_byte; ++j)
+    {
+        buf_out[j] = right_shift_64(value_in, right_shifts - k * 8);
+        ++k;
+    }
+
+    *bit_index += bit_count;
+}
+
+static void unswage_value(uint64_t* value_out,
+                          const byte* restrict buf_in,
+                          const uint8_t bit_count,
+                          size_t* bit_index) {
+
+    size_t start_byte = *bit_index / 8;                         // Index of starting byte of current value in swaged buffer
+    size_t end_byte   = (*bit_index + bit_count) / 8;      // Index of ending byte of current value in swaged buffer
+
+    uint8_t bit_offset = *bit_index % 8;                        // Index of current bit in byte [0-7]
+    uint8_t end_byte_bits = (*bit_index + bit_count) % 8;  // Number of bits in end_byte occupied by current value
+
+    int8_t right_shifts = 8 - bit_count - bit_offset;
+
+    // Read from start_byte
+    uint64_t intermed = right_shift_8(buf_in[start_byte] & start_mask[bit_offset], right_shifts); // Masks away first value-unrelated bits in start_byte and shifts related bits to final position
+    // Read from intermediate bytes
+    uint8_t k = 1;
+    for(uint64_t j = start_byte + 1; j < end_byte; ++j)
+    {
+        intermed |= right_shift_8(buf_in[j], right_shifts + k * 8); // Shifts whole byte to final position and applies it
+        ++k;
+    }
+    // Read from end_byte
+    if(start_byte != end_byte)
+    {
+        intermed |= right_shift_8(buf_in[end_byte], 8 - end_byte_bits); // Shifts out unrelated end bits in end_byte and applies value
+    }
+
+    // Write to output buffer
+    *value_out = intermed;
+
+    *bit_index += bit_count;
+}
+
 //Supported datatypes: double float
 // Repeat for each data type
 
 // To optimize compression we need some statistics about the data.
-// There are 5 relevant regions on the number line:
+// There are 5 relevant regions on the number line and maybe 1 special
+// fill value:
 //
 // absneg | relneg | zero | relpos | abspos (fill)
 //        ^        ^      ^        ^
@@ -259,6 +260,11 @@ typedef struct region_stats_<DATATYPE> {
     datatype_cast_<DATATYPE> min;
     datatype_cast_<DATATYPE> max;
     size_t count;
+    uint8_t prefix_mask;        // left aligned (better on decompression)
+    uint8_t prefix_value;       // left aligned (better on decompression)
+    uint8_t prefix_bit_count;
+    uint8_t exponent_bit_count; // unused in quantization
+    uint8_t mantissa_bit_count; // also used as quantize_bit_count
 } region_stats_<DATATYPE>;
 
 typedef struct allquant_stats_<DATATYPE> {
@@ -272,20 +278,10 @@ typedef struct allquant_stats_<DATATYPE> {
 
 static void find_statistics_<DATATYPE>(const <DATATYPE>* buffer,
                                        const size_t size,
-                                       uint8_t* minimum_sign,
-                                       uint8_t* maximum_sign,
-                                       int16_t* minimum_exponent,
-                                       int16_t* maximum_exponent,
                                        allquant_stats_<DATATYPE>* stats,
                                        double fill_value,
                                        int16_t finest_exponent,
                                        int16_t abstol_min_exponent){
-
-    *minimum_sign = 1;
-    *maximum_sign = 0;
-
-    *minimum_exponent = 0x7fff;
-    *maximum_exponent = -*minimum_exponent;
 
     stats->absneg.min.f = INFINITY_<DATATYPE>;
     stats->absneg.max.f = NINFINITY_<DATATYPE>;
@@ -311,7 +307,7 @@ static void find_statistics_<DATATYPE>(const <DATATYPE>* buffer,
         datatype_cast_<DATATYPE> cur;
         cur.f = buffer[i];
 
-        if(cur.f == fill_value && fill_value != DBL_MAX) {
+        if((double)cur.f == fill_value && fill_value != DBL_MAX) {
             stats->fill.count++;
         } else if(cur.p.exponent < finest_exponent - 1) {
             if(cur.f > stats->zero.max.f) stats->zero.max.f = cur.f;
@@ -354,90 +350,336 @@ static void find_statistics_<DATATYPE>(const <DATATYPE>* buffer,
                 stats->abspos.count++;
             }
         }
-
-        if(cur.p.exponent >= finest_exponent) {
-          if(*minimum_sign != 0 && cur.p.sign < *minimum_sign) { *minimum_sign = cur.p.sign; }
-          if(*maximum_sign != 1 && cur.p.sign > *maximum_sign) { *maximum_sign = cur.p.sign; }
-
-          if(cur.p.exponent < abstol_min_exponent) {
-            if(cur.p.exponent < *minimum_exponent) { *minimum_exponent = cur.p.exponent; }
-            if(cur.p.exponent > *maximum_exponent) { *maximum_exponent = cur.p.exponent; }
-          }
-        }
-    }
-
-    // Maybe cur.p.exponent >= finest_exponent doesn't match for any value
-    // then min/max still on useless init-value
-    if (*maximum_exponent < *minimum_exponent) {
-      *maximum_exponent = *minimum_exponent = finest_exponent;
     }
 }
 
-static void find_statistics_fill_<DATATYPE>(const <DATATYPE>* buffer,
-                                            const size_t size,
-                                            uint8_t* minimum_sign,
-                                            uint8_t* maximum_sign,
-                                            int16_t* minimum_exponent,
-                                            int16_t* maximum_exponent,
-                                            double fill_value,
-                                            int16_t finest_exponent,
-                                            int16_t abstol_min_exponent,
-                                            byte *keys){
+static uint64_t get_bit_count_region_<DATATYPE>(region_stats_<DATATYPE>* region) {
+    // printf("pre %d exp %d mant %d count %d\n", region->prefix_bit_count, region->exponent_bit_count, region->mantissa_bit_count, region->count);
+    return (region->prefix_bit_count + region->exponent_bit_count +
+        region->mantissa_bit_count) * region->count;
+}
 
-    *minimum_sign = 1;
-    *maximum_sign = 0;
+static uint64_t get_bit_count_all_<DATATYPE>(allquant_stats_<DATATYPE>* stats) {
+    return get_bit_count_region_<DATATYPE>(&stats->absneg) +
+        get_bit_count_region_<DATATYPE>(&stats->relneg) +
+        get_bit_count_region_<DATATYPE>(&stats->zero) +
+        get_bit_count_region_<DATATYPE>(&stats->relpos) +
+        get_bit_count_region_<DATATYPE>(&stats->abspos) +
+        get_bit_count_region_<DATATYPE>(&stats->fill);
+}
 
-    *minimum_exponent = 0x7fff;
-    *maximum_exponent = -*minimum_exponent;
+static void get_header_data_<DATATYPE>(const <DATATYPE>* source,
+                                       size_t count,
+                                       allquant_stats_<DATATYPE>* stats,
+                                       double fill_value,
+                                       int16_t finest_exponent,
+                                       double abstol,
+                                       int16_t abstol_min_exponent,
+                                       uint8_t mantissa_bit_count){
 
-    for(size_t i = 0; i < size; ++i) {
-        if (buffer[i] != fill_value) {
-            datatype_cast_<DATATYPE> cur;
-            cur.f = buffer[i];
+    find_statistics_<DATATYPE>(source,
+                               count,
+                               stats,
+                               fill_value,
+                               finest_exponent,
+                               abstol_min_exponent);
 
-            if(cur.p.exponent >= finest_exponent) {
-              if(*minimum_sign != 0 && cur.p.sign < *minimum_sign) { *minimum_sign = cur.p.sign; }
-              if(*maximum_sign != 1 && cur.p.sign > *maximum_sign) { *maximum_sign = cur.p.sign; }
+    // Huffman encode prefix bits for regions
+    huffman_entity huffman[6];
+    huffman[0].count = stats->absneg.count;
+    huffman[1].count = stats->relneg.count;
+    huffman[2].count = stats->zero.count;
+    huffman[3].count = stats->relpos.count;
+    huffman[4].count = stats->abspos.count;
+    huffman[5].count = stats->fill.count;
+    huffman_encode(huffman, 6);
 
-              if(cur.p.exponent < abstol_min_exponent) {
-                if(cur.p.exponent < *minimum_exponent) { *minimum_exponent = cur.p.exponent; }
-                if(cur.p.exponent > *maximum_exponent) { *maximum_exponent = cur.p.exponent; }
+    // Store different bit counts per region
+    stats->absneg.prefix_mask = huffman[0].bitmask;
+    stats->absneg.prefix_value = huffman[0].bitvalue;
+    stats->absneg.prefix_bit_count = huffman[0].bitcount;
+    stats->absneg.exponent_bit_count = 0;
+    stats->absneg.mantissa_bit_count = scil_calculate_bits_needed_<DATATYPE>(
+      stats->absneg.min.f, stats->absneg.max.f, abstol, 0, NULL);
 
-                /*It sets for each exponent existing in buffer 1 bit flag */
-                keys[cur.p.exponent >> 3] |= 1 << (cur.p.exponent % 8);
-              }
-            }
-        }
+    stats->relneg.prefix_mask = huffman[1].bitmask;
+    stats->relneg.prefix_value = huffman[1].bitvalue;
+    stats->relneg.prefix_bit_count = huffman[1].bitcount;
+    stats->relneg.exponent_bit_count = calc_exponent_bit_count(
+      stats->relneg.max.p.exponent, stats->relneg.min.p.exponent,
+      MAX_EXPONENT_<DATATYPE>);
+    stats->relneg.mantissa_bit_count = mantissa_bit_count;
+
+    stats->zero.prefix_mask = huffman[2].bitmask;
+    stats->zero.prefix_value = huffman[2].bitvalue;
+    stats->zero.prefix_bit_count = huffman[2].bitcount;
+    stats->zero.exponent_bit_count = 0;
+    stats->zero.mantissa_bit_count = 0;
+
+    stats->relpos.prefix_mask = huffman[3].bitmask;
+    stats->relpos.prefix_value = huffman[3].bitvalue;
+    stats->relpos.prefix_bit_count = huffman[3].bitcount;
+    stats->relpos.exponent_bit_count = calc_exponent_bit_count(
+      stats->relpos.min.p.exponent, stats->relpos.max.p.exponent,
+      MAX_EXPONENT_<DATATYPE>);
+    stats->relpos.mantissa_bit_count = mantissa_bit_count;
+
+    stats->abspos.prefix_mask = huffman[4].bitmask;
+    stats->abspos.prefix_value = huffman[4].bitvalue;
+    stats->abspos.prefix_bit_count = huffman[4].bitcount;
+    stats->abspos.exponent_bit_count = 0;
+    stats->absneg.mantissa_bit_count = scil_calculate_bits_needed_<DATATYPE>(
+      stats->absneg.min.f, stats->absneg.max.f, abstol, 0, NULL);
+
+    stats->fill.prefix_mask = huffman[5].bitmask;
+    stats->fill.prefix_value = huffman[5].bitvalue;
+    stats->fill.prefix_bit_count = huffman[5].bitcount;
+    stats->fill.exponent_bit_count = 0;
+    stats->fill.mantissa_bit_count = 0;
+}
+
+static int read_header_<DATATYPE>(const byte* source,
+                        size_t* source_size,
+                        allquant_stats_<DATATYPE>* stats,
+                        double *abstol,
+                        double *fill_value){
+    const byte* start = source;
+
+    uint8_t region_flags = *((uint8_t*)source);
+    ++source;
+
+    // mantissa_bit_count is always equal in relneg and relpos
+    if (region_flags & 10) {
+        stats->relneg.mantissa_bit_count = *((uint8_t*)source);
+        stats->relpos.mantissa_bit_count = *((uint8_t*)source);
+        ++source;
     }
+
+    // need abstol value if used in at least one region
+    if (region_flags & 17) {
+        scilU_unpack8(source, abstol);
+        source += 8;
+    }
+
+    if (region_flags & 1) { // absneg
+        stats->absneg.prefix_value = *((uint8_t*)source);
+        ++source;
+        stats->absneg.prefix_bit_count = *((uint8_t*)source);
+        ++source;
+        stats->absneg.mantissa_bit_count = *((uint8_t*)source);
+        ++source;
+        double d;
+        scilU_unpack8(source, (&d));
+        stats->absneg.min.f = (<DATATYPE>)d;
+        source += 8;
+        stats->absneg.prefix_mask = get_prefix_mask(stats->absneg.prefix_bit_count);
+    } else {
+        stats->absneg.prefix_mask = 0;
+        stats->absneg.prefix_value = 1;
+        stats->absneg.prefix_bit_count = 0;
+        stats->absneg.mantissa_bit_count = 0;
+    }
+    stats->absneg.exponent_bit_count = 0;
+
+    if (region_flags & 2) { // relneg
+        stats->relneg.prefix_value = *((uint8_t*)source);
+        ++source;
+        stats->relneg.prefix_bit_count = *((uint8_t*)source);
+        ++source;
+        stats->relneg.exponent_bit_count = *((uint8_t*)source);
+        ++source;
+        stats->relneg.max.f = 1.0;
+        stats->relneg.max.p.exponent = *((int16_t*)source);
+        source += 2;
+        stats->relneg.prefix_mask = get_prefix_mask(stats->relneg.prefix_bit_count);
+    } else {
+        stats->relneg.prefix_mask = 0;
+        stats->relneg.prefix_value = 1;
+        stats->relneg.prefix_bit_count = 0;
+        stats->relneg.exponent_bit_count = 0;
+        stats->relneg.mantissa_bit_count = 0;
+    }
+
+    if (region_flags & 4) { // zero
+        stats->zero.prefix_value = *((uint8_t*)source);
+        ++source;
+        stats->zero.prefix_bit_count = *((uint8_t*)source);
+        ++source;
+        stats->zero.prefix_mask = get_prefix_mask(stats->zero.prefix_bit_count);
+    } else {
+        stats->zero.prefix_mask = 0;
+        stats->zero.prefix_value = 1;
+        stats->zero.prefix_bit_count = 0;
+    }
+    stats->zero.exponent_bit_count = 0;
+    stats->zero.mantissa_bit_count = 0;
+
+    if (region_flags & 8) { // relpos
+        stats->relpos.prefix_value = *((uint8_t*)source);
+        ++source;
+        stats->relpos.prefix_bit_count = *((uint8_t*)source);
+        ++source;
+        stats->relpos.exponent_bit_count = *((uint8_t*)source);
+        ++source;
+        stats->relpos.min.f = 1.0;
+        stats->relpos.min.p.exponent = *((int16_t*)source);
+        source += 2;
+        stats->relpos.prefix_mask = get_prefix_mask(stats->relpos.prefix_bit_count);
+    } else {
+        stats->relpos.prefix_mask = 0;
+        stats->relpos.prefix_value = 1;
+        stats->relpos.prefix_bit_count = 0;
+        stats->relpos.exponent_bit_count = 0;
+        stats->relpos.mantissa_bit_count = 0;
+    }
+
+    if (region_flags & 16) { // abspos
+        stats->abspos.prefix_value = *((uint8_t*)source);
+        ++source;
+        stats->abspos.prefix_bit_count = *((uint8_t*)source);
+        ++source;
+        stats->abspos.mantissa_bit_count = *((uint8_t*)source);
+        ++source;
+        double d;
+        scilU_unpack8(source, (&d));
+        stats->abspos.min.f = (<DATATYPE>)d;
+        source += 8;
+        stats->abspos.prefix_mask = get_prefix_mask(stats->abspos.prefix_bit_count);
+    } else {
+        stats->abspos.prefix_mask = 0;
+        stats->abspos.prefix_value = 1;
+        stats->abspos.prefix_bit_count = 0;
+        stats->abspos.mantissa_bit_count = 0;
+    }
+    stats->abspos.exponent_bit_count = 0;
+
+    if (region_flags & 32) { // fill
+        stats->fill.prefix_value = *((uint8_t*)source);
+        ++source;
+        stats->fill.prefix_bit_count = *((uint8_t*)source);
+        ++source;
+        scilU_unpack8(source, fill_value);
+        source += 8;
+        stats->fill.prefix_mask = get_prefix_mask(stats->fill.prefix_bit_count);
+    } else {
+        stats->fill.prefix_mask = 0;
+        stats->fill.prefix_value = 1;
+        stats->fill.prefix_bit_count = 0;
+    }
+    stats->fill.exponent_bit_count = 0;
+    stats->fill.mantissa_bit_count = 0;
+
+    int size = (int) (source - start);
+    *source_size -= size;
+    return size;
+}
+
+static int write_header_<DATATYPE>(byte* dest,
+                                   allquant_stats_<DATATYPE>* stats,
+                                   double abstol,
+                                   double fill_value){
+    byte* start = dest;
+
+    uint8_t region_flags = 0;
+    if (stats->absneg.count > 0)  region_flags |= 1;
+    if (stats->relneg.count > 0)  region_flags |= 2;
+    if (stats->zero.count > 0)    region_flags |= 4;
+    if (stats->relpos.count > 0)  region_flags |= 8;
+    if (stats->abspos.count > 0)  region_flags |= 16;
+    if (stats->fill.count > 0)    region_flags |= 32;
+
+    *dest = region_flags;
+    ++dest;
+
+    // mantissa_bit_count is always equal in relneg and relpos
+    if (region_flags & 10) {
+        *dest = stats->relneg.mantissa_bit_count;
+        ++dest;
+    }
+
+    // need to store abstol if used in at least one region
+    if (region_flags & 17) {
+        scilU_pack8(dest, abstol);
+        dest += 8;
+    }
+
+    if (region_flags & 1) { // absneg
+        *dest = stats->absneg.prefix_value;
+        ++dest;
+        *dest = stats->absneg.prefix_bit_count;
+        ++dest;
+        *dest = stats->absneg.mantissa_bit_count;
+        ++dest;
+        double d = stats->absneg.min.f;
+        scilU_pack8(dest, d);
+        dest += 8;
+    }
+
+    if (region_flags & 2) { // relneg
+        *dest = stats->relneg.prefix_value;
+        ++dest;
+        *dest = stats->relneg.prefix_bit_count;
+        ++dest;
+        *dest = stats->relneg.exponent_bit_count;
+        ++dest;
+        *((int16_t*)dest) = stats->relneg.max.p.exponent;
+        dest += 2;
+    }
+
+    if (region_flags & 4) { // zero
+        *dest = stats->zero.prefix_value;
+        ++dest;
+        *dest = stats->zero.prefix_bit_count;
+        ++dest;
+    }
+
+    if (region_flags & 8) { // relpos
+        *dest = stats->relpos.prefix_value;
+        ++dest;
+        *dest = stats->relpos.prefix_bit_count;
+        ++dest;
+        *dest = stats->relpos.exponent_bit_count;
+        ++dest;
+        *((int16_t*)dest) = stats->relpos.min.p.exponent;
+        dest += 2;
+    }
+
+    if (region_flags & 16) { // abspos
+        *dest = stats->abspos.prefix_value;
+        ++dest;
+        *dest = stats->abspos.prefix_bit_count;
+        ++dest;
+        *dest = stats->abspos.mantissa_bit_count;
+        ++dest;
+        double d = stats->abspos.min.f;
+        scilU_pack8(dest, d);
+        dest += 8;
+    }
+
+    if (region_flags & 32) { // fill
+        *dest = stats->fill.prefix_value;
+        ++dest;
+        *dest = stats->fill.prefix_bit_count;
+        ++dest;
+        scilU_pack8(dest, fill_value);
+        dest += 8;
+    }
+
+    return (int) (dest - start);
 }
 
 // TODO: Speed up shifts with lookup table.
 static inline uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
-                                          uint8_t signs_id,
                                           uint8_t exponent_bit_count,
                                           uint8_t mantissa_bit_count,
-                                          int16_t minimum_exponent,
-                                          uint64_t zero_value_mask,
-                                          uint64_t finest_value_mask){
+                                          int16_t minimum_exponent){
 
     uint64_t result = 0;
 
     datatype_cast_<DATATYPE> cur;
     cur.f = value;
 
-    // For minimum_exponent all values with exponent < finest value's exponent
-    // are ignored, so if we see one here it is meant to be rounded
-    // down to zero if another exponent smaller or up to finest
-    if(cur.p.exponent < minimum_exponent - 1) {
-        return zero_value_mask;
-    } else if(cur.p.exponent < minimum_exponent) {
-        return finest_value_mask;
-    }
-
-    // Calculate potentionally compressed sign bit, writing it and shifting to get space for exponent bits
-    if(signs_id == 2){
-        result = (uint64_t) cur.p.sign << exponent_bit_count;
-    }
+    // Checking for finest and sign-bit was done earlier
 
     // Amount of bitshifts to do at various points
     uint8_t shifts = MANTISSA_LENGTH_<DATATYPE_UPPER> - mantissa_bit_count;
@@ -470,296 +712,208 @@ static inline uint64_t compress_value_<DATATYPE>(<DATATYPE> value,
 }
 
 static inline  <DATATYPE> decompress_value_<DATATYPE>(uint64_t value,
-                                              uint8_t bit_count_per_value,
-                                              uint8_t signs_id,
                                               uint8_t exponent_bit_count,
                                               uint8_t mantissa_bit_count,
                                               int16_t minimum_exponent){
 
     datatype_cast_<DATATYPE> cur;
 
-    cur.p.sign     = get_sign(value, bit_count_per_value, signs_id);
+    cur.p.sign     = 0; // sign is stored in prefix and handled outside
     cur.p.exponent = get_exponent(value, exponent_bit_count, mantissa_bit_count, minimum_exponent);
     cur.p.mantissa = get_mantissa_<DATATYPE>(value, mantissa_bit_count);
 
     return cur.f;
 }
 
-static int compress_buffer_<DATATYPE>(uint64_t* restrict dest,
+static int compress_buffer_<DATATYPE>(byte * restrict dest,
                                       const <DATATYPE>* restrict source,
                                       size_t count,
-                                      uint8_t signs_id,
-                                      uint8_t exponent_bit_count,
-                                      uint8_t mantissa_bit_count,
-                                      int16_t minimum_exponent,
-                                      uint64_t zero_value_mask){
-
-    datatype_cast_<DATATYPE> finest;
-    finest.p.sign = 0;
-    finest.p.mantissa = 0;
-    finest.p.exponent = minimum_exponent;
-    uint64_t finest_value_mask = compress_value_<DATATYPE>(
-                                          finest.f,
-                                          signs_id,
-                                          exponent_bit_count,
-                                          mantissa_bit_count,
-                                          minimum_exponent,
-                                          zero_value_mask, 0);
-
-    for(size_t i = 0; i < count; ++i){
-        dest[i] = compress_value_<DATATYPE>(source[i], signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, zero_value_mask, finest_value_mask);
-    }
-
-    return SCIL_NO_ERR;
-}
-
-static int compress_buffer_fill_<DATATYPE>(uint64_t* restrict dest,
-                                      const <DATATYPE>* restrict source,
-                                      size_t count,
-                                      uint8_t signs_id,
-                                      uint8_t exponent_bit_count,
-                                      uint8_t mantissa_bit_count,
-                                      int16_t minimum_exponent,
+                                      allquant_stats_<DATATYPE>* stats,
                                       double fill_value,
-                                      uint64_t fill_value_mask,
-                                      uint64_t zero_value_mask){
+                                      int16_t finest_exponent,
+                                      double abstol,
+                                      int16_t abstol_min_exponent){
 
+    // Swaging state
+    size_t bit_index = 0;
+    uint64_t unswaged;
+
+    // Precalculate 64bit representation of finest value
     datatype_cast_<DATATYPE> finest;
     finest.p.sign = 0;
     finest.p.mantissa = 0;
-    finest.p.exponent = minimum_exponent;
-    uint64_t finest_value_mask = compress_value_<DATATYPE>(
-                                          finest.f,
-                                          signs_id,
-                                          exponent_bit_count,
-                                          mantissa_bit_count,
-                                          minimum_exponent,
-                                          zero_value_mask, 0);
+    finest.p.exponent = finest_exponent;
+    uint64_t finest_neg = compress_value_<DATATYPE>(finest.f,
+        stats->relneg.exponent_bit_count, stats->relneg.mantissa_bit_count,
+        stats->relneg.max.p.exponent);
+    uint64_t finest_pos = compress_value_<DATATYPE>(finest.f,
+        stats->relpos.exponent_bit_count, stats->relpos.mantissa_bit_count,
+        stats->relpos.min.p.exponent);
 
-    for(size_t i = 0; i < count; ++i){
-      if (source[i] != fill_value){
-        dest[i] = compress_value_<DATATYPE>(source[i], signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, zero_value_mask, finest_value_mask);
-      }else{
-        dest[i] = fill_value_mask;
-      }
+    // Precalculate amount of data bits for rel-regions
+    uint8_t relneg_data_bit_count = stats->relneg.exponent_bit_count +
+        stats->relneg.mantissa_bit_count;
+    uint8_t relpos_data_bit_count = stats->relpos.exponent_bit_count +
+        stats->relpos.mantissa_bit_count;
+
+    // Convert prefix values from left aligned to right aligned
+    // because swaging expects given number of bits right aligned within 64bit
+    uint64_t absneg_prefix_value = stats->absneg.prefix_value >> (8 -
+        stats->absneg.prefix_bit_count);
+    uint64_t relneg_prefix_value = stats->relneg.prefix_value >> (8 -
+        stats->relneg.prefix_bit_count);
+    uint64_t zero_prefix_value = stats->zero.prefix_value >> (8 -
+        stats->zero.prefix_bit_count);
+    uint64_t relpos_prefix_value = stats->relpos.prefix_value >> (8 -
+        stats->relpos.prefix_bit_count);
+    uint64_t abspos_prefix_value = stats->abspos.prefix_value >> (8 -
+        stats->abspos.prefix_bit_count);
+    uint64_t fill_prefix_value = stats->fill.prefix_value >> (8 -
+        stats->fill.prefix_bit_count);
+
+    // For each value:
+    // - check wich region value belongs to
+    // - write regions huffman prefix (variable length)
+    // stop on special cases, else
+    // - compress value to unswaged 64bit with sigbits- or abstol-algo
+    // - swage that value according to regions bit_counts
+
+    for(size_t i = 0; i < count; ++i) {
+        datatype_cast_<DATATYPE> cur;
+        cur.f = source[i];
+
+        if((double)cur.f == fill_value && fill_value != DBL_MAX) {
+            swage_value(dest, fill_prefix_value,
+                stats->fill.prefix_bit_count, &bit_index);
+        } else if(cur.p.exponent < finest_exponent - 1) {
+            swage_value(dest, zero_prefix_value,
+                stats->zero.prefix_bit_count, &bit_index);
+        } else if(cur.p.exponent < finest_exponent) {
+            if(cur.p.sign) {
+                swage_value(dest, relneg_prefix_value,
+                    stats->relneg.prefix_bit_count, &bit_index);
+                swage_value(dest, finest_neg,
+                    relneg_data_bit_count, &bit_index);
+            } else {
+                swage_value(dest, relpos_prefix_value,
+                    stats->relpos.prefix_bit_count, &bit_index);
+                swage_value(dest, finest_pos,
+                    relpos_data_bit_count, &bit_index);
+            }
+        } else if(cur.p.exponent < abstol_min_exponent) {
+            if(cur.p.sign) {
+                swage_value(dest, relneg_prefix_value,
+                    stats->relneg.prefix_bit_count, &bit_index);
+                // Compress_value needs min_exponent, but caution:
+                // For negative values this is the exponent of the max
+                // value in this range!
+                unswaged = compress_value_<DATATYPE>(source[i],
+                    stats->relneg.exponent_bit_count,
+                    stats->relneg.mantissa_bit_count,
+                    stats->relneg.max.p.exponent);
+                swage_value(dest, unswaged,
+                    relneg_data_bit_count, &bit_index);
+            } else {
+                swage_value(dest, relpos_prefix_value,
+                    stats->relpos.prefix_bit_count, &bit_index);
+                unswaged = compress_value_<DATATYPE>(source[i],
+                    stats->relpos.exponent_bit_count,
+                    stats->relpos.mantissa_bit_count,
+                    stats->relpos.min.p.exponent);
+                swage_value(dest, unswaged,
+                    relpos_data_bit_count, &bit_index);
+            }
+        } else {
+            if(cur.p.sign) {
+                //TODO absneg
+                swage_value(dest, absneg_prefix_value,
+                    stats->absneg.prefix_bit_count, &bit_index);
+                swage_value(dest, 0,
+                    stats->absneg.mantissa_bit_count, &bit_index);
+            } else {
+                //TODO abspos
+                swage_value(dest, abspos_prefix_value,
+                    stats->abspos.prefix_bit_count, &bit_index);
+                swage_value(dest, 0,
+                    stats->abspos.mantissa_bit_count, &bit_index);
+            }
+        }
     }
 
     return SCIL_NO_ERR;
 }
 
 static int decompress_buffer_<DATATYPE>(<DATATYPE>* restrict dest,
-                                        const uint64_t* restrict source,
+                                        const byte* restrict source,
                                         size_t count,
-                                        uint8_t bit_count_per_value,
-                                        uint8_t signs_id,
-                                        uint8_t exponent_bit_count,
-                                        uint8_t mantissa_bit_count,
-                                        int16_t minimum_exponent,
-                                        uint64_t zero_value_mask){
+                                        allquant_stats_<DATATYPE>* stats,
+                                        double abstol,
+                                        double fill_value){
+
+    // Swaging state
+    size_t bit_index = 0;
+    uint64_t unswaged;
+    uint8_t prefix_byte;
+
+    // Precalculate amount of data bits for rel-regions
+    uint8_t relneg_data_bit_count = stats->relneg.exponent_bit_count +
+        stats->relneg.mantissa_bit_count;
+    uint8_t relpos_data_bit_count = stats->relpos.exponent_bit_count +
+        stats->relpos.mantissa_bit_count;
 
     for (size_t i = 0; i < count; ++i) {
-      if (source[i] == zero_value_mask){
-        dest[i] = 0.0;
+      // Read 1 byte, then mask it with regions bitmask and compare with
+      // regions value. By design only one will match and unused regions
+      // are set up to never match.
+      // After the region is identified, we know how many prefix bits it was
+      // and then rewind some bits, because we did not read a full byte.
+      // From knowing the region we then know how many data bits to read next.
+
+      unswage_value(&unswaged, source, 8, &bit_index);
+      prefix_byte = (uint8_t)unswaged;
+
+      if ((prefix_byte & stats->zero.prefix_mask) ==
+        stats->zero.prefix_value) {
+          bit_index -= 8 - stats->zero.prefix_bit_count;
+          dest[i] = 0.0;
+      } else if ((prefix_byte & stats->fill.prefix_mask) ==
+        stats->fill.prefix_value) {
+          bit_index -= 8 - stats->fill.prefix_bit_count;
+          dest[i] = (<DATATYPE>)fill_value;
+      } else if ((prefix_byte & stats->relneg.prefix_mask) ==
+        stats->relneg.prefix_value) {
+          bit_index -= 8 - stats->relneg.prefix_bit_count;
+          unswage_value(&unswaged, source, relneg_data_bit_count, &bit_index);
+          dest[i] = -decompress_value_<DATATYPE>(unswaged,
+            stats->relneg.exponent_bit_count, stats->relneg.mantissa_bit_count,
+            stats->relneg.max.p.exponent);
+      } else if ((prefix_byte & stats->relpos.prefix_mask) ==
+        stats->relpos.prefix_value) {
+          bit_index -= 8 - stats->relpos.prefix_bit_count;
+          unswage_value(&unswaged, source, relpos_data_bit_count, &bit_index);
+          dest[i] = decompress_value_<DATATYPE>(unswaged,
+            stats->relpos.exponent_bit_count, stats->relpos.mantissa_bit_count,
+            stats->relpos.min.p.exponent);
+      } else if ((prefix_byte & stats->absneg.prefix_mask) ==
+        stats->absneg.prefix_value) {
+          //TODO absneg
+          bit_index -= 8 - stats->absneg.prefix_bit_count;
+          unswage_value(&unswaged, source, stats->absneg.mantissa_bit_count, &bit_index);
+          dest[i] = 0.0;
+      } else if ((prefix_byte & stats->abspos.prefix_mask) ==
+        stats->abspos.prefix_value) {
+          //TODO abspos
+          bit_index -= 8 - stats->abspos.prefix_bit_count;
+          unswage_value(&unswaged, source, stats->abspos.mantissa_bit_count, &bit_index);
+          dest[i] = 0.0;
       } else {
-        dest[i] = decompress_value_<DATATYPE>(source[i], bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
+          // Corrupted data, found illegal prefix.
+          // Due to huffman codes, this would mean the prefixes from header
+          // were corrupt. Should never happen.
+          return SCIL_BUFFER_ERR;
       }
     }
-
     return SCIL_NO_ERR;
-}
-
-static int decompress_buffer_fill_<DATATYPE>(<DATATYPE>* restrict dest,
-                                        const uint64_t* restrict source,
-                                        size_t count,
-                                        uint8_t bit_count_per_value,
-                                        uint8_t signs_id,
-                                        uint8_t exponent_bit_count,
-                                        uint8_t mantissa_bit_count,
-                                        int16_t minimum_exponent,
-                                        double fill_value,
-                                        uint64_t fill_value_mask,
-                                        uint64_t zero_value_mask){
-    for(size_t i = 0; i < count; ++i){
-      if (source[i] == fill_value_mask){
-        dest[i] = fill_value;
-      } else if (source[i] == zero_value_mask){
-        dest[i] = 0.0;
-      } else {
-        dest[i] = decompress_value_<DATATYPE>(source[i], bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent);
-      }
-    }
-
-    return SCIL_NO_ERR;
-}
-
-static void get_header_data_<DATATYPE>(const <DATATYPE>* source,
-                                       size_t count,
-                                       uint8_t* signs_id,
-                                       uint8_t* exponent_bit_count,
-                                       uint8_t mantissa_bit_count,
-                                       int16_t* minimum_exponent,
-                                       int16_t finest_exponent,
-                                       int16_t abstol_min_exponent,
-                                       uint64_t *zero_value_mask){
-
-    uint8_t minimum_sign, maximum_sign;
-    int16_t maximum_exponent;
-
-    allquant_stats_<DATATYPE> stats;
-
-    find_statistics_<DATATYPE>(source,
-                               count,
-                               &minimum_sign,
-                               &maximum_sign,
-                               minimum_exponent,
-                               &maximum_exponent,
-                               &stats,
-                               DBL_MAX,
-                               finest_exponent,
-                               abstol_min_exponent);
-
-    int need_zero_value_mask = (*minimum_exponent > 0);
-
-    // reserve 1 exponent for rounding up
-    // will be used for zero_value_mask also
-    if (maximum_exponent < MAX_EXPONENT_<DATATYPE>) {
-        maximum_exponent++;
-    }
-
-    *signs_id = calc_sign_bit_count(minimum_sign, maximum_sign);
-    *exponent_bit_count = calc_exponent_bit_count(*minimum_exponent, maximum_exponent, EXPONENT_LENGTH_<DATATYPE_UPPER> , 0, need_zero_value_mask);
-
-    // A slim approach to get the zero_value_mask
-    *zero_value_mask = 0;
-    if (need_zero_value_mask) {
-        datatype_cast_<DATATYPE> cur;
-        cur.p.sign = 0;
-        cur.p.mantissa = 0;
-        cur.p.exponent = 0;
-        if (maximum_exponent + 1 <= MAX_EXPONENT_<DATATYPE>) {
-          cur.p.exponent = maximum_exponent + 1;
-        }
-        if (cur.p.exponent){
-          *zero_value_mask = compress_value_<DATATYPE>(
-                                              cur.f,
-                                              *signs_id,
-                                              *exponent_bit_count,
-                                              mantissa_bit_count,
-                                              *minimum_exponent,
-                                              0, 0);
-        }
-    }
-}
-
-static void get_header_data_fill_<DATATYPE>(const <DATATYPE>* source,
-                                       size_t count,
-                                       uint8_t* signs_id,
-                                       uint8_t* exponent_bit_count,
-                                       uint8_t mantissa_bit_count,
-                                       int16_t* minimum_exponent,
-                                       double fill_value,
-                                       uint64_t *fill_value_mask,
-                                       int16_t finest_exponent,
-                                       int16_t abstol_min_exponent,
-                                       uint64_t *zero_value_mask){
-
-    int16_t maximum_exponent;
-    uint8_t minimum_sign, maximum_sign;
-
-    byte *keys = (byte*)SAFE_MALLOC((EXPONENT_LENGTH_<DATATYPE_UPPER> - 1) << 2);
-    memset(keys, 0, (EXPONENT_LENGTH_<DATATYPE_UPPER> - 1) << 2);
-
-    find_statistics_fill_<DATATYPE>(source,
-                                    count,
-                                    &minimum_sign,
-                                    &maximum_sign,
-                                    minimum_exponent,
-                                    &maximum_exponent,
-                                    fill_value,
-                                    finest_exponent,
-                                    abstol_min_exponent,
-                                    keys);
-
-    /*printf("Check array with exponents from source\n");
-    for(int i=0; i<32;i++)
-      printf("%i ", keys[i]);*/
-
-    // reserve 1 exponent for rounding up
-    // will be used for fill_value_mask and zero_value_mask also
-    if (maximum_exponent < MAX_EXPONENT_<DATATYPE>) {
-        maximum_exponent++;
-    }
-
-    int need_zero_value_mask = (*minimum_exponent > 0);
-    *signs_id = calc_sign_bit_count(minimum_sign, maximum_sign);
-    *exponent_bit_count = calc_exponent_bit_count(*minimum_exponent, maximum_exponent, EXPONENT_LENGTH_<DATATYPE_UPPER> , 1, need_zero_value_mask);
-
-    datatype_cast_<DATATYPE> cur;
-
-    *fill_value_mask = 0;
-    cur.p.sign = 0;
-    cur.p.mantissa = 0;
-    cur.p.exponent = 0;
-
-    // TODO: Test this case. Does it happen? Extend to zero_value_mask
-    if((*exponent_bit_count + 1 >= EXPONENT_LENGTH_<DATATYPE_UPPER>) && ((maximum_exponent - *minimum_exponent) != mask[*exponent_bit_count])){
-      /* If we have maximal number of bits and
-      we didn't increase the number of bits (because max-min diff != max)
-      then...
-      Find first free exponent number between min and max exponents
-      (first zero bit number in keys will be set as cur.p.exponent) */
-        int i = ((int)*minimum_exponent + 1) >> 3;
-        int j = ((int)*minimum_exponent + 1) % 8;
-        int imax = ((int)maximum_exponent >> 3) + (((int)maximum_exponent % 8)? 1:0);//32
-        int jmax = 8;
-
-        for(i; i < imax; i++){ //bytes
-          if (i==imax-1) jmax = maximum_exponent % 8;
-          if (keys[i] != 0xff){
-            for(j; j < jmax; j++) //bits
-              if (!(keys[i] >> j)){
-                cur.p.exponent = (i << 3) + j;
-              }
-          }
-          j=0;
-        }
-    } else {
-      cur.p.exponent = maximum_exponent + 1;
-    }
-
-    /* If the free exponent was not found => error.
-    We have no space to place fill value. */
-
-    if (cur.p.exponent){
-      *fill_value_mask = compress_value_<DATATYPE>(
-                                          cur.f,
-                                          *signs_id,
-                                          *exponent_bit_count,
-                                          mantissa_bit_count,
-                                          *minimum_exponent,
-                                          0, 0);
-    }
-
-    // A more slim approach to get the zero_value_mask
-    *zero_value_mask = 0;
-    if (need_zero_value_mask) {
-        cur.p.exponent = 0;
-        if (maximum_exponent + 2 <= MAX_EXPONENT_<DATATYPE>) {
-          cur.p.exponent = maximum_exponent + 2;
-        }
-        if (cur.p.exponent){
-          *zero_value_mask = compress_value_<DATATYPE>(
-                                              cur.f,
-                                              *signs_id,
-                                              *exponent_bit_count,
-                                              mantissa_bit_count,
-                                              *minimum_exponent,
-                                              0, 0);
-        }
-    }
-
-    free(keys);
-    return;
 }
 
 int scil_allquant_compress_<DATATYPE>(const scil_context_t* ctx,
@@ -796,7 +950,7 @@ int scil_allquant_compress_<DATATYPE>(const scil_context_t* ctx,
     /* Check for finest absolute tolerance.
        Intention is to reduce the amount of used exponents to save bits there.
        So we only need all exponents below finest_exponent to turn either
-       to zero (must not be encoded by minimum possible exponent -> zero_value_mask)
+       to zero (must not be encoded by minimum possible exponent)
        or to the finest value (use min. value with finest_exponent for continuity).
        Rounding threshold is half of "reduced finest", just 1 exponent less
     */
@@ -833,64 +987,26 @@ int scil_allquant_compress_<DATATYPE>(const scil_context_t* ctx,
 
     size_t count = scilPr_get_dims_count(dims);
 
-    uint8_t signs_id, exponent_bit_count;
-    int16_t minimum_exponent;
-    uint64_t fill_value_mask, zero_value_mask;
+    allquant_stats_<DATATYPE> stats; // stores all statistics and bitcounts
 
-    if (ctx->hints.fill_value == DBL_MAX){
-      get_header_data_<DATATYPE>(source, count, &signs_id, &exponent_bit_count, mantissa_bit_count, &minimum_exponent, finest_exponent, abstol_min_exponent, &zero_value_mask);
-    }else{ // use the fill value
-      get_header_data_fill_<DATATYPE>(source, count, &signs_id, &exponent_bit_count, mantissa_bit_count, &minimum_exponent, ctx->hints.fill_value, &fill_value_mask, finest_exponent, abstol_min_exponent, &zero_value_mask);
+    get_header_data_<DATATYPE>(source, count, &stats, ctx->hints.fill_value,
+      finest_exponent, abstol, abstol_min_exponent, mantissa_bit_count);
 
-      if(!fill_value_mask){
-        return SCIL_FILL_VAL_ERR;
-      }
-      //if(!zero_value_mask) is ok, it's just the normal 0.0 then
-    }
+    uint64_t bit_count_all = get_bit_count_all_<DATATYPE>(&stats);
 
-    uint8_t bit_count_per_value = get_bit_count_per_value(signs_id, exponent_bit_count, mantissa_bit_count);
+    int header = write_header_<DATATYPE>(dest, &stats, abstol, ctx->hints.fill_value);
 
-    // About finest: After finding min/max, the minimum_exponent will be the finest_exponent, so we use minimum_exponent from now on
-    int header = write_header(dest, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, ctx->hints.fill_value, fill_value_mask, zero_value_mask);
-    dest += header;
-
-    *dest_size = round_up_byte(bit_count_per_value * count) + header;
-
-    int ret = SCIL_NO_ERR;
+    *dest_size = round_up_byte(bit_count_all) + header;
 
     // ==================== Compression ========================================
 
-    // Allocate intermediate buffer
-    uint64_t* compressed_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
-
-    if (ctx->hints.fill_value == DBL_MAX){
-      // Compress each value in source buffer
-      if(compress_buffer_<DATATYPE>(compressed_buffer, source, count, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, zero_value_mask)){
-        ret = SCIL_BUFFER_ERR;
-        goto comp_cleanup;
-      }
-    }else{ // don't compress the fill value
-      if(compress_buffer_fill_<DATATYPE>(compressed_buffer, source, count, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, ctx->hints.fill_value, fill_value_mask, zero_value_mask)){
-        ret = SCIL_BUFFER_ERR;
-        goto comp_cleanup;
-      }
+    // Compress and pack / swage per value, as bits_per_value depends on
+    // the region the value is in
+    if(compress_buffer_<DATATYPE>(dest + header, source, count, &stats,
+      ctx->hints.fill_value, finest_exponent, abstol, abstol_min_exponent)) {
+        return SCIL_BUFFER_ERR;
     }
-
-    // Pack compressed values tightly
-    if(scil_swage(dest, compressed_buffer, count, bit_count_per_value)){
-        ret = SCIL_BUFFER_ERR;
-        goto comp_cleanup;
-    }
-    /*printf("Control dest\n");
-    for(size_t i = 0; i < *dest_size; ++i){
-      printf("%i ", dest[i]);
-    }*/
-
-    // ==================== Cleanup ============================================
-
-    comp_cleanup:
-    free(compressed_buffer);
-    return ret;
+    return SCIL_NO_ERR;
 }
 
 int scil_allquant_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
@@ -902,7 +1018,8 @@ int scil_allquant_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
     assert(dims != NULL);
     assert(source != NULL);
 
-    double fill_value = 0;
+    double fill_value = DBL_MAX;
+    double abstol = 0.0;
 
     // ==================== Initialization =====================================
 
@@ -910,43 +1027,17 @@ int scil_allquant_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
 
     size_t source_size_cp = source_size;
 
-    uint8_t signs_id, exponent_bit_count, mantissa_bit_count;
-    int16_t minimum_exponent;
-    uint64_t fill_value_mask = 0, zero_value_mask = 0;
-    int header = read_header(source, &source_size_cp, &signs_id, &exponent_bit_count, &mantissa_bit_count, &minimum_exponent, &fill_value, &fill_value_mask, &zero_value_mask);
-    source += header;
+    allquant_stats_<DATATYPE> stats;
 
-    uint8_t bit_count_per_value = get_bit_count_per_value(signs_id, exponent_bit_count, mantissa_bit_count);
+    int header = read_header_<DATATYPE>(source, &source_size_cp, &stats, &abstol, &fill_value);
 
     // ==================== Decompression ======================================
 
-    uint64_t* unswaged_buffer = (uint64_t*)SAFE_MALLOC(count * sizeof(uint64_t));
-
-    int ret = SCIL_NO_ERR;
-
-    if(scil_unswage(unswaged_buffer, source, count, bit_count_per_value)){
-        ret = SCIL_BUFFER_ERR;
-        goto decomp_cleanup;
+    // Deompress each value in source buffer
+    if(decompress_buffer_<DATATYPE>(dest, source + header, count, &stats, abstol, fill_value)) {
+        return SCIL_BUFFER_ERR;
     }
-
-    if (fill_value == DBL_MAX){
-      // Deompress each value in source buffer
-      if(decompress_buffer_<DATATYPE>(dest, unswaged_buffer, count, bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, zero_value_mask) ){
-          ret = SCIL_BUFFER_ERR;
-          goto decomp_cleanup;
-      }
-    }else{ // set fill value
-      if(decompress_buffer_fill_<DATATYPE>(dest, unswaged_buffer, count, bit_count_per_value, signs_id, exponent_bit_count, mantissa_bit_count, minimum_exponent, fill_value, fill_value_mask, zero_value_mask) ){
-          ret = SCIL_BUFFER_ERR;
-          goto decomp_cleanup;
-      }
-    }
-
-    // ==================== Cleanup ============================================
-
-    decomp_cleanup:
-    free(unswaged_buffer);
-    return ret;
+    return SCIL_NO_ERR;
 }
 
 // End repeat

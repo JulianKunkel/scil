@@ -15,9 +15,10 @@
 
 /**
  * \file
- * \brief Header containing abstol of the Scientific Compression Interface
+ * \brief Header containing allquant of the Scientific Compression Interface
  * Library
  * \author Julian Kunkel <juliankunkel@googlemail.com>
+ * \author Oliver Pola <5pola@informatik.uni-hamburg.de>
  */
 
 #ifndef SCIL_ALL_QUANTITIES_H_

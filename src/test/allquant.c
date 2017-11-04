@@ -94,7 +94,7 @@ int test_allquant(double reltol, double finest, double abstol, double min_value,
         max_abs_error = max(max_abs_error, abs_err);
     }
 
-    printf("%5.1f, %7.1f, %5.1f, %5.1f, %5.1f, %5.2f, %5.2f, %6.1f, %s\n",
+    printf("%8.1f, %7.1f, %5.1f, %5.1f, %5.1f, %5.2f, %5.2f, %6.1f, %s\n",
         min_value, max_value,
         reltol, finest, abstol,
         max_rel_error, max_finest_error, max_abs_error,
@@ -119,5 +119,11 @@ int main(void){
     errors += test_allquant(30, 0.5, 200, 0, 100);
     errors += test_allquant(30, 0.5, 200, 0, 1000);
     errors += test_allquant(30, 0.5, 200, 0, 10000);
+    errors += test_allquant(10, 0.1, 20, -100, 100);
+    errors += test_allquant(10, 0.1, 20, -1000, 1000);
+    errors += test_allquant(10, 0.1, 20, -10000, 10000);
+    errors += test_allquant(30, 0.5, 200, -100, 100);
+    errors += test_allquant(30, 0.5, 200, -1000, 1000);
+    errors += test_allquant(30, 0.5, 200, -10000, 10000);
     return errors;
 }

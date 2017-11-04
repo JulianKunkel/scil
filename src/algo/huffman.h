@@ -6,13 +6,14 @@
 #define HUFFMAN_H
 
 #include <stdlib.h>
+#include <stdint.h>
 
 typedef struct huffman_entity {
   void* data;
   size_t count;
-  unsigned char bitmask;
-  unsigned char bitvalue;
-  unsigned char bitcount;
+  uint8_t bitmask;
+  uint8_t bitvalue;
+  uint8_t bitcount;
 } huffman_entity;
 
 // pre: data, count is set (count = 0 is allowed)

@@ -42,15 +42,15 @@ huffman_node* huffman_dequeue(huffman_node** queue, int* queuecount) {
 }
 
 void huffman_tree_traverse(huffman_node* node,
-                      char bitmask, char bitvalue, char bitcount) {
+                      uint8_t  bitmask, uint8_t bitvalue, uint8_t bitcount) {
   if(node->tree_left == NULL || node->tree_right == NULL) {
     node->entity->bitmask = bitmask;
     node->entity->bitvalue = bitvalue;
     node->entity->bitcount = bitcount;
   } else {
     bitcount++;
-    char shifts = 8 - bitcount;
-    char one = 1 << shifts;
+    uint8_t shifts = 8 - bitcount;
+    uint8_t one = 1 << shifts;
     bitmask = bitmask | one;
     huffman_tree_traverse(node->tree_left, bitmask, bitvalue, bitcount);
     bitvalue = bitvalue | one;
