@@ -25,7 +25,7 @@
  #include <stdlib.h>
  #include <time.h>
 
- #include <plugins/file-plugin.h>
+ #include <file-formats/scil-file-format.h>
  #include "cnoise.h"
 
  /*

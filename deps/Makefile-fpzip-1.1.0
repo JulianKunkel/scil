@@ -25,7 +25,7 @@ FPZIP_CONV = -DWITH_UNION
 CXX = g++
 CXXFLAGS += -ansi -Wall -g -fPIC -fvisibility=hidden -fvisibility-inlines-hidden
 CXXFLAGS += -O3
-LDFLAGS += -shared -fvisibility=hidden -fvisibility-inlines-hidden
+LDFLAGS += -fPIC -shared -fvisibility=hidden -fvisibility-inlines-hidden
 DEFS += -DFPZIP_BLOCK_SIZE=$(FPZIP_BLOCK_SIZE) -DFPZIP_FP=$(FPZIP_FP) $(FPZIP_CONV)
 
 CXX_FILES =	error.cpp\

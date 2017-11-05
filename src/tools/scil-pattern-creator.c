@@ -22,7 +22,7 @@
 #include <scil-patterns.h>
 #include <scil-util.h>
 #include <scil-option.h>
-#include <plugins/file-plugin.h>
+#include <file-formats/scil-file-format.h>
 
 int main(int argc, char ** argv){
   int ret;
@@ -81,15 +81,15 @@ int main(int argc, char ** argv){
     exit(1);
   }
 
-  scilPa_set_random_seed(seed);
+  scilP_set_random_seed(seed);
 
-  scilPr_initialize_dims_4d(& dims, x, y, z, w);
+  scil_dims_initialize_4d(& dims, x, y, z, w);
 
-  size_t data_size = scilPr_get_dims_size(&dims, datatype);
+  size_t data_size = scil_dims_get_size(&dims, datatype);
   byte* buffer_in = (byte*) malloc(data_size);
 
-  for(int i=0; i < scilPa_get_pattern_library_size(); i++){
-	  char* name = scilPa_get_library_pattern_name(i);
+  for(int i=0; i < scilP_get_pattern_library_size(); i++){
+	  char* name = scilP_get_library_pattern_name(i);
 
     if( strcmp(check_pattern, "all") != 0 && strcmp(name, check_pattern) != 0){
       continue;
@@ -99,7 +99,7 @@ int main(int argc, char ** argv){
     sprintf(fullName, "%s.%s", name, out_plugin->extension);
 
     printf("Processing %s\n", fullName);
-  	ret = scilPa_create_library_pattern(buffer_in, datatype, & dims, i);
+  	ret = scilP_create_library_pattern(buffer_in, datatype, & dims, i);
   	assert( ret == SCIL_NO_ERR);
 
     ret = out_plugin->writeData(fullName, buffer_in, datatype, data_size, datatype, dims);

@@ -1,5 +1,13 @@
 project (${PROJECT_NAME})
 
+include_directories(
+  ${CMAKE_SOURCE_DIR}/base
+  ${CMAKE_SOURCE_DIR}/util
+  ${CMAKE_BINARY_DIR}/util
+  ${CMAKE_SOURCE_DIR}/compression
+  ${CMAKE_SOURCE_DIR}/pattern
+)
+
 file(GLOB TESTFILES "${CMAKE_CURRENT_SOURCE_DIR}" "*.c")
 foreach(TESTFILE ${TESTFILES})
   if(IS_DIRECTORY ${TESTFILE} )

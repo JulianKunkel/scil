@@ -9,4 +9,4 @@ if [[ "$2" == "" ]] ; then
     exit 1
 fi
 
-sed -i "s/$FROM/$TO/g" $(find -regex '.*\.[ch]\([.].*\|$\)' |grep -v build|grep -v deps)
+sed -i "s#$FROM#$TO#g" $(find -regex '.*\.[ch]\([.].*\|$\)' |grep -v build|grep -v deps)

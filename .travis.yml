@@ -1,7 +1,7 @@
 services:
   - docker
 script:
-  - cd test/docker
+  - cd test-docker
   - docker build -t kunkel/scil:ubuntu16.04 ubuntu16.04
   - ./run-travis.sh
 after_success:

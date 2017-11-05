@@ -15,7 +15,8 @@
 
 #include <scil-error.h>
 
-#include <scil-compressors.h>
+#include <scil.h>
+#include <scil-compressor.h>
 #include <scil-data-characteristics.h>
 #include <scil-patterns.h>
 #include <scil-util.h>
@@ -35,9 +36,9 @@ static int val_error_occured = 0;
 int test_correctness(const char* name, double* buffer_in, scil_dims_t dims)
 {
     size_t out_c_size;
-    size_t variableSize = scilPr_get_dims_count(&dims);
+    size_t variableSize = scil_dims_get_count(&dims);
 
-    const size_t c_size = scilPr_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
+    const size_t c_size = scil_get_compressed_data_size_limit(&dims, SCIL_TYPE_DOUBLE);
 
     double* buffer_uncompressed = (double*) malloc(c_size);
     allocate(byte, buffer_out, c_size);
@@ -47,10 +48,10 @@ int test_correctness(const char* name, double* buffer_in, scil_dims_t dims)
     scil_user_hints_t hints;
     scil_user_hints_t out_accuracy;
 
-    scilPr_initialize_user_hints(&hints);
+    scil_user_hints_initialize(&hints);
     hints.absolute_tolerance = 0.01;
 
-    double r = (double) scilI_get_data_randomness( buffer_in, variableSize * sizeof(double), tmp_buff, c_size);
+    double r = (double) scilU_get_data_randomness( buffer_in, variableSize * sizeof(double), tmp_buff, c_size);
 
     printf("Pattern %s randomness: %.1f%%\n", name, r);
 
@@ -72,7 +73,7 @@ int test_correctness(const char* name, double* buffer_in, scil_dims_t dims)
           continue;
         }
 
-        int ret = scilPr_create_context(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
+        int ret = scil_context_create(&ctx, SCIL_TYPE_DOUBLE, 0, NULL, &hints);
         if (ret != 0) {
             printf("Invalid combination %s\n", compression_name);
             continue;
@@ -153,12 +154,12 @@ int main(int argc, char** argv)
     allocate(double, buffer_in, variableSize);
 
     scil_dims_t dims;
-    scilPr_initialize_dims_1d(&dims, variableSize);
+    scil_dims_initialize_1d(&dims, variableSize);
 
-    for (int i = 0; i < scilPa_get_pattern_library_size(); i++) {
-        char* name = scilPa_get_library_pattern_name(i);
+    for (int i = 0; i < scilP_get_pattern_library_size(); i++) {
+        char* name = scilP_get_library_pattern_name(i);
         printf("processing: %s\n", name);
-        ret = scilPa_create_library_pattern(buffer_in, SCIL_TYPE_DOUBLE, &dims, i);
+        ret = scilP_create_library_pattern(buffer_in, SCIL_TYPE_DOUBLE, &dims, i);
         assert(ret == SCIL_NO_ERR);
         test_correctness(name, buffer_in, dims);
     }

@@ -20,7 +20,6 @@
  * \file
  * \brief Contains miscellanious useful functions.
  * \author Julian Kunkel <juliankunkel@googlemail.com>
- * \author Lennart Braun <3braun@informatik.uni-hamburg.de>
  * \author Armin Schaare <3schaare@informatik.uni-hamburg.de>
  */
 
@@ -29,7 +28,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <scil.h>
+#include <scil-dims.h>
 #include <scil-util-types.h>
 
 /**
@@ -53,97 +52,7 @@
 
 #define DATATYPE_LENGTH(type) (type == SCIL_TYPE_FLOAT ? sizeof(float) : type == SCIL_TYPE_DOUBLE ? sizeof(double) : type == SCIL_TYPE_INT8 ? sizeof(int8_t) : type == SCIL_TYPE_INT16 ? sizeof(int16_t) : type == SCIL_TYPE_INT32 ? sizeof(int32_t) : type == SCIL_TYPE_INT64 ? sizeof(int64_t) : 1)
 
-/**
- * \brief Allocates a buffer with error checking.
- *
- * Uses malloc for allocation.
- *
- * \param size Length of requested memory in bytes.
- * \param file Filename to display in error message.
- * \param line Line to display in error message.
- * \pre size != 0
- * \return Pointer to allocated buffer.
- * \post Allocation successfull or exit with error message.
- */
-void* safe_malloc (size_t size, const char* file, unsigned long line);
-
-
-/**
- * \brief Allocates a buffer with error checking.
- *
- * Uses calloc for allocation.
- *
- * \param nmemb Number of elements.
- * \param size Length of one element.
- * \param file Filename to display in error message.
- * \param line Line to display in error message.
- * \pre nmemb != 0
- * \pre size != 0
- * \return Pointer to allocated buffer.
- * \post Allocation successfull or exit with error message.
- */
-void* safe_calloc (size_t nmemb, size_t size, const char* file, unsigned long line);
-
-
-/**
- * \brief Reallocates a buffer with error checking.
- *
- * Uses realloc for allocation.
- *
- * \param ptr  Pointer to the original buffer.
- * \param size Length of requested memory in bytes.
- * \param file Filename to display in error message.
- * \param line Line to display in error message.
- * \pre size != 0
- * \return Pointer to allocated buffer.
- * \post Allocation successfull or exit with error message.
- */
-void* safe_realloc (void* ptr, size_t size, const char* file, unsigned long line);
-
-
-/**
- * \brief Shortcut for safe_malloc().
- * \param size Length of requested memory in bytes.
- */
-#define SAFE_MALLOC(size) safe_malloc(size, __FILE__, __LINE__)
-
-
-/**
- * \brief Shortcut for safe_calloc().
- * \param nmemb Number of elements.
- * \param size Length of one element in bytes.
- */
-#define SAFE_CALLOC(nmemb, size) safe_calloc(nmemb, size, __FILE__, __LINE__)
-
-
-/**
- * \brief Shortcut for safe_realloc().
- * \param ptr  Pointer to an allocated buffer.
- * \param size Length of requested memory in bytes.
- */
-#define SAFE_REALLOC(ptr, size) safe_realloc(ptr, size, __FILE__, __LINE__)
-
-/**
- * \brief Opens a file with error checking.
- * \param path Path of the file to open.
- * \param args fopen argument string.
- * \param file Filename to display in error message.
- * \param line Line to display in error message.
- * \pre path != NULL
- * \pre args != NULL
- * \return Pointer to opened file.
- * \post Opened file successfully or exit with error message.
- */
-FILE* safe_fopen(const char* path, const char* args, const char* src, unsigned long line);
-
-/**
- * \brief Shortcut for safe_fopen().
- * \param path Path of the file to open.
- * \param args fopen argument string.
- */
-#define SAFE_FOPEN(path, args) safe_fopen(path, args, __FILE__, __LINE__)
-
-
+void * scilU_safe_malloc(size_t size);
 
 typedef union {
   struct {
@@ -167,6 +76,19 @@ typedef union {
 
 #pragma GCC diagnostic pop
 
+/*
+ * \brief Returns the byte size of data with its dimensional configuration given by dims.
+ * data.
+ * \param dims Dimensional configuration of the data
+ * \param type The datas type (i.e. float, double, etc.)
+ * \return Byte size of the data
+ */
+size_t scil_dims_get_size(const scil_dims_t* dims, enum SCIL_Datatype type);
+
+/*
+ * \brief Return the minimum size of the compression buffer needed.
+ */
+size_t scil_get_compressed_data_size_limit(const scil_dims_t* dims, enum SCIL_Datatype datatype);
 
 /**
  * \brief Writes dimensional information into buffer
@@ -220,9 +142,6 @@ void print_time (scil_timer time, FILE* file);
 
 double scilU_time_to_double (scil_timer t);
 
-
-void scilU_critical_error(const char * msg);
-
 void scilU_print_buffer(char * dest, size_t out_size);
 uint8_t scilU_relative_tolerance_to_significant_bits(double rel_tol);
 double scilU_significant_bits_to_relative_tolerance(uint8_t sig_bits);
@@ -242,7 +161,7 @@ void scilU_subtract_data(SCIL_Datatype_t datatype, byte * restrict  data1, byte 
 
 /* Tools to iterate over the 1D buffer as a multi-dimensional data space */
 
-typedef void(*scilG_iterfunc)(double* data,
+typedef void(*scilU_iterfunc)(double* data,
                               const scil_dims_t* pos,
                               const scil_dims_t* size,
                               int* iter,
@@ -251,19 +170,19 @@ typedef void(*scilG_iterfunc)(double* data,
 /*
  * \brief Convert the current position in a ND array to the position of the original 1D data array.
  */
-size_t scilG_data_pos(const scil_dims_t* pos, const scil_dims_t* size);
+size_t scilU_data_pos(const scil_dims_t* pos, const scil_dims_t* size);
 
 
 /*
  * \brief iterate over the ND array of dimensions dims starting from offset to end in steps based on the array iter.
  * For each element the function func is invoked with the user_ptr as argument.
  */
-void scilG_iter(double* data,
+void scilU_iter(double* data,
                 const scil_dims_t* dims,
                 const scil_dims_t* offset,
                 const scil_dims_t* end,
                 int* iter,
-                scilG_iterfunc func,
+                scilU_iterfunc func,
                 const void* user_ptr);
 
 void scilU_print_dims(scil_dims_t dims);

@@ -23,8 +23,8 @@ typedef struct scil_pattern {
   char * name;
 } scil_pattern_t;
 
-typedef void (*scilPa_mutator)(double* buffer, const scil_dims_t* dims, double arg);
+typedef void (*scilP_mutator)(double* buffer, const scil_dims_t* dims, double arg);
 
-void scilPI_change_data_scale(double* buffer, const scil_dims_t* dims, double mn, double mx);
+void scilP_change_data_scale(double* buffer, const scil_dims_t* dims, double mn, double mx);
 
 #endif // SCIL_PATTERN_INTERNAL_H

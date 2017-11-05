@@ -21,11 +21,20 @@
 #include <float.h>
 
 
+#include <scil-user-hints.h>
 #include <scil-util.h>
-#include <scil-quantizer.h>
+
+void * scilU_safe_malloc(size_t size){
+  void * p = malloc(size);
+  if( p == NULL ){
+    printf("[SCIL] Could not allocate %lld bytes\n", (long long) size);
+    exit(1);
+  }
+  return p;
+}
 
 void scilU_find_minimum_maximum_with_excluded_points(SCIL_Datatype_t datatype, byte * data, scil_dims_t * dims, double * out_min, double * out_max, double ignore_to, double ignore_from, double fill_value){
-  size_t count = scilPr_get_dims_count(dims);
+  size_t count = scil_dims_get_count(dims);
 
   switch(datatype){
   case (SCIL_TYPE_DOUBLE): {
@@ -80,7 +89,7 @@ void scilU_find_minimum_maximum(SCIL_Datatype_t datatype, byte * data, scil_dims
 }
 
 void scilU_subtract_data(SCIL_Datatype_t datatype, byte * restrict  data1, byte * restrict in_out_data2, scil_dims_t * dims){
-  size_t count = scilPr_get_dims_count(dims);
+  size_t count = scil_dims_get_count(dims);
 
   switch(datatype){
   case (SCIL_TYPE_DOUBLE): {
@@ -317,12 +326,6 @@ void print_time (scil_timer time, FILE* file)
     fprintf(file, "%lu.%09lu", time.tv_sec, time.tv_nsec);
 }
 
-void scilU_critical_error(const char * msg){
-  printf("Critical error: %s\n", msg);
-  // printf("%d", 1/0);
-  exit(1);
-}
-
 int scilU_double_equal(double val1, double val2){
   if ( val1 > val2){
     return val1 - val2 < 1e-300;
@@ -343,7 +346,7 @@ int scilU_float_equal(float val1, float val2){
 /*
 \brief Convert the current position in a ND array to the position of the original 1D data array.
  */
-size_t scilG_data_pos(const scil_dims_t* pos, const scil_dims_t* size){
+size_t scilU_data_pos(const scil_dims_t* pos, const scil_dims_t* size){
   assert(size->dims == pos->dims);
   size_t cur = pos->length[size->dims - 1];
   if(size->dims == 0){
@@ -357,12 +360,12 @@ size_t scilG_data_pos(const scil_dims_t* pos, const scil_dims_t* size){
 }
 
 
-void scilG_iter(double* data,
+void scilU_iter(double* data,
                 const scil_dims_t* dims,
                 const scil_dims_t* offset,
                 const scil_dims_t* ende,
                 int* iter,
-                scilG_iterfunc func,
+                scilU_iterfunc func,
                 const void* user_ptr)
 {
   assert(dims->dims > 0);
@@ -424,4 +427,22 @@ void scilU_print_dims(scil_dims_t pos){
     printf(",%zu", pos.length[i]);
   }
   printf(") ");
+}
+
+
+size_t scil_dims_get_size(const scil_dims_t* dims, enum SCIL_Datatype datatype)
+{
+    if (dims->dims == 0) {
+        return 0;
+    }
+    size_t result = 1;
+    for (uint8_t i = 0; i < dims->dims; ++i) {
+        result *= dims->length[i];
+    }
+    return result * DATATYPE_LENGTH(datatype);
+}
+
+size_t scil_get_compressed_data_size_limit(const scil_dims_t* dims, enum SCIL_Datatype datatype)
+{
+    return scil_dims_get_size(dims, datatype) * 4 + SCIL_BLOCK_HEADER_MAX_SIZE;
 }

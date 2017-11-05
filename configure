@@ -16,6 +16,7 @@ function help(){
 	echo "--lgsl=<dir>             : path to lib-gsl"
 	echo "--lzlib=<dir>            : path to lzlib"
 	echo "--netcdf=<dir>           : path to NetCDF"
+	echo "--cc=<compiler>          : path to the compiler"
 	echo
 	echo "Optional:"
         echo "--code-coverage   : compile with ctest and use gcov via target coverage to measure code coverage"
@@ -92,13 +93,14 @@ function reconfigure(){
 	exit $?
 }
 
-set -- `getopt -u -l "help,version,debug,reconfigure,prefix:,plantuml-jar-dir:,netcdf:,with-cc:,with-cxx:,verbose,build-dir:,lzlib:,lgsl:,code-coverage" -o "hV" -- "$@"`
+set -- `getopt -u -l "help,version,debug,reconfigure,prefix:,plantuml-jar-dir:,cc:,netcdf:,with-cc:,with-cxx:,verbose,build-dir:,lzlib:,lgsl:,code-coverage" -o "hV" -- "$@"`
 test $# -lt 1  && exit 1
 while test $# -gt 0
 do
 	case "$1" in
 		--help) help; exit;;
 		--reconfigure) reconfigure;;
+		--cc) export CC="$2"; shift;;
 		--version) cmake --version; exit;;
 		--lgsl) check "$2" "gsl"; shift;;
 		--lzlib) check "$2" "z"; shift;;

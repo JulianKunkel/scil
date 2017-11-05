@@ -5,6 +5,8 @@
 #include <float.h>
 #include <limits.h>
 
+#include <scil-datatypes.h>
+
 #define INFINITY_double INFINITY
 #define INFINITY_float INFINITY
 

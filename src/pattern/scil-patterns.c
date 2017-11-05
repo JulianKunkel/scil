@@ -21,7 +21,7 @@
 #include <scil-pattern-internal.h>
 
 #include <scil-error.h>
-#include <scil-internal.h>
+#include <scil-debug.h>
 #include <scil-util.h>
 
 #include <basic-patterns.h>
@@ -39,7 +39,7 @@ static scil_pattern_t * patterns[] ={
 };
 
 typedef struct{
-  scilPa_mutator call;
+  scilP_mutator call;
   float arg;
 } mutator_config;
 
@@ -60,11 +60,11 @@ static int library_size = 0;
 static int library_capacity = 100;
 static int library_seed = 0;
 
-void scilPa_set_random_seed(int val){
+void scilP_set_random_seed(int val){
   library_seed  = val;
 }
 
-int scilPa_get_available_patterns_count()
+int scilP_get_available_patterns_count()
 {
     static int count = -1;
 
@@ -79,17 +79,17 @@ int scilPa_get_available_patterns_count()
     return count;
 }
 
-char* scilPa_get_pattern_name(int index)
+char* scilP_get_pattern_name(int index)
 {
-    if (index < 0 || index >= scilPa_get_available_patterns_count())
+    if (index < 0 || index >= scilP_get_available_patterns_count())
         return NULL;
 
     return patterns[index]->name;
 }
 
-int scilPa_get_pattern_index(const char* name)
+int scilP_get_pattern_index(const char* name)
 {
-    for(int i=0; i < scilPa_get_available_patterns_count(); i++){
+    for(int i=0; i < scilP_get_available_patterns_count(); i++){
         if(strcmp(name, patterns[i]->name) == 0){
             return i;
         }
@@ -97,11 +97,11 @@ int scilPa_get_pattern_index(const char* name)
     return -1;
 }
 
-int scilPa_create_pattern_double(double * buffer, const scil_dims_t* dims, const char* name, double mn, double mx, double arg, double arg2){
+int scilP_create_pattern_double(double * buffer, const scil_dims_t* dims, const char* name, double mn, double mx, double arg, double arg2){
   if (name == NULL){
     return SCIL_EINVAL;
   }
-  int num = scilPa_get_pattern_index(name);
+  int num = scilP_get_pattern_index(name);
   if (num == -1){
     return SCIL_EINVAL;
   }
@@ -119,7 +119,7 @@ static void library_add(char * pattern, char * name, float mn, float mx, float a
     va_start(vl,mutator_count);
     m = (mutator_config*) malloc(sizeof(mutator_config) * mutator_count);
     for(int i=0; i < mutator_count; i++){
-      m[i].call = va_arg(vl, scilPa_mutator);
+      m[i].call = va_arg(vl, scilP_mutator);
       m[i].arg = (float) va_arg(vl, double);
     }
     va_end(vl);
@@ -139,17 +139,17 @@ static void create_library_patterns_if_needed(){
   initialized = 1;
   library = malloc(sizeof(library_pattern) * library_capacity);
 
-  library_add("random", "randomRep10-100", 1, 100,  0, -1,     1, scilPa_repeater, 10.0);
-  library_add("random", "randomRep2-100", 1, 100,  0, -1,      1, scilPa_repeater, 2.0);
+  library_add("random", "randomRep10-100", 1, 100,  0, -1,     1, scilP_repeater, 10.0);
+  library_add("random", "randomRep2-100", 1, 100,  0, -1,      1, scilP_repeater, 2.0);
 
-  library_add("random", "randomRep10-1-+1", -1, 1,  0,  -1,    1, scilPa_repeater, 10.0);
-  library_add("random", "randomRep2-1-+1", -1, 1,   0, -1,     1, scilPa_repeater, 2.0);
+  library_add("random", "randomRep10-1-+1", -1, 1,  0,  -1,    1, scilP_repeater, 10.0);
+  library_add("random", "randomRep2-1-+1", -1, 1,   0, -1,     1, scilP_repeater, 2.0);
 
-  library_add("random", "randomIpol10-100", 1, 100, 0,  -1,   1, scilPa_interpolator, 10.0);
-  library_add("random", "randomIpol2-100", 1, 100,  0, -1,    1, scilPa_interpolator, 2.0);
+  library_add("random", "randomIpol10-100", 1, 100, 0,  -1,   1, scilP_interpolator, 10.0);
+  library_add("random", "randomIpol2-100", 1, 100,  0, -1,    1, scilP_interpolator, 2.0);
 
-  library_add("random", "randomIpol10-1-+1", -1, 1, 0,  -1,   1, scilPa_interpolator, 10.0);
-  library_add("random", "randomIpol2-1-+1", -1, 1,  0, -1,    1, scilPa_interpolator, 2.0);
+  library_add("random", "randomIpol10-1-+1", -1, 1, 0,  -1,   1, scilP_interpolator, 10.0);
+  library_add("random", "randomIpol2-1-+1", -1, 1,  0, -1,    1, scilP_interpolator, 2.0);
 
   library_add("constant", "constant0", 0, -1, -1, 0, 0);
   library_add("constant", "constant35", 35.3335353, -1, -1, 0, 0);
@@ -177,20 +177,20 @@ static void create_library_patterns_if_needed(){
   library_add("simplexNoise", "simplex206", 0, 100, 3.0, 6, 0); // 6 passes, 3 hills
 }
 
-int scilPa_get_pattern_library_size(){
+int scilP_get_pattern_library_size(){
   create_library_patterns_if_needed();
   return library_size;
 }
 
-char * scilPa_get_library_pattern_name(int p){
+char * scilP_get_library_pattern_name(int p){
   create_library_patterns_if_needed();
   assert( p <= library_size && p >= 0);
 
   return library[p].name;
 }
 
-void scilPa_convert_data_from_double(void * buffer, SCIL_Datatype_t datatype,  double * data, const scil_dims_t* dims){
-  size_t elemCount = scilPr_get_dims_count(dims);
+void scilP_convert_data_from_double(void * buffer, SCIL_Datatype_t datatype,  double * data, const scil_dims_t* dims){
+  size_t elemCount = scil_dims_get_count(dims);
 
 	switch(datatype){
 		case(SCIL_TYPE_FLOAT):{
@@ -234,17 +234,17 @@ void scilPa_convert_data_from_double(void * buffer, SCIL_Datatype_t datatype,  d
 }
 
 
-int scilPa_create_pattern(void * buffer, SCIL_Datatype_t datatype, const scil_dims_t* dims, const char* name, double mn, double mx, double arg, double arg2){
+int scilP_create_pattern(void * buffer, SCIL_Datatype_t datatype, const scil_dims_t* dims, const char* name, double mn, double mx, double arg, double arg2){
   double * data;
   if (datatype != SCIL_TYPE_DOUBLE){
-    int doubleSize = scilPr_get_compressed_data_size_limit( dims, datatype);
+    int doubleSize = scil_get_compressed_data_size_limit(dims, datatype);
     data = malloc(doubleSize * sizeof(double));
   }else{
     data = (double*) buffer;
   }
 
   int ret;
-  ret = scilPa_create_pattern_double(data, dims, name, mn, mx, arg, arg2);
+  ret = scilP_create_pattern_double(data, dims, name, mn, mx, arg, arg2);
   if (ret != SCIL_NO_ERR){
     if (datatype != SCIL_TYPE_DOUBLE){
       free(data);
@@ -253,18 +253,18 @@ int scilPa_create_pattern(void * buffer, SCIL_Datatype_t datatype, const scil_di
   }
 
   if (datatype != SCIL_TYPE_DOUBLE){
-    scilPa_convert_data_from_double(buffer, datatype,  data, dims);
+    scilP_convert_data_from_double(buffer, datatype,  data, dims);
 
     free(data);
   }
   return SCIL_NO_ERR;
 }
 
-int scilPa_create_library_pattern(void * buffer, SCIL_Datatype_t datatype, const scil_dims_t* dims, int pattern_index)
+int scilP_create_library_pattern(void * buffer, SCIL_Datatype_t datatype, const scil_dims_t* dims, int pattern_index)
 {
   double * data;
   if (datatype != SCIL_TYPE_DOUBLE){
-    int doubleSize = scilPr_get_compressed_data_size_limit( dims, SCIL_TYPE_DOUBLE);
+    int doubleSize = scil_get_compressed_data_size_limit( dims, SCIL_TYPE_DOUBLE);
     data = malloc(doubleSize);
   }else{
     data = (double*) buffer;
@@ -274,7 +274,7 @@ int scilPa_create_library_pattern(void * buffer, SCIL_Datatype_t datatype, const
   assert(pattern_index <= library_size && pattern_index >= 0);
   library_pattern* l = &library[pattern_index];
   int ret;
-  ret = scilPa_create_pattern_double(data, dims, l->pattern, l->mn, l->mx, l->arg, l->arg2);
+  ret = scilP_create_pattern_double(data, dims, l->pattern, l->mn, l->mx, l->arg, l->arg2);
   if (ret != SCIL_NO_ERR){
     if (datatype != SCIL_TYPE_DOUBLE){
       free(data);
@@ -287,7 +287,7 @@ int scilPa_create_library_pattern(void * buffer, SCIL_Datatype_t datatype, const
   }
 
   if (datatype != SCIL_TYPE_DOUBLE){
-    scilPa_convert_data_from_double(buffer, datatype,  data, dims);
+    scilP_convert_data_from_double(buffer, datatype,  data, dims);
 
     free(data);
   }
@@ -296,9 +296,9 @@ int scilPa_create_library_pattern(void * buffer, SCIL_Datatype_t datatype, const
 }
 
 
-void scilPI_change_data_scale(double* buffer, const scil_dims_t* dims, double mn, double mx){
+void scilP_change_data_scale(double* buffer, const scil_dims_t* dims, double mn, double mx){
   // fix min + max, first identify min/max
-  size_t count = scilPr_get_dims_count(dims);
+  size_t count = scil_dims_get_count(dims);
   double mn_o = 1e308, mx_o=-1e308;
   for (size_t i=0; i < count; i++){
     mn_o = min(mn_o, buffer[i]);

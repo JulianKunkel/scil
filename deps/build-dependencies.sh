@@ -92,7 +92,7 @@ fi
 BUILD=0
 
 if [[ ! -e libzfp.a ]] ; then
-	echo "  Building fpzip shared library"
+	echo "  Building zfp shared library"
 	pushd "$ZFP" > /dev/null
 	cp "$SRC/config-zfp" Config
 	make shared
@@ -102,7 +102,7 @@ if [[ ! -e libzfp.a ]] ; then
 fi
 
 if [[ ! -e libfpzip.a ]] ; then
-  echo "  Building zfp shared library"
+  echo "  Building fpzip shared library"
   pushd "$FPZIP/src" > /dev/null
   make -f "$SRC/Makefile-fpzip-1.1.0"
   popd > /dev/null
@@ -138,7 +138,7 @@ if [[ ! -e libsz.a ]] ; then
 	BUILD=1
 fi
 
-if [[ false ]] ; then
+if [[ ! -e CubismZ ]] ; then
 	mkdir CubismZ || true
 fi
 
