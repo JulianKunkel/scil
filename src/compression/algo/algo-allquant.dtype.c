@@ -427,8 +427,8 @@ static void get_header_data_<DATATYPE>(const <DATATYPE>* source,
     stats->abspos.prefix_value = huffman[4].bitvalue;
     stats->abspos.prefix_bit_count = huffman[4].bitcount;
     stats->abspos.exponent_bit_count = 0;
-    stats->absneg.mantissa_bit_count = scil_calculate_bits_needed_<DATATYPE>(
-      stats->absneg.min.f, stats->absneg.max.f, abstol, 0, NULL);
+    stats->abspos.mantissa_bit_count = scil_calculate_bits_needed_<DATATYPE>(
+      stats->abspos.min.f, stats->abspos.max.f, abstol, 0, NULL);
 
     stats->fill.prefix_mask = huffman[5].bitmask;
     stats->fill.prefix_value = huffman[5].bitvalue;
@@ -724,6 +724,20 @@ static inline  <DATATYPE> decompress_value_<DATATYPE>(uint64_t value,
     return cur.f;
 }
 
+static inline uint64_t quantize_value_<DATATYPE>(<DATATYPE> value,
+                                                 double absolute_tolerance,
+                                                 <DATATYPE> minimum){
+
+    return (((uint64_t) ( ((double) (value - minimum)) / absolute_tolerance )) + 1)>>1;
+}
+
+static inline <DATATYPE> unquantize_value_<DATATYPE>(uint64_t value,
+                                                    double absolute_tolerance,
+                                                    <DATATYPE> minimum){
+
+    return minimum + (<DATATYPE>)(value * 2 * absolute_tolerance);
+}
+
 static int compress_buffer_<DATATYPE>(byte * restrict dest,
                                       const <DATATYPE>* restrict source,
                                       size_t count,
@@ -824,16 +838,18 @@ static int compress_buffer_<DATATYPE>(byte * restrict dest,
             }
         } else {
             if(cur.p.sign) {
-                //TODO absneg
+                unswaged = quantize_value_<DATATYPE>(source[i], abstol,
+                    stats->absneg.min.f);
                 swage_value(dest, absneg_prefix_value,
                     stats->absneg.prefix_bit_count, &bit_index);
-                swage_value(dest, 0,
+                swage_value(dest, unswaged,
                     stats->absneg.mantissa_bit_count, &bit_index);
             } else {
-                //TODO abspos
+                unswaged = quantize_value_<DATATYPE>(source[i], abstol,
+                    stats->abspos.min.f);
                 swage_value(dest, abspos_prefix_value,
                     stats->abspos.prefix_bit_count, &bit_index);
-                swage_value(dest, 0,
+                swage_value(dest, unswaged,
                     stats->abspos.mantissa_bit_count, &bit_index);
             }
         }
@@ -895,16 +911,16 @@ static int decompress_buffer_<DATATYPE>(<DATATYPE>* restrict dest,
             stats->relpos.min.p.exponent);
       } else if ((prefix_byte & stats->absneg.prefix_mask) ==
         stats->absneg.prefix_value) {
-          //TODO absneg
           bit_index -= 8 - stats->absneg.prefix_bit_count;
           unswage_value(&unswaged, source, stats->absneg.mantissa_bit_count, &bit_index);
-          dest[i] = 0.0;
+          dest[i] = unquantize_value_<DATATYPE>(unswaged, abstol,
+              stats->absneg.min.f);
       } else if ((prefix_byte & stats->abspos.prefix_mask) ==
         stats->abspos.prefix_value) {
-          //TODO abspos
           bit_index -= 8 - stats->abspos.prefix_bit_count;
           unswage_value(&unswaged, source, stats->abspos.mantissa_bit_count, &bit_index);
-          dest[i] = 0.0;
+          dest[i] = unquantize_value_<DATATYPE>(unswaged, abstol,
+              stats->abspos.min.f);
       } else {
           // Corrupted data, found illegal prefix.
           // Due to huffman codes, this would mean the prefixes from header
@@ -976,7 +992,7 @@ int scil_allquant_compress_<DATATYPE>(const scil_context_t* ctx,
         double abstol_min_value = (abstol / reltol) * 100.0;
         datatype_cast_double abstol_min;
         abstol_min.f = abstol_min_value;
-        abstol_min_exponent = abstol_min.p.exponent;
+        abstol_min_exponent = abstol_min.p.exponent + 1; //TODO explain + 1
     }
 
     // Check whether allquant compression makes sense

@@ -114,16 +114,16 @@ int main(void){
     int errors = 0;
     printf("#Min-value, Max-value, Reltol, Finest, Abstol, Max-rel-err, Max-finest-err, Max-abs-err, Status\n");
     errors += test_allquant(10, 0.1, 20, 0, 100);
-    //TODO errors += test_allquant(10, 0.1, 20, 0, 1000);
-    //TODO errors += test_allquant(10, 0.1, 20, 0, 10000);
+    errors += test_allquant(10, 0.1, 20, 0, 1000);
+    errors += test_allquant(10, 0.1, 20, 0, 10000);
     errors += test_allquant(30, 0.5, 200, 0, 100);
-    //TODO errors += test_allquant(30, 0.5, 200, 0, 1000);
-    //TODO errors += test_allquant(30, 0.5, 200, 0, 10000);
+    errors += test_allquant(30, 0.5, 200, 0, 1000);
+    errors += test_allquant(30, 0.5, 200, 0, 10000);
     errors += test_allquant(10, 0.1, 20, -100, 100);
-    //TODO errors += test_allquant(10, 0.1, 20, -1000, 1000);
-    //TODO errors += test_allquant(10, 0.1, 20, -10000, 10000);
+    errors += test_allquant(10, 0.1, 20, -1000, 1000);
+    errors += test_allquant(10, 0.1, 20, -10000, 10000);
     errors += test_allquant(30, 0.5, 200, -100, 100);
-    //TODO errors += test_allquant(30, 0.5, 200, -1000, 1000);
-    //TODO errors += test_allquant(30, 0.5, 200, -10000, 10000);
+    errors += test_allquant(30, 0.5, 200, -1000, 1000);
+    errors += test_allquant(30, 0.5, 200, -10000, 10000);
     return errors;
 }
