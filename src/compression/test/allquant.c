@@ -25,8 +25,7 @@ double abs_error(double input, double output) {
     return err;
 }
 
-int test_allquant(double reltol, double finest, double abstol, double min_value, double max_value) {
-    size_t count = 1000;
+int test_allquant(size_t count, double reltol, double finest, double abstol, double min_value, double max_value) {
 
     scil_user_hints_t hints;
     scil_user_hints_initialize(&hints);
@@ -94,10 +93,11 @@ int test_allquant(double reltol, double finest, double abstol, double min_value,
         max_abs_error = max(max_abs_error, abs_err);
     }
 
-    printf("%8.1f, %7.1f, %5.1f, %5.1f, %5.1f, %5.2f, %5.2f, %6.1f, %s\n",
-        min_value, max_value,
+    printf("%7d, %8.1f, %7.1f, %5.1f, %5.1f, %5.1f, %5.2f, %5.2f, %6.1f, %5.2f%%, %s\n",
+        count, min_value, max_value,
         reltol, finest, abstol,
         max_rel_error, max_finest_error, max_abs_error,
+        100.0 * out_size / uncompressed_size,
         errors > 0 ? "Failed" : "Ok");
 
     free(buffer_in);
@@ -112,18 +112,20 @@ int test_allquant(double reltol, double finest, double abstol, double min_value,
 
 int main(void){
     int errors = 0;
-    printf("#Min-value, Max-value, Reltol, Finest, Abstol, Max-rel-err, Max-finest-err, Max-abs-err, Status\n");
-    errors += test_allquant(10, 0.1, 20, 0, 100);
-    errors += test_allquant(10, 0.1, 20, 0, 1000);
-    errors += test_allquant(10, 0.1, 20, 0, 10000);
-    errors += test_allquant(30, 0.5, 200, 0, 100);
-    errors += test_allquant(30, 0.5, 200, 0, 1000);
-    errors += test_allquant(30, 0.5, 200, 0, 10000);
-    errors += test_allquant(10, 0.1, 20, -100, 100);
-    errors += test_allquant(10, 0.1, 20, -1000, 1000);
-    errors += test_allquant(10, 0.1, 20, -10000, 10000);
-    errors += test_allquant(30, 0.5, 200, -100, 100);
-    errors += test_allquant(30, 0.5, 200, -1000, 1000);
-    errors += test_allquant(30, 0.5, 200, -10000, 10000);
+    printf("#Num-values, Min-value, Max-value, Reltol, Finest, Abstol, Max-rel-err, Max-finest-err, Max-abs-err, Compressed-size, Status\n");
+    for(int num = 100; num <= 1000000; num *= 100) {
+        errors += test_allquant(num, 10, 0.1, 20, 0, 100);
+        errors += test_allquant(num, 10, 0.1, 20, 0, 1000);
+        errors += test_allquant(num, 10, 0.1, 20, 0, 10000);
+        errors += test_allquant(num, 30, 0.5, 200, 0, 100);
+        errors += test_allquant(num, 30, 0.5, 200, 0, 1000);
+        errors += test_allquant(num, 30, 0.5, 200, 0, 10000);
+        errors += test_allquant(num, 10, 0.1, 20, -100, 100);
+        errors += test_allquant(num, 10, 0.1, 20, -1000, 1000);
+        errors += test_allquant(num, 10, 0.1, 20, -10000, 10000);
+        errors += test_allquant(num, 30, 0.5, 200, -100, 100);
+        errors += test_allquant(num, 30, 0.5, 200, -1000, 1000);
+        errors += test_allquant(num, 30, 0.5, 200, -10000, 10000);
+    }
     return errors;
 }
