@@ -93,7 +93,7 @@ int test_allquant(size_t count, double reltol, double finest, double abstol, dou
         max_abs_error = max(max_abs_error, abs_err);
     }
 
-    printf("%7d, %8.1f, %7.1f, %5.1f, %5.1f, %5.1f, %5.2f, %5.2f, %6.1f, %5.2f%%, %s\n",
+    printf("%7lu, %8.1f, %7.1f, %5.1f, %5.1f, %5.1f, %5.2f, %5.2f, %6.1f, %5.2f%%, %s\n",
         count, min_value, max_value,
         reltol, finest, abstol,
         max_rel_error, max_finest_error, max_abs_error,
@@ -126,6 +126,11 @@ int main(void){
         errors += test_allquant(num, 30, 0.5, 200, -100, 100);
         errors += test_allquant(num, 30, 0.5, 200, -1000, 1000);
         errors += test_allquant(num, 30, 0.5, 200, -10000, 10000);
+    }
+    if (-1 != test_allquant(1000, 50, 20, 10, 0, 1000))
+    {
+        printf("Did not get SCIL_PRECISION_ERR on finest > abstol, Failed\n");
+        errors++;
     }
     return errors;
 }
