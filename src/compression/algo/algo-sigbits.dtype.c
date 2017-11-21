@@ -676,8 +676,8 @@ int scil_sigbits_compress_<DATATYPE>(const scil_context_t* ctx,
        or to the finest value (use min. value with finest_exponent for continuity).
        Rounding threshold is half of "reduced finest", just 1 exponent less
     */
-    <DATATYPE> finest_value = (<DATATYPE>) ctx->hints.relative_err_finest_abs_tolerance;
-    datatype_cast_<DATATYPE> finest;    
+    <DATATYPE> finest_value = (<DATATYPE>) ctx->hints.relative_err_finest_abs_tolerance*2.0;
+    datatype_cast_<DATATYPE> finest;
     finest.f = finest_value;
 
     // Check whether sigbit compression makes sense
