@@ -989,15 +989,15 @@ int scil_allquant_compress_<DATATYPE>(const scil_context_t* ctx,
     double abstol = ctx->hints.absolute_tolerance;
     int16_t abstol_min_exponent = MAX_EXPONENT_<DATATYPE> + 1; // no abstol
     if (abstol > 0.0) {
-        double abstol_min_value = (abstol / reltol) * 100.0;
-        datatype_cast_double abstol_min;
+        <DATATYPE> abstol_min_value = (<DATATYPE>)((abstol / reltol) * 100.0);
+        datatype_cast_<DATATYPE> abstol_min;
         abstol_min.f = abstol_min_value;
         abstol_min_exponent = abstol_min.p.exponent + 1; //TODO explain + 1
-    }
 
-    // Check whether allquant compression makes sense
-    if(finest_exponent > abstol_min_exponent){
-        return SCIL_PRECISION_ERR;
+        // Turning finest into 0 will obviously cause an abs-error of finest
+        if(finest_value > abstol){
+            return SCIL_PRECISION_ERR;
+        }
     }
 
     size_t count = scil_dims_get_count(dims);
