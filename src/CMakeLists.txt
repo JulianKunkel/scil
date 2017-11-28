@@ -45,7 +45,7 @@ else()
 endif()
 endif()
 
-set(COMPILER_OPTIONS "-DGIT_VERSION='\"${GIT_VERSION}\"' -pipe -Wall -Wno-unused-parameter -Wextra -Wfloat-equal -fdata-sections -ffunction-sections -Wl,--gc-sections  -Wl,--version-script=${CMAKE_SOURCE_DIR}/symbols.map")
+set(COMPILER_OPTIONS "-pipe -Wall -Wno-unused-parameter -Wextra -Wfloat-equal -fdata-sections -ffunction-sections -Wl,--gc-sections  -Wl,--version-script=${CMAKE_SOURCE_DIR}/symbols.map")
 
 # compile flags, striping symbols that are not with scil prefix to prevent collisions
 set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -std=gnu99 ${COMPILER_OPTIONS}")
@@ -122,7 +122,6 @@ execute_process(COMMAND ${DEV_DIR}/create-datatype-variants.py ${CMAKE_SOURCE_DI
 add_custom_target(
     trigger_datatype_variants
     ALL COMMAND ${DEV_DIR}/create-datatype-variants.py ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/)
-
 
 configure_file("${CMAKE_SOURCE_DIR}/scil-config.h.in" "scil-config.h" @ONLY)
 

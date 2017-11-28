@@ -21,6 +21,7 @@
 #include <scil-error.h>
 #include <scil-option.h>
 #include <scil-util.h>
+#include <scil-config.h>
 
 #include <stdio.h>
 #include <assert.h>
@@ -61,7 +62,7 @@ int main(int argc, char ** argv){
   scil_user_hints_t hints;
   scil_user_hints_t out_accuracy;
 
-  printf("scil-compress (Git version:%s)\n", GIT_VERSION);
+  printf("scil-compress (Git commit:%s)\ncompiler-options: %s\ncompiler-version: %s\n", GIT_VERSION, C_COMPILER_OPTIONS, C_COMPILER_VERSION);
   double fake_abstol_value = 0;
 
   int ret;
