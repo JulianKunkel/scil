@@ -64,6 +64,7 @@ int main(int argc, char ** argv){
 
   printf("scil-compress (Git commit:%s)\ncompiler-options: %s\ncompiler-version: %s\n", GIT_VERSION, C_COMPILER_OPTIONS, C_COMPILER_VERSION);
   double fake_abstol_value = 0;
+  double fake_finest_abstol_value = 0;
 
   int ret;
 
@@ -95,7 +96,7 @@ int main(int argc, char ** argv){
     {0, "hint-lossless-range-from", NULL,  OPTION_OPTIONAL_ARGUMENT, 'F', & hints.lossless_data_range_from},
     {0, "hint-fill-value", NULL,  OPTION_OPTIONAL_ARGUMENT, 'F', & hints.fill_value},
     {0, "hint-fake-absolute-tolerance-percent-max", "This is a fake hint. Actually it sets the abstol value based on the given percentage (enter 0.1 aka 10%% tolerance)",  OPTION_OPTIONAL_ARGUMENT, 'F', & fake_abstol_value},
-
+    {0, "hint-fake-relative_err_finest_abs_tolerance", "This is a fake hint. Actually it sets the finest abstol value based on the given percentage (enter 0.1 aka 10%% tolerance)",  OPTION_OPTIONAL_ARGUMENT, 'F', & fake_finest_abstol_value},
     {0, "cycle", "For testing: Compress, then decompress and store the output. Files are CSV files",OPTION_FLAG, 'd' , & cycle},
     LAST_OPTION
   };
@@ -165,21 +166,27 @@ int main(int argc, char ** argv){
   array_size = scil_dims_get_size(& dims, input_datatype);
 
 
-  if (fake_abstol_value > 0.0){
+  if (fake_abstol_value > 0.0 || fake_finest_abstol_value > 0.0){
     double max, min;
     scilU_find_minimum_maximum_with_excluded_points(input_datatype, input_data, & dims, & min, & max, hints.lossless_data_range_up_to,  hints.lossless_data_range_from, hints.fill_value);
     if (min < 0 && max < -min){
 	     max = -min;
     }
 
-    double new_abs_tol = max * fake_abstol_value;
-    if ( hints.absolute_tolerance > 0.0 ){
-      printf("Error: don't set both the absolute_tolerance and the fake relative absolute tolerance!\n");
-      exit(1);
-    }
+    if (fake_abstol_value > 0.0){
+      double new_abs_tol = max * fake_abstol_value;
+      if ( hints.absolute_tolerance > 0.0 ){
+        printf("Error: don't set both the absolute_tolerance and the fake relative absolute tolerance!\n");
+        exit(1);
+      }
 
-    printf("fake abstol: setting value %f %f %f\n", min, max, new_abs_tol);
-    hints.absolute_tolerance = new_abs_tol;
+      printf("fake abstol: setting value to %f (min: %f max: %f)\n", new_abs_tol, min, max);
+      hints.absolute_tolerance = new_abs_tol;
+    }
+    if(fake_finest_abstol_value > 0.0){
+      hints.relative_err_finest_abs_tolerance = max * fake_finest_abstol_value;
+      printf("fake relative_err_finest_abs_tolerance: setting value to %f\n", hints.relative_err_finest_abs_tolerance);
+    }
   }
 
   ret = scil_context_create(&ctx, input_datatype, 0, NULL, &hints);

@@ -995,9 +995,9 @@ int scil_allquant_compress_<DATATYPE>(const scil_context_t* ctx,
         abstol_min_exponent = abstol_min.p.exponent + 1; //TODO explain + 1
 
         // Turning finest into 0 will obviously cause an abs-error of finest
-        if(finest_value > abstol){
-            return SCIL_PRECISION_ERR;
-        }
+        //if(finest_value > abstol){
+        //    return SCIL_PRECISION_ERR;
+        //}
     }
 
     size_t count = scil_dims_get_count(dims);
