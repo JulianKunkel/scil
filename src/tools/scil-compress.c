@@ -61,6 +61,7 @@ int main(int argc, char ** argv){
   scil_user_hints_t hints;
   scil_user_hints_t out_accuracy;
 
+  printf("scil-compress (Git version:%s)\n", GIT_VERSION);
   double fake_abstol_value = 0;
 
   int ret;

@@ -26,6 +26,10 @@ include(CheckCSourceRuns)
 
 option(CODE_COVERAGE "CODE_COVERAGE" OFF)
 
+
+EXEC_PROGRAM(git ARGS rev-parse HEAD OUTPUT_VARIABLE GIT_VERSION)
+# set(CGIT_VERSION "${GIT_VERSION}" CACHE STRING "GIT REVISION" FORCE)
+
 IF (CODE_COVERAGE)
 IF ( CMAKE_BUILD_TYPE STREQUAL "Debug")
 	IF ( CMAKE_COMPILER_IS_GNUCC )
@@ -41,7 +45,7 @@ else()
 endif()
 endif()
 
-set(COMPILER_OPTIONS "-pipe -Wall -Wno-unused-parameter -Wextra -Wfloat-equal -fdata-sections -ffunction-sections -Wl,--gc-sections  -Wl,--version-script=${CMAKE_SOURCE_DIR}/symbols.map")
+set(COMPILER_OPTIONS "-DGIT_VERSION='\"${GIT_VERSION}\"' -pipe -Wall -Wno-unused-parameter -Wextra -Wfloat-equal -fdata-sections -ffunction-sections -Wl,--gc-sections  -Wl,--version-script=${CMAKE_SOURCE_DIR}/symbols.map")
 
 # compile flags, striping symbols that are not with scil prefix to prevent collisions
 set (CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -std=gnu99 ${COMPILER_OPTIONS}")
