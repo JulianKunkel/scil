@@ -8,6 +8,8 @@ Research/Unidata. See COPYRIGHT file for more info.
 #include "ncdispatch.h"
 #include "netcdf_f.h"
 
+#include <scil.h>
+
 /** \defgroup variables Variables
 
 Variables hold multi-dimensional arrays of data.
@@ -699,6 +701,15 @@ In this example from libsrc4/tst_vars2.c, chunksizes are set with nc_var_def_chu
 
 */
 int
+nc_def_var_scil(int ncid, int varid, void * scil_hints)
+{
+    NC* ncp;
+    int stat = NC_check_id(ncid,&ncp);
+    if(stat != NC_NOERR) return stat;
+    return ncp->dispatch->def_var_scil(ncid, varid, scil_hints);
+}
+
+int
 nc_def_var_chunking(int ncid, int varid, int storage,
 		    const size_t *chunksizesp)
 {
@@ -715,6 +726,57 @@ nc_def_var_fill(int ncid, int varid, int no_fill, const void *fill_value)
     NC* ncp;
     int stat = NC_check_id(ncid,&ncp);
     if(stat != NC_NOERR) return stat;
+		char name[4096];
+		nc_type datatype;
+		int ret = ncvarinq(ncid, varid, name, & datatype, NULL, NULL, NULL);
+
+		scil_user_hints_t * hints = NULL;
+
+		FILE * fd = fopen("var-io.conf", "r");
+		if( ! fd){
+			printf("ERROR could not open var-io.conf\n");
+			exit(1);
+		}
+		while(1){
+			char varname[1024];
+			char algorithm[1024];
+			double vals_d[3];
+			int vals_i[2];
+
+			int count = fscanf(fd, "%s%*[ ]%s%*[ ]%f%*[ ]%f%*[ ]%f%*[ ]%d%*[ ]%d", varname, algorithm, & vals_d[0], & vals_d[1], & vals_d[2], & vals_i[0], & vals_i[1]);
+			if (count < 5){
+				break;
+			}
+			if(strcmp(varname, name) == 0){
+				hints = malloc(sizeof(scil_user_hints_t));
+				scil_user_hints_initialize(hints);
+				hints->force_compression_methods = strdup(algorithm);
+				hints->fill_value = *((float*) fill_value); // TODO FIXME using datatype
+				if(vals_d[0] != 0.0){
+					hints->relative_tolerance_percent = vals_d[0];
+				}
+				if(vals_d[1] != 0.0){
+					hints->relative_err_finest_abs_tolerance = vals_d[1];
+				}
+				if(vals_d[2] != 0.0){
+					hints->absolute_tolerance = vals_d[2];
+				}
+				if(vals_i[0] != 0){
+					hints->significant_digits = vals_i[0];
+				}
+				if(vals_i[1] != 0){
+					hints->significant_bits = vals_i[1];
+				}
+				break;
+			}
+		}
+		fclose(fd);
+
+		if(hints != NULL){
+			printf("Setting scil hints for variable: %s\n", name);
+			ncp->dispatch->def_var_scil(ncid, varid, hints);
+		}
+
     return ncp->dispatch->def_var_fill(ncid,varid,no_fill,fill_value);
 }
 
