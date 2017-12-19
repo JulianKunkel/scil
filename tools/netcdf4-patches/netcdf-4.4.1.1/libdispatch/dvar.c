@@ -699,15 +699,6 @@ In this example from libsrc4/tst_vars2.c, chunksizes are set with nc_var_def_chu
 
 */
 int
-nc_def_var_scil(int ncid, int varid, void * scil_hints)
-{
-    NC* ncp;
-    int stat = NC_check_id(ncid,&ncp);
-    if(stat != NC_NOERR) return stat;
-    return ncp->dispatch->def_var_scil(ncid, varid, scil_hints);
-}
-
-int
 nc_def_var_chunking(int ncid, int varid, int storage,
 		    const size_t *chunksizesp)
 {
