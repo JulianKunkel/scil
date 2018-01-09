@@ -4,13 +4,13 @@ Date: Tue, 19 Dec 2017 11:32:09 +0100
 Subject: [PATCH] Flexible read information from file.
 
 ---
- .../netcdf-4.4.1.1/libdispatch/dvar.c              | 62 ++++++++++++++++++++++
+ ./libdispatch/dvar.c              | 13 ++++++++++++++++++++++
  1 file changed, 62 insertions(+)
 
-diff --git a/tools/netcdf4-patches/netcdf-4.4.1.1/libdispatch/dvar.c b/tools/netcdf4-patches/netcdf-4.4.1.1/libdispatch/dvar.c
+diff --git a/netcdf-4.4.1.1/libdispatch/dvar.c b/netcdf-4.4.1.1/libdispatch/dvar.c
 index 2a4cda8..8a1a1e4 100644
---- a/tools/netcdf4-patches/netcdf-4.4.1.1/libdispatch/dvar.c
-+++ b/tools/netcdf4-patches/netcdf-4.4.1.1/libdispatch/dvar.c
+--- a/libdispatch/dvar.c
++++ b/libdispatch/dvar.c
 @@ -8,6 +8,8 @@ Research/Unidata. See COPYRIGHT file for more info.
  #include "ncdispatch.h"
  #include "netcdf_f.h"
@@ -20,59 +20,21 @@ index 2a4cda8..8a1a1e4 100644
  /** \defgroup variables Variables
  
  Variables hold multi-dimensional arrays of data.
-@@ -715,6 +726,57 @@ nc_def_var_fill(int ncid, int varid, int no_fill, const void *fill_value)
+@@ -715,6 +726,19 @@ nc_def_var_fill(int ncid, int varid, int no_fill, const void *fill_value)
      NC* ncp;
      int stat = NC_check_id(ncid,&ncp);
      if(stat != NC_NOERR) return stat;
-+		char name[4096];
-+		nc_type datatype;
-+		int ret = ncvarinq(ncid, varid, name, & datatype, NULL, NULL, NULL);
-+
-+		scil_user_hints_t * hints = NULL;
-+
-+		FILE * fd = fopen("var-io.conf", "r");
-+		if( ! fd){
-+			printf("ERROR could not open var-io.conf\n");
-+			exit(1);
-+		}
-+		while(1){
-+			char varname[1024];
-+			char algorithm[1024];
-+			double vals_d[3];
-+			int vals_i[2];
-+
-+			int count = fscanf(fd, "%s%*[ ]%s%*[ ]%f%*[ ]%f%*[ ]%f%*[ ]%d%*[ ]%d", varname, algorithm, & vals_d[0], & vals_d[1], & vals_d[2], & vals_i[0], & vals_i[1]);
-+			if (count < 5){
-+				break;
-+			}
-+			if(strcmp(varname, name) == 0){
-+				hints = malloc(sizeof(scil_user_hints_t));
-+				scil_user_hints_initialize(hints);
-+				hints->force_compression_methods = strdup(algorithm);
-+				hints->fill_value = *((float*) fill_value); // TODO FIXME using datatype
-+				if(vals_d[0] != 0.0){
-+					hints->relative_tolerance_percent = vals_d[0];
-+				}
-+				if(vals_d[1] != 0.0){
-+					hints->relative_err_finest_abs_tolerance = vals_d[1];
-+				}
-+				if(vals_d[2] != 0.0){
-+					hints->absolute_tolerance = vals_d[2];
-+				}
-+				if(vals_i[0] != 0){
-+					hints->significant_digits = vals_i[0];
-+				}
-+				if(vals_i[1] != 0){
-+					hints->significant_bits = vals_i[1];
-+				}
-+				break;
-+			}
-+		}
-+		fclose(fd);
-+
-+		if(hints != NULL){
-+			printf("Setting scil hints for variable: %s\n", name);
-+			ncp->dispatch->def_var_scil(ncid, varid, hints);
++		if(getenv("NETCDF_SCIL_HINTS_FILE") != NULL){
++		        scil_user_hints_t * hints = malloc(sizeof(scil_user_hints_t));
++                       char name[4096];
++                       int ret = ncvarinq(ncid, varid, name, NULL, NULL, NULL, NULL);
++                       int ret = scil_user_hints_load(hints, getenv("NETCDF_SCIL_HINTS_FILE"), name);
++                       if (ret == SCIL_NO_ERR){
++    			   printf("Setting scil hints for variable: %s\n", name);
++			   ncp->dispatch->def_var_scil(ncid, varid, hints);
++                       }else{
++                          free(hints);
++                       }
 +		}
 +
      return ncp->dispatch->def_var_fill(ncid,varid,no_fill,fill_value);
