@@ -106,4 +106,8 @@ void scil_user_hints_copy(scil_user_hints_t * out, const scil_user_hints_t* hint
 
 void scil_user_hints_print(const scil_user_hints_t* hints);
 
+int scil_user_hints_load(scil_user_hints_t * out_hints, const char * filename, const char * variable);
+
+int scil_set_user_hint_from_string(scil_user_hints_t * out_hints, const char * variable_line);
+
 #endif // SCIL_USER_HINTS_H
