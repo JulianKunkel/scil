@@ -14,11 +14,12 @@ enum scil_performance_unit {
     SCIL_PERFORMANCE_NETWORK, // this unit indicates the performance of the
                               // network interconnect, e.g., Infiniband
     SCIL_PERFORMANCE_NODELOCAL_STORAGE, // the performance of the local storage
-    SCIL_PERFORMANCE_SINGLESTREAM_SHARED_STORAGE // this unit indicates the
+    SCIL_PERFORMANCE_SINGLESTREAM_SHARED_STORAGE, // this unit indicates the
                                                  // performance of one thread
                                                  // sending data to the shared
                                                  // storage, e.g., 1 GiB/s with
                                                  // Lustre
+    SCIL_PERFORMANCE_LAST_UNIT
 };
 
 extern const char * performance_units[];
@@ -87,7 +88,7 @@ typedef struct
     double fill_value;
 
     /** \brief Settings for a multi dimensional field
-     * The max steepness indicates the delta between two neighboring points that is considered to be tolerable for normal patterns.
+     * The max steepness ivaluendicates the delta between two neighboring points that is considered to be tolerable for normal patterns.
      */
     double field_max_steepness;
 

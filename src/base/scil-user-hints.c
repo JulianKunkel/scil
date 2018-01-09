@@ -120,10 +120,20 @@ static int scil_is_empty_line_or_comment(char * out){
 	return true;
 }
 
-static scil_performance_hint_t scil_string_to_performance(char * value){
-	scil_performance_hint_t p;
-	printf("%s\n", value);
-	return p;
+static int scil_string_to_performance(char * value, scil_performance_hint_t * p){
+	char * unitstr = strstr(value, "*");
+	*unitstr = 0;
+	unitstr++;
+	p->multiplier = atof(value);
+	int unit = 0;
+	p->unit = SCIL_PERFORMANCE_IGNORE;
+	for(unit=0; unit < SCIL_PERFORMANCE_LAST_UNIT; unit++){
+		if(strcasecmp(unitstr, performance_units[unit]) == 0){
+			p->unit = unit;
+			return SCIL_NO_ERR;
+		}
+	}
+	return SCIL_EINVAL;
 }
 
 int scil_set_user_hint_from_string(scil_user_hints_t * hints, const char * var){
@@ -141,12 +151,16 @@ int scil_set_user_hint_from_string(scil_user_hints_t * hints, const char * var){
 	}
 	*value = 0;
 	value++;
+	if(value[strlen(value)-1] == '\n'){
+		value[strlen(value)-1] = 0;
+	}
 
 	for(int i=0; ; i++){
 		if(hint_names[i] == NULL){
 			break;
 		}
-		if(strcmp(key, hint_names[i]) == 0){
+		if(strcasecmp(key, hint_names[i]) == 0){
+			int ret;
 			// found the key
 			switch(i){
 				case(0):
@@ -174,10 +188,18 @@ int scil_set_user_hint_from_string(scil_user_hints_t * hints, const char * var){
 				  hints->fill_value = atof(value);
 				  break;
 				case(8):
-				  hints->comp_speed = scil_string_to_performance(value);
+				  ret = scil_string_to_performance(value, & hints->comp_speed);
+					if(ret != SCIL_NO_ERR){
+						printf("Error could not parse performance value: %s", var);
+						exit(1);
+					}
 				  break;
 				case(9):
-				  hints->decomp_speed = scil_string_to_performance(value);
+				  ret = scil_string_to_performance(value, & hints->decomp_speed);
+					if(ret != SCIL_NO_ERR){
+						printf("Error could not parse performance value: %s", var);
+						exit(1);
+					}
 				  break;
 				case(10):
 				  hints->force_compression_methods = strdup(value);
@@ -203,8 +225,8 @@ int scil_user_hints_load(scil_user_hints_t * out_hints, const char * filename, c
 	int ret = 1;
 	char searchstring[1024];
 	sprintf(searchstring, "%s:\n", variable);
-	int found_var = false;
-
+	int read_var = false;
+	int have_var = false;
 
 	while(1){ // line by lineNetworkSpeed
 		char line[1024];
@@ -217,14 +239,15 @@ int scil_user_hints_load(scil_user_hints_t * out_hints, const char * filename, c
 		}
 		if(strcmp(searchstring, line) == 0){
 			// now until we reach another variable
-			found_var = true;
+			read_var = true;
+			have_var = true;
 			continue;
 		}
 		if(strstr(line, ":") != NULL){
-			found_var = false;
+			read_var = false;
 			continue;
 		}
-		if(found_var){
+		if(read_var){
 			ret = scil_set_user_hint_from_string(out_hints, line);
 			if(ret != 0){
 				printf("Error parsing line: \"%s\"\n", line);
@@ -234,5 +257,8 @@ int scil_user_hints_load(scil_user_hints_t * out_hints, const char * filename, c
 	}
 
 	fclose(fd);
-	return 0;
+	if(have_var){
+		return SCIL_NO_ERR;
+	}
+	return SCIL_EINVAL;
 }
