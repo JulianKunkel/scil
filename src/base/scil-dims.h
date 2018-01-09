@@ -9,7 +9,7 @@
  */
 #define SCIL_BLOCK_HEADER_MAX_SIZE 1024
 
-#define SCIL_DIMS_MAX 4
+#define SCIL_DIMS_MAX 5 //4
 
 /** \brief Struct to contain the dimensional configuration of data. */
 typedef struct scil_dims
@@ -25,6 +25,7 @@ void scil_dims_initialize_1d(scil_dims_t* dims, size_t dim1);
 void scil_dims_initialize_2d(scil_dims_t* dims, size_t dim1, size_t dim2);
 void scil_dims_initialize_3d(scil_dims_t* dims, size_t dim1, size_t dim2, size_t dim3);
 void scil_dims_initialize_4d(scil_dims_t* dims, size_t dim1, size_t dim2, size_t dim3, size_t dim4);
+void scil_dims_initialize_5d(scil_dims_t* dims, size_t dim1, size_t dim2, size_t dim3, size_t dim4, size_t dim5);
 
 /*
  */

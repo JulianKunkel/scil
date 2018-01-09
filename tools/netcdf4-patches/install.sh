@@ -7,19 +7,33 @@ if [[ ! -e  netcdf-4.4.1.1.tar.gz ]] ; then
   tar -xf netcdf*
 fi
 
-INSTALL=$PWD/../../install
-export CFLAGS="-I$INSTALL/include"
+PREFIX=$PWD/../../install/
+export CFLAGS="-I$PREFIX/include"
 export CPPFLAGS=$CFLAGS
-export LDFLAGS="-L$INSTALL/lib -lhdf5-filter-scil  -lscil -lscil-util"
+export LDFLAGS="-L$PREFIX/lib -lhdf5 -lhdf5_hl -lhdf5-filter-scil -lscil -lscil-util -Wl,--rpath=$INSTALL/lib"
+export LT_SYS_LIBRARY_PATH="$PREFIX/lib"
 
-if  [[ ! -e "$INSTALL/lib/libnetcdf.so" ]] ; then
+export CC=mpicc
+
+if  [[ ! -e "$PREFIX/lib/libnetcdf.so" ]] ; then
   pushd netcdf*
-  patch -p1 < ../*patch
-  CC=mpicc ./configure --prefix=$INSTALL
+  #patch -p1 < ../*patch
+  
+  #./configure --enable-parallel-tests --prefix=$INSTALL
+./configure \
+ --prefix=${PREFIX} \
+ --enable-shared \
+ --enable-static \
+ --enable-parallel-tests \
+ --enable-large-file-tests \
+ --enable-pnetcdf 
+  #CC=mpicc ./configure --prefix=$INSTALL --enable-parallel
+  make -j 4
+  make check install
   popd
 fi
 
-gcc  test-netcdf4.c  $CFLAGS -lnetcdf $LDFLAGS   -o test-netcdf4 -Wl,--rpath=$INSTALL/lib
-rm *.nc
-./test-netcdf4
-h5dump -H -p tst_chunks3.nc
+#gcc  test-netcdf4.c  $CFLAGS -lnetcdf $LDFLAGS   -o test-netcdf4 -Wl,--rpath=$INSTALL/lib
+#rm *.nc
+#./test-netcdf4
+#h5dump -H -p tst_chunks3.nc

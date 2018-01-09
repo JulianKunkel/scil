@@ -47,11 +47,33 @@ void scil_dims_initialize_4d(scil_dims_t* dims, size_t dim1, size_t dim2, size_t
   }
 }
 
+void scil_dims_initialize_5d(scil_dims_t* dims, size_t dim1, size_t dim2, size_t dim3, size_t dim4, size_t dim5)
+{
+	dims->dims = 5;
+	dims->length[0] = dim1;
+	dims->length[1] = dim2;
+	dims->length[2] = dim3;
+	dims->length[3] = dim4;
+  dims->length[4] = dim5;
+  if(dim5 == 0){
+    dims->dims--;
+    if(dim4 == 0){
+      dims->dims--;
+      if(dim3 == 0){
+        dims->dims--;
+        if(dim2 == 0){
+          dims->dims--;
+        }
+      }
+    }
+  }
+}
+
 void scil_dims_initialize_array(scil_dims_t* dims, uint8_t count, const size_t* length)
 {
   memset(dims, 0, sizeof(scil_dims_t));
   dims->dims = count;
-  assert(count <= 4);
+  //assert(count <= 4);
   memcpy(&dims->length, length, count * sizeof(size_t));
 }
 

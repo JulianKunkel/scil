@@ -20,7 +20,7 @@ include(CheckCSourceCompiles)
 
 # compile flags
 set (CMAKE_C_FLAGS
-    "${CMAKE_C_FLAGS} -ggdb3 -std=gnu11 -pedantic -Wall -Wextra -pedantic-errors -Wl,--rpath=${HDF5_LIBRARY_DIRS}:${SCIL_LIBRARY_DIRS}"
+    "${CMAKE_C_FLAGS} -ggdb3 -std=gnu11 -pedantic -Wall -Wextra -pedantic-errors -Wl,--rpath=${SCIL_LIBRARY_DIRS}$:{HDF5_LIBRARY_DIRS}"
 )
 set (CMAKE_C_FLAGS_DEBUG   "-O0")
 set (CMAKE_C_FLAGS_RELEASE "-O3")

@@ -137,9 +137,27 @@ int scil_compress(byte* restrict dest,
 	assert(source != NULL);
 
 	int ret = SCIL_NO_ERR;
+  scil_dims_t* resized_dims = malloc(sizeof(scil_dims_t));
+  memset(resized_dims, 0, sizeof(scil_dims_t));
+
+  if(dims->dims > 4){
+    resized_dims->dims = 4;
+			for(int i=0; i < dims->dims; i++){
+        if (i > 3){
+          resized_dims->length[3] *= dims->length[i];
+        }else{
+          resized_dims->length[i] = dims->length[i];
+        }
+			}
+	}else{
+    resized_dims->dims = dims->dims;
+			for(int i=0; i < dims->dims; i++){
+          resized_dims->length[i] = dims->length[i];
+			}
+  }
 
 	// Get byte size of input data
-    size_t input_size           = scil_dims_get_size(dims, ctx->datatype);
+    size_t input_size           = scil_dims_get_size(resized_dims, ctx->datatype);
     const size_t datatypes_size = input_size;
 
 	// Skip the compression if input size is 0 and set destination buffer to a single 0 and size 1
@@ -161,7 +179,7 @@ int scil_compress(byte* restrict dest,
 
 	// Check whether automatic compressor decision can be skipped because of a user forced chain
     if (hints->force_compression_methods == NULL) {
-        scilC_algo_chooser_execute(source, dims, ctx);
+        scilC_algo_chooser_execute(source, resized_dims, ctx);
     }
 
     size_t out_size = 0;
@@ -192,22 +210,22 @@ int scil_compress(byte* restrict dest,
 
             switch (ctx->datatype) {
                 case (SCIL_TYPE_FLOAT):
-                    ret = algo->c.PFtype.compress_float(ctx, (float*)dst, header, &header_size_out, src, dims);
+                    ret = algo->c.PFtype.compress_float(ctx, (float*)dst, header, &header_size_out, src, resized_dims);
                     break;
                 case (SCIL_TYPE_DOUBLE):
-                    ret = algo->c.PFtype.compress_double(ctx, (double*)dst, header, &header_size_out, src, dims);
+                    ret = algo->c.PFtype.compress_double(ctx, (double*)dst, header, &header_size_out, src, resized_dims);
                     break;
               	case (SCIL_TYPE_INT8) :
-              		ret = algo->c.PFtype.compress_int8(ctx, (int8_t*)dst, header, &header_size_out, src, dims);
+              		ret = algo->c.PFtype.compress_int8(ctx, (int8_t*)dst, header, &header_size_out, src, resized_dims);
               		break;
               	case(SCIL_TYPE_INT16) :
-              		ret = algo->c.PFtype.compress_int16(ctx, (int16_t*)dst, header, &header_size_out, src, dims);
+              		ret = algo->c.PFtype.compress_int16(ctx, (int16_t*)dst, header, &header_size_out, src, resized_dims);
               		break;
               	case(SCIL_TYPE_INT32) :
-              		ret = algo->c.PFtype.compress_int32(ctx, (int32_t*)dst, header, &header_size_out, src, dims);
+              		ret = algo->c.PFtype.compress_int32(ctx, (int32_t*)dst, header, &header_size_out, src, resized_dims);
               		break;
               	case(SCIL_TYPE_INT64) :
-              		ret = algo->c.PFtype.compress_int64(ctx, (int64_t*)dst, header, &header_size_out, src, dims);
+              		ret = algo->c.PFtype.compress_int64(ctx, (int64_t*)dst, header, &header_size_out, src, resized_dims);
               		break;
                 case(SCIL_TYPE_UNKNOWN) :
               	case(SCIL_TYPE_STRING) :
@@ -244,22 +262,22 @@ int scil_compress(byte* restrict dest,
         scilU_algorithm_t* algo = chain->converter;
         switch (ctx->datatype) {
             case (SCIL_TYPE_FLOAT):
-                ret = algo->c.Ctype.compress_float(ctx, (int64_t*)dst, &out_size, src, dims);
+                ret = algo->c.Ctype.compress_float(ctx, (int64_t*)dst, &out_size, src, resized_dims);
                 break;
             case (SCIL_TYPE_DOUBLE):
-                ret = algo->c.Ctype.compress_double(ctx, (int64_t*)dst, &out_size, src, dims);
+                ret = algo->c.Ctype.compress_double(ctx, (int64_t*)dst, &out_size, src, resized_dims);
                 break;
           	case (SCIL_TYPE_INT8) :
-          		ret = algo->c.Ctype.compress_int8(ctx, (int64_t*)dst, &out_size, src, dims);
+          		ret = algo->c.Ctype.compress_int8(ctx, (int64_t*)dst, &out_size, src, resized_dims);
           		break;
           	case(SCIL_TYPE_INT16) :
-          		ret = algo->c.Ctype.compress_int16(ctx, (int64_t*)dst, &out_size, src, dims);
+          		ret = algo->c.Ctype.compress_int16(ctx, (int64_t*)dst, &out_size, src, resized_dims);
           		break;
           	case(SCIL_TYPE_INT32) :
-          		ret = algo->c.Ctype.compress_int32(ctx, (int64_t*)dst, &out_size, src, dims);
+          		ret = algo->c.Ctype.compress_int32(ctx, (int64_t*)dst, &out_size, src, resized_dims);
           		break;
           	case(SCIL_TYPE_INT64) :
-          		ret = algo->c.Ctype.compress_int64(ctx, (int64_t*)dst, &out_size, src, dims);
+          		ret = algo->c.Ctype.compress_int64(ctx, (int64_t*)dst, &out_size, src, resized_dims);
           		break;
             case(SCIL_TYPE_UNKNOWN) :
             case(SCIL_TYPE_BINARY) :
@@ -298,7 +316,7 @@ int scil_compress(byte* restrict dest,
             void* src = pick_buffer(1, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
             void* dst = pick_buffer(0, total_compressors, remaining_compressors, source, dest, buff_tmp, dest);
 
-			      ret = algo->c.PStype.compress(ctx, (int64_t*)dst, header, &header_size_out, src, dims);
+			      ret = algo->c.PStype.compress(ctx, (int64_t*)dst, header, &header_size_out, src, resized_dims);
 
             if (ret != 0) return ret;
             remaining_compressors--;
@@ -327,22 +345,22 @@ int scil_compress(byte* restrict dest,
         scilU_algorithm_t* algo = chain->data_compressor;
         switch (ctx->datatype) {
           case (SCIL_TYPE_FLOAT):
-                ret = algo->c.DNtype.compress_float(ctx, dst, &out_size, src, dims);
+                ret = algo->c.DNtype.compress_float(ctx, dst, &out_size, src, resized_dims);
                 break;
           case (SCIL_TYPE_DOUBLE):
-                ret = algo->c.DNtype.compress_double(ctx, dst, &out_size, src, dims);
+                ret = algo->c.DNtype.compress_double(ctx, dst, &out_size, src, resized_dims);
                 break;
     			case (SCIL_TYPE_INT8) :
-    				ret = algo->c.DNtype.compress_int8(ctx, dst, &out_size, src, dims);
+    				ret = algo->c.DNtype.compress_int8(ctx, dst, &out_size, src, resized_dims);
     				break;
     			case(SCIL_TYPE_INT16) :
-    				ret = algo->c.DNtype.compress_int16(ctx, dst, &out_size, src, dims);
+    				ret = algo->c.DNtype.compress_int16(ctx, dst, &out_size, src, resized_dims);
     				break;
     			case(SCIL_TYPE_INT32) :
-    				ret = algo->c.DNtype.compress_int32(ctx, dst, &out_size, src, dims);
+    				ret = algo->c.DNtype.compress_int32(ctx, dst, &out_size, src, resized_dims);
     				break;
     			case(SCIL_TYPE_INT64) :
-    				ret = algo->c.DNtype.compress_int64(ctx, dst, &out_size, src, dims);
+    				ret = algo->c.DNtype.compress_int64(ctx, dst, &out_size, src, resized_dims);
     				break;
           case(SCIL_TYPE_UNKNOWN) :
           case(SCIL_TYPE_BINARY) :
@@ -405,6 +423,25 @@ int scil_decompress(SCIL_Datatype_t datatype,
     assert(source != NULL);
     assert(buff_tmp1 != NULL);
 
+    scil_dims_t* resized_dims = malloc(sizeof(scil_dims_t));
+    memset(resized_dims, 0, sizeof(scil_dims_t));
+
+    if(dims->dims > 4){
+      resized_dims->dims = 4;
+  			for(int i=0; i < dims->dims; i++){
+          if (i > 3){
+            resized_dims->length[3] *= dims->length[i];
+          }else{
+            resized_dims->length[i] = dims->length[i];
+          }
+  			}
+  	}else{
+      resized_dims->dims = dims->dims;
+  			for(int i=0; i < dims->dims; i++){
+            resized_dims->length[i] = dims->length[i];
+  			}
+    }
+
     // Read compressor ID (algorithm id) from header
     const int total_compressors = (uint8_t)source[0];
     int remaining_compressors   = total_compressors;
@@ -413,7 +450,7 @@ int scil_decompress(SCIL_Datatype_t datatype,
     size_t src_size        = source_size - 1;
     int ret;
 
-    const size_t output_size = scil_dims_get_size(dims, datatype);
+    const size_t output_size = scil_dims_get_size(resized_dims, datatype);
     byte* restrict buff_tmp2 = &buff_tmp1[(int)(output_size * 2 + 10)];
 
     // for(int i=0; i < chain_size; i++){
@@ -459,22 +496,22 @@ int scil_decompress(SCIL_Datatype_t datatype,
 
         switch (datatype) {
             case (SCIL_TYPE_FLOAT):
-                ret = algo->c.DNtype.decompress_float(dst, dims, src, src_size);
+                ret = algo->c.DNtype.decompress_float(dst, resized_dims, src, src_size);
                 break;
             case (SCIL_TYPE_DOUBLE):
-                ret = algo->c.DNtype.decompress_double(dst, dims, src, src_size);
+                ret = algo->c.DNtype.decompress_double(dst, resized_dims, src, src_size);
                 break;
 			case (SCIL_TYPE_INT8) :
-				ret = algo->c.DNtype.decompress_int8(dst, dims, src, src_size);
+				ret = algo->c.DNtype.decompress_int8(dst, resized_dims, src, src_size);
 				break;
 			case(SCIL_TYPE_INT16) :
-				ret = algo->c.DNtype.decompress_int16(dst, dims, src, src_size);
+				ret = algo->c.DNtype.decompress_int16(dst, resized_dims, src, src_size);
 				break;
 			case(SCIL_TYPE_INT32) :
-				ret = algo->c.DNtype.decompress_int32(dst, dims, src, src_size);
+				ret = algo->c.DNtype.decompress_int32(dst, resized_dims, src, src_size);
 				break;
 			case(SCIL_TYPE_INT64) :
-				ret = algo->c.DNtype.decompress_int64(dst, dims, src, src_size);
+				ret = algo->c.DNtype.decompress_int64(dst, resized_dims, src, src_size);
 				break;
       case(SCIL_TYPE_UNKNOWN) :
       case(SCIL_TYPE_BINARY) :
@@ -500,7 +537,7 @@ int scil_decompress(SCIL_Datatype_t datatype,
         void* dst = pick_buffer(0, total_compressors, remaining_compressors, src_adj, dest, buff_tmp1, buff_tmp2);
         int header_parsed;
 
-        ret = algo->c.PStype.decompress(dst, dims, src, header, &header_parsed);
+        ret = algo->c.PStype.decompress(dst, resized_dims, src, header, &header_parsed);
 
         header -= header_parsed;
 
@@ -521,22 +558,22 @@ int scil_decompress(SCIL_Datatype_t datatype,
 
         switch (datatype) {
           case (SCIL_TYPE_FLOAT):
-            ret = algo->c.Ctype.decompress_float(dst, dims, src, src_size);
+            ret = algo->c.Ctype.decompress_float(dst, resized_dims, src, src_size);
             break;
           case (SCIL_TYPE_DOUBLE):
-            ret = algo->c.Ctype.decompress_double(dst, dims, src, src_size);
+            ret = algo->c.Ctype.decompress_double(dst, resized_dims, src, src_size);
             break;
     			case (SCIL_TYPE_INT8) :
-    				ret = algo->c.Ctype.decompress_int8(dst, dims, src, src_size);
+    				ret = algo->c.Ctype.decompress_int8(dst, resized_dims, src, src_size);
     				break;
     			case(SCIL_TYPE_INT16) :
-    				ret = algo->c.Ctype.decompress_int16(dst, dims, src, src_size);
+    				ret = algo->c.Ctype.decompress_int16(dst, resized_dims, src, src_size);
     				break;
     			case(SCIL_TYPE_INT32) :
-    				ret = algo->c.Ctype.decompress_int32(dst, dims, src, src_size);
+    				ret = algo->c.Ctype.decompress_int32(dst, resized_dims, src, src_size);
     				break;
     			case(SCIL_TYPE_INT64) :
-    				ret = algo->c.Ctype.decompress_int64(dst, dims, src, src_size);
+    				ret = algo->c.Ctype.decompress_int64(dst, resized_dims, src, src_size);
     				break;
           case(SCIL_TYPE_UNKNOWN) :
           case(SCIL_TYPE_BINARY) :
@@ -568,22 +605,22 @@ int scil_decompress(SCIL_Datatype_t datatype,
 
         switch (datatype) {
           case (SCIL_TYPE_FLOAT):
-              ret = algo->c.PFtype.decompress_float(dst, dims, src, header, &header_parsed);
+              ret = algo->c.PFtype.decompress_float(dst, resized_dims, src, header, &header_parsed);
               break;
           case (SCIL_TYPE_DOUBLE):
-              ret = algo->c.PFtype.decompress_double(dst, dims, src, header, &header_parsed);
+              ret = algo->c.PFtype.decompress_double(dst, resized_dims, src, header, &header_parsed);
               break;
     			case (SCIL_TYPE_INT8) :
-    				ret = algo->c.PFtype.decompress_int8(dst, dims, src, header, &header_parsed);
+    				ret = algo->c.PFtype.decompress_int8(dst, resized_dims, src, header, &header_parsed);
     				break;
     			case(SCIL_TYPE_INT16) :
-    				ret = algo->c.PFtype.decompress_int16(dst, dims, src, header, &header_parsed);
+    				ret = algo->c.PFtype.decompress_int16(dst, resized_dims, src, header, &header_parsed);
     				break;
     			case(SCIL_TYPE_INT32) :
-    				ret = algo->c.PFtype.decompress_int32(dst, dims, src, header, &header_parsed);
+    				ret = algo->c.PFtype.decompress_int32(dst, resized_dims, src, header, &header_parsed);
     				break;
     			case(SCIL_TYPE_INT64) :
-    				ret = algo->c.PFtype.decompress_int64(dst, dims, src, header, &header_parsed);
+    				ret = algo->c.PFtype.decompress_int64(dst, resized_dims, src, header, &header_parsed);
     				break;
           case(SCIL_TYPE_UNKNOWN) :
     			case(SCIL_TYPE_BINARY) :
@@ -689,7 +726,25 @@ void scil_determine_accuracy(SCIL_Datatype_t datatype,
 }
 
 int scil_validate_compression(SCIL_Datatype_t datatype, const void* restrict data_uncompressed, scil_dims_t* dims, byte* restrict data_compressed, const size_t compressed_size, const scil_context_t* ctx, scil_user_hints_t* out_accuracy) {
-    const uint64_t length = scil_get_compressed_data_size_limit(dims, datatype);
+    scil_dims_t* resized_dims = malloc(sizeof(scil_dims_t));
+    memset(resized_dims, 0, sizeof(scil_dims_t));
+
+    if(dims->dims > 4){
+      resized_dims->dims = 4;
+        for(int i=0; i < dims->dims; i++){
+          if (i > 3){
+            resized_dims->length[3] *= dims->length[i];
+          }else{
+            resized_dims->length[i] = dims->length[i];
+          }
+        }
+      }else{
+        resized_dims->dims = dims->dims;
+        for(int i=0; i < dims->dims; i++){
+            resized_dims->length[i] = dims->length[i];
+          }
+        }
+    const uint64_t length = scil_get_compressed_data_size_limit(resized_dims, datatype);
     byte* data_out        = (byte*)malloc(length);
     if (data_out == NULL) {
         return SCIL_MEMORY_ERR;
@@ -698,7 +753,7 @@ int scil_validate_compression(SCIL_Datatype_t datatype, const void* restrict dat
 
     memset(data_out, -1, length);
 
-    int ret = scil_decompress(datatype, data_out, dims, data_compressed, compressed_size, &data_out[length / 2]);
+    int ret = scil_decompress(datatype, data_out, resized_dims, data_compressed, compressed_size, &data_out[length / 2]);
     if (ret != 0) {
         goto end;
     }
@@ -713,12 +768,12 @@ int scil_validate_compression(SCIL_Datatype_t datatype, const void* restrict dat
                 "INFO: can check only for identical data as data is not a "
                 "multiple of DataType\n");
         } else {
-            scil_determine_accuracy( datatype, data_out, data_uncompressed, dims, ctx->hints.relative_err_finest_abs_tolerance, &a);
+            scil_determine_accuracy( datatype, data_out, data_uncompressed, resized_dims, ctx->hints.relative_err_finest_abs_tolerance, &a);
         }
         goto end;
     } else {
         // determine achieved accuracy
-        scil_determine_accuracy(datatype, data_out, data_uncompressed, dims, ctx->hints.relative_err_finest_abs_tolerance, &a);
+        scil_determine_accuracy(datatype, data_out, data_uncompressed, resized_dims, ctx->hints.relative_err_finest_abs_tolerance, &a);
 
         const scil_user_hints_t h = ctx->hints;
 

@@ -116,10 +116,10 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 	int rank = H5Sget_simple_extent_ndims(space);
 	if(rank <= 0) return -4;
 
-	if (rank > 4){
+	/*if (rank > 4){
 		error("SCIL only supports up to 4D variables\n");
 		exit(1);
-	}
+	}*/
 
 	const int cd_size = sizeof(plugin_config_persisted) / sizeof(unsigned int);
 
@@ -134,6 +134,12 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 	int chunkRank = H5Pget_chunk(pList, rank, chunkSize);
 	if(chunkRank <= 0) return -1;
 	if(chunkRank > rank) return -2;
+	/*if(chunkRank > 4){
+			for(int i=4; i<rank;i++){
+				chunkSize[3] *= chunkSize[i];
+			}
+			rank=4;
+	}*/
 
 	assert(sizeof(size_t) == sizeof(hsize_t) );
 	scil_dims_initialize_array(& cfg_p->dims, rank, (const size_t*) chunkSize);
@@ -241,6 +247,7 @@ static size_t compressorFilter(unsigned int flags, size_t cd_nelmts, const unsig
 
 		ret = scil_compress(buffer + 8, config->dst_size, ((byte**) buf)[0], (& cfg_p->dims), & out_size, config->ctx);
 		scilU_pack8(buffer, out_size);
+		debug("ret: %zu \n", ret);
 		debug("CS: %zu \n", out_size);
 		out_size +=8;
 
