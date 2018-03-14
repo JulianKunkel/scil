@@ -39,7 +39,7 @@ function checknetcdf(){
 		echo "Error could not find NetCDF in $where ; directory does not exist"
 		exit 1
 	fi
-	nc-config --libs >/dev/null
+	nc-config --libs > /dev/null
 	if [ $? != 0 ] ; then
 		if [[ -e $where/include && -e $where/lib ]] ; then
 			AI="$AI $where/include $where/$extra_dir"
@@ -126,8 +126,6 @@ echo $PARAMETERS > configure.log
 
 export ADDITIONAL_INC_PATH=$AI
 export ADDITIONAL_LIB_PATH=$AL
-
-
 TARGET_DIR="/usr/local"
 
 if test -n "$codeCoverage"; then
