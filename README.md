@@ -1,6 +1,14 @@
 # Scientific Compression Library (SCIL) [![Build Status](https://travis-ci.org/JulianKunkel/scil.svg?branch=master)](https://travis-ci.org/JulianKunkel/scil) ![Codecov Status](https://codecov.io/github/JulianKunkel/scil/coverage.svg?branch=master)
 *****
 
+With the Scientific Compression Library (SCIL), we are developing a meta-compressor that allows users to set various quantities that define the acceptable error and the expected performance behavior.
+The library then aims to choose the appropriate chain of algorithms to yield the users requirements (this feature is still under development).
+This approach is a crucial step towards a scientifically safe use of much-needed lossy data compression, because it disentangles the tasks of determining scientific ground characteristics of tolerable noise, from the task of determining an optimal compression strategy given target noise levels and constraints.
+Future algorithms are used without change in the application code, once they are integrated into SCIL.
+SCIL also comes with a pattern library to generate various relevant synthetic test patterns.
+Further tools are provided to plot, add noise or to compress CSV and NetCDF3 files.
+Internally, support functions simplify the development of new algorithms and the testing.
+
 SCIL is available on [GitHub](https://github.com/JulianKunkel/scil).
 
 ## Prerequisites
