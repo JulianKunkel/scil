@@ -28,7 +28,7 @@ index 2a4cda8..8a1a1e4 100644
 +		        scil_user_hints_t * hints = malloc(sizeof(scil_user_hints_t));
 +                       char name[4096];
 +                       int ret = ncvarinq(ncid, varid, name, NULL, NULL, NULL, NULL);
-+                       int ret = scil_user_hints_load(hints, getenv("NETCDF_SCIL_HINTS_FILE"), name);
++                       ret = scil_user_hints_load(hints, getenv("NETCDF_SCIL_HINTS_FILE"), name);
 +                       if (ret == SCIL_NO_ERR){
 +    			   printf("Setting scil hints for variable: %s\n", name);
 +			   ncp->dispatch->def_var_scil(ncid, varid, hints);

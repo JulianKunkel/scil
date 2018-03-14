@@ -225,7 +225,9 @@ main(int argc, char *argv[]) {
 
     if (deflate_level != 0) {
 	    //if((stat = nc_def_var_deflate(ncid, varid_x, shuffle, NC_COMPRESSED, deflate_level)))
-			if((stat = nc_def_var_scil(ncid, varid_x, & scil_hints)))
+	    if((stat = nc_def_var_scil(ncid, varid_x, & scil_hints)))
+	    ERR1(stat);
+            if((stat = nc_def_var_fill(ncid, varid_x, NULL, 0)))
 	    ERR1(stat);
     }
 
