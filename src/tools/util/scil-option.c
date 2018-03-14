@@ -363,7 +363,7 @@ int scilO_parseOptions(int argc, char ** argv, option_help * args, int * printhe
     }
   }
 
-  if( requiredArgsSeen != requiredArgsNeeded ){
+  if( *printhelp != 1 && requiredArgsSeen != requiredArgsNeeded ){
     printf("Error: Missing some required arguments\n\n");
     *printhelp = -1;
   }
