@@ -28,7 +28,7 @@ int scil_fpzip_compress_<DATATYPE>(const scil_context_t* ctx,
                         const scil_dims_t* dims)
 {
     FPZ* fpz = fpzip_write_to_buffer(dest, *dest_size);
-    fpz->type = SCIL_TYPE_<DATATYPE_UPPER>; // in fpzip float is 0 and double 1
+    fpz->type = (SCIL_TYPE_<DATATYPE_UPPER>==SCIL_TYPE_DOUBLE)?1:0; // in fpzip float is 0 and double 1
 
     fpz->prec = ctx->hints.significant_bits;
 
