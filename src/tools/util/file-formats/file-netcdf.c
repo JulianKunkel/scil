@@ -130,6 +130,12 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
         case(NC_INT64):
           *out_datatype = SCIL_TYPE_INT64;
           break;
+        case(NC_UBYTE):
+          *out_datatype = SCIL_TYPE_BINARY;
+          break;
+        case(NC_STRING):
+          *out_datatype = SCIL_TYPE_STRING;
+          break;
         default:
           printf("ERROR: not supported datatype in readData\n");
           return 1;
@@ -176,6 +182,12 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
           break;
         case(SCIL_TYPE_INT64):
           nc_get_var(ncid,rh_id,(int64_t*)input_data);
+          break;
+        case(SCIL_TYPE_BINARY):
+          nc_get_var(ncid,rh_id,(unsigned char*)input_data);
+          break;
+        case(SCIL_TYPE_STRING):
+          nc_get_var(ncid,rh_id,(const char **)input_data);
           break;
         default:
           printf("ERROR: not supported datatype in readData\n");
@@ -227,7 +239,7 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
       ncdatatype = NC_INT64;
       break;
     case(SCIL_TYPE_BINARY):
-      ncdatatype = NC_BYTE;
+      ncdatatype = NC_UBYTE;
       break;
     case(SCIL_TYPE_STRING):
       ncdatatype = NC_STRING;
