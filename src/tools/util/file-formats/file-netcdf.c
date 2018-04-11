@@ -226,6 +226,12 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
     case(SCIL_TYPE_INT64):
       ncdatatype = NC_INT64;
       break;
+    case(SCIL_TYPE_BINARY):
+      ncdatatype = NC_BYTE;
+      break;
+    case(SCIL_TYPE_STRING):
+      ncdatatype = NC_STRING;
+      break;
     default:
       printf("ERROR: not supported datatype in writeData\n");
       return 1;
@@ -281,6 +287,14 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
          break;
        case(SCIL_TYPE_INT64):
        if ((retval = nc_put_var_longlong(ncid, varid, (const long long*) buf)))
+         NC_ISSYSERR(retval);
+         break;
+       case(SCIL_TYPE_BINARY):
+       if ((retval = nc_put_var_ubyte(ncid, varid, (const unsigned char*) buf)))
+         NC_ISSYSERR(retval);
+         break;
+       case(SCIL_TYPE_STRING):
+       if ((retval = nc_put_var_string(ncid, varid, (const char **) buf)))
          NC_ISSYSERR(retval);
          break;
        default:
