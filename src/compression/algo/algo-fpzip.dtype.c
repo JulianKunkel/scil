@@ -30,7 +30,7 @@ int scil_fpzip_compress_<DATATYPE>(const scil_context_t* ctx,
     FPZ* fpz = fpzip_write_to_buffer(dest, *dest_size);
     fpz->type = (SCIL_TYPE_<DATATYPE_UPPER>==SCIL_TYPE_DOUBLE)?1:0; // in fpzip float is 0 and double 1
 
-    fpz->prec = ctx->hints.significant_bits;
+    fpz->prec = 9 + ctx->hints.significant_bits;
 
     fpz->nx = 1; //
     fpz->ny = 1; //
