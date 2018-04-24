@@ -103,12 +103,16 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
   /*Get variable*/
   if ((retval = nc_inq_varid (ncid, netcdf_varname, &rh_id)))
   {
-    printf("ERROR no variable with this name");
+    printf("ERROR no variable with this name: %s\n", netcdf_varname);
     NC_ISSYSERR(retval);
+    return 1;
   }
 
     if ((retval = nc_inq_var (ncid, rh_id, NULL, &rh_type, &rh_ndims, rh_dimids, NULL)))
+    {
       NC_ISSYSERR(retval);
+      return 1;
+    }
     else
     {
       switch(rh_type){
@@ -142,7 +146,10 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
         }
       for (int j = 0; j < rh_ndims; j++)
         if ((retval = nc_inq_dim(ncid, rh_dimids[j], NULL, &lengthp[j])))
-          NC_ISSYSERR(retval);
+        {
+            NC_ISSYSERR(retval);
+            return 1;
+        }
 
       switch(rh_ndims){
         case(1):
@@ -250,7 +257,10 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
     }
   /* Write new file*/
   if ((retval = nc_create(name, NC_NETCDF4, &ncid)))
-    NC_ISSYSERR(retval);
+  {
+      NC_ISSYSERR(retval);
+      return 1;
+  }
 
   char cbuffer[5];//99+dim
 
@@ -261,7 +271,10 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
     itoa(i,cbuffer);
     strcat( cbuffer, "dim");
     if ((retval = nc_def_dim(ncid, cbuffer, dims.length[i], &dimids[i])))
+    {
       NC_ISSYSERR(retval);
+      return 1;
+    }
   }
 
 
@@ -274,7 +287,10 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
   /* End define mode. This tells netCDF we are done defining
    * metadata. */
   if ((retval = nc_enddef(ncid)))
-     NC_ISSYSERR(retval);
+  {
+      NC_ISSYSERR(retval);
+      return 1;
+  }
 
   switch(buf_datatype){//output_datatype
        case(SCIL_TYPE_DOUBLE):
