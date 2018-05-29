@@ -26,6 +26,12 @@ typedef struct {
   option_help *  (*get_options)();
   int (*readData)(const char * name, byte ** out_buf, SCIL_Datatype_t * out_datatype, scil_dims_t * out_dims, size_t * read_size);
   int (*writeData)(const char * name, const byte * buf, SCIL_Datatype_t buf_datatype, size_t elements, SCIL_Datatype_t orig_datatype, scil_dims_t dims);
+
+  int (*openRead)(const char * name, SCIL_Datatype_t * out_datatype, scil_dims_t * out_dims, int * ncid, int * rh_id);
+  int (*openWrite)(const char * name, SCIL_Datatype_t * out_datatype, scil_dims_t * out_dims, int * ncid, int * rh_id);
+  int (*readChunk)(const int ncid, int rh_id, SCIL_Datatype_t out_datatype, size_t * pos, size_t * count, byte ** buf, size_t * read_size);
+  int (*writeChunk)(const int ncid, int rh_id, SCIL_Datatype_t out_datatype, size_t * pos, size_t * count, byte ** buf, size_t * read_size);
+  int (*closeFile)(const int ncid);
 } scil_file_plugin_t;
 
 scil_file_plugin_t * scil_find_plugin(const char * name);

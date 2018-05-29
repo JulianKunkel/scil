@@ -169,7 +169,10 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
         return 1;
       }
 
-      input_data = (byte*) malloc(scil_get_compressed_data_size_limit(out_dims, *out_datatype));
+      size_t input_size;
+      input_size = scil_dims_get_size(out_dims, *out_datatype);
+      //input_data = (byte*) malloc(scil_get_compressed_data_size_limit(out_dims, *out_datatype));
+      input_data = (byte*) scilU_safe_malloc(input_size);
 
       switch(*out_datatype){
         case(SCIL_TYPE_DOUBLE):
@@ -342,10 +345,181 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
   return 0;
 }
 
+static int openRead(const char * name, SCIL_Datatype_t * out_datatype, scil_dims_t * out_dims, int * ncid, int * rh_id){
+  printf("openRead\n");
+  int ndims_in, nvars_in, ngatts_in, unlimdimid_in;
+  size_t lengthp[NC_MAX_VAR_DIMS];
+  int formatp, rh_ndims, rh_dimids[NC_MAX_VAR_DIMS];
+  nc_type rh_type;
+
+  /* Error handling. */
+  int retval;
+
+  byte *input_data = NULL;
+
+  if (netcdf_varname == NULL)
+  {
+    printf("ERROR netcdf_varname is empty\n");
+    return 1;
+  }
+  /* Open the file. */
+  if ((retval = nc_open(name, NC_NOWRITE, ncid)))
+  {
+    NC_ISSYSERR(retval);
+    return 1;
+  }
+  nc_inq_format(*ncid, &formatp);
+  printf("%s file opened for read\n", (formatp == NC_FORMAT_CLASSIC)?"NC_FORMAT_CLASSIC":(formatp == NC_FORMAT_64BIT_OFFSET)?"NC_FORMAT_64BIT_OFFSET":(formatp == NC_FORMAT_NETCDF4)?"NC_FORMAT_NETCDF4":(formatp == NC_FORMAT_CDF5)?"NC_FORMAT_CDF5":"another");
+
+  if ((retval = nc_inq(*ncid, &ndims_in, &nvars_in, &ngatts_in, &unlimdimid_in)))
+  {
+    NC_ISSYSERR(retval);
+    return 1;
+  }
+
+  printf("\n\n====OUTPUT====\nnumber of dimensions: %i\nnumber of variables: %i\nnumber of global attributes: %i\nunlimited dimentions: %i\n\n", ndims_in, nvars_in, ngatts_in, unlimdimid_in);
+
+  /*Get variable*/
+  if ((retval = nc_inq_varid (*ncid, netcdf_varname, rh_id)))
+  {
+    printf("ERROR no variable with this name: %s\n", netcdf_varname);
+    NC_ISSYSERR(retval);
+    return 1;
+  }
+
+    if ((retval = nc_inq_var (*ncid, *rh_id, NULL, &rh_type, &rh_ndims, rh_dimids, NULL)))
+    {
+      NC_ISSYSERR(retval);
+      return 1;
+    }
+    else
+    {
+      switch(rh_type){
+        case(NC_DOUBLE):
+          *out_datatype = SCIL_TYPE_DOUBLE;
+          break;
+        case(NC_FLOAT):
+          *out_datatype = SCIL_TYPE_FLOAT;
+          break;
+        case(NC_BYTE):
+          *out_datatype = SCIL_TYPE_INT8;
+          break;
+        case(NC_SHORT):
+          *out_datatype = SCIL_TYPE_INT16;
+          break;
+        case(NC_INT):
+          *out_datatype = SCIL_TYPE_INT32;
+          break;
+        case(NC_INT64):
+          *out_datatype = SCIL_TYPE_INT64;
+          break;
+        case(NC_UBYTE):
+          *out_datatype = SCIL_TYPE_BINARY;
+          break;
+        case(NC_STRING):
+          *out_datatype = SCIL_TYPE_STRING;
+          break;
+        default:
+          printf("ERROR: not supported datatype in readData\n");
+          return 1;
+        }
+      for (int j = 0; j < rh_ndims; j++)
+        if ((retval = nc_inq_dim(*ncid, rh_dimids[j], NULL, &lengthp[j])))
+        {
+            NC_ISSYSERR(retval);
+            return 1;
+        }
+
+      switch(rh_ndims){
+        case(1):
+        scil_dims_initialize_1d(out_dims, lengthp[0]);
+        break;
+        case(2):
+        scil_dims_initialize_2d(out_dims, lengthp[0], lengthp[1]);
+        break;
+        case(3):
+        scil_dims_initialize_3d(out_dims, lengthp[0], lengthp[1], lengthp[2]);
+        break;
+        case(4):
+        scil_dims_initialize_4d(out_dims, lengthp[0], lengthp[1], lengthp[2], lengthp[3]);
+        break;
+        default:
+        printf("ERROR: not supported number of dimensions\n");
+        return 1;
+      }
+    }
+  printf("*** SUCCESS open file %s!\n", name);
+
+  return 0;
+}
+
+static int openWrite(const char * name, SCIL_Datatype_t * out_datatype, scil_dims_t * out_dims, int * ncid, int * rh_id){
+  return 0;
+}
+
+static int readChunk(const int ncid, const int rh_id, SCIL_Datatype_t out_datatype, size_t * pos, size_t * count, byte ** buf, size_t * read_size){
+  printf("readChunk\n");
+  switch(out_datatype){
+    case(SCIL_TYPE_DOUBLE):
+      nc_get_vara(ncid, rh_id, pos, count, (double*)buf);
+      break;
+    case(SCIL_TYPE_FLOAT):
+      nc_get_vara(ncid, rh_id, pos, count, (float*)buf);
+      break;
+    case(SCIL_TYPE_INT8):
+      nc_get_vara(ncid, rh_id, pos, count, (int8_t*)buf);
+      break;
+    case(SCIL_TYPE_INT16):
+      nc_get_vara(ncid, rh_id, pos, count, (int16_t*)buf);
+      break;
+    case(SCIL_TYPE_INT32):
+      nc_get_vara(ncid, rh_id, pos, count, (int32_t*)buf);
+      break;
+    case(SCIL_TYPE_INT64):
+      nc_get_vara(ncid, rh_id, pos, count, (int64_t*)buf);
+      break;
+    case(SCIL_TYPE_BINARY):
+      nc_get_vara(ncid, rh_id, pos, count, (unsigned char*)buf);
+      break;
+    case(SCIL_TYPE_STRING):
+      nc_get_vara(ncid, rh_id, pos, count, (const char **)buf);
+      break;
+    default:
+      printf("ERROR: not supported datatype in readData\n");
+      return 1;
+  }
+  printf("*** SUCCESS read chunk!\n");
+
+  //*read_size = scil_dims_get_size(out_dims, *out_datatype);
+
+  return 0;
+}
+
+static int writeChunk(const int ncid, const int rh_id, SCIL_Datatype_t out_datatype, size_t * pos, size_t * count, byte ** buf, size_t * read_size){
+  return 0;
+}
+
+static int closeFile(const int ncid){
+  /* Error handling. */
+  int retval;
+
+  if ((retval = nc_close(ncid)))
+  {
+    NC_ISSYSERR(retval);
+    return 1;
+  }
+  printf("*** SUCCESS close file!\n");
+}
+
 scil_file_plugin_t netcdf_plugin = {
   "netcdf",
   "nc",
   get_options,
   readData,
-  writeData
+  writeData,
+  openRead,
+  openWrite,
+  readChunk,
+  writeChunk,
+  closeFile
 };

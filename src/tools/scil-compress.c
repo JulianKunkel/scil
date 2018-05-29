@@ -138,6 +138,28 @@ int main(int argc, char ** argv){
   SCIL_Datatype_t input_datatype;
   size_t read_data_size;
   size_t array_size;
+  /*int ncid, rh_id;
+  static size_t pos[] = {0, 0, 0, 0};
+  static size_t count[] = {2880,1440,78,1};
+  array_size = 1*78*1440*2880*4;
+
+  ret = in_plugin->openRead(in_file, & input_datatype, & dims, & ncid, & rh_id);
+  if (ret != 0){
+    printf("The input file %s could not be open\n", in_file);
+    exit(1);
+  }
+  //split data in chunks
+  while (1){
+    input_data = (byte*) scilU_safe_malloc(array_size);
+    ret = in_plugin->readChunk(ncid, rh_id, input_datatype, pos, count, & input_data, & read_data_size);
+    if (ret != 0){
+      printf("The chunk could not be read\n");
+      exit(1);
+    }
+    //printf("Read data size: %lld\n", read_data_size);
+    ret = in_plugin->closeFile(ncid);
+    exit(0);
+  }*/
 
   scil_timer timer;
   scil_timer totalRun;
