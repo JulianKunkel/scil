@@ -22,6 +22,7 @@
 #include <scil-option.h>
 #include <scil-util.h>
 #include <scil-config.h>
+#include <scil-debug.h>
 
 #include <stdio.h>
 #include <assert.h>
@@ -31,6 +32,8 @@
 
 #include <file-formats/scil-file-format.h>
 
+#define DATA_SIZE_LIMIT 3 << 29
+
 static int validate = 0;
 static int verbose = 0;
 static int compress = 0;
@@ -39,6 +42,7 @@ static int cycle = 0;
 static char * in_file = "";
 static char * out_file = NULL;
 static int compute_residual = 0;
+static int use_chunks = 0;
 
 
 static int use_max_value_as_fill_value = 0;
@@ -98,6 +102,7 @@ int main(int argc, char ** argv){
     {0, "hint-fake-absolute-tolerance-percent-max", "This is a fake hint. Actually it sets the abstol value based on the given percentage (enter 0.1 aka 10%% tolerance)",  OPTION_OPTIONAL_ARGUMENT, 'F', & fake_abstol_value},
     {0, "hint-fake-relative_err_finest_abs_tolerance", "This is a fake hint. Actually it sets the finest abstol value based on the given percentage (enter 0.1 aka 10%% tolerance)",  OPTION_OPTIONAL_ARGUMENT, 'F', & fake_finest_abstol_value},
     {0, "cycle", "For testing: Compress, then decompress and store the output. Files are CSV files",OPTION_FLAG, 'd' , & cycle},
+    {0, "use_chunks", "For testing: use chunks",OPTION_FLAG, 'd' , & use_chunks},
     LAST_OPTION
   };
 
@@ -138,28 +143,78 @@ int main(int argc, char ** argv){
   SCIL_Datatype_t input_datatype;
   size_t read_data_size;
   size_t array_size;
-  /*int ncid, rh_id;
-  static size_t pos[] = {0, 0, 0, 0};
-  static size_t count[] = {2880,1440,78,1};
-  array_size = 1*78*1440*2880*4;
 
-  ret = in_plugin->openRead(in_file, & input_datatype, & dims, & ncid, & rh_id);
-  if (ret != 0){
-    printf("The input file %s could not be open\n", in_file);
-    exit(1);
-  }
-  //split data in chunks
-  while (1){
-    input_data = (byte*) scilU_safe_malloc(array_size);
-    ret = in_plugin->readChunk(ncid, rh_id, input_datatype, pos, count, & input_data, & read_data_size);
+  if (use_chunks){
+    int ncid, rh_id;
+    scil_dims_t orig_dims;
+    size_t * pos;
+    size_t * count;
+    scil_dims_t dims;
+    size_t chunks_number=1;
+    //array_size = 1*78*1440*2880*4;
+
+    ret = in_plugin->openRead(in_file, & input_datatype, & orig_dims, & ncid, & rh_id);
     if (ret != 0){
-      printf("The chunk could not be read\n");
+      printf("The input file %s could not be open\n", in_file);
       exit(1);
     }
-    //printf("Read data size: %lld\n", read_data_size);
+    
+    pos = (size_t*) malloc(orig_dims.dims * sizeof(size_t));
+    count = (size_t*) malloc(orig_dims.dims * sizeof(size_t));
+    
+    for (size_t i = 0; i < orig_dims.dims; i++){
+      count[i] = orig_dims.length[orig_dims.dims-1-i];
+      pos[i] = 0;
+    }
+    array_size = scil_dims_get_size(& orig_dims, input_datatype);
+
+    chunks_number = 1;
+    int i = orig_dims.dims-1;
+    //split data in chunks
+    while (array_size > DATA_SIZE_LIMIT){
+      if ((count[i] % 2) == 0){
+        count[i] >>= 1; 
+	chunks_number <<= 1;
+        array_size >>= 1;
+      }
+      else {
+        if (i == 0){
+          printf("Cannot be good enough chunked\n");
+          exit(1);
+        }
+        else --i;
+      }
+    }
+    debug("chunks: %lld, [%lld] [%lld] [%lld] [%lld]\n\n", chunks_number, count[0], count[1], count[2], count[3]);
+    debug("cur_chunk: %lld | i%lld [%lld] [%lld] [%lld] [%lld]\n", 0, 0, pos[0], pos[1], pos[2], pos[3]);
+
+    for (size_t cur_chunk = 0; cur_chunk < chunks_number; cur_chunk++){
+      input_data = (byte*) scilU_safe_malloc(array_size);
+      ret = in_plugin->readChunk(ncid, rh_id, input_datatype, pos, count, & input_data, & read_data_size);
+      if (ret != 0){
+        printf("The chunk %i could not be read\n",i);
+        exit(1);
+      }
+
+      //compress
+      //write
+
+      //prepare next chunk
+      for (size_t i = 0; i < orig_dims.dims; i++){
+        if ((pos[i] + count[i]) < orig_dims.length[orig_dims.dims-1-i]){
+           pos[i] += count[i];
+           debug("cur_chunk: %lld | i%lld [%lld] [%lld] [%lld] [%lld]\n", cur_chunk+1, i, pos[0], pos[1], pos[2], pos[3]);
+           break;
+        }
+        else {
+          pos[i] = 0;
+        }
+      }
+      free(input_data);
+    }
     ret = in_plugin->closeFile(ncid);
     exit(0);
-  }*/
+  }
 
   scil_timer timer;
   scil_timer totalRun;
