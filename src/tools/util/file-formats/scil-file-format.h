@@ -28,9 +28,9 @@ typedef struct {
   int (*writeData)(const char * name, const byte * buf, SCIL_Datatype_t buf_datatype, size_t elements, SCIL_Datatype_t orig_datatype, scil_dims_t dims);
 
   int (*openRead)(const char * name, SCIL_Datatype_t * out_datatype, scil_dims_t * out_dims, int * ncid, int * rh_id);
-  int (*openWrite)(const char * name, SCIL_Datatype_t * out_datatype, scil_dims_t * out_dims, int * ncid, int * rh_id);
-  int (*readChunk)(const int ncid, int rh_id, SCIL_Datatype_t out_datatype, size_t * pos, size_t * count, byte ** buf, size_t * read_size);
-  int (*writeChunk)(const int ncid, int rh_id, SCIL_Datatype_t out_datatype, size_t * pos, size_t * count, byte ** buf, size_t * read_size);
+  int (*openWrite)(const char * name, SCIL_Datatype_t out_datatype, scil_dims_t out_dims, int * ncid, int * var_id);
+  int (*readChunk)(const int ncid, SCIL_Datatype_t out_datatype, byte ** buf, const int varid, const size_t * pos, const size_t * count);
+  int (*writeChunk)(const int ncid, SCIL_Datatype_t out_datatype, const byte * buf, const int varid, const size_t * pos, const size_t * count);
   int (*closeFile)(const int ncid);
 } scil_file_plugin_t;
 

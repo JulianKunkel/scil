@@ -145,52 +145,68 @@ int main(int argc, char ** argv){
   size_t array_size;
 
   if (use_chunks){
-    int ncid, rh_id;
+    int rncid, rvarid, wncid, wvarid;
     scil_dims_t orig_dims;
     size_t * pos;
     size_t * count;
     scil_dims_t dims;
     size_t chunks_number=1;
+    size_t buff_size, input_size;
     //array_size = 1*78*1440*2880*4;
 
-    ret = in_plugin->openRead(in_file, & input_datatype, & orig_dims, & ncid, & rh_id);
+    ret = in_plugin->openRead(in_file, & input_datatype, & orig_dims, & rncid, & rvarid);
     if (ret != 0){
       printf("The input file %s could not be open\n", in_file);
       exit(1);
     }
     
+    if (out_file != NULL){
+      if (compress){
+        output_datatype = SCIL_TYPE_BINARY;
+      }
+      else{
+        output_datatype = input_datatype;
+      } 
+      ret = in_plugin->openWrite(out_file, output_datatype, orig_dims, & wncid, & wvarid);
+      if (ret != 0){
+        printf("The input file %s could not be open\n", out_file);
+        exit(1);
+      } 
+    }
+
     pos = (size_t*) malloc(orig_dims.dims * sizeof(size_t));
     count = (size_t*) malloc(orig_dims.dims * sizeof(size_t));
     
     for (size_t i = 0; i < orig_dims.dims; i++){
-      count[i] = orig_dims.length[orig_dims.dims-1-i];
+      count[i] = orig_dims.length[i];
       pos[i] = 0;
     }
     array_size = scil_dims_get_size(& orig_dims, input_datatype);
-
+    printf("arr s %lld\n",array_size);
     chunks_number = 1;
-    int i = orig_dims.dims-1;
+    int i = 0;
     //split data in chunks
     while (array_size > DATA_SIZE_LIMIT){
       if ((count[i] % 2) == 0){
         count[i] >>= 1; 
-	chunks_number <<= 1;
+        chunks_number <<= 1;
         array_size >>= 1;
       }
       else {
-        if (i == 0){
+        if (i == orig_dims.dims-1){
           printf("Cannot be good enough chunked\n");
           exit(1);
         }
-        else --i;
+        else i++;
       }
     }
-    debug("chunks: %lld, [%lld] [%lld] [%lld] [%lld]\n\n", chunks_number, count[0], count[1], count[2], count[3]);
-    debug("cur_chunk: %lld | i%lld [%lld] [%lld] [%lld] [%lld]\n", 0, 0, pos[0], pos[1], pos[2], pos[3]);
+    printf("chunks: %lld, [%lld] [%lld] [%lld] [%lld]\n\n", chunks_number, count[0], count[1], count[2], count[3]);
+    printf("size: %lld\n", array_size);
 
     for (size_t cur_chunk = 0; cur_chunk < chunks_number; cur_chunk++){
+      printf("cur_chunk: %lld | i%lld [%lld] [%lld] [%lld] [%lld]\n", 0, 0, pos[0], pos[1], pos[2], pos[3]);
       input_data = (byte*) scilU_safe_malloc(array_size);
-      ret = in_plugin->readChunk(ncid, rh_id, input_datatype, pos, count, & input_data, & read_data_size);
+      ret = in_plugin->readChunk(rncid, input_datatype, input_data, rvarid, pos, count);
       if (ret != 0){
         printf("The chunk %i could not be read\n",i);
         exit(1);
@@ -199,9 +215,23 @@ int main(int argc, char ** argv){
       //compress
       //write
 
+      // todo reformat into output format, if neccessary
+      if (out_file != NULL){
+        //if ( compute_residual && (uncompress || cycle) ){
+          // compute the residual error
+          //scilU_subtract_data(input_datatype, input_data, output_data, & dims);
+        //}
+        ret = out_plugin->writeChunk(wncid, output_datatype, input_data, wvarid, pos, count);
+        if (ret != 0){
+          printf("The output file %s could not be written\n", out_file);
+          exit(1);
+        }
+      }
+
+
       //prepare next chunk
       for (size_t i = 0; i < orig_dims.dims; i++){
-        if ((pos[i] + count[i]) < orig_dims.length[orig_dims.dims-1-i]){
+        if ((pos[i] + count[i]) < orig_dims.length[i]){
            pos[i] += count[i];
            debug("cur_chunk: %lld | i%lld [%lld] [%lld] [%lld] [%lld]\n", cur_chunk+1, i, pos[0], pos[1], pos[2], pos[3]);
            break;
@@ -212,7 +242,8 @@ int main(int argc, char ** argv){
       }
       free(input_data);
     }
-    ret = in_plugin->closeFile(ncid);
+    ret = in_plugin->closeFile(rncid);
+    ret = out_plugin->closeFile(wncid);
     exit(0);
   }
 

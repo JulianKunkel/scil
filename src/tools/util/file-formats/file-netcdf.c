@@ -346,7 +346,7 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
 }
 
 static int openRead(const char * name, SCIL_Datatype_t * out_datatype, scil_dims_t * out_dims, int * ncid, int * rh_id){
-  printf("openRead\n");
+  printf("Open file for read\n");
   int ndims_in, nvars_in, ngatts_in, unlimdimid_in;
   size_t lengthp[NC_MAX_VAR_DIMS];
   int formatp, rh_ndims, rh_dimids[NC_MAX_VAR_DIMS];
@@ -453,36 +453,110 @@ static int openRead(const char * name, SCIL_Datatype_t * out_datatype, scil_dims
   return 0;
 }
 
-static int openWrite(const char * name, SCIL_Datatype_t * out_datatype, scil_dims_t * out_dims, int * ncid, int * rh_id){
+static int openWrite(const char * name, SCIL_Datatype_t out_datatype, scil_dims_t dims, int * ncid, int * varid){
+  printf("Open file for write\n");
+  int ncdatatype;
+  int dimids[NC_MAX_VAR_DIMS];
+
+  /* Error handling. */
+  int retval;
+
+  switch(out_datatype){
+    case(SCIL_TYPE_DOUBLE):
+      ncdatatype = NC_DOUBLE;
+      break;
+    case(SCIL_TYPE_FLOAT):
+      ncdatatype = NC_FLOAT;
+      break;
+    case(SCIL_TYPE_INT8):
+      ncdatatype = NC_BYTE;
+      break;
+    case(SCIL_TYPE_INT16):
+      ncdatatype = NC_SHORT;
+      break;
+    case(SCIL_TYPE_INT32):
+      ncdatatype = NC_INT;
+      break;
+    case(SCIL_TYPE_INT64):
+      ncdatatype = NC_INT64;
+      break;
+    case(SCIL_TYPE_BINARY):
+      ncdatatype = NC_UBYTE;
+      break;
+    case(SCIL_TYPE_STRING):
+      ncdatatype = NC_STRING;
+      break;
+    default:
+      printf("ERROR: not supported datatype in writeData\n");
+      return 1;
+    }
+  /* Write new file*/
+  if ((retval = nc_create(name, NC_NETCDF4, ncid)))
+  {
+      NC_ISSYSERR(retval);
+      return 1;
+  }
+  char cbuffer[5];//99+dim
+
+
+  for (int i = 0; i < dims.dims; i++)
+  {
+    memset(cbuffer,0,strlen(cbuffer));
+    itoa(i,cbuffer);
+    strcat( cbuffer, "dim");
+    if ((retval = nc_def_dim(*ncid, cbuffer, dims.length[i], &dimids[i])))
+    {
+      NC_ISSYSERR(retval);
+      return 1;
+    }
+  }
+  
+  if ((retval = nc_def_var(*ncid, netcdf_varname, ncdatatype, dims.dims, dimids, varid)))
+  {
+    printf("ERROR no variable with this name");
+    NC_ISSYSERR(retval);
+  }
+
+  /* End define mode. This tells netCDF we are done defining
+   *    * metadata. */
+  if ((retval = nc_enddef(*ncid)))
+  {
+    NC_ISSYSERR(retval);
+    return 1;
+  }
   return 0;
 }
 
-static int readChunk(const int ncid, const int rh_id, SCIL_Datatype_t out_datatype, size_t * pos, size_t * count, byte ** buf, size_t * read_size){
+static int readChunk(const int ncid, SCIL_Datatype_t out_datatype, byte * buf, const int varid, const size_t * pos, const size_t * count){
   printf("readChunk\n");
+  int retval;
+  
   switch(out_datatype){
     case(SCIL_TYPE_DOUBLE):
-      nc_get_vara(ncid, rh_id, pos, count, (double*)buf);
+      if (retval = nc_get_vara(ncid, varid, pos, count, (double*)buf))
+        NC_ISSYSERR(retval);
       break;
     case(SCIL_TYPE_FLOAT):
-      nc_get_vara(ncid, rh_id, pos, count, (float*)buf);
+      if (retval = nc_get_vara(ncid, varid, pos, count, (float*)buf))
+        NC_ISSYSERR(retval);
       break;
     case(SCIL_TYPE_INT8):
-      nc_get_vara(ncid, rh_id, pos, count, (int8_t*)buf);
+      nc_get_vara(ncid, varid, pos, count, (int8_t*)buf);
       break;
     case(SCIL_TYPE_INT16):
-      nc_get_vara(ncid, rh_id, pos, count, (int16_t*)buf);
+      nc_get_vara(ncid, varid, pos, count, (int16_t*)buf);
       break;
     case(SCIL_TYPE_INT32):
-      nc_get_vara(ncid, rh_id, pos, count, (int32_t*)buf);
+      nc_get_vara(ncid, varid, pos, count, (int32_t*)buf);
       break;
     case(SCIL_TYPE_INT64):
-      nc_get_vara(ncid, rh_id, pos, count, (int64_t*)buf);
+      nc_get_vara(ncid, varid, pos, count, (int64_t*)buf);
       break;
     case(SCIL_TYPE_BINARY):
-      nc_get_vara(ncid, rh_id, pos, count, (unsigned char*)buf);
+      nc_get_vara(ncid, varid, pos, count, (unsigned char*)buf);
       break;
     case(SCIL_TYPE_STRING):
-      nc_get_vara(ncid, rh_id, pos, count, (const char **)buf);
+      nc_get_vara(ncid, varid, pos, count, (const char **)buf);
       break;
     default:
       printf("ERROR: not supported datatype in readData\n");
@@ -495,7 +569,49 @@ static int readChunk(const int ncid, const int rh_id, SCIL_Datatype_t out_dataty
   return 0;
 }
 
-static int writeChunk(const int ncid, const int rh_id, SCIL_Datatype_t out_datatype, size_t * pos, size_t * count, byte ** buf, size_t * read_size){
+static int writeChunk(const int ncid, SCIL_Datatype_t buf_datatype, const byte * buf, const int varid, const size_t * pos, const size_t * count){
+  printf("writeChunk\n");
+  /* Error handling. */
+  int retval;
+
+  switch(buf_datatype){//output_datatype
+       case(SCIL_TYPE_DOUBLE):
+       if ((retval = nc_put_vara_double(ncid, varid, pos, count, (const double*) buf)))
+         NC_ISSYSERR(retval);
+         break;
+       case(SCIL_TYPE_FLOAT):
+       if ((retval = nc_put_vara_float(ncid, varid, pos, count, (const float*) buf)))
+         NC_ISSYSERR(retval);
+         break;
+       case(SCIL_TYPE_INT8):
+       if ((retval = nc_put_vara_text(ncid, varid, pos, count, (const char*) buf)))
+         NC_ISSYSERR(retval);
+         break;
+       case(SCIL_TYPE_INT16):
+       if ((retval = nc_put_vara_short(ncid, varid, pos, count, (const short*) buf)))
+         NC_ISSYSERR(retval);
+         break;
+       case(SCIL_TYPE_INT32):
+       if ((retval = nc_put_vara_int(ncid, varid, pos, count, (const int*) buf)))
+         NC_ISSYSERR(retval);
+         break;
+       case(SCIL_TYPE_INT64):
+       if ((retval = nc_put_vara_longlong(ncid, varid, pos, count, (const long long*) buf)))
+         NC_ISSYSERR(retval);
+         break;
+       case(SCIL_TYPE_BINARY):
+       if ((retval = nc_put_vara_ubyte(ncid, varid, pos, count, (const unsigned char*) buf)))
+         NC_ISSYSERR(retval);
+         break;
+       case(SCIL_TYPE_STRING):
+       if ((retval = nc_put_vara_string(ncid, varid, pos, count, (const char **) buf)))
+         NC_ISSYSERR(retval);
+         break;
+       default:
+         printf("Not supported datatype in writeData\n");
+       }
+
+  printf("*** SUCCESS write chunk!\n");
   return 0;
 }
 
