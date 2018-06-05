@@ -144,22 +144,27 @@ int main(int argc, char ** argv){
   size_t read_data_size;
   size_t array_size;
 
+
   if (use_chunks){
     int rncid, rvarid, wncid, wvarid;
     scil_dims_t orig_dims;
     size_t * pos;
     size_t * count;
-    scil_dims_t dims;
     size_t chunks_number=1;
     size_t buff_size, input_size;
     //array_size = 1*78*1440*2880*4;
-
+    
+    scil_timer timer;
+    scil_timer totalRun;
+    double t_read = 0.0, t_write = 0.0, t_compress = 0.0, t_decompress = 0.0;
+    scilU_start_timer(& totalRun);
+    
     ret = in_plugin->openRead(in_file, & input_datatype, & orig_dims, & rncid, & rvarid);
     if (ret != 0){
       printf("The input file %s could not be open\n", in_file);
       exit(1);
     }
-    
+        
     if (out_file != NULL){
       if (compress){
         output_datatype = SCIL_TYPE_BINARY;
@@ -182,7 +187,7 @@ int main(int argc, char ** argv){
       pos[i] = 0;
     }
     array_size = scil_dims_get_size(& orig_dims, input_datatype);
-    printf("arr s %lld\n",array_size);
+    
     chunks_number = 1;
     int i = 0;
     //split data in chunks
@@ -200,32 +205,140 @@ int main(int argc, char ** argv){
         else i++;
       }
     }
-    printf("chunks: %lld, [%lld] [%lld] [%lld] [%lld]\n\n", chunks_number, count[0], count[1], count[2], count[3]);
+
+    dims.dims = orig_dims.dims;
+
+    for (size_t i = 0; i < dims.dims; i++){
+      dims.length[i] = count[i];
+    }
+    
+    printf("orig_dims: [%lld] [%lld] [%lld] [%lld]\n\n", orig_dims.length[0], orig_dims.length[1], orig_dims.length[2], orig_dims.length[3]);
+    printf("chunks: %lld | chunk size [%lld] [%lld] [%lld] [%lld]\n\n", chunks_number, count[0], count[1], count[2], count[3]);
     printf("size: %lld\n", array_size);
 
+    ret = scil_context_create(&ctx, input_datatype, 0, NULL, &hints);
+    assert(ret == SCIL_NO_ERR);
+
+    /*read, compress, decompress, write in chunks*/
     for (size_t cur_chunk = 0; cur_chunk < chunks_number; cur_chunk++){
-      printf("cur_chunk: %lld | i%lld [%lld] [%lld] [%lld] [%lld]\n", 0, 0, pos[0], pos[1], pos[2], pos[3]);
+      printf("cur_chunk: %lld | start position [%lld] [%lld] [%lld] [%lld]\n", cur_chunk, pos[0], pos[1], pos[2], pos[3]);
       input_data = (byte*) scilU_safe_malloc(array_size);
+      scilU_start_timer(& timer);
       ret = in_plugin->readChunk(rncid, input_datatype, input_data, rvarid, pos, count);
       if (ret != 0){
         printf("The chunk %i could not be read\n",i);
         exit(1);
       }
+      t_read = scilU_stop_timer(timer);
 
+      if (use_max_value_as_fill_value){
+        double max, min;
+        scilU_find_minimum_maximum(input_datatype, input_data, & dims, & min, & max);
+        hints.fill_value = max;
+      }
+
+      if(verbose > 0){
+        double max, min;
+        scilU_find_minimum_maximum_with_excluded_points(input_datatype, input_data, & dims, & min, & max, hints.lossless_data_range_up_to,  hints.lossless_data_range_from, hints.fill_value);
+        printf("Min: %.10e Max: %.10e\n", min, max);
+      }
+
+      if (fake_abstol_value > 0.0 || fake_finest_abstol_value > 0.0){
+        double max, min;
+        scilU_find_minimum_maximum_with_excluded_points(input_datatype, input_data, & dims, & min, & max, hints.lossless_data_range_up_to,  hints.lossless_data_range_from, hints.fill_value);
+        if (min < 0 && max < -min){
+	     max = -min;
+        }
+
+        if (fake_abstol_value > 0.0){
+          double new_abs_tol = max * fake_abstol_value;
+          if ( hints.absolute_tolerance > 0.0 ){
+            printf("Error: don't set both the absolute_tolerance and the fake relative absolute tolerance!\n");
+            exit(1);
+          }
+
+          printf("fake abstol: setting value to %f (min: %f max: %f)\n", new_abs_tol, min, max);
+          hints.absolute_tolerance = new_abs_tol;
+        }
+
+        if(fake_finest_abstol_value > 0.0){
+          hints.relative_err_finest_abs_tolerance = max * fake_finest_abstol_value;
+          printf("fake relative_err_finest_abs_tolerance: setting value to %f\n", hints.relative_err_finest_abs_tolerance);
+        }
+      }
+
+      ret = scil_context_create(&ctx, input_datatype, 0, NULL, &hints);
+      assert(ret == SCIL_NO_ERR);
+      if (print_hints){
+        printf("Effective hints (only needed for compression)\n");
+        scil_user_hints_t e = scil_get_effective_hints(ctx);
+        scil_user_hints_print(& e);
+      }
+      
+      input_size = scil_get_compressed_data_size_limit(&dims, input_datatype);
+      //printf("input size: %lld\n", input_size);
+      output_data = (byte*) scilU_safe_malloc(input_size);
       //compress
-      //write
+      if (cycle || (! compress && ! uncompress) ){
+        printf("...compression and decompression\n");
+        byte* result = (byte*) scilU_safe_malloc(input_size);
 
+        scilU_start_timer(& timer);
+        ret = scil_compress(result,input_size, input_data, & dims, & buff_size, ctx);
+        t_compress = scilU_stop_timer(timer);
+        assert(ret == SCIL_NO_ERR);
+
+        byte* tmp_buff = (byte*) scilU_safe_malloc(input_size);
+        scilU_start_timer(& timer);
+        ret = scil_decompress(input_datatype, output_data, & dims, result, buff_size, tmp_buff);
+        t_decompress = scilU_stop_timer(timer);
+        assert(ret == SCIL_NO_ERR);
+
+        free(tmp_buff);
+
+        output_datatype = input_datatype;
+
+        if (validate) {
+          ret = scil_validate_compression(input_datatype, input_data, &dims, result, buff_size, ctx, &out_accuracy);
+          if(ret != SCIL_NO_ERR){
+            printf("SCIL validation error!\n");
+          }
+          if(print_hints){
+            printf("Validation accuracy:");
+            scil_user_hints_print(& out_accuracy);
+          }
+        }
+
+        free(result);
+
+        assert(ret == SCIL_NO_ERR);
+      }
+      
+      //write
       // todo reformat into output format, if neccessary
       if (out_file != NULL){
         //if ( compute_residual && (uncompress || cycle) ){
           // compute the residual error
           //scilU_subtract_data(input_datatype, input_data, output_data, & dims);
         //}
-        ret = out_plugin->writeChunk(wncid, output_datatype, input_data, wvarid, pos, count);
+        ret = out_plugin->writeChunk(wncid, output_datatype, output_data, wvarid, pos, count);
         if (ret != 0){
           printf("The output file %s could not be written\n", out_file);
           exit(1);
         }
+      }
+            
+      if(measure_time){
+        printf("Size:\n");
+        printf(" size, %ld\n size_compressed, %ld\n ratio, %f\n", array_size, buff_size, ((double) buff_size) / array_size);
+        //printf("Runtime:  %fs\n", runtime);
+        printf(" read,       %fs, %f MiB/s\n", t_read, array_size/t_read/1024 /1024);
+        if (t_compress > 0.0)
+          printf(" compress,   %fs, %f MiB/s\n", t_compress, array_size/t_compress/1024 /1024);
+        if (t_decompress > 0.0)
+          printf(" decompress, %fs, %f MiB/s\n", t_decompress, array_size/t_decompress/1024 /1024);
+        if (t_write > 0.0)
+          printf(" write,      %fs, %f MiB/s\n", t_write, array_size/t_write/1024 /1024);
       }
 
 
@@ -241,9 +354,16 @@ int main(int argc, char ** argv){
         }
       }
       free(input_data);
+      free(output_data);
+      
+      ret = scil_destroy_context(ctx);
+      assert(ret == SCIL_NO_ERR);
     }
+
+    //ret = scil_destroy_context(ctx);
+    //assert(ret == SCIL_NO_ERR);
     ret = in_plugin->closeFile(rncid);
-    ret = out_plugin->closeFile(wncid);
+    if (out_file != NULL) ret = out_plugin->closeFile(wncid);
     exit(0);
   }
 

@@ -29,7 +29,7 @@ typedef struct {
 
   int (*openRead)(const char * name, SCIL_Datatype_t * out_datatype, scil_dims_t * out_dims, int * ncid, int * rh_id);
   int (*openWrite)(const char * name, SCIL_Datatype_t out_datatype, scil_dims_t out_dims, int * ncid, int * var_id);
-  int (*readChunk)(const int ncid, SCIL_Datatype_t out_datatype, byte ** buf, const int varid, const size_t * pos, const size_t * count);
+  int (*readChunk)(const int ncid, SCIL_Datatype_t out_datatype, byte * buf, const int varid, const size_t * pos, const size_t * count);
   int (*writeChunk)(const int ncid, SCIL_Datatype_t out_datatype, const byte * buf, const int varid, const size_t * pos, const size_t * count);
   int (*closeFile)(const int ncid);
 } scil_file_plugin_t;

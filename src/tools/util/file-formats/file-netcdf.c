@@ -170,7 +170,7 @@ static int readData(const char * name, byte ** out_buf, SCIL_Datatype_t * out_da
       }
 
       size_t input_size;
-      input_size = scil_dims_get_size(out_dims, *out_datatype);
+      input_size = scil_get_compressed_data_size_limit(out_dims, *out_datatype);
       //input_data = (byte*) malloc(scil_get_compressed_data_size_limit(out_dims, *out_datatype));
       input_data = (byte*) scilU_safe_malloc(input_size);
 
