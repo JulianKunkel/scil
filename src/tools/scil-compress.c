@@ -64,6 +64,7 @@ static scil_file_plugin_t * out_plugin = NULL;
 int main(int argc, char ** argv){
   scil_context_t* ctx = NULL;
   scil_user_hints_t hints;
+  scil_user_hints_t hints_cpy;
   scil_user_hints_t out_accuracy;
 
   printf("scil-compress (Git commit:%s)\ncompiler-options: %s\ncompiler-version: %s\n", GIT_VERSION, C_COMPILER_OPTIONS, C_COMPILER_VERSION);
@@ -216,8 +217,12 @@ int main(int argc, char ** argv){
     printf("chunks: %lld | chunk size [%lld] [%lld] [%lld] [%lld]\n\n", chunks_number, count[0], count[1], count[2], count[3]);
     printf("size: %lld\n", array_size);
 
+    scil_user_hints_copy(& hints_cpy, & hints);
+
     /*read, compress, decompress, write in chunks*/
     for (size_t cur_chunk = 0; cur_chunk < chunks_number; cur_chunk++){
+      scil_user_hints_copy(& hints, & hints_cpy);
+
       printf("cur_chunk: %lld | start position [%lld] [%lld] [%lld] [%lld]\n", cur_chunk, pos[0], pos[1], pos[2], pos[3]);
       input_data = (byte*) scilU_safe_malloc(array_size);
       scilU_start_timer(& timer);
