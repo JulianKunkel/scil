@@ -252,6 +252,10 @@ int main(int argc, char ** argv){
 	     max = -min;
         }
 
+        if (min > max){
+            printf("*** [SCIL] warning: only fill values in chunk\n");
+        }
+
         if (fake_abstol_value > 0.0){
           double new_abs_tol = max * fake_abstol_value;
           if ( hints.absolute_tolerance > 0.0 ){
@@ -270,7 +274,11 @@ int main(int argc, char ** argv){
       }
 
       ret = scil_context_create(&ctx, input_datatype, 0, NULL, &hints);
-      assert(ret == SCIL_NO_ERR);
+      if (ret != SCIL_NO_ERR){
+            printf("*** [SCIL] error: datatype is not supported by compressor\n");
+            return 0;
+      }
+
       if (print_hints){
         printf("Effective hints (only needed for compression)\n");
         scil_user_hints_t e = scil_get_effective_hints(ctx);
@@ -312,8 +320,11 @@ int main(int argc, char ** argv){
         }
 
         free(result);
-
-        assert(ret == SCIL_NO_ERR);
+        if(ret != SCIL_NO_ERR){
+          ret = scil_destroy_context(ctx);
+          assert(ret == SCIL_NO_ERR);
+          return 0;
+        }
       }
 
       //write
@@ -366,7 +377,7 @@ int main(int argc, char ** argv){
     //assert(ret == SCIL_NO_ERR);
     ret = in_plugin->closeFile(rncid);
     if (out_file != NULL) ret = out_plugin->closeFile(wncid);
-    exit(0);
+    return 0;
   }
 
   scil_timer timer;
