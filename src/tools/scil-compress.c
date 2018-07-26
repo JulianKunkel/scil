@@ -64,6 +64,7 @@ static scil_file_plugin_t * out_plugin = NULL;
 int main(int argc, char ** argv){
   scil_context_t* ctx = NULL;
   scil_user_hints_t hints;
+  scil_user_hints_t hints_cpy;
   scil_user_hints_t out_accuracy;
 
   printf("scil-compress (Git commit:%s)\ncompiler-options: %s\ncompiler-version: %s\n", GIT_VERSION, C_COMPILER_OPTIONS, C_COMPILER_VERSION);
@@ -153,47 +154,47 @@ int main(int argc, char ** argv){
     size_t chunks_number=1;
     size_t buff_size, input_size;
     //array_size = 1*78*1440*2880*4;
-    
+
     scil_timer timer;
     scil_timer totalRun;
     double t_read = 0.0, t_write = 0.0, t_compress = 0.0, t_decompress = 0.0;
     scilU_start_timer(& totalRun);
-    
+
     ret = in_plugin->openRead(in_file, & input_datatype, & orig_dims, & rncid, & rvarid);
     if (ret != 0){
       printf("The input file %s could not be open\n", in_file);
       exit(1);
     }
-        
+
     if (out_file != NULL){
       if (compress){
         output_datatype = SCIL_TYPE_BINARY;
       }
       else{
         output_datatype = input_datatype;
-      } 
+      }
       ret = in_plugin->openWrite(out_file, output_datatype, orig_dims, & wncid, & wvarid);
       if (ret != 0){
         printf("The input file %s could not be open\n", out_file);
         exit(1);
-      } 
+      }
     }
 
     pos = (size_t*) malloc(orig_dims.dims * sizeof(size_t));
     count = (size_t*) malloc(orig_dims.dims * sizeof(size_t));
-    
+
     for (size_t i = 0; i < orig_dims.dims; i++){
       count[i] = orig_dims.length[i];
       pos[i] = 0;
     }
     array_size = scil_dims_get_size(& orig_dims, input_datatype);
-    
+
     chunks_number = 1;
     int i = 0;
     //split data in chunks
     while (array_size > DATA_SIZE_LIMIT){
       if ((count[i] % 2) == 0){
-        count[i] >>= 1; 
+        count[i] >>= 1;
         chunks_number <<= 1;
         array_size >>= 1;
       }
@@ -211,16 +212,17 @@ int main(int argc, char ** argv){
     for (size_t i = 0; i < dims.dims; i++){
       dims.length[i] = count[i];
     }
-    
+
     printf("orig_dims: [%lld] [%lld] [%lld] [%lld]\n\n", orig_dims.length[0], orig_dims.length[1], orig_dims.length[2], orig_dims.length[3]);
     printf("chunks: %lld | chunk size [%lld] [%lld] [%lld] [%lld]\n\n", chunks_number, count[0], count[1], count[2], count[3]);
     printf("size: %lld\n", array_size);
 
-    ret = scil_context_create(&ctx, input_datatype, 0, NULL, &hints);
-    assert(ret == SCIL_NO_ERR);
+    scil_user_hints_copy(& hints_cpy, & hints);
 
     /*read, compress, decompress, write in chunks*/
     for (size_t cur_chunk = 0; cur_chunk < chunks_number; cur_chunk++){
+      scil_user_hints_copy(& hints, & hints_cpy);
+
       printf("cur_chunk: %lld | start position [%lld] [%lld] [%lld] [%lld]\n", cur_chunk, pos[0], pos[1], pos[2], pos[3]);
       input_data = (byte*) scilU_safe_malloc(array_size);
       scilU_start_timer(& timer);
@@ -250,6 +252,10 @@ int main(int argc, char ** argv){
 	     max = -min;
         }
 
+        if (min > max){
+            printf("*** [SCIL] warning: only fill values in chunk\n");
+        }
+
         if (fake_abstol_value > 0.0){
           double new_abs_tol = max * fake_abstol_value;
           if ( hints.absolute_tolerance > 0.0 ){
@@ -268,13 +274,17 @@ int main(int argc, char ** argv){
       }
 
       ret = scil_context_create(&ctx, input_datatype, 0, NULL, &hints);
-      assert(ret == SCIL_NO_ERR);
+      if (ret != SCIL_NO_ERR){
+            printf("*** [SCIL] error: datatype is not supported by compressor\n");
+            return 0;
+      }
+
       if (print_hints){
         printf("Effective hints (only needed for compression)\n");
         scil_user_hints_t e = scil_get_effective_hints(ctx);
         scil_user_hints_print(& e);
       }
-      
+
       input_size = scil_get_compressed_data_size_limit(&dims, input_datatype);
       //printf("input size: %lld\n", input_size);
       output_data = (byte*) scilU_safe_malloc(input_size);
@@ -310,10 +320,13 @@ int main(int argc, char ** argv){
         }
 
         free(result);
-
-        assert(ret == SCIL_NO_ERR);
+        if(ret != SCIL_NO_ERR){
+          ret = scil_destroy_context(ctx);
+          assert(ret == SCIL_NO_ERR);
+          return 0;
+        }
       }
-      
+
       //write
       // todo reformat into output format, if neccessary
       if (out_file != NULL){
@@ -327,7 +340,7 @@ int main(int argc, char ** argv){
           exit(1);
         }
       }
-            
+
       if(measure_time){
         printf("Size:\n");
         printf(" size, %ld\n size_compressed, %ld\n ratio, %f\n", array_size, buff_size, ((double) buff_size) / array_size);
@@ -355,7 +368,7 @@ int main(int argc, char ** argv){
       }
       free(input_data);
       free(output_data);
-      
+
       ret = scil_destroy_context(ctx);
       assert(ret == SCIL_NO_ERR);
     }
@@ -364,7 +377,7 @@ int main(int argc, char ** argv){
     //assert(ret == SCIL_NO_ERR);
     ret = in_plugin->closeFile(rncid);
     if (out_file != NULL) ret = out_plugin->closeFile(wncid);
-    exit(0);
+    return 0;
   }
 
   scil_timer timer;
