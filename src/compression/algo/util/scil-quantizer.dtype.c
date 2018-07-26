@@ -101,11 +101,11 @@ int scil_unquantize_buffer_fill_<DATATYPE>(<DATATYPE>* restrict dest,
     assert(dest != NULL);
     assert(source != NULL);
 
-    double real_tolerance = 2.0 * absolute_tolerance;
+    <DATATYPE> real_tolerance = 2.0 * (<DATATYPE>) absolute_tolerance;
 
     for(size_t i = 0; i < count; ++i){
       if(source[i] != next_free_number){
-        dest[i] = minimum + (<DATATYPE>)(source[i] * real_tolerance);
+        dest[i] = (<DATATYPE>)minimum + (<DATATYPE>)(source[i] * real_tolerance);
       }else{
         dest[i] = fill_value;
       }
