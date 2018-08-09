@@ -663,18 +663,18 @@ void scil_determine_accuracy(SCIL_Datatype_t datatype,
     a.relative_tolerance_percent        = 0;
 
 		switch(datatype){
-    case (SCIL_TYPE_DOUBLE): {
-        a.significant_bits = MANTISSA_LENGTH_DOUBLE; // in bits
-        scil_determine_accuracy_double((double*)data_1,
+    		case (SCIL_TYPE_DOUBLE): {
+        		a.significant_bits = MANTISSA_LENGTH_DOUBLE; // in bits
+        		scil_determine_accuracy_double((double*)data_1,
                                        (double*)data_2,
                                        scil_dims_get_count(dims),
                                        relative_err_finest_abs_tolerance,
                                        &a);
-				break;
-    }
+		break;
+    		}
 		case (SCIL_TYPE_FLOAT) : {
-        a.significant_bits = MANTISSA_LENGTH_FLOAT; // in bits
-        scil_determine_accuracy_float((float*)data_1,
+        		a.significant_bits = MANTISSA_LENGTH_FLOAT; // in bits
+        		scil_determine_accuracy_float((float*)data_1,
                                       (float*)data_2,
                                       scil_dims_get_count(dims),
                                       relative_err_finest_abs_tolerance,
@@ -683,11 +683,7 @@ void scil_determine_accuracy(SCIL_Datatype_t datatype,
 		}
 		case(SCIL_TYPE_INT8):{
 			a.significant_bits = 8;
-			scil_determine_accuracy_int8_t((int8_t*)data_1,
-															(int8_t*)data_2,
-															scil_dims_get_count(dims),
-															relative_err_finest_abs_tolerance,
-															&a);
+			scil_determine_accuracy_int8_t((int8_t*)data_1, (int8_t*)data_2, scil_dims_get_count(dims), relative_err_finest_abs_tolerance, &a);
 			break;
 		}
 		case(SCIL_TYPE_INT16):{
@@ -705,9 +701,9 @@ void scil_determine_accuracy(SCIL_Datatype_t datatype,
 			scil_determine_accuracy_int64_t((int64_t*)data_1, (int64_t*)data_2, scil_dims_get_count(dims), relative_err_finest_abs_tolerance, &a);
 			break;
 		}
-    case(SCIL_TYPE_UNKNOWN) :
-    case(SCIL_TYPE_BINARY):
-    case(SCIL_TYPE_STRING):{
+    		case(SCIL_TYPE_UNKNOWN) :
+    		case(SCIL_TYPE_BINARY):
+    		case(SCIL_TYPE_STRING):{
 			// No relevant comparision
 			*out_hints = a;
 			return;
