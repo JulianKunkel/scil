@@ -5,12 +5,12 @@
 
 #include <scil-util.h>
 
-//Supported datatypes: float double
+//Supported datatypes: int8_t int16_t int32_t int64_t
 // Repeat for each data type
 
 
 uint8_t scil_calculate_bits_needed_<DATATYPE>(<DATATYPE> minimum, <DATATYPE> maximum,  double absolute_tolerance, int reserved_numbers, uint64_t * next_free_number){
-  absolute_tolerance = absolute_tolerance * 2.0;
+  absolute_tolerance = (uint64_t)absolute_tolerance * 2.0;
   if(absolute_tolerance <= 0.0 || (double)(maximum - minimum) < absolute_tolerance){
     if(next_free_number != NULL){
       *next_free_number = 0;
@@ -76,7 +76,7 @@ int scil_quantize_buffer_minmax_fill_<DATATYPE>(uint64_t* restrict dest,
     assert(dest != NULL);
     assert(source != NULL);
 
-    double real_tolerance = (1 / 1.0) / absolute_tolerance;
+    double real_tolerance = (1 / 1.0) / (uint64_t)absolute_tolerance;
     double min_fixed = (double) minimum;
 
     for(size_t i = 0; i < count; ++i){
@@ -101,7 +101,7 @@ int scil_unquantize_buffer_fill_<DATATYPE>(<DATATYPE>* restrict dest,
     assert(dest != NULL);
     assert(source != NULL);
 
-    double real_tolerance = 2.0 * absolute_tolerance;
+    uint64_t real_tolerance = 2.0 * (uint64_t) absolute_tolerance;
 
     for(size_t i = 0; i < count; ++i){
       if(source[i] != next_free_number){
