@@ -16,7 +16,7 @@ void scilU_find_minimum_maximum_with_excluded_points_<DATATYPE>(const <DATATYPE>
     <DATATYPE> max = NINFINITY_<DATATYPE>;
     if (fill_value != DBL_MAX && ignore_up_to != -DBL_MAX && ignore_from != DBL_MAX){
       for(size_t i = 0; i < count; ++i){
-        if (buffer[i] == fill_value){
+        if (fabs(buffer[i] - fill_value) < FLT_EPSILON){
           debugI("%s Ignored some fill value\n", __PRETTY_FUNCTION__);
           continue;
         }
@@ -27,7 +27,7 @@ void scilU_find_minimum_maximum_with_excluded_points_<DATATYPE>(const <DATATYPE>
       }
     }else if (fill_value != DBL_MAX){
       for(size_t i = 0; i < count; ++i){
-        if (buffer[i] == fill_value){
+        if (fabs(buffer[i] - fill_value) < FLT_EPSILON){
           debugI("%s Ignored some fill value\n", __PRETTY_FUNCTION__);
           continue;
         }

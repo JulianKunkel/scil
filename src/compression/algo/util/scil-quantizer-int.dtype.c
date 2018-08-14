@@ -80,7 +80,7 @@ int scil_quantize_buffer_minmax_fill_<DATATYPE>(uint64_t* restrict dest,
     double min_fixed = (double) minimum;
 
     for(size_t i = 0; i < count; ++i){
-      if(source[i] != fill_value){
+      if(source[i] != (<DATATYPE>)fill_value){
         dest[i] = (((uint64_t) ( ((double) source[i] - min_fixed) * real_tolerance )) + 1)>>1;
       }else{
         dest[i] = next_free_number;

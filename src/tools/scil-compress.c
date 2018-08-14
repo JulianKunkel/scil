@@ -264,7 +264,7 @@ int main(int argc, char ** argv){
           }
 
           printf("fake abstol: setting value to %f (min: %f max: %f)\n", new_abs_tol, min, max);
-          hints.absolute_tolerance = new_abs_tol;
+          hints.absolute_tolerance = fabs(new_abs_tol);
         }
 
         if(fake_finest_abstol_value > 0.0){
