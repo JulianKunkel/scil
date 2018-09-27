@@ -16,6 +16,8 @@ void test(int datatype, void * source){
   scil_user_hints_t hints;
   scil_user_hints_initialize(&hints);
 
+  scil_validate_params_t out_validation;
+
   hints.absolute_tolerance  = 1;
 
   scil_context_t* ctx;
@@ -27,7 +29,7 @@ void test(int datatype, void * source){
   printf("Compressed size: %ld\n", compressed_size);
 
   scil_user_hints_t out_accuracy;
-  ret = scil_validate_compression(datatype, source, & dims, dest, compressed_size,  ctx, & out_accuracy);
+  ret = scil_validate_compression(datatype, source, & dims, dest, compressed_size,  ctx, & out_accuracy, & out_validation);
 
   scil_user_hints_print(& out_accuracy);
 

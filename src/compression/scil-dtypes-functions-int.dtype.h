@@ -2,7 +2,7 @@
 // Repeat for each data type
 
 #pragma GCC diagnostic ignored "-Wfloat-equal"
-static void scil_determine_accuracy_<DATATYPE>(const <DATATYPE> *data_1, const <DATATYPE> *data_2, const size_t length, const double relative_err_finest_abs_tolerance, scil_user_hints_t * a){
+static void scil_determine_accuracy_<DATATYPE>(const <DATATYPE> *data_1, const <DATATYPE> *data_2, const size_t length, const double relative_err_finest_abs_tolerance, scil_user_hints_t * a, scil_validate_params_t * out_validation){
 	for(size_t i = 0; i < length; i++ ){
 		const <DATATYPE> c1 = data_1[i];
 		const <DATATYPE> c2 = data_2[i];
@@ -34,9 +34,20 @@ static void scil_determine_accuracy_<DATATYPE>(const <DATATYPE> *data_1, const <
 		}else{
 			cur.relative_err_finest_abs_tolerance = err;
 		}
-		a->absolute_tolerance = max(cur.absolute_tolerance, a->absolute_tolerance);
-		a->relative_err_finest_abs_tolerance = max(cur.relative_err_finest_abs_tolerance, a->relative_err_finest_abs_tolerance);
-		a->relative_tolerance_percent = max(cur.relative_tolerance_percent, a->relative_tolerance_percent);
+
+                if(cur.absolute_tolerance > a->absolute_tolerance){
+                        out_validation->absolute_tolerance_idx = i; 
+                }
+                if(cur.relative_err_finest_abs_tolerance > a->relative_err_finest_abs_tolerance){
+                        out_validation->relative_err_finest_abs_tolerance_idx = i;
+                }
+                if(cur.relative_tolerance_percent > a->relative_tolerance_percent){
+                        out_validation->relative_tolerance_percent_idx = i;
+                }
+
+                a->absolute_tolerance = max(cur.absolute_tolerance, a->absolute_tolerance);
+                a->relative_err_finest_abs_tolerance = max(cur.relative_err_finest_abs_tolerance, a->relative_err_finest_abs_tolerance);
+                a->relative_tolerance_percent = max(cur.relative_tolerance_percent, a->relative_tolerance_percent);
 		a->significant_bits = min(cur.significant_digits, a->significant_bits);
 	}
 }

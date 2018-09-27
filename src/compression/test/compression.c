@@ -131,6 +131,7 @@ int main(){
 	}
 	printf("\n");
 	scil_user_hints_t accuracy;
+        scil_validate_params_t out_validation;
 
 	printf("Testing accuracy first\n");
 
@@ -140,13 +141,13 @@ int main(){
 	scil_dims_t dims1;
 	scil_dims_initialize_1d(&dims1, 1);
 
-	scil_determine_accuracy(SCIL_TYPE_DOUBLE, & f1, &f2, & dims1, 0.01, & accuracy);
+	scil_determine_accuracy(SCIL_TYPE_DOUBLE, & f1, &f2, & dims1, 0.01, & accuracy, & out_validation);
 	scil_user_hints_print(& accuracy);
 
-	scil_determine_accuracy(SCIL_TYPE_DOUBLE, & f1, &f2, & dims1, 0.51, & accuracy);
+	scil_determine_accuracy(SCIL_TYPE_DOUBLE, & f1, &f2, & dims1, 0.51, & accuracy, & out_validation);
 	scil_user_hints_print(& accuracy);
 
-	ret = scil_validate_compression(SCIL_TYPE_DOUBLE, u_buf, & dims, c_buf, c_buf_size, ctx, & accuracy);
+	ret = scil_validate_compression(SCIL_TYPE_DOUBLE, u_buf, & dims, c_buf, c_buf_size, ctx, & accuracy, & out_validation);
 
 	printf("\nscil_validate_compression returned %s\n", ret == 0 ? "OK" : "ERROR");
 	scil_user_hints_print(& accuracy);

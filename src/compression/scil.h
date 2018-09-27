@@ -402,7 +402,8 @@ void scil_determine_accuracy(SCIL_Datatype_t datatype,
                              const void* restrict data_2,
                              scil_dims_t* dims,
                              const double relative_err_finest_abs_tolerance,
-                             scil_user_hints_t *out_hints);
+                             scil_user_hints_t *out_hints,
+                             scil_validate_params_t *out_validation);
 
 /**
  \brief Test method: check if the conditions as specified by ctx are met by
@@ -416,7 +417,8 @@ int scil_validate_compression(SCIL_Datatype_t datatype,
                               byte* restrict data_compressed,
                               const size_t compressed_size,
                               const scil_context_t* ctx,
-                              scil_user_hints_t *out_accuracy);
+                              scil_user_hints_t *out_accuracy,
+                              scil_validate_params_t *out_validation);
 
 
 #endif

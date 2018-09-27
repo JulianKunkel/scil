@@ -39,7 +39,8 @@ int main(void)
     }
 
     scil_user_hints_t out_accuracy;
-    ret = scil_validate_compression(SCIL_TYPE_DOUBLE, source, & dims, dest, compressed_size,  ctx, & out_accuracy);
+    scil_validate_params_t out_validation;
+    ret = scil_validate_compression(SCIL_TYPE_DOUBLE, source, & dims, dest, compressed_size,  ctx, & out_accuracy, & out_validation);
 
     scil_user_hints_print(& out_accuracy);
 

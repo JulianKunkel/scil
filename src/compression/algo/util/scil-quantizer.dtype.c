@@ -36,7 +36,7 @@ int scil_quantize_buffer_minmax_<DATATYPE>(uint64_t* restrict dest,
     assert(dest != NULL);
     assert(source != NULL);
 
-    double real_tolerance = 1 / absolute_tolerance;
+    double real_tolerance = (1 / 1.0) / absolute_tolerance;
     double min_fixed = (double) minimum;
 
     for(size_t i = 0; i < count; ++i){
@@ -54,13 +54,14 @@ int scil_unquantize_buffer_<DATATYPE>(<DATATYPE>* restrict dest,
 
     assert(dest != NULL);
     assert(source != NULL);
-    double abstol = 2*absolute_tolerance;
+
+    double real_tolerance = 2.0 * absolute_tolerance;
 
     for(size_t i = 0; i < count; ++i){
-        dest[i] = minimum + (<DATATYPE>)(source[i] * abstol);
+        dest[i] = (<DATATYPE>)minimum + (<DATATYPE>)(source[i] * real_tolerance);
     }
 
-    return 0;
+    return SCIL_NO_ERR;
 }
 
 
@@ -111,7 +112,7 @@ int scil_unquantize_buffer_fill_<DATATYPE>(<DATATYPE>* restrict dest,
       }
     }
 
-    return 0;
+    return SCIL_NO_ERR;
 }
 
 

@@ -43,7 +43,7 @@ static char * in_file = "";
 static char * out_file = NULL;
 static int compute_residual = 0;
 static int use_chunks = 0;
-
+static int scientific_validation = 0;
 
 static int use_max_value_as_fill_value = 0;
 static int measure_time = 0;
@@ -66,6 +66,7 @@ int main(int argc, char ** argv){
   scil_user_hints_t hints;
   scil_user_hints_t hints_cpy;
   scil_user_hints_t out_accuracy;
+  scil_validate_params_t out_validation;  
 
   printf("scil-compress (Git commit:%s)\ncompiler-options: %s\ncompiler-version: %s\n", GIT_VERSION, C_COMPILER_OPTIONS, C_COMPILER_VERSION);
   double fake_abstol_value = 0;
@@ -104,6 +105,7 @@ int main(int argc, char ** argv){
     {0, "hint-fake-relative_err_finest_abs_tolerance", "This is a fake hint. Actually it sets the finest abstol value based on the given percentage (enter 0.1 aka 10%% tolerance)",  OPTION_OPTIONAL_ARGUMENT, 'F', & fake_finest_abstol_value},
     {0, "cycle", "For testing: Compress, then decompress and store the output. Files are CSV files",OPTION_FLAG, 'd' , & cycle},
     {0, "use_chunks", "For testing: use chunks",OPTION_FLAG, 'd' , & use_chunks},
+    {0, "scientific_validation", "", OPTION_FLAG, 'd', & scientific_validation},
     LAST_OPTION
   };
 
@@ -144,7 +146,10 @@ int main(int argc, char ** argv){
   SCIL_Datatype_t input_datatype;
   size_t read_data_size;
   size_t array_size;
-
+  
+  out_validation.absolute_tolerance_idx = 0;
+  out_validation.relative_tolerance_percent_idx = 0;
+  out_validation.relative_err_finest_abs_tolerance_idx = 0;
 
   if (use_chunks){
     int rncid, rvarid, wncid, wvarid;
@@ -153,7 +158,6 @@ int main(int argc, char ** argv){
     size_t * count;
     size_t chunks_number=1;
     size_t buff_size, input_size;
-    //array_size = 1*78*1440*2880*4;
 
     scil_timer timer;
     scil_timer totalRun;
@@ -217,7 +221,9 @@ int main(int argc, char ** argv){
     printf("chunks: %lld | chunk size [%lld] [%lld] [%lld] [%lld]\n\n", chunks_number, count[0], count[1], count[2], count[3]);
     printf("size: %lld\n", array_size);
 
-    scil_user_hints_copy(& hints_cpy, & hints);
+    //scil_user_hints_copy(& hints_cpy, & hints);
+    ret = scil_context_create(&ctx, input_datatype, 0, NULL, &hints);
+    assert(ret == SCIL_NO_ERR);
 
     /*read, compress, decompress, write in chunks*/
     for (size_t cur_chunk = 0; cur_chunk < chunks_number; cur_chunk++){
@@ -309,7 +315,7 @@ int main(int argc, char ** argv){
         output_datatype = input_datatype;
 
         if (validate) {
-          ret = scil_validate_compression(input_datatype, input_data, &dims, result, buff_size, ctx, &out_accuracy);
+          ret = scil_validate_compression(input_datatype, input_data, &dims, result, buff_size, ctx, &out_accuracy, &out_validation);
           if(ret != SCIL_NO_ERR){
             printf("SCIL validation error!\n");
           }
@@ -465,13 +471,16 @@ int main(int argc, char ** argv){
     output_datatype = input_datatype;
 
     if (validate) {
-        ret = scil_validate_compression(input_datatype, input_data, &dims, result, buff_size, ctx, &out_accuracy);
+        ret = scil_validate_compression(input_datatype, input_data, &dims, result, buff_size, ctx, &out_accuracy, &out_validation);
         if(ret != SCIL_NO_ERR){
           printf("SCIL validation error!\n");
         }
         if(print_hints){
           printf("Validation accuracy:");
           scil_user_hints_print(& out_accuracy);
+	  if (scientific_validation){
+            printf("Scientific Validation:\n\tabsolute_tolerance_idx: %lu \n\trelative_err_finest_abs_tolerance_idx: %lu \n\trelative_tolerance_percent_idx: %lu \n", out_validation.absolute_tolerance_idx, out_validation.relative_err_finest_abs_tolerance_idx, out_validation.relative_tolerance_percent_idx);
+          }
         }
     }
     ret = scil_destroy_context(ctx);
@@ -485,13 +494,16 @@ int main(int argc, char ** argv){
     assert(ret == SCIL_NO_ERR);
 
     if (validate) {
-        ret = scil_validate_compression(input_datatype, input_data, &dims, output_data, buff_size, ctx, &out_accuracy);
+        ret = scil_validate_compression(input_datatype, input_data, &dims, output_data, buff_size, ctx, &out_accuracy, &out_validation);
         if(ret != SCIL_NO_ERR){
           printf("SCIL validation error!\n");
         }
         if(print_hints){
           printf("Validation accuracy:");
           scil_user_hints_print(& out_accuracy);
+	  if (scientific_validation){
+            printf("Scientific Validation:\n\tabsolute_tolerance_idx: %lu \n\trelative_err_finest_abs_tolerance_idx: %lu \n\trelative_tolerance_percent_idx: %lu \n", out_validation.absolute_tolerance_idx, out_validation.relative_err_finest_abs_tolerance_idx, out_validation.relative_tolerance_percent_idx);
+          }
         }
     }
     ret = scil_destroy_context(ctx);

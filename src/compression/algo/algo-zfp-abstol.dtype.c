@@ -150,7 +150,8 @@ int scil_zfp_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
                             const size_t in_size)
 {
     int ret = 0;
-    double tolerance, fill_value;
+    double tolerance;
+    double fill_value = DBL_MAX;
     double next_free_number;
     int size = in_size;
     size_t count = scil_dims_get_count(dims);

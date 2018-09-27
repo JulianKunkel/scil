@@ -756,7 +756,7 @@ int scil_sigbits_decompress_<DATATYPE>(<DATATYPE>*restrict dest,
     assert(dims != NULL);
     assert(source != NULL);
 
-    double fill_value = 0;
+    double fill_value = DBL_MAX;
 
     // ==================== Initialization =====================================
 

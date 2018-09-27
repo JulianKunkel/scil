@@ -165,7 +165,7 @@ int scil_abstol_decompress_<DATATYPE>(<DATATYPE>* restrict dest,
     assert(dims != NULL);
 
     double min, abs_tol;
-    double fill_value;
+    double fill_value = DBL_MAX;
     uint8_t bits_per_value;
     byte* in = source;
     size_t in_size = source_size;

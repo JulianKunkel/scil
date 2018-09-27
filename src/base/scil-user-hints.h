@@ -1,6 +1,7 @@
 #ifndef SCIL_USER_HINTS_H
 #define SCIL_USER_HINTS_H
 
+#include <stdlib.h>
 #include <scil-datatypes.h>
 
 // ############################################################################
@@ -45,6 +46,13 @@ typedef struct
 // These values define the limit for the accuracy
 #define SCIL_ACCURACY_DBL_FINEST 1e-307
 #define SCIL_ACCURACY_INT_FINEST -1
+
+typedef struct
+{
+  size_t absolute_tolerance_idx;
+  size_t relative_tolerance_percent_idx;
+  size_t relative_err_finest_abs_tolerance_idx;
+} scil_validate_params_t;
 
 /**
  * \brief Struct containing information on the tolerable

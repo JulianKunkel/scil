@@ -654,9 +654,16 @@ void scil_determine_accuracy(SCIL_Datatype_t datatype,
                              const void* restrict data_2,
                              scil_dims_t* dims,
                              const double relative_err_finest_abs_tolerance,
-                             scil_user_hints_t* out_hints) {
+                             scil_user_hints_t* out_hints,
+                             scil_validate_params_t *out_validation) {
     scil_user_hints_t a;
     scil_user_hints_initialize(&a);
+
+    scil_validate_params_t validation_params;
+
+    validation_params.absolute_tolerance_idx = 0;
+    validation_params.relative_tolerance_percent_idx = 0;
+    validation_params.relative_err_finest_abs_tolerance_idx = 0;
 
     a.absolute_tolerance                = 0;
     a.relative_err_finest_abs_tolerance = 0;
@@ -669,7 +676,8 @@ void scil_determine_accuracy(SCIL_Datatype_t datatype,
                                        (double*)data_2,
                                        scil_dims_get_count(dims),
                                        relative_err_finest_abs_tolerance,
-                                       &a);
+                                       &a,
+                                       &validation_params);
 		break;
     		}
 		case (SCIL_TYPE_FLOAT) : {
@@ -678,27 +686,28 @@ void scil_determine_accuracy(SCIL_Datatype_t datatype,
                                       (float*)data_2,
                                       scil_dims_get_count(dims),
                                       relative_err_finest_abs_tolerance,
-                                      &a);
+                                      &a,
+                                      &validation_params);
     		break;
 		}
 		case(SCIL_TYPE_INT8):{
 			a.significant_bits = 8;
-			scil_determine_accuracy_int8_t((int8_t*)data_1, (int8_t*)data_2, scil_dims_get_count(dims), relative_err_finest_abs_tolerance, &a);
+			scil_determine_accuracy_int8_t((int8_t*)data_1, (int8_t*)data_2, scil_dims_get_count(dims), relative_err_finest_abs_tolerance, &a, &validation_params);
 			break;
 		}
 		case(SCIL_TYPE_INT16):{
 			a.significant_bits = 16;
-			scil_determine_accuracy_int16_t((int16_t*)data_1, (int16_t*)data_2, scil_dims_get_count(dims), relative_err_finest_abs_tolerance, &a);
+			scil_determine_accuracy_int16_t((int16_t*)data_1, (int16_t*)data_2, scil_dims_get_count(dims), relative_err_finest_abs_tolerance, &a, &validation_params);
 			break;
 		}
 		case(SCIL_TYPE_INT32):{
 			a.significant_bits = 32;
-			scil_determine_accuracy_int32_t((int32_t*)data_1, (int32_t*)data_2, scil_dims_get_count(dims), relative_err_finest_abs_tolerance, &a);
+			scil_determine_accuracy_int32_t((int32_t*)data_1, (int32_t*)data_2, scil_dims_get_count(dims), relative_err_finest_abs_tolerance, &a, &validation_params);
 			break;
 		}
 		case(SCIL_TYPE_INT64):{
 			a.significant_bits = 64;
-			scil_determine_accuracy_int64_t((int64_t*)data_1, (int64_t*)data_2, scil_dims_get_count(dims), relative_err_finest_abs_tolerance, &a);
+			scil_determine_accuracy_int64_t((int64_t*)data_1, (int64_t*)data_2, scil_dims_get_count(dims), relative_err_finest_abs_tolerance, &a, &validation_params);
 			break;
 		}
     		case(SCIL_TYPE_UNKNOWN) :
@@ -718,12 +727,15 @@ void scil_determine_accuracy(SCIL_Datatype_t datatype,
         a.relative_err_finest_abs_tolerance = a.absolute_tolerance;
     }
 
+    *out_validation = validation_params;
     *out_hints = a;
 }
 
-int scil_validate_compression(SCIL_Datatype_t datatype, const void* restrict data_uncompressed, scil_dims_t* dims, byte* restrict data_compressed, const size_t compressed_size, const scil_context_t* ctx, scil_user_hints_t* out_accuracy) {
+int scil_validate_compression(SCIL_Datatype_t datatype, const void* restrict data_uncompressed, scil_dims_t* dims, byte* restrict data_compressed, const size_t compressed_size, const scil_context_t* ctx, scil_user_hints_t* out_accuracy, scil_validate_params_t* out_validation) {
     scil_dims_t* resized_dims = malloc(sizeof(scil_dims_t));
     memset(resized_dims, 0, sizeof(scil_dims_t));
+
+    scil_validate_params_t validation_params;
 
     if(dims->dims > 4){
       resized_dims->dims = 4;
@@ -746,6 +758,7 @@ int scil_validate_compression(SCIL_Datatype_t datatype, const void* restrict dat
         return SCIL_MEMORY_ERR;
     }
     scil_user_hints_t a;
+    scil_user_hints_initialize(&a);
 
     memset(data_out, -1, length);
 
@@ -757,19 +770,18 @@ int scil_validate_compression(SCIL_Datatype_t datatype, const void* restrict dat
     if (ctx->lossless_compression_needed) {
         // check bytes for identity
         ret = memcmp(data_out, (byte*)data_uncompressed, length);
-        memset(&a, 0, sizeof(a));
 
         if (!ctx->lossless_compression_needed) {
             printf(
                 "INFO: can check only for identical data as data is not a "
                 "multiple of DataType\n");
         } else {
-            scil_determine_accuracy( datatype, data_out, data_uncompressed, resized_dims, ctx->hints.relative_err_finest_abs_tolerance, &a);
+            scil_determine_accuracy( datatype, data_out, data_uncompressed, resized_dims, ctx->hints.relative_err_finest_abs_tolerance, &a, &validation_params);
         }
         goto end;
     } else {
         // determine achieved accuracy
-        scil_determine_accuracy(datatype, data_out, data_uncompressed, resized_dims, ctx->hints.relative_err_finest_abs_tolerance, &a);
+        scil_determine_accuracy(datatype, data_out, data_uncompressed, resized_dims, ctx->hints.relative_err_finest_abs_tolerance, &a, &validation_params);
 
         const scil_user_hints_t h = ctx->hints;
 
@@ -812,6 +824,7 @@ int scil_validate_compression(SCIL_Datatype_t datatype, const void* restrict dat
     }
 end:
     free(data_out);
+    *out_validation = validation_params;
     *out_accuracy = a;
 
     return ret;

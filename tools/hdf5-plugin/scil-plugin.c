@@ -26,8 +26,6 @@
 #include <scil.h>
 #include <scil-util.h>
 
-#define DEBUG
-
 #ifdef DEBUG
 #define debug(...) printf("[SCIL HDF5] "__VA_ARGS__)
 #else
@@ -112,7 +110,7 @@ typedef struct {
 } plugin_config_persisted;
 
 static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
-	debug("compressorSetLocal()\n");
+	//debug("compressorSetLocal()\n");
 	int rank = H5Sget_simple_extent_ndims(space);
 	if(rank <= 0) return -4;
 
@@ -213,7 +211,7 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 }
 
 static size_t compressorFilter(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nBytes, size_t *buf_size, void **buf){
-	debug("compressorFilter called %d %lld %lld %d \n", flags, (long long) nBytes, (long long) * buf_size, (int) cd_nelmts);
+	//debug("compressorFilter called %d %lld %lld %d \n", flags, (long long) nBytes, (long long) * buf_size, (int) cd_nelmts);
 
 	size_t out_size = *buf_size;
 	int ret;
@@ -268,7 +266,7 @@ herr_t H5Pset_scil_user_hints_t(hid_t dcpl, scil_user_hints_t * hints){
 	memcpy(hints_new, hints, sizeof(scil_user_hints_t));
 	memcpy(& cd_values[0], & hints_new, sizeof(void *));
 	//printf("set %u %u \n", cd_values[0], cd_values[1]);
-	debug("H5Pset_scil_user_hints_t hints:%p\n", (void*) hints_new);
+	//debug("H5Pset_scil_user_hints_t hints:%p\n", (void*) hints_new);
 
 	return H5Pmodify_filter( dcpl, SCIL_ID, H5Z_FLAG_MANDATORY, 2, (unsigned*) cd_values );
 }

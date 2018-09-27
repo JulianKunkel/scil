@@ -27,7 +27,7 @@
 void * scilU_safe_malloc(size_t size){
   void * p = malloc(size);
   if( p == NULL ){
-    printf("[SCIL] Could not allocate %lld bytes\n", (long long) size);
+    printf("[SCIL] Could not allocate %llu bytes\n", (unsigned long long) size);
     exit(1);
   }
   return p;

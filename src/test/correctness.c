@@ -47,6 +47,7 @@ int test_correctness(const char* name, double* buffer_in, scil_dims_t dims)
     scil_context_t* ctx;
     scil_user_hints_t hints;
     scil_user_hints_t out_accuracy;
+    scil_validate_params_t out_validation;
 
     scil_user_hints_initialize(&hints);
     hints.absolute_tolerance = 0.01;
@@ -107,7 +108,7 @@ int test_correctness(const char* name, double* buffer_in, scil_dims_t dims)
         double seconds_decompress = scilU_stop_timer(timer);
 
         if (ret_d == 0) {
-            ret_v = scil_validate_compression(SCIL_TYPE_DOUBLE, buffer_in, &dims, buffer_out, out_c_size, ctx, &out_accuracy);
+            ret_v = scil_validate_compression(SCIL_TYPE_DOUBLE, buffer_in, &dims, buffer_out, out_c_size, ctx, &out_accuracy, &out_validation);
         }
 
         size_t u_size = variableSize * sizeof(double);
