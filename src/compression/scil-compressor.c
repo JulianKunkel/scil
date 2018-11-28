@@ -9,6 +9,9 @@
 #include <algo/algo-zfp-abstol.h>
 #include <algo/algo-zfp-precision.h>
 #include <algo/lz4fast.h>
+#include <algo/zstd.h>
+#include <algo/zstd-11.h>
+#include <algo/zstd-22.h>
 #include <algo/precond-dummy.h>
 #include <algo/algo-quantize.h>
 #include <algo/algo-swage.h>
@@ -49,6 +52,9 @@ static scilU_algorithm_t* algo_array[] = {
 	& algo_sz, // 13
 	& algo_precond_delta, // 14
 	& algo_precond_fp_delta, // 15
+  	& algo_zstd,
+  	& algo_zstd11,
+  	& algo_zstd22,
 	NULL
 };
 
