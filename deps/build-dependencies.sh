@@ -95,6 +95,12 @@ if [[ ! -e "$SRC/lz4" ]] ; then
 	popd
 fi
 
+if [[ ! -e "$SRC/zstd" ]] ; then
+	pushd "$SRC"
+	git clone https://github.com/facebook/zstd.git
+	popd
+fi
+
 if [[ $DOWNLOAD_ONLY == 1 ]] ; then
   exit 0
 fi
@@ -144,6 +150,16 @@ if [[ ! -e liblz4.a ]] ; then
 	BUILD=1
 fi
 
+if [[ ! -e libzstd.a ]] ; then
+    echo "  Building zstd"
+	mkdir -p include/zstd || true
+	pushd "$SRC/zstd/" > /dev/null
+	make clean || true
+	make -j 4 CFLAGS="-fPIC"
+	popd > /dev/null
+	BUILD=1
+fi
+
 if [[ ! -e libsz.a ]] ; then
 	echo "  Building SZ"
 	mkdir SZ || true
@@ -167,8 +183,10 @@ if [[ $BUILD == 1 ]] ; then
 
   rm *.a || true # ignore error
   cp $SRC/lz4/lib/lz4.h include/lz4/
+  cp $SRC/zstd/lib/zstd.h include/zstd/
   cp ./SZ/install/lib/libzlib.a ./SZ/install/lib/libsz.a ./zfp-0.5.0/lib/libzfp.a ./cnoise/libcnoise.a ./fpzip-1.1.0/lib/libfpzip.a .
   cp $SRC/lz4/lib/liblz4.a .
+  cp $SRC/zstd/lib/libzstd.a .
   echo "[OK]"
 else
   echo "[Already built]"
