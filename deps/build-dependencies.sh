@@ -47,7 +47,7 @@ download $ZFP.tar.gz http://computation.llnl.gov/projects/floating-point-compres
 #fi
 =======
 if [[ ! -e "$SRC/$WAVELET.zip" ]] ; then
-	#wget http://eeweb.poly.edu/~onur/$WAVELET.zip -O "$SRC/$WAVELET.zip"
+	# wget http://eeweb.poly.edu/~onur/$WAVELET.zip -O "$SRC/$WAVELET.zip"
 	# new url, md5 checked
 	wget http://www.picb.ac.cn/~xiaohang/vimwiki/study/course/wavelete/wavelet_code.zip -O "$SRC/$WAVELET.zip"
 fi
@@ -98,6 +98,12 @@ fi
 if [[ ! -e "$SRC/zstd" ]] ; then
 	pushd "$SRC"
 	git clone https://github.com/facebook/zstd.git
+	popd
+fi
+
+if [[ ! -e "$SRC/c-blosc" ]] ; then
+	pushd "$SRC"
+	git clone https://github.com/Blosc/c-blosc.git
 	popd
 fi
 
@@ -160,6 +166,20 @@ if [[ ! -e libzstd.a ]] ; then
 	BUILD=1
 fi
 
+if [[ ! -e libblosc.a ]] ; then
+    echo "  Building blosc"
+	mkdir -p include/blosc || true
+	pushd "$SRC/c-blosc/" > /dev/null
+	mkdir build || true
+	cd build
+	cmake -DCMAKE_INSTALL_PREFIX=. ..
+	make clean || true
+	make install -j 4
+	#make -j 4 CFLAGS="-fPIC"
+	popd > /dev/null
+	BUILD=1
+fi
+
 if [[ ! -e libsz.a ]] ; then
 	echo "  Building SZ"
 	mkdir SZ || true
@@ -184,10 +204,13 @@ if [[ $BUILD == 1 ]] ; then
   rm *.a || true # ignore error
   cp $SRC/lz4/lib/lz4.h include/lz4/
   cp $SRC/zstd/lib/zstd.h include/zstd/
+  cp $SRC/c-blosc/build/include/*.h include/blosc/
   cp ./SZ/install/lib/libzlib.a ./SZ/install/lib/libsz.a ./zfp-0.5.0/lib/libzfp.a ./cnoise/libcnoise.a ./fpzip-1.1.0/lib/libfpzip.a .
   cp $SRC/lz4/lib/liblz4.a .
   cp $SRC/zstd/lib/libzstd.a .
+  cp $SRC/c-blosc/build/lib/libblosc.a .
   echo "[OK]"
 else
   echo "[Already built]"
 fi
+
