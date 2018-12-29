@@ -49,7 +49,7 @@ download $ZFP.tar.gz http://computation.llnl.gov/projects/floating-point-compres
 if [[ ! -e "$SRC/$WAVELET.zip" ]] ; then
 	# wget http://eeweb.poly.edu/~onur/$WAVELET.zip -O "$SRC/$WAVELET.zip"
 	# new url, md5 checked
-	wget http://www.picb.ac.cn/~xiaohang/vimwiki/study/course/wavelete/wavelet_code.zip -O "$SRC/$WAVELET.zip"
+	wget https://s3.eu-central-1.amazonaws.com/jupublic/wavelet_code.zip -O "$SRC/$WAVELET.zip"
 fi
 
 if [[ ! -e "$TGT/$WAVELET"&& $DOWNLOAD_ONLY == 0 ]] ; then
