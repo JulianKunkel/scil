@@ -55,6 +55,42 @@ static void parse_losless_list(){
 
 void scilC_algo_chooser_initialize(){
   int ret;
+
+  /*
+   * Handling of optional variable - compressor mapping file
+   */
+  char * var_compressor_file = getenv("SCIL_VARIABLE_MAPPING_FILE");
+  if(var_compressor_file != NULL){
+    FILE * var_compressor_data = fopen(var_compressor_file, "r");
+    char * line = NULL;
+    size_t len = 0;
+    int lines = 0; // -1 to skip header
+    while (getline(&line, &len, var_compressor_data) != -1) {
+        ++lines;
+    }
+    rewind(var_compressor_data);
+
+    variable_dict = scilU_dict_create(lines-1);
+    size_t linenumber = 0;
+    char *delimiter = ",";
+    while (getline(&line, &len, var_compressor_data) != -1) {
+        if(linenumber>0){ // Skip header
+            char *variable_name = strtok(line, delimiter);
+            char *compressor_name = strtok(NULL, delimiter);
+            scilU_dict_put(variable_dict, variable_name, compressor_name);
+            //printf("Var: %s | Comp: %s", variable_name, scilU_dict_get(variable_dict, variable_name)->value);
+        }
+        ++linenumber;
+    }
+    fclose(var_compressor_data);
+    if(line != NULL){
+      free(line);
+    }
+  }
+
+  /*
+   * System characteristics
+   */
   char * filename = getenv("SCIL_SYSTEM_CHARACTERISTICS_FILE");
   if(filename == NULL){
     filename = SYSTEM_CONFIGURATION_FILE;

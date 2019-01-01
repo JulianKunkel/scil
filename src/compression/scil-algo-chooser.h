@@ -18,6 +18,9 @@
 
 #include <scil-context.h>
 #include <scil-dims.h>
+#include <scil-dict.h>
+
+scilU_dict_t *variable_dict;
 
 void scilC_algo_chooser_initialize();
 

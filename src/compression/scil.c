@@ -160,6 +160,13 @@ int scil_compress(byte* restrict dest,
     size_t input_size           = scil_dims_get_size(resized_dims, ctx->datatype);
     const size_t datatypes_size = input_size;
 
+
+    /*
+     * TODO: Available information
+    printf("Size: %ld | Type: %s | Fill Value: %0.14E | Dims: %d | Dim Layout: ", input_size, scil_datatype_to_str(ctx->datatype), *((float*) ctx->special_values), dims->dims);
+    scilU_print_dims(*dims);
+    printf("\n");
+    */
 	// Skip the compression if input size is 0 and set destination buffer to a single 0 and size 1
     if (datatypes_size == 0) {
         out_size_p[0] = 1;
@@ -173,11 +180,24 @@ int scil_compress(byte* restrict dest,
         return SCIL_MEMORY_ERR;
     }
 
-	// Set local references of hints and compression chain
+    // Check for variable - compressor mapping
+    if(variable_dict->size > 0) {
+        char* h5name = getenv("H5REPACK_VARIABLE");
+        if(strlen(h5name)>0) {
+            scilU_dict_element_t *element = scilU_dict_get(variable_dict, h5name);
+            if (element != NULL) {
+                // TODO: Check existence? scilU_find_compressor_by_name
+                ctx->hints.force_compression_methods = element->value;
+                //printf("H5: %s | compressor: %s\n", h5name, element->value);
+            }
+        }
+    }
+
+    // Set local references of hints and compression chain
     const scil_user_hints_t *hints = &ctx->hints;
     scil_compression_chain_t* chain  = &ctx->chain;
 
-	// Check whether automatic compressor decision can be skipped because of a user forced chain
+    // Check whether automatic compressor decision can be skipped because of a user forced chain
     if (hints->force_compression_methods == NULL) {
         scilC_algo_chooser_execute(source, resized_dims, ctx);
     }
@@ -238,7 +258,6 @@ int scil_compress(byte* restrict dest,
             remaining_compressors--;
             out_size += header_size_out;
             header   += header_size_out;
-
             *header = algo->compressor_id;
             debugI(
                 "C compressor ID %d at pos %llu\n", *header, (long long unsigned)header)
