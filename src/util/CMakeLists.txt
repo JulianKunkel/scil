@@ -10,11 +10,9 @@ list(REMOVE_ITEM UTIL_FILES ${REMOVE})
 
 # add files from src/base directory
 FILE(GLOB CORE_FILES ${CMAKE_SOURCE_DIR}/base/*.c ${CMAKE_BINARY_DIR}/base/*.c)
-
 add_library(scil-util SHARED
 	${UTIL_FILES}
-	${CORE_FILES}
-)
+	${CORE_FILES})
 
 target_link_libraries(scil-util
 	${GCOV_LIBRARIES}

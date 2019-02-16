@@ -19,8 +19,10 @@
 #include <scil-context.h>
 #include <scil-dims.h>
 #include <scil-dict.h>
+#include <scil-decision-tree.h>
 
 scilU_dict_t *variable_dict;
+scilU_decision_tree* decision_tree;
 
 void scilC_algo_chooser_initialize();
 

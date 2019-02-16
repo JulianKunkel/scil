@@ -163,7 +163,9 @@ int scil_compress(byte* restrict dest,
 
     /*
      * TODO: Available information
-    printf("Size: %ld | Type: %s | Fill Value: %0.14E | Dims: %d | Dim Layout: ", input_size, scil_datatype_to_str(ctx->datatype), *((float*) ctx->special_values), dims->dims);
+     */
+    /*
+    printf("Size: %ld | Type: %s | Fill Value: %0.14E | Dims: %d | Dim Layout: ", input_size, scil_datatype_to_str(ctx->datatype), *((double*) ctx->special_values), dims->dims);
     scilU_print_dims(*dims);
     printf("\n");
     */
@@ -181,16 +183,21 @@ int scil_compress(byte* restrict dest,
     }
 
     // Check for variable - compressor mapping
-    if(variable_dict->size > 0) {
+    if(variable_dict != NULL) {
         char* h5name = getenv("H5REPACK_VARIABLE");
         if(strlen(h5name)>0) {
             scilU_dict_element_t *element = scilU_dict_get(variable_dict, h5name);
             if (element != NULL) {
                 // TODO: Check existence? scilU_find_compressor_by_name
                 ctx->hints.force_compression_methods = element->value;
-                //printf("H5: %s | compressor: %s\n", h5name, element->value);
+                warn("H5: %s | compressor: %s\n", h5name, element->value);
             }
         }
+    }else if(decision_tree != NULL){
+      // TODO: Gather all required infos to apply to tree
+      double features[] = {32.0,9142272.0,2285568.0,4.0,5.0,9.96920996838687e+36,3.0,124.0,96.0,192.0,0.0,0.0,1.0,1.0,0.0,0.0,1.0};
+      char* predicted = scilU_tree_predict(decision_tree, 0, features);
+      warn("Predicted: %s\n", predicted);
     }
 
     // Set local references of hints and compression chain
