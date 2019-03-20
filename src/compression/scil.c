@@ -164,11 +164,11 @@ int scil_compress(byte* restrict dest,
     /*
      * TODO: Available information
      */
-    /*
-    printf("Size: %ld | Type: %s | Fill Value: %0.14E | Dims: %d | Dim Layout: ", input_size, scil_datatype_to_str(ctx->datatype), *((double*) ctx->special_values), dims->dims);
+
+    printf("Size: %ld | Type: %s | Fill Value: %0.5E | Dims: %d | Dim Layout: ", input_size, scil_datatype_to_str(ctx->datatype), ctx->special_values->fill_value, dims->dims);
     scilU_print_dims(*dims);
     printf("\n");
-    */
+
 	// Skip the compression if input size is 0 and set destination buffer to a single 0 and size 1
     if (datatypes_size == 0) {
         out_size_p[0] = 1;
@@ -198,6 +198,12 @@ int scil_compress(byte* restrict dest,
       double features[] = {32.0,9142272.0,2285568.0,4.0,5.0,9.96920996838687e+36,3.0,124.0,96.0,192.0,0.0,0.0,1.0,1.0,0.0,0.0,1.0};
       char* predicted = scilU_tree_predict(decision_tree, 0, features);
       warn("Predicted: %s\n", predicted);
+      /*
+      warn("Dim 0: %s\n", getenv("H5REPACK_DIM_0"));
+      warn("Dim 1: %s\n", getenv("H5REPACK_DIM_1"));
+      warn("Dim 2: %s\n", getenv("H5REPACK_DIM_2"));
+      warn("Dim 3: %s\n", getenv("H5REPACK_DIM_3"));
+      */
     }
 
     // Set local references of hints and compression chain
