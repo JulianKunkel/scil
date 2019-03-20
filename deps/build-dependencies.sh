@@ -28,22 +28,22 @@ function download(){
 
 ZFP=zfp-0.5.0
 FPZIP=fpzip-1.1.0
-WAVELET=wavelet_code
+
 
 download $FPZIP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download
 download $ZFP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download
 
-if [[ ! -e "$SRC/$WAVELET.zip" ]] ; then
-	wget http://eeweb.poly.edu/~onur/$WAVELET.zip -O "$SRC/$WAVELET.zip"
-fi
-
-if [[ ! -e "$TGT/$WAVELET"&& $DOWNLOAD_ONLY == 0 ]] ; then
-	unzip "$SRC/$WAVELET.zip" -d "$TGT/$WAVELET"
-	if [[ $? != 0 ]] ; then
-		echo "Error unzip $SRC/$1"
-		exit 1
-	fi
-fi
+#WAVELET=wavelet_code
+#if [[ ! -e "$SRC/$WAVELET.zip" ]] ; then
+#	wget http://eeweb.poly.edu/~onur/$WAVELET.zip -O "$SRC/$WAVELET.zip"
+#fi
+#if [[ ! -e "$TGT/$WAVELET"&& $DOWNLOAD_ONLY == 0 ]] ; then
+#	unzip "$SRC/$WAVELET.zip" -d "$TGT/$WAVELET"
+#	if [[ $? != 0 ]] ; then
+#		echo "Error unzip $SRC/$1"
+#		exit 1
+#	fi
+#fi
 
 if [[ ! -e "$SRC/cnoise/test/test_output.txt" ]] ; then
 	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/cnoise.c -P "$SRC/cnoise/"

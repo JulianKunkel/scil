@@ -70,11 +70,6 @@ find_library(LIBZ_LIBRARIES NAMES z PATHS ENV ${ADDITIONAL_LIB_PATH})
 find_path(LIBGSL_INCLUDE_DIRS NAMES gsl/gsl_errno.h PATHS ENV ${ADDITIONAL_INC_PATH})
 find_library(LIBGSL_LIBRARIES NAMES gsl PATHS ENV ${ADDITIONAL_LIB_PATH})
 
-find_path(LIBNETCDF_INCLUDE_DIRS NAMES netcdf.h PATHS "/home/ana/work/install/netcdf/4.4.1.1/include")
-find_library(LIBNETCDF_LIBRARIES NAMES netcdf PATHS "/home/ana/work/install/netcdf/4.4.1.1/lib")
-
-#set (LIBNETCDF_INCLUDE_DIRS "/home/ana/work/install/netcdf/4.4.1.1/include")
-#set (LIBNETCDF_LIBRARIES "/home/ana/work/install/netcdf/4.4.1.1/lib/netcdf.so")
 ##### ENDIANESS
 
 set(ENDIANESS "undefined" CACHE STRING "Endianess")

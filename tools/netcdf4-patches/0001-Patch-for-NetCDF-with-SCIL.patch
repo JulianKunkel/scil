@@ -142,7 +142,7 @@ index ac216b9..3b4148d 100644
 +  assert(nc && grp && h5);
 +
 +  /* Find the var. */
-+  for (var = grp->var; var; var = var->l.next)
++  for (var = grp->vars; var; var = var->l.next)
 +     if (var->varid == varid)
 +        break;
 +

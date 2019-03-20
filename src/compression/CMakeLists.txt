@@ -13,7 +13,7 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}/algo/util
 
   ${LIBZ_INCLUDE_DIRS}
-  ${DEPS_COMPILED_DIR}/wavelet_code
+#  ${DEPS_COMPILED_DIR}/wavelet_code
   ${DEPS_COMPILED_DIR}/include/zfp
   ${DEPS_COMPILED_DIR}/include/fpzip
   ${DEPS_COMPILED_DIR}/include/sz
@@ -32,9 +32,9 @@ add_library(scil SHARED
   ${ALGO_FILES}
 	${COMPRESS_FILES}
 
-  ${DEPS_COMPILED_DIR}/wavelet_code/alloc.c
-  ${DEPS_COMPILED_DIR}/wavelet_code/wav_basic.c
-  ${DEPS_COMPILED_DIR}/wavelet_code/wav_trf.c
+#  ${DEPS_COMPILED_DIR}/wavelet_code/alloc.c
+#  ${DEPS_COMPILED_DIR}/wavelet_code/wav_basic.c
+#  ${DEPS_COMPILED_DIR}/wavelet_code/wav_trf.c
 )
 
 add_dependencies(scil trigger_datatype_variants)

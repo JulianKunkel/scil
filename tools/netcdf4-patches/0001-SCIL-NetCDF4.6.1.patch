@@ -1,0 +1,229 @@
+From a1f056e7b81ad556517f0be06ecd0ed6735b0a91 Mon Sep 17 00:00:00 2001
+From: "Julian M. Kunkel" <juliankunkel@googlemail.com>
+Date: Wed, 20 Mar 2019 19:18:52 +0000
+Subject: [PATCH] SCIL NetCDF4.6.1
+
+---
+ include/nc4internal.h |  1 +
+ include/ncdispatch.h  |  1 +
+ include/netcdf.h      |  3 +++
+ libdispatch/dvar.c    | 24 +++++++++++++++++++++-
+ libsrc4/nc4hdf.c      |  6 +++++-
+ libsrc4/nc4var.c      | 47 +++++++++++++++++++++++++++++++++++++++++++
+ libsrcp/ncpdispatch.c |  5 +++++
+ 7 files changed, 85 insertions(+), 2 deletions(-)
+
+diff --git a/include/nc4internal.h b/include/nc4internal.h
+index 94c9e21..800790d 100644
+--- a/include/nc4internal.h
++++ b/include/nc4internal.h
+@@ -185,6 +185,7 @@ typedef struct NC_VAR_INFO
+    int deflate_level;
+    nc_bool_t shuffle;           /* True if var has shuffle filter applied */
+    nc_bool_t fletcher32;        /* True if var has fletcher32 filter applied */
++   void * compress_scil;        /* scil_compression */
+    size_t chunk_cache_size, chunk_cache_nelems;
+    float chunk_cache_preemption;
+ #ifdef USE_HDF4
+diff --git a/include/ncdispatch.h b/include/ncdispatch.h
+index 95cf46e..ed46a31 100644
+--- a/include/ncdispatch.h
++++ b/include/ncdispatch.h
+@@ -297,6 +297,7 @@ int (*inq_enum_ident)(int, nc_type, long long, char*);
+ int (*def_opaque)(int, size_t, const char*, nc_type*);
+ int (*def_var_deflate)(int, int, int, int, int);
+ int (*def_var_fletcher32)(int, int, int);
++int (*def_var_scil)(int, int, void*);
+ int (*def_var_chunking)(int, int, int, const size_t*);
+ int (*def_var_endian)(int, int, int);
+ int (*def_var_filter)(int, int, unsigned int, size_t, const unsigned int*);
+diff --git a/include/netcdf.h b/include/netcdf.h
+index bae3e40..e320456 100644
+--- a/include/netcdf.h
++++ b/include/netcdf.h
+@@ -838,6 +838,9 @@ nc_inq_var_szip(int ncid, int varid, int *options_maskp, int *pixels_per_blockp)
+ EXTERNL int
+ nc_def_var_fletcher32(int ncid, int varid, int fletcher32);
+
++EXTERNL int
++nc_def_var_scil(int ncid, int varid, void * scil_hints);
++
+ /* Inquire about fletcher32 checksum for a var. */
+ EXTERNL int
+ nc_inq_var_fletcher32(int ncid, int varid, int *fletcher32p);
+diff --git a/libdispatch/dvar.c b/libdispatch/dvar.c
+index d76f2e5..0b0c35f 100644
+--- a/libdispatch/dvar.c
++++ b/libdispatch/dvar.c
+@@ -8,6 +8,8 @@
+ #include "ncdispatch.h"
+ #include "netcdf_f.h"
+
++#include <scil.h>
++
+ /**
+ \defgroup variables Variables
+
+@@ -622,7 +624,18 @@ nc_def_var_fill(int ncid, int varid, int no_fill, const void *fill_value)
+      * fill_value argument.
+      */
+     if (varid == NC_GLOBAL) return NC_EGLOBAL;
+-
++		if(getenv("NETCDF_SCIL_HINTS_FILE") != NULL){
++		        scil_user_hints_t * hints = malloc(sizeof(scil_user_hints_t));
++                       char name[4096];
++                       int ret = ncvarinq(ncid, varid, name, NULL, NULL, NULL, NULL);
++                       ret = scil_user_hints_load(hints, getenv("NETCDF_SCIL_HINTS_FILE"), name);
++                       if (ret == SCIL_NO_ERR){
++    			   printf("Setting scil hints for variable: %s\n", name);
++			   ncp->dispatch->def_var_scil(ncid, varid, hints);
++                       }else{
++                          free(hints);
++                       }
++		}
+     return ncp->dispatch->def_var_fill(ncid,varid,no_fill,fill_value);
+ }
+
+@@ -1005,6 +1018,15 @@ nc_def_var_chunking(int ncid, int varid, int storage,
+ 					   chunksizesp);
+ }
+
++int
++nc_def_var_scil(int ncid, int varid, void * scil_hints)
++{
++    NC* ncp;
++    int stat = NC_check_id(ncid,&ncp);
++    if(stat != NC_NOERR) return stat;
++    return ncp->dispatch->def_var_scil(ncid, varid, scil_hints);
++}
++
+ /**
+ @ingroup variables
+
+diff --git a/libsrc4/nc4hdf.c b/libsrc4/nc4hdf.c
+index 597f7eb..62ab39c 100644
+--- a/libsrc4/nc4hdf.c
++++ b/libsrc4/nc4hdf.c
+@@ -20,6 +20,7 @@
+ #include "nc4dispatch.h"
+ #include <H5DSpublic.h>
+ #include <math.h>
++#include <scil-hdf5-plugin.h>
+
+ #ifdef HAVE_INTTYPES_H
+ #define __STDC_FORMAT_MACROS
+@@ -1726,8 +1727,11 @@ var_create_dataset(NC_GRP_INFO_T *grp, NC_VAR_INFO_T *var, nc_bool_t write_dimid
+          BAIL(NC_EHDFERR);
+    }
+
++   if(var->compress_scil){
++    if (H5Pset_scil_user_hints_t(plistid, var->compress_scil) < 0)
++      BAIL(NC_EHDFERR);
+    /* If the user wants to deflate the data, set that up now. */
+-   if (var->deflate) {
++   }else if (var->deflate) {
+       if (H5Pset_deflate(plistid, var->deflate_level) < 0)
+          BAIL(NC_EHDFERR);
+    } else if(var->filterid) {
+diff --git a/libsrc4/nc4var.c b/libsrc4/nc4var.c
+index b6cf802..062ae7f 100644
+--- a/libsrc4/nc4var.c
++++ b/libsrc4/nc4var.c
+@@ -1187,6 +1187,53 @@ NC4_def_var_fletcher32(int ncid, int varid, int fletcher32)
+                            NULL, NULL, NULL, NULL, NULL);
+ }
+
++int
++NC4_def_var_scil(int ncid, int varid, void * scil_hints)
++{
++  NC *nc;
++  NC_GRP_INFO_T *grp;
++  NC_HDF5_FILE_INFO_T *h5;
++  NC_VAR_INFO_T *var;
++  NC_DIM_INFO_T *dim;
++  int d;
++  int retval;
++  nc_bool_t ishdf4 = NC_FALSE; /* Use this to avoid so many ifdefs */
++  LOG((2, "%s: ncid 0x%x varid %d", __func__, ncid, varid));
++
++  /* Find info for this file and group, and set pointer to each. */
++  if ((retval = nc4_find_nc_grp_h5(ncid, &nc, &grp, &h5)))
++     return retval;
++
++  #ifdef USE_HDF4
++  ishdf4 = h5->hdf4;
++  #endif
++
++  /* Attempting to do any of these things on a netCDF-3 file produces
++   * an error. */
++  if (!h5)
++     return NC_ENOTNC4;
++  assert(nc && grp && h5);
++  /* Find the var. */
++  if (varid < 0 || varid >= grp->vars.nelems)
++    return NC_ENOTVAR;
++  var = grp->vars.value[varid];
++
++  /* Oh no! Maybe we couldn't find it (*sob*)! */
++  if (!var)
++     return NC_ENOTVAR;
++
++  /* If the HDF5 dataset has already been created, then it is too
++   * late to set all the extra stuff. */
++  if (var->created)
++     return NC_ELATEDEF;
++
++  var->compress_scil = scil_hints;
++  var->contiguous = NC_FALSE;
++
++  return NC_NOERR;
++}
++
++
+ /**
+  * @internal Define chunking stuff for a var. This is called by
+  * nc_def_var_chunking(). Chunking is required in any dataset with one
+diff --git a/libsrcp/ncpdispatch.c b/libsrcp/ncpdispatch.c
+index 92b324c..39f4daf 100644
+--- a/libsrcp/ncpdispatch.c
++++ b/libsrcp/ncpdispatch.c
+@@ -1495,6 +1495,11 @@ NCP_def_var_fletcher32(int ncid, int varid, int fletcher32)
+     return NC_ENOTNC4;
+ }
+
++NCP_def_var_scil(int ncid, int varid, void * scil_hints)
++{
++    return NC_ENOTNC4;
++}
++
+ static int
+ NCP_def_var_chunking(int ncid, int varid, int contiguous, const size_t *chunksizesp)
+ {
+diff --git a/libsrc4/nc4dispatch.c b/libsrc4/nc4dispatch.c
+index 8b7cccb..482b113 100644
+--- a/libsrc4/nc4dispatch.c
++++ b/libsrc4/nc4dispatch.c
+@@ -93,6 +93,7 @@ NC4_inq_enum_ident,
+ NC4_def_opaque,
+ NC4_def_var_deflate,
+ NC4_def_var_fletcher32,
++NC4_def_var_scil,
+ NC4_def_var_chunking,
+ NC4_def_var_endian,
+ NC4_def_var_filter,
+diff --git a/include/nc4dispatch.h b/include/nc4dispatch.h
+index b3827d5..2417d2a 100644
+--- a/include/nc4dispatch.h
++++ b/include/nc4dispatch.h
+@@ -241,6 +241,9 @@ NC4_def_var_deflate(int, int, int, int, int);
+ extern int
+ NC4_def_var_fletcher32(int, int, int);
+
++extern int
++NC4_def_var_scil(int ncid, int varid, void * scil_hints);
++
+ extern int
+ NC4_def_var_chunking(int, int, int, const size_t *);
+
+--
+2.17.1

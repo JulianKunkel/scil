@@ -29,12 +29,9 @@ fprintf(stderr, "Sorry! Unexpected result, %s, line: %d - %s\n", \
 return n; \
 } while (0)
 
-#define NC_COMPRESSED 1
 
 void
 parse_args(int argc, char *argv[], /* from command-line invocation */
-	   int *deflate_levelp,	   /* returned: 0 uncompressed,
-				      1-9 compression level */
 	   int *shufflep,	   /* returned: 1 if shuffle, otherwise 0 */
 	   size_t *dims,	   /* returned: dimension sizes */
 	   size_t *chunks,	   /* returned: chunk sizes */
@@ -43,43 +40,36 @@ parse_args(int argc, char *argv[], /* from command-line invocation */
 	   float *cache_prep)	   /* returned: cache preemption policy (0-1) */
 {
 
-    if(argc > 1) {
-	*deflate_levelp = atol(argv[1]);
-	if (*deflate_levelp < 0) {
-	    *deflate_levelp = -*deflate_levelp;
-	    *shufflep = NC_SHUFFLE;
-	}
-    }
+    if(argc > 1)
+	dims[0] = atol(argv[1]);
     if(argc > 2)
-	dims[0] = atol(argv[2]);
-    if(argc > 3)
-	chunks[0] = atol(argv[3]);
+	chunks[0] = atol(argv[2]);
     else
 	chunks[0] = (dims[0]+7)/8;
-    if(argc > 4)
-	dims[1] = atol(argv[4]);
+    if(argc > 3)
+	dims[1] = atol(argv[3]);
     else
 	dims[1] = dims[0];
-    if(argc > 5)
-	chunks[1] = atol(argv[5]);
+    if(argc > 4)
+	chunks[1] = atol(argv[4]);
     else
 	chunks[1] = chunks[0];
-    if(argc > 6)
-	dims[2] = atol(argv[6]);
+    if(argc > 5)
+	dims[2] = atol(argv[5]);
     else
 	dims[2] = dims[1];
-    if(argc > 7)
-	chunks[2] = atol(argv[7]);
+    if(argc > 6)
+	chunks[2] = atol(argv[6]);
     else
 	chunks[2] = chunks[1];
+    if(argc > 7)
+	*cache_sizep = atol(argv[7]);
     if(argc > 8)
-	*cache_sizep = atol(argv[8]);
+	*cache_nelemsp = atol(argv[8]);
     if(argc > 9)
-	*cache_nelemsp = atol(argv[9]);
-    if(argc > 10)
-	*cache_prep = atof(argv[10]);
-    if(argc > 11) {
-	printf("Usage: %s [def_level] [dim1] [chunk1] [dim2] [chunk2] [dim3] [chunk3] [cache_size] [cache_nelems] [cache_pre]\n",
+	*cache_prep = atof(argv[9]);
+    if(argc > 10) {
+	printf("Usage: %s [dim1] [chunk1] [dim2] [chunk2] [dim3] [chunk3] [cache_size] [cache_nelems] [cache_pre]\n",
 	       argv[0]);
 	exit(1);
     }
@@ -118,9 +108,6 @@ main(int argc, char *argv[]) {
     size_t chunks[] = {32, 32, 32}; /* default chunk sizes */
     size_t start[3], count[3];
     float contig_time, chunked_time, compressed_time, ratio;
-    int deflate_level = 1;	/* default compression level, 9 is
-				 * better and slower.  If negative,
-				 * turn on shuffle filter also. */
     int shuffle = NC_NOSHUFFLE;
     size_t cache_size_def;
     size_t cache_hash_def;
@@ -138,7 +125,7 @@ main(int argc, char *argv[]) {
     /* From args, get parameters for timing, including variable and
        chunk sizes.  Negative deflate level means also use shuffle
        filter. */
-    parse_args(argc, argv, &deflate_level, &shuffle, dims,
+    parse_args(argc, argv, &shuffle, dims,
 	       chunks, &cache_size, &cache_hash, &cache_pre);
 
     /* get cache defaults, then set cache parameters that are not default */
@@ -156,11 +143,6 @@ main(int argc, char *argv[]) {
     printf("cache: %3.2f MBytes  %ld objs  %3.2f preempt, ",
 	   cache_size/1.e6, cache_hash, cache_pre);
 
-    if(deflate_level == 0) {
-	printf("uncompressed        ");
-    } else {
-	printf("compression level %d", deflate_level);
-    }
     if(shuffle == 1) {
 	printf(", shuffled");
     }
@@ -223,16 +205,13 @@ main(int argc, char *argv[]) {
     if((stat = nc_def_var_chunking(ncid, varid_x, NC_CHUNKED, chunks)))
 	ERR1(stat);
 
-    if (deflate_level != 0) {
-	    //if((stat = nc_def_var_deflate(ncid, varid_x, shuffle, NC_COMPRESSED, deflate_level)))
-	    if((stat = nc_def_var_scil(ncid, varid_x, & scil_hints)))
-	    ERR1(stat);
-            if((stat = nc_def_var_fill(ncid, varid_x, NULL, 0)))
-	    ERR1(stat);
-    }
+  if((stat = nc_def_var_scil(ncid, varid_x, & scil_hints)))
+  	ERR1(stat);
+  if((stat = nc_def_var_fill(ncid, varid_x, 0, 0)))
+    	ERR1(stat);
 
     /* leave define mode */
-    if((stat = nc_enddef (ncid)))
+  if((stat = nc_enddef (ncid)))
 	ERR1(stat);
 
     /* write each variable one yz slab at a time */

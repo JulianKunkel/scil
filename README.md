@@ -48,6 +48,8 @@ When running configure, the system will automatically install additional require
 
 + You have to copy the HDF5 wrapper to the plugin install directory of HDF5!
 
+  To build a complete development environment including the prerequisites, see install-dev.md
+
 ## Directory structure
 
 * dev: contains tools for development

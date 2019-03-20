@@ -12,7 +12,7 @@
 #include <algo/precond-dummy.h>
 #include <algo/algo-quantize.h>
 #include <algo/algo-swage.h>
-#include <algo/algo-wavelets.h>
+//#include <algo/algo-wavelets.h>
 #include <algo/algo-allquant.h>
 #include <algo/algo-sz.h>
 #include <algo/precond-delta.h>
@@ -23,6 +23,14 @@
 #include <assert.h>
 #include <ctype.h>
 #include <string.h>
+
+
+scilU_algorithm_t algo_wavelets = {// unimplemented at the moment
+    .name = "wavelets",
+    11,
+    SCIL_COMPRESSOR_TYPE_DATATYPES,
+    1
+};
 
 static scilU_algorithm_t* algo_array[] = {
 	& algo_memcopy,
@@ -128,4 +136,3 @@ scilU_algorithm_t* scilU_find_compressor_by_name(const char* name)
         return algo_array[num];
     }
 }
-
