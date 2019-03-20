@@ -44,3 +44,10 @@ $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$SCIL_INSTALL/lib
 $ ./test-netcdf-scil
 This should show some data:
 $ $SCIL_INSTALL/bin/h5dump -p tst_chunks3.nc | grep -A 30 '"var_compressed"'
+
+Now we test the NetCDF4 native integration with external configuration.
+This requires at the moment that the function nc_def_var_fill() is called from the application.
+
+First, set the configuration file:
+$ export NETCDF_SCIL_HINTS_FILE=./src/compression/test/user-hints.cfg
+$ ./test-netcdf-scil

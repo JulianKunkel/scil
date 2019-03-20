@@ -209,7 +209,8 @@ main(int argc, char *argv[]) {
   	ERR1(stat);
   if((stat = nc_def_var_fill(ncid, varid_x, 0, 0)))
     	ERR1(stat);
-
+	if((stat = nc_def_var_fill(ncid, varid_k, 0, 0)))
+		ERR1(stat);
     /* leave define mode */
   if((stat = nc_enddef (ncid)))
 	ERR1(stat);
