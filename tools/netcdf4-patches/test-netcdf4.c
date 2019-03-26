@@ -205,15 +205,15 @@ main(int argc, char *argv[]) {
     if((stat = nc_def_var_chunking(ncid, varid_x, NC_CHUNKED, chunks)))
 	ERR1(stat);
 
+	if((stat = nc_def_var_fill(ncid, varid_x, 0, 0)))
+		ERR1(stat);
   if((stat = nc_def_var_scil(ncid, varid_x, & scil_hints)))
   	ERR1(stat);
-  if((stat = nc_def_var_fill(ncid, varid_x, 0, 0)))
-    	ERR1(stat);
 	if((stat = nc_def_var_fill(ncid, varid_k, 0, 0)))
 		ERR1(stat);
     /* leave define mode */
   if((stat = nc_enddef (ncid)))
-	ERR1(stat);
+		ERR1(stat);
 
     /* write each variable one yz slab at a time */
     start[0] = 0;
