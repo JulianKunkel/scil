@@ -36,7 +36,13 @@ int main(){
   hid_t dcpl = H5Pcreate(H5P_DATASET_CREATE);
   hsize_t chunk_size[2] = {2,5};
   H5Pset_chunk(dcpl, 2, chunk_size);
-  H5Pset_filter(dcpl, SCIL_ID, H5Z_FLAG_MANDATORY, 0, NULL);
+
+  // See:  https://support.hdfgroup.org/HDF5/doc/Advanced/DynamicallyLoadedFilters/HDF5DynamicallyLoadedFilters.pdf
+  scil_user_hints_t hints;
+  scil_user_hints_initialize(& hints);
+  hints.absolute_tolerance = 1;
+  hints.force_compression_methods = "abstol,lz4";
+  H5Pset_scil_user_hints_t(dcpl, & hints);
 
   double value = 54.34;
   err = H5Pset_fill_value(dcpl, H5T_NATIVE_DOUBLE, & value);
@@ -57,7 +63,8 @@ int main(){
   err = H5Dwrite( dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
   assert(err == 0);
 
-  // check the resuls
+
+  // check the results, this comes from the cache!
   memset(data, -1, sizeof(double)*10*4);
 
   err = H5Dread( dset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
@@ -74,6 +81,8 @@ int main(){
 
   H5Dclose(dset);
   H5Fclose(fid);
+
+  printf("Now run: h5dump -p test-example.h5 to check the results\n");
 
   return 0;
 }
