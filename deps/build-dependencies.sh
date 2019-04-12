@@ -33,7 +33,6 @@ FPZIP=fpzip-1.1.0
 download $FPZIP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download
 download $ZFP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download
 
-<<<<<<< HEAD
 #WAVELET=wavelet_code
 #if [[ ! -e "$SRC/$WAVELET.zip" ]] ; then
 #	wget http://eeweb.poly.edu/~onur/$WAVELET.zip -O "$SRC/$WAVELET.zip"
@@ -45,21 +44,7 @@ download $ZFP.tar.gz http://computation.llnl.gov/projects/floating-point-compres
 #		exit 1
 #	fi
 #fi
-=======
-if [[ ! -e "$SRC/$WAVELET.zip" ]] ; then
-	# wget http://eeweb.poly.edu/~onur/$WAVELET.zip -O "$SRC/$WAVELET.zip"
-	# new url, md5 checked
-	wget https://s3.eu-central-1.amazonaws.com/jupublic/wavelet_code.zip -O "$SRC/$WAVELET.zip"
-fi
 
-if [[ ! -e "$TGT/$WAVELET"&& $DOWNLOAD_ONLY == 0 ]] ; then
-	unzip "$SRC/$WAVELET.zip" -d "$TGT/$WAVELET"
-	if [[ $? != 0 ]] ; then
-		echo "Error unzip $SRC/$1"
-		exit 1
-	fi
-fi
->>>>>>> 14ba365... Updated Wavelet source
 
 if [[ ! -e "$SRC/cnoise/test/test_output.txt" ]] ; then
 	wget https://people.sc.fsu.edu/~jburkardt/c_src/cnoise/cnoise.c -P "$SRC/cnoise/"
@@ -213,4 +198,3 @@ if [[ $BUILD == 1 ]] ; then
 else
   echo "[Already built]"
 fi
-

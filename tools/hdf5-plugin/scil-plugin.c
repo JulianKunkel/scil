@@ -197,7 +197,7 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 		}
 	}
 
-  ret = scil_context_create(&config->ctx, cfg_p->type, special_cnt, special_values, h);
+  ret = scil_context_create(& config->ctx, cfg_p->type, special_cnt, special_values, h);
 	if(special_values != NULL){
 		free(special_values);
 	}
@@ -262,8 +262,10 @@ static size_t compressorFilter(unsigned int flags, size_t cd_nelmts, const unsig
 herr_t H5Pset_scil_user_hints_t(hid_t dcpl, scil_user_hints_t * hints){
 	// TODO fixme, duplicate memory structure
 	unsigned cd_values[2];
+
 	scil_user_hints_t * hints_new = malloc(sizeof(scil_user_hints_t));
 	memcpy(hints_new, hints, sizeof(scil_user_hints_t));
+
 	memcpy(& cd_values[0], & hints_new, sizeof(void *));
 	//printf("set %u %u \n", cd_values[0], cd_values[1]);
 	//debug("H5Pset_scil_user_hints_t hints:%p\n", (void*) hints_new);
