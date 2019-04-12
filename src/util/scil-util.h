@@ -44,15 +44,15 @@
 #define EXPONENT_LENGTH_FLOAT (32 - MANTISSA_LENGTH_FLOAT)
 #define EXPONENT_LENGTH_DOUBLE (64 - MANTISSA_LENGTH_DOUBLE)
 
-#define max(a,b) \
+#define max(a, b) \
   (a > b ? a : b)
 
-#define min(a,b) \
+#define min(a, b) \
   (-max(-a, -b))
 
 #define DATATYPE_LENGTH(type) (type == SCIL_TYPE_FLOAT ? sizeof(float) : type == SCIL_TYPE_DOUBLE ? sizeof(double) : type == SCIL_TYPE_INT8 ? sizeof(int8_t) : type == SCIL_TYPE_INT16 ? sizeof(int16_t) : type == SCIL_TYPE_INT32 ? sizeof(int32_t) : type == SCIL_TYPE_INT64 ? sizeof(int64_t) : 1)
 
-void * scilU_safe_malloc(size_t size);
+void *scilU_safe_malloc(size_t size);
 
 typedef union {
   struct {
@@ -60,7 +60,7 @@ typedef union {
     uint32_t exponent : 8;
     uint32_t sign     : 1;
   } p;
-	float f;
+  float f;
 } datatype_cast_float;
 
 #pragma GCC diagnostic push
@@ -71,7 +71,7 @@ typedef union {
     uint32_t exponent : 11;
     uint32_t sign     : 1;
   } p;
-	double f;
+  double f;
 } datatype_cast_double;
 
 #pragma GCC diagnostic pop
@@ -83,12 +83,12 @@ typedef union {
  * \param type The datas type (i.e. float, double, etc.)
  * \return Byte size of the data
  */
-size_t scil_dims_get_size(const scil_dims_t* dims, enum SCIL_Datatype type);
+size_t scil_dims_get_size(const scil_dims_t *dims, enum SCIL_Datatype type);
 
 /*
  * \brief Return the minimum size of the compression buffer needed.
  */
-size_t scil_get_compressed_data_size_limit(const scil_dims_t* dims, enum SCIL_Datatype datatype);
+size_t scil_get_compressed_data_size_limit(const scil_dims_t *dims, enum SCIL_Datatype datatype);
 
 /**
  * \brief Writes dimensional information into buffer
@@ -97,7 +97,7 @@ size_t scil_get_compressed_data_size_limit(const scil_dims_t* dims, enum SCIL_Da
  * \pre dest != NULL
  * \return Byte size consumed of destination buffer
  */
-size_t scilU_write_dims_to_buffer(void* dest, const scil_dims_t* dims);
+size_t scilU_write_dims_to_buffer(void *dest, const scil_dims_t *dims);
 
 /**
  * \brief Reads dimensional information from buffer.
@@ -105,7 +105,7 @@ size_t scilU_write_dims_to_buffer(void* dest, const scil_dims_t* dims);
  * \pre dest != NULL
  * \return Dimensional configuration of compressed data
  */
-void scilU_read_dims_from_buffer(scil_dims_t* dims, void* dest);
+void scilU_read_dims_from_buffer(scil_dims_t *dims, void *dest);
 
 ////////////// TIMER MANAGEMENT /////////////////////
 
@@ -117,7 +117,7 @@ typedef struct timespec scil_timer;
  * \param end Second timestamp.
  * \return end - start
  */
-scil_timer scilU_time_diff (scil_timer end, scil_timer start);
+scil_timer scilU_time_diff(scil_timer end, scil_timer start);
 
 /**
  * \brief Calculates the sum between two timestamps.
@@ -125,9 +125,9 @@ scil_timer scilU_time_diff (scil_timer end, scil_timer start);
  * \param end Second timestamp.
  * \return t1 + t2
  */
-scil_timer scilU_time_sum (scil_timer t1, scil_timer t2);
+scil_timer scilU_time_sum(scil_timer t1, scil_timer t2);
 
-void scilU_start_timer(scil_timer * t1);
+void scilU_start_timer(scil_timer *t1);
 double scilU_stop_timer(scil_timer t1);
 
 /**
@@ -138,11 +138,11 @@ double scilU_stop_timer(scil_timer t1);
  * \param time Time to print.
  * \param file
  */
-void print_time (scil_timer time, FILE* file);
+void print_time(scil_timer time, FILE *file);
 
-double scilU_time_to_double (scil_timer t);
+double scilU_time_to_double(scil_timer t);
 
-void scilU_print_buffer(char * dest, size_t out_size);
+void scilU_print_buffer(char *dest, size_t out_size);
 uint8_t scilU_relative_tolerance_to_significant_bits(double rel_tol);
 double scilU_significant_bits_to_relative_tolerance(uint8_t sig_bits);
 
@@ -151,39 +151,51 @@ int scilU_convert_significant_bits_to_decimals(int bits);
 int scilU_double_equal(double val1, double val2);
 int scilU_float_equal(float val1, float val2);
 
-void scilU_find_minimum_maximum(SCIL_Datatype_t datatype, byte * data, scil_dims_t * dims, double * out_min, double * out_max);
+void scilU_find_minimum_maximum(SCIL_Datatype_t datatype,
+                                byte *data,
+                                scil_dims_t *dims,
+                                double *out_min,
+                                double *out_max);
 
-void scilU_find_minimum_maximum_with_excluded_points(SCIL_Datatype_t datatype, byte * data, scil_dims_t * dims, double * out_min, double * out_max, double ignore_up_to, double ignore_from, double fill_value);
+void scilU_find_minimum_maximum_with_excluded_points(SCIL_Datatype_t datatype,
+                                                     byte *data,
+                                                     scil_dims_t *dims,
+                                                     double *out_min,
+                                                     double *out_max,
+                                                     double ignore_up_to,
+                                                     double ignore_from,
+                                                     double fill_value);
 
 // this function substracts data2 from data1 and stores the result in data2
-void scilU_subtract_data(SCIL_Datatype_t datatype, byte * restrict  data1, byte * restrict in_out_data2, scil_dims_t * dims);
-
+void scilU_subtract_data(SCIL_Datatype_t datatype,
+                         byte *restrict data1,
+                         byte *restrict in_out_data2,
+                         scil_dims_t *dims);
 
 /* Tools to iterate over the 1D buffer as a multi-dimensional data space */
 
-typedef void(*scilU_iterfunc)(double* data,
-                              const scil_dims_t* pos,
-                              const scil_dims_t* size,
-                              int* iter,
-                              const void* user_ptr);
+typedef void(*scilU_iterfunc)(double *data,
+                              const scil_dims_t *pos,
+                              const scil_dims_t *size,
+                              int *iter,
+                              const void *user_ptr);
 
 /*
  * \brief Convert the current position in a ND array to the position of the original 1D data array.
  */
-size_t scilU_data_pos(const scil_dims_t* pos, const scil_dims_t* size);
-
+size_t scilU_data_pos(const scil_dims_t *pos, const scil_dims_t *size);
 
 /*
  * \brief iterate over the ND array of dimensions dims starting from offset to end in steps based on the array iter.
  * For each element the function func is invoked with the user_ptr as argument.
  */
-void scilU_iter(double* data,
-                const scil_dims_t* dims,
-                const scil_dims_t* offset,
-                const scil_dims_t* end,
-                int* iter,
+void scilU_iter(double *data,
+                const scil_dims_t *dims,
+                const scil_dims_t *offset,
+                const scil_dims_t *end,
+                int *iter,
                 scilU_iterfunc func,
-                const void* user_ptr);
+                const void *user_ptr);
 
 void scilU_print_dims(scil_dims_t dims);
 
@@ -213,5 +225,10 @@ void scilU_print_dims(scil_dims_t dims);
 #define scilU_unpack8(buffer, result_p) scilU_reverse_copy(result_p, buffer, 8)
 
 #endif
+
+typedef struct {
+  double fill_value;
+  int layout;
+} special_values;
 
 #endif /* SCIL_UTIL_H */

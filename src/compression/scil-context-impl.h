@@ -11,14 +11,13 @@ struct scil_context {
 
   /** \brief Special values are special values that must be preserved, we support a list of  values */
   int special_values_count;
-  void * special_values;
+  special_values *special_values;
 
   /** \brief The last compressor used, could be used for debugging */
   scil_compression_chain_t chain;
 
   /** \brief Dictionary for pipeline internal parameters */
-  scilU_dict_t * pipeline_params;
-} ;
-
+  scilU_dict_t *pipeline_params;
+};
 
 #endif // SCIL_CONTEXT_H

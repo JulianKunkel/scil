@@ -66,7 +66,7 @@ int main(int argc, char ** argv){
   scil_user_hints_t hints;
   scil_user_hints_t hints_cpy;
   scil_user_hints_t out_accuracy;
-  scil_validate_params_t out_validation;  
+  scil_validate_params_t out_validation;
 
   printf("scil-compress (Git commit:%s)\ncompiler-options: %s\ncompiler-version: %s\n", GIT_VERSION, C_COMPILER_OPTIONS, C_COMPILER_VERSION);
   double fake_abstol_value = 0;

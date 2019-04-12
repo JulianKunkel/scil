@@ -48,6 +48,7 @@ target_link_libraries(scil
   ${DEPS_COMPILED_DIR}/libcnoise.a
   ${DEPS_COMPILED_DIR}/libsz.a
   ${DEPS_COMPILED_DIR}/liblz4.a
+  ${DEPS_COMPILED_DIR}/libzstd.a
 )
 
 # target_link_libraries(scil INTERFACE  "-Wl,--retain-symbols-file=${CMAKE_CURRENT_SOURCE_DIR}/symbols.txt")
