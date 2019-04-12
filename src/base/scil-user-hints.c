@@ -228,6 +228,8 @@ int scil_user_hints_load(scil_user_hints_t * out_hints, const char * filename, c
 	int read_var = false;
 	int have_var = false;
 
+	scil_user_hints_initialize(out_hints);
+
 	while(1){ // line by lineNetworkSpeed
 		char line[1024];
 		ret = scil_readline(fd, 1024, line);
