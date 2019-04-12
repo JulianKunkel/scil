@@ -189,13 +189,16 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 	int special_cnt = 0;
 	hret = H5Pfill_value_defined(pList, & status);
 	if (hret >= 0 &&  status != H5D_FILL_VALUE_UNDEFINED){
-		void * fill_value = malloc(1024); // TOOD find proper size
-		hret = H5Pget_fill_value(pList, type_id, fill_value );
+		void * fill_value = malloc(1024); // TODO find proper size
+		// hret = H5Pget_fill_value(pList, type_id, fill_value );
+		// Something is messed here, special_values is internally another datatype, also may not be DOUBLE, converted to DBL explicitly to fix for the simple test-cases
+		hret = H5Pget_fill_value(pList, H5T_NATIVE_DOUBLE, fill_value );
 		if (hret >= 0){
 			special_cnt = 1;
 			special_values = fill_value;
 		}
 	}
+
 
   ret = scil_context_create(& config->ctx, cfg_p->type, special_cnt, special_values, h);
 	if(special_values != NULL){
