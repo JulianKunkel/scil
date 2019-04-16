@@ -102,6 +102,7 @@ void benchmark(FILE * f, SCIL_Datatype_t datatype, const char * name, byte * buf
 		fprintf(f, "%.1f; %d; %s; %s; %.1lf; %.1lf; %.3lf\n",
 			r, datatype, name, hints.force_compression_methods,
 			data_size/seconds_compress/1024 /1024, data_size/seconds_decompress/1024 /1024, c_fac);
+		fflush(f);
   }
 	free(buffer_out);
 	free(tmp_buff);
