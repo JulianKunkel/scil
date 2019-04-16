@@ -75,7 +75,7 @@ int scil_context_create(scil_context_t **out_ctx,
   } else {
     ctx->special_values = NULL;
   }
-
+  
   scil_user_hints_t *oh;
   oh = &ctx->hints;
   scil_user_hints_copy(oh, hints);
