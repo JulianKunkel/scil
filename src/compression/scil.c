@@ -164,8 +164,9 @@ int scil_compress(byte* restrict dest,
     /*
      * TODO: Available information
      */
-
-    printf("Size: %ld | Type: %s | Fill Value: %0.5E | Dims: %d | Dim Layout: ", input_size, scil_datatype_to_str(ctx->datatype), ctx->special_values->fill_value, dims->dims);
+     if(ctx->special_values_count){
+       printf("Size: %ld | Special values: %d | Type: %s | Fill Value: %0.5E | Dims: %d | Dim Layout: ", input_size, ctx->special_values_count,  scil_datatype_to_str(ctx->datatype), ctx->special_values->fill_value, dims->dims);
+     }
     scilU_print_dims(*dims);
     printf("\n");
 

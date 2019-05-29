@@ -1,9 +1,10 @@
 #!/bin/bash
 
-BUILD="$1"
-shift
-CLEAN=0
+echo "Running test for $HOSTNAME"
+BUILD=/data/build-docker/$HOSTNAME/
+mkdir -p $BUILD
 
+CLEAN=0
 ERROR=0
 
 set -- `getopt -u -l "clean" -o "" -- "$@"`
@@ -34,5 +35,11 @@ make test
 #fi
 ERROR=$(($ERROR + $?))
 popd  > /dev/null
+
+if [[ $ERROR != 0 ]]  ; then
+  echo "Errors occured, see: "
+  find $BUILD/ -name LastTest.log | sed "s#/data/#../../#"
+  exit 1
+fi
 
 exit $ERROR

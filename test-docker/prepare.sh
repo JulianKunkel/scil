@@ -23,7 +23,7 @@ if [ $? != 0 ] ; then
 	exit 1
 fi
 
-docker build -t kunkel/scil:ubuntu17.04 ubuntu17.04
+docker build -t kunkel/scil:ubuntu18.04-hdf5-nc ubuntu18.04-hdf5-nc
 if [ $? != 0 ] ; then
 	echo "Error building image"
 	exit 1
