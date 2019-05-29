@@ -2,6 +2,8 @@
 
 echo "Running test for $HOSTNAME"
 BUILD=/data/build-docker/$HOSTNAME/
+export SCIL_INSTALL=$BUILD/install
+
 mkdir -p $BUILD
 
 CLEAN=0
@@ -24,7 +26,7 @@ if [[ $CLEAN == 1 ]] ; then
    rm -rf $BUILD
 fi
   if [[ ! -e $BUILD/CMakeCache.txt ]] ; then
-    ./configure --build-dir=$BUILD --debug || exit 1
+    ./configure --build-dir=$BUILD --prefix=$BUILD/install --debug || exit 1
 fi
 pushd $BUILD > /dev/null
 make || exit 1
@@ -34,7 +36,26 @@ make test
 #  cat Testing/Temporary/LastTest.log
 #fi
 ERROR=$(($ERROR + $?))
-popd  > /dev/null
+
+make install
+
+# Install HDF5 and NetCDF on top of SCIL:
+/data/tools/hdf5-plugin/install-hdf5.sh
+
+echo "Install SCIL plugin for HDF5"
+pushd ../../tools/hdf5-plugin/
+./configure --prefix=$SCIL_INSTALL --build-dir=$BUILD/hdf5-plugin --with-scil=$SCIL_INSTALL --with-hdf5=$SCIL_INSTALL --with-cc=$(which gcc) --rpath=$SCIL_INSTALL/lib
+popd
+
+pushd $BUILD/hdf5-plugin
+make -j 4
+make -j 4 install
+popd
+
+cd $BUILD
+/data/tools/netcdf4-patches/install.sh
+
+echo "All prepared and installed in $SCIL_INSTALL, see /data/test-docker/ubuntu18.04-hdf5-nc/run-example.sh"
 
 if [[ $ERROR != 0 ]]  ; then
   echo "Errors occured, see: "

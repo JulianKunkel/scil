@@ -1,17 +1,22 @@
 #!/bin/bash -e
+SRC=$(realpath $(dirname $0))
+
 if [[ "$SCIL_INSTALL" == "" ]] ; then
   SCIL_INSTALL=$PWD/../../install/
 fi
 
 hdf5=hdf5-1.10.5
-if [[ ! -e $hdf5.tar.bz2 ]] ; then
+if [[ ! -e $SRC/../../deps/$hdf5.tar.bz2 ]] ; then
+  pushd $SRC/../../deps/
   wget https://support.hdfgroup.org/ftp/HDF5/current/src/$hdf5.tar.bz2
+  tar -xf $hdf5.tar.bz2
+  popd
 fi
 
-tar -xf $hdf5.tar.bz2
+mkdir hdf5 || true
+pushd hdf5
 
-pushd $hdf5
-./configure --prefix="${SCIL_INSTALL}" \
+$SRC/../../deps/$hdf5/configure --prefix="${SCIL_INSTALL}" \
 	--enable-hl \
 	--enable-shared \
 	--enable-static \
@@ -28,6 +33,5 @@ pushd $hdf5
 
 make -j 4
 make -j 4 install
-
 
 popd

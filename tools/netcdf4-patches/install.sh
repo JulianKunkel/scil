@@ -8,8 +8,17 @@ if [[ "$SCIL_INSTALL" == "" ]] ; then
 fi
 
 VERSION=netcdf-4.6.1
-if [[ ! -e  $VERSION.tar.gz ]] ; then
+if [[ ! -e $SRC/../../deps/$VERSION.tar.gz ]] ; then
+  pushd $SRC/../../deps/
   wget ftp://ftp.unidata.ucar.edu/pub/netcdf/$VERSION.tar.gz
+  tar -xf $VERSION.tar.gz
+  cd $VERSION
+  echo "Patching NetCDF for SCIL"
+  patch -p1 < $SRC/0001-SCIL-NetCDF4.6.1.patch
+  #patch -p1 < $SRC/0001-Patch-for-NetCDF-with-SCIL.patch
+  #patch -p1 < $SRC/0002-Flexible-read-information-from-file.patch
+
+  popd
 fi
 
 export CFLAGS="-I$SCIL_INSTALL/include -O0 -g3" # -O0 -g3
@@ -21,19 +30,16 @@ export CC=mpicc
 
 
 #if  [[ ! -e "$SCIL_INSTALL/lib/libnetcdf.so" ]] ; then
-  tar -xf $VERSION.tar.gz
+  mkdir netcdf4 || true
+  pushd netcdf4
 
-  pushd $VERSION
-  #patch -p1 < $SRC/0001-Patch-for-NetCDF-with-SCIL.patch
-  #patch -p1 < $SRC/0002-Flexible-read-information-from-file.patch
-  patch -p1 < $SRC/0001-SCIL-NetCDF4.6.1.patch
-
-  ./configure \
+  $SRC/../../deps/$VERSION//configure \
     --prefix=${SCIL_INSTALL} \
     --enable-shared \
     --enable-static \
     --enable-parallel-tests \
-    --enable-large-file-tests 
+    --enable-large-file-tests \
+    --disable-dap
   make -j 4
   #make check
   make install
