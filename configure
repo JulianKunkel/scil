@@ -42,8 +42,8 @@ function checknetcdf(){
 	nc-config --libs > /dev/null
 	if [ $? != 0 ] ; then
 		if [[ -e $where/include && -e $where/lib ]] ; then
-			AI="$AI $where/include $where/$extra_dir"
-			AL="$AL $where/lib $where/lib64 $where/$extra_dir"
+			AI="$AI:$where/include:$where/$extra_dir"
+			AL="$AL:$where/lib:$where/lib64:$where/$extra_dir"
 		else
 			echo "Error could not find $what in $where"
 			exit 1
@@ -73,8 +73,8 @@ function check(){
 	pkg-config --exists $what
 	if [ $? != 0 ] ; then
 		if [[ -e $where/include && -e $where/lib ]] ; then
-			AI="$AI $where/include $where/$extra_dir"
-			AL="$AL $where/lib $where/lib64 $where/$extra_dir"
+			AI="$AI:$where/include:$where/$extra_dir"
+			AL="$AL:$where/lib:$where/lib64:$where/$extra_dir"
 		else
 			echo "Error could not find $what in $where"
 			exit 1
@@ -104,7 +104,7 @@ do
 		--version) cmake --version; exit;;
 		--lgsl) check "$2" "gsl"; shift;;
 		--lzlib) check "$2" "z"; shift;;
-		--netcdf) checknetcdf "$2" ; shift;;
+		--netcdf) check "$2" ; shift;;
 		--prefix) prefix="$2"; shift;;
 		--debug) debug="yes"; ;;
                 --code-coverage) debug="yes" ; codeCoverage="yes" ;;
