@@ -21,7 +21,7 @@ typedef struct scil_context scil_context_t;
 int scil_context_create(scil_context_t **out_ctx,
                         SCIL_Datatype_t datatype,
                         int special_values_count,
-                        special_values *special_values,
+                        scil_value_t *special_values,
                         const scil_user_hints_t *hints);
 
 int scil_destroy_context(scil_context_t *out_ctx);

@@ -160,16 +160,6 @@ int scil_compress(byte* restrict dest,
     size_t input_size           = scil_dims_get_size(resized_dims, ctx->datatype);
     const size_t datatypes_size = input_size;
 
-
-    /*
-     * TODO: Available information
-     */
-     if(ctx->special_values_count){
-       printf("Size: %ld | Special values: %d | Type: %s | Fill Value: %0.5E | Dims: %d | Dim Layout: ", input_size, ctx->special_values_count,  scil_datatype_to_str(ctx->datatype), ctx->special_values->fill_value, dims->dims);
-     }
-    scilU_print_dims(*dims);
-    printf("\n");
-
 	// Skip the compression if input size is 0 and set destination buffer to a single 0 and size 1
     if (datatypes_size == 0) {
         out_size_p[0] = 1;

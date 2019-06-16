@@ -238,7 +238,6 @@ int scilO_parseOptions(int argc, char ** argv, option_help * args, int * printhe
   int requiredArgsSeen = 0;
   int requiredArgsNeeded = 0;
   int i;
-
   for(option_help * o = args; o->shortVar != 0 || o->longVar != 0 ; o++ ){
     if(o->arg == OPTION_REQUIRED_ARGUMENT){
       requiredArgsNeeded++;

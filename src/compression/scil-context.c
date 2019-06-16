@@ -54,7 +54,7 @@ static void fix_double_setting(double *dbl) {
 int scil_context_create(scil_context_t **out_ctx,
                         SCIL_Datatype_t datatype,
                         int special_values_count,
-                        special_values *sv,
+                        scil_value_t *sv,
                         const scil_user_hints_t *hints) {
   initialize();
 
@@ -69,13 +69,11 @@ int scil_context_create(scil_context_t **out_ctx,
 
   ctx->datatype = datatype;
   ctx->special_values_count = special_values_count;
-  if (sv != NULL) {
-    ctx->special_values = malloc(sizeof(special_values));
-    memcpy(ctx->special_values, sv, sizeof(special_values));
-  } else {
-    ctx->special_values = NULL;
+  if (special_values_count != 0) {
+    ctx->special_values = scilU_safe_malloc(sizeof(scil_value_t)* special_values_count);
+    memcpy(ctx->special_values, sv, sizeof(scil_value_t)*special_values_count);
   }
-  
+
   scil_user_hints_t *oh;
   oh = &ctx->hints;
   scil_user_hints_copy(oh, hints);

@@ -226,9 +226,5 @@ void scilU_print_dims(scil_dims_t dims);
 
 #endif
 
-typedef struct {
-  double fill_value;
-  int layout;
-} special_values;
 
 #endif /* SCIL_UTIL_H */

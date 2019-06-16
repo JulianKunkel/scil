@@ -96,6 +96,9 @@ static int scil_readline(FILE * fd, int maxlength, char * out){
 	maxlength = maxlength - 1;
 	while(pos < maxlength && ! feof(fd)){
 		char ch = getc(fd);
+		if(ch == EOF){
+			break;
+		}
 		if(ch == '\n'){
 			out[pos] = ch;
 			out[pos+1] = 0;
@@ -229,8 +232,9 @@ int scil_user_hints_load(scil_user_hints_t * out_hints, const char * filename, c
 	int have_var = false;
 
 	scil_user_hints_initialize(out_hints);
-
+	int line_cnt = 0;
 	while(1){ // line by lineNetworkSpeed
+		line_cnt++;
 		char line[1024];
 		ret = scil_readline(fd, 1024, line);
 		if (ret == 0){
@@ -252,7 +256,7 @@ int scil_user_hints_load(scil_user_hints_t * out_hints, const char * filename, c
 		if(read_var){
 			ret = scil_set_user_hint_from_string(out_hints, line);
 			if(ret != 0){
-				printf("Error parsing line: \"%s\"\n", line);
+				printf("Error parsing line %d: \"%s\"\n", line_cnt, line);
 				exit(1);
 			}
 		}

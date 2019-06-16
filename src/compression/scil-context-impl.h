@@ -9,9 +9,9 @@ struct scil_context {
   enum SCIL_Datatype datatype;
   scil_user_hints_t hints;
 
-  /** \brief Special values are special values that must be preserved, we support a list of  values */
-  int special_values_count;
-  special_values *special_values;
+  /** \brief Special values are special values that must be preserved, we support a list of values */
+  int  special_values_count;
+  scil_value_t *special_values;
 
   /** \brief The last compressor used, could be used for debugging */
   scil_compression_chain_t chain;
