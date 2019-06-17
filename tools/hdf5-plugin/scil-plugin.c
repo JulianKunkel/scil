@@ -191,7 +191,7 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 	if (hret >= 0 &&  status != H5D_FILL_VALUE_UNDEFINED){
 		// Something is messed here, special_values is internally another datatype, also may not be DOUBLE, converted to DBL explicitly to fix for the simple test-cases
 		hret = H5Pget_fill_value(pList, type_id, & fill.u );
-		if (hret >= 0){
+		if (hret == H5D_FILL_VALUE_USER_DEFINED){
 			special_cnt = 1;
 			fill.typ = cfg_p->type;
 		}
