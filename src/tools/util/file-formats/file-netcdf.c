@@ -270,7 +270,7 @@ static int writeData(const char * name, const byte * buf, SCIL_Datatype_t buf_da
 
   for (int i = 0; i < dims.dims; i++)
   {
-    memset(cbuffer,0,strlen(cbuffer));
+    memset(cbuffer, 0, 5);
     itoa(i,cbuffer);
     strcat( cbuffer, "dim");
     if ((retval = nc_def_dim(ncid, cbuffer, dims.length[i], &dimids[i])))
