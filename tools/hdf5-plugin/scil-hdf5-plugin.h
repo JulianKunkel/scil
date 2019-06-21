@@ -31,6 +31,6 @@ herr_t H5Pset_scil_user_hints_t(hid_t dcpl, scil_user_hints_t * hints);
 /*
  * The memory of the hints is managed internally. Do not free them while the plugin is operational.
  */
-herr_t H5Pget_scil_user_hints_t(hid_t dcpl, scil_user_hints_t ** out_hints);
+herr_t H5Pget_scil_user_hints_t(hid_t dcpl, scil_user_hints_t * out_hints);
 
 #endif

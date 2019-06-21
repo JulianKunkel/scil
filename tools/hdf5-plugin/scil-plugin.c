@@ -58,6 +58,7 @@ const void *H5PLget_plugin_info(void) {
 		.set_local = & compressorSetLocal,
 		.filter = & compressorFilter
 	};
+
 	return &filterClass;
 }
 
@@ -105,6 +106,7 @@ typedef struct {
 typedef struct {
 	plugin_compress_config * cfg;
 
+	scil_user_hints_t hints;
 	scil_dims_t dims;
 	enum SCIL_Datatype type;
 } plugin_config_persisted;
@@ -132,26 +134,18 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 	int chunkRank = H5Pget_chunk(pList, rank, chunkSize);
 	if(chunkRank <= 0) return -1;
 	if(chunkRank > rank) return -2;
-	/*if(chunkRank > 4){
-			for(int i=4; i<rank;i++){
-				chunkSize[3] *= chunkSize[i];
-			}
-			rank=4;
-	}*/
 
 	assert(sizeof(size_t) == sizeof(hsize_t) );
 	scil_dims_initialize_array(& cfg_p->dims, rank, (const size_t*) chunkSize);
 
-  scil_user_hints_t * h;
+
 	scil_user_hints_t hints_new;
 	// TODO set the hints (accuracy) according to the property lists in HDF5
 	// H5Tget_precision ?
-	int ret = H5Pget_scil_user_hints_t(pList, & h);
-	if(ret != 0 || h == NULL){
-		h = & hints_new;
-		scil_user_hints_initialize(h);
+	int ret = H5Pget_scil_user_hints_t(pList, & hints_new);
+	if(ret != 0){
+		scil_user_hints_initialize(& hints_new);
 	}
-
 
 	H5T_class_t dataTypeClass;
 	dataTypeClass = H5Tget_class(type_id);
@@ -196,7 +190,7 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 			fill.typ = cfg_p->type;
 		}
 	}
-  ret = scil_context_create(& config->ctx, cfg_p->type, special_cnt, & fill, h);
+  ret = scil_context_create(& config->ctx, cfg_p->type, special_cnt, & fill, & hints_new);
 
 	assert(ret == SCIL_NO_ERR);
 
@@ -206,82 +200,100 @@ static herr_t compressorSetLocal(hid_t pList, hid_t type_id, hid_t space) {
 	return H5Pmodify_filter( pList, SCIL_ID, H5Z_FLAG_MANDATORY, cd_size, cd_values );
 }
 
+void H5MM_xfree(void *);
+void* H5MM_malloc(size_t size);
+
 static size_t compressorFilter(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], size_t nBytes, size_t *buf_size, void **buf){
 	debug("compressorFilter called %d %lld %lld %d \n", flags, (long long) nBytes, (long long) * buf_size, (int) cd_nelmts);
 
-	size_t out_size = *buf_size;
 	int ret;
+
+	// Testcode that copies data through
+	/*{
+		size_t out_size = *buf_size;
+		void * outbuf = H5MM_malloc(out_size);
+		memcpy(outbuf, *buf, out_size);
+		H5MM_xfree(*buf);
+		*buf = outbuf;
+		*buf_size = out_size;
+		return out_size;
+	}*/
+
+	byte * in_buf = *(byte**) buf;
+	plugin_config_persisted* cfg_p = ((plugin_config_persisted *) cd_values);
 
   if(flags & H5Z_FLAG_REVERSE){
 		// uncompress
-		plugin_config_persisted* cfg_p = ((plugin_config_persisted *) cd_values);
+		const size_t max_buff = scil_get_compressed_data_size_limit(& cfg_p->dims, cfg_p->type);
+		const size_t output_size = scil_dims_get_size(& cfg_p->dims, cfg_p->type);
 
-		const size_t buff_size = scil_get_compressed_data_size_limit(& cfg_p->dims, cfg_p->type);
-		byte * buffer = (byte*) malloc(buff_size);
-
-		byte * in_buf = ((byte**) buf)[0];
+		byte * buffer = (byte*) H5MM_malloc(max_buff);
+		*buf_size = max_buff;
 
 		size_t c_buf_size;
 		scilU_unpack8(in_buf, &c_buf_size);
 		in_buf += 8;
 
-		debug("DC: %zu \n", c_buf_size);
+		debug("DC: %zu %zu %zu\n", c_buf_size,  *buf_size, output_size);
 
-		ret = scil_decompress(cfg_p->type, buffer, & cfg_p->dims, in_buf, c_buf_size, buffer + buff_size/2 + 1);
+		ret = scil_decompress(cfg_p->type, buffer, & cfg_p->dims, in_buf, c_buf_size, buffer + max_buff/2 + 1);
 
+		H5MM_xfree(*buf);
 		*buf = buffer;
 
+		assert(ret == SCIL_NO_ERR);
+		return output_size; // 0 means error.
+
 	}else{ // compress
+		size_t out_size;
 
-		plugin_config_persisted* cfg_p = ((plugin_config_persisted *) cd_values);
 		plugin_compress_config* config = cfg_p->cfg;
+		assert(cfg_p->dims.dims < 5);
 
-		byte * buffer = (byte*) malloc(config->dst_size + 8);
+		byte * buffer = (byte*) H5MM_malloc(config->dst_size + 8);
 		// memset(buffer, 0, config->dst_size + 8);
+		*buf_size = config->dst_size + 8;
 
-		ret = scil_compress(buffer + 8, config->dst_size, ((byte**) buf)[0], (& cfg_p->dims), & out_size, config->ctx);
+		ret = scil_compress(buffer + 8, config->dst_size, in_buf, (& cfg_p->dims), & out_size, config->ctx);
+		debug("Chunksize: %zu dims: %d\n", out_size, cfg_p->dims.dims);
 		scilU_pack8(buffer, out_size);
 		debug("ret: %zu \n", ret);
 		debug("CS: %zu \n", out_size);
 		out_size +=8;
 
-		*buf = buffer;
-	}
-	assert(ret == SCIL_NO_ERR);
+		H5MM_xfree(in_buf);
 
-  return out_size; // 0 means error.
+		*buf = buffer;
+		assert(ret == SCIL_NO_ERR);
+	  return out_size; // 0 means error.
+	}
 }
 
 #define H5P_SCIL_HINT "scil_user_hints_t"
 
 
 herr_t H5Pset_scil_user_hints_t(hid_t dcpl, scil_user_hints_t * hints){
-	// TODO fixme, duplicate memory structure
-	unsigned cd_values[2];
-
-	scil_user_hints_t * hints_new = malloc(sizeof(scil_user_hints_t));
-	memcpy(hints_new, hints, sizeof(scil_user_hints_t));
-
-	memcpy(& cd_values[0], & hints_new, sizeof(void *));
+	const int cd_size = sizeof(plugin_config_persisted) / sizeof(unsigned int);
+	unsigned cd_values[cd_size];
+	plugin_config_persisted * cfg = (plugin_config_persisted *) cd_values;
+	memcpy(& cfg->hints, hints, sizeof(scil_user_hints_t));
 	//printf("set %u %u \n", cd_values[0], cd_values[1]);
 	//debug("H5Pset_scil_user_hints_t hints:%p\n", (void*) hints_new);
-
-	return H5Pset_filter(dcpl, SCIL_ID, H5Z_FLAG_MANDATORY, 2, (unsigned*) cd_values);
-	//return H5Pmodify_filter( dcpl, SCIL_ID, H5Z_FLAG_MANDATORY, 2, (unsigned*) cd_values );
+	return H5Pset_filter(dcpl, SCIL_ID, H5Z_FLAG_MANDATORY, cd_size, (unsigned*) cd_values);
 }
 
-herr_t H5Pget_scil_user_hints_t(hid_t dcpl, scil_user_hints_t ** out_hints){
+herr_t H5Pget_scil_user_hints_t(hid_t dcpl, scil_user_hints_t * out_hints){
 	unsigned int *flags = NULL;
-	size_t cd_nelmts = 2;
+	const size_t cd_size = sizeof(plugin_config_persisted) / sizeof(unsigned int);
+	size_t cd_nelmts = cd_size;
 
-	unsigned cd_values[2];
+	unsigned cd_values[cd_size];
 	unsigned *filter_config = NULL;
 
 	herr_t ret = H5Pget_filter_by_id( dcpl, SCIL_ID, flags, & cd_nelmts, cd_values, 0, NULL, filter_config);
-	if(ret >= 0 && cd_nelmts == 2){
-		//printf("get %u %u \n", cd_values[0], cd_values[1]);
-		memcpy(out_hints, & cd_values[0], sizeof(void *));
-		//printf("get %p \n", *out_hints);
+	if(ret >= 0 && cd_nelmts == cd_size){
+		plugin_config_persisted * cfg = (plugin_config_persisted *) cd_values;
+		memcpy(out_hints, & cfg->hints, sizeof(scil_user_hints_t));
 		return 0;
 	}
 	return -1;
