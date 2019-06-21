@@ -129,7 +129,7 @@ diff --git a/libsrc4/nc4var.c b/libsrc4/nc4var.c
 index b6cf802..062ae7f 100644
 --- a/libsrc4/nc4var.c
 +++ b/libsrc4/nc4var.c
-@@ -1187,6 +1187,53 @@ NC4_def_var_fletcher32(int ncid, int varid, int fletcher32)
+@@ -1187,6 +1187,54 @@ NC4_def_var_fletcher32(int ncid, int varid, int fletcher32)
                             NULL, NULL, NULL, NULL, NULL);
  }
 
@@ -175,6 +175,7 @@ index b6cf802..062ae7f 100644
 +
 +  var->compress_scil = scil_hints;
 +  var->contiguous = NC_FALSE;
++  var->parallel_access = NC_COLLECTIVE;
 +
 +  return NC_NOERR;
 +}
