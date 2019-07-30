@@ -177,11 +177,12 @@ int main(int argc, char ** argv){
       else{
         output_datatype = input_datatype;
       }
-      ret = in_plugin->openWrite(out_file, output_datatype, orig_dims, & wncid, & wvarid);
+      //todo fix error with writing in another format
+      /*ret = in_plugin->openWrite(out_file, output_datatype, orig_dims, & wncid, & wvarid);
       if (ret != 0){
         printf("The input file %s could not be open\n", out_file);
         exit(1);
-      }
+      }*/
     }
 
     pos = (size_t*) malloc(orig_dims.dims * sizeof(size_t));
@@ -227,7 +228,7 @@ int main(int argc, char ** argv){
 
     /*read, compress, decompress, write in chunks*/
     for (size_t cur_chunk = 0; cur_chunk < chunks_number; cur_chunk++){
-      scil_user_hints_copy(& hints, & hints_cpy);
+      //scil_user_hints_copy(& hints, & hints_cpy);
 
       printf("cur_chunk: %lld | start position [%lld] [%lld] [%lld] [%lld]\n", cur_chunk, pos[0], pos[1], pos[2], pos[3]);
       input_data = (byte*) scilU_safe_malloc(array_size);
