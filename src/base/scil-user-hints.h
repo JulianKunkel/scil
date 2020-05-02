@@ -58,8 +58,7 @@ typedef struct
  * \brief Struct containing information on the tolerable
  * precision loss on compression
  */
-typedef struct
-{
+struct scil_user_hints_t{
     /** \brief relative tolerable error (1 means 1%) */
     double relative_tolerance_percent;
 
@@ -107,7 +106,9 @@ typedef struct
     /** \brief */
     char *force_compression_methods;
 
-} scil_user_hints_t;
+};
+
+typedef struct scil_user_hints_t scil_user_hints_t;
 
 void scil_user_hints_initialize(scil_user_hints_t * hints);
 
