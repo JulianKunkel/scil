@@ -8,4 +8,4 @@ Description: Library for compression of floating point data
 Version: 1.0.0
 Requires:
 Cflags: -I${includedir}
-Libs: -L${libdir} -lscil -lscil-util
+Libs: -L${libdir} -Wl,--rpath=${libdir} -lscil -lscil-util

@@ -103,9 +103,8 @@ struct scil_user_hints_t{
     scil_performance_hint_t comp_speed;
     scil_performance_hint_t decomp_speed;
 
-    /** \brief */
+    /** \brief for debugging purposes, one may set the compression method */
     char *force_compression_methods;
-
 };
 
 typedef struct scil_user_hints_t scil_user_hints_t;
@@ -119,5 +118,7 @@ void scil_user_hints_print(const scil_user_hints_t* hints);
 int scil_user_hints_load(scil_user_hints_t * out_hints, const char * filename, const char * variable);
 
 int scil_set_user_hint_from_string(scil_user_hints_t * out_hints, const char * variable_line);
+
+// int scil_set_user_hint_from_keyvalue()
 
 #endif // SCIL_USER_HINTS_H
