@@ -34,6 +34,6 @@ typedef struct {
   int (*closeFile)(const int ncid);
 } scil_file_plugin_t;
 
-scil_file_plugin_t * scil_find_plugin(const char * name);
+extern scil_file_plugin_t * scil_find_plugin(const char * name);
 
 #endif

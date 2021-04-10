@@ -1,49 +1,103 @@
-# compiler settings -----------------------------------------------------------
+# compiler executables --------------------------------------------------------
 
-# GNU compiler
 CC = gcc
 CXX = g++
-FLAGS = -O3 -fPIC -Wall -I../inc $(DEFS)
-CFLAGS = $(FLAGS) -std=c89 -Wno-unused-function -fvisibility=hidden -fvisibility-inlines-hidden
-#CFLAGS = $(FLAGS) -std=c99
-CXXFLAGS = $(FLAGS) -std=c++98 -fvisibility=hidden -fvisibility-inlines-hidden
+FC = gfortran
 
-# IBM compiler
-# CC = xlc
-# CXX = xlc++
-# CFLAGS = -O2 -qmaxmem=-1 -qpic=large -I../inc $(DEFS)
-# CXXFLAGS= $(CFLAGS)
+# language standard -----------------------------------------------------------
+
+# CSTD = -std=c89 -Wno-unused-function
+  CSTD = -std=c99
+  CXXSTD = -std=c++98
+# CXXSTD = -std=c++11
+  FSTD = -std=f2003 -ffree-form -Wno-c-binding-type
+
+# common compiler options -----------------------------------------------------
+
+FLAGS = -O3 -fPIC -Wall -Wextra -pedantic -I../include
+SOFLAGS =
+
+# macOS compiler options (uncomment on macOS) ---------------------------------
+
+# SOFLAGS += -undefined dynamic_lookup
+
+# OpenMP compiler options -----------------------------------------------------
+
+# do not uncomment; use "make ZFP_WITH_OPENMP=0" to disable OpenMP
+OMPFLAGS = -fopenmp
 
 # optional compiler macros ----------------------------------------------------
+
+# use long long for 64-bit types
+# DEFS += -DZFP_INT64='long long' -DZFP_INT64_SUFFIX='ll'
+# DEFS += -DZFP_UINT64='unsigned long long' -DZFP_UINT64_SUFFIX='ull'
 
 # use smaller bit stream word type for finer rate granularity
 # DEFS += -DBIT_STREAM_WORD_TYPE=uint8
 # DEFS += -DBIT_STREAM_WORD_TYPE=uint16
 # DEFS += -DBIT_STREAM_WORD_TYPE=uint32
+# DEFS += -DBIT_STREAM_WORD_TYPE=uint64
 
 # enable strided access for progressive zfp streams
 # DEFS += -DBIT_STREAM_STRIDED
 
-# run regression test with medium sized arrays
-# DEFS += -DTESTZFP_MEDIUM_ARRAYS
-
-# run regression test with large arrays
-# DEFS += -DTESTZFP_LARGE_ARRAYS
-
-# run diffusion without compression
-# DEFS += -DWITHOUT_COMPRESSION
-
 # use aligned memory allocation
-# DEFS += -DALIGNED_ALLOC
+# DEFS += -DZFP_WITH_ALIGNED_ALLOC
 
 # use two-way skew-associative cache
-# DEFS += -DCACHE_TWOWAY
+# DEFS += -DZFP_WITH_CACHE_TWOWAY
 
 # use faster but more collision prone hash function
-# DEFS += -DCACHE_FAST_HASH
+# DEFS += -DZFP_WITH_CACHE_FAST_HASH
 
 # count cache misses
-# DEFS += -DCACHE_PROFILE
+# DEFS += -DZFP_WITH_CACHE_PROFILE
 
-# for recent versions of MSVC
-# DEFS += -DHAVE_C99_MATH
+# build targets ---------------------------------------------------------------
+
+# default targets
+BUILD_CFP = 0
+BUILD_ZFORP = 0
+BUILD_UTILITIES = 1
+BUILD_EXAMPLES = 0
+BUILD_TESTING = 1
+BUILD_SHARED_LIBS = 0
+
+# build all targets?
+ifdef BUILD_ALL
+  ifneq ($(BUILD_ALL),0)
+    BUILD_CFP = 1
+    BUILD_ZFORP = 1
+    BUILD_UTILITIES = 1
+    BUILD_EXAMPLES = 1
+    BUILD_TESTING = 1
+  endif
+endif
+
+# build shared libraries?
+ifneq ($(BUILD_SHARED_LIBS),0)
+  LIBRARY = shared
+  LIBZFP = libzfp.so
+  LIBCFP = libcfp.so
+else
+  LIBRARY = static
+  LIBZFP = libzfp.a
+  LIBCFP = libcfp.a
+endif
+
+# conditionals ----------------------------------------------------------------
+
+# enable OpenMP?
+ifdef ZFP_WITH_OPENMP
+  ifneq ($(ZFP_WITH_OPENMP),0)
+    ifneq ($(ZFP_WITH_OPENMP),OFF)
+      FLAGS += $(OMPFLAGS)
+    endif
+  endif
+endif
+
+# compiler options ------------------------------------------------------------
+
+CFLAGS = $(CSTD) $(FLAGS) $(DEFS)
+CXXFLAGS = $(CXXSTD) $(FLAGS) $(DEFS)
+FFLAGS = $(FSTD) $(FLAGS) $(DEFS)

@@ -18,6 +18,6 @@
 
 #include <file-formats/scil-file-format-impl.h>
 
-scil_file_plugin_t netcdf_plugin;
+extern scil_file_plugin_t netcdf_plugin;
 
 #endif

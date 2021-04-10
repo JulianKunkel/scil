@@ -27,6 +27,10 @@
 #include <stdio.h>
 #include <string.h>
 
+scilU_dict_t *variable_dict;
+scilU_decision_tree* decision_tree;
+
+
 typedef struct {
   scil_compression_chain_t chain;
   float randomness;

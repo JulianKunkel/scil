@@ -119,7 +119,7 @@ int scil_zfp_abstol_compress_<DATATYPE>(const scil_context_t* ctx,
 
     /*  zfp_stream_set_rate(zfp, rate, type, 3, 0); */
     /*  zfp_stream_set_precision(zfp, precision, type); */
-    zfp_stream_set_accuracy(zfp, ctx->hints.absolute_tolerance, zfp_type_<DATATYPE>);
+    zfp_stream_set_accuracy(zfp, ctx->hints.absolute_tolerance);
 
     size_t bufsize = zfp_stream_maximum_size(zfp, field);
     bitstream* stream = stream_open(dest, bufsize);
@@ -173,7 +173,7 @@ int scil_zfp_abstol_decompress_<DATATYPE>( <DATATYPE>*restrict data_out,
 
     /*  zfp_stream_set_rate(zfp, rate, type, 3, 0); */
     /*  zfp_stream_set_precision(zfp, precision, type); */
-    zfp_stream_set_accuracy(zfp, tolerance, zfp_type_<DATATYPE>);
+    zfp_stream_set_accuracy(zfp, tolerance);
 
     size_t bufsize = zfp_stream_maximum_size(zfp, field);
     bitstream* stream = stream_open(compressed_buf_in, bufsize);

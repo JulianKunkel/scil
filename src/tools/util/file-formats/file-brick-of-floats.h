@@ -18,6 +18,6 @@
 
 #include <file-formats/scil-file-format-impl.h>
 
-scil_file_plugin_t brick_of_floats_plugin;
+extern scil_file_plugin_t brick_of_floats_plugin;
 
 #endif

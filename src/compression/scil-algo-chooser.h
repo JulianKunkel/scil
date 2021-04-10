@@ -21,8 +21,8 @@
 #include <scil-dict.h>
 #include <scil-decision-tree.h>
 
-scilU_dict_t *variable_dict;
-scilU_decision_tree* decision_tree;
+extern scilU_dict_t *variable_dict;
+extern scilU_decision_tree* decision_tree;
 
 void scilC_algo_chooser_initialize();
 

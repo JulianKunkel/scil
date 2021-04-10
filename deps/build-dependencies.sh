@@ -26,12 +26,12 @@ function download(){
 		fi
 }
 
-ZFP=zfp-0.5.0
-FPZIP=fpzip-1.1.0
+ZFP=zfp-0.5.5
+FPZIP=fpzip-1.3.0
 
 
-download $FPZIP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download
-download $ZFP.tar.gz http://computation.llnl.gov/projects/floating-point-compression/download
+download $FPZIP.tar.gz https://computing.llnl.gov/sites/default/files/inline-files/
+download $ZFP.tar.gz https://github.com/LLNL/zfp/releases/download/0.5.5/
 
 #WAVELET=wavelet_code
 #if [[ ! -e "$SRC/$WAVELET.zip" ]] ; then
@@ -107,8 +107,7 @@ BUILD=0
 if [[ ! -e libzfp.a ]] ; then
 	echo "  Building zfp shared library"
 	pushd "$ZFP" > /dev/null
-	cp "$SRC/config-zfp" Config
-	make shared
+	#cp "$SRC/config-zfp" Config
 	make
 	popd > /dev/null
 	BUILD=1
@@ -117,7 +116,7 @@ fi
 if [[ ! -e libfpzip.a ]] ; then
   echo "  Building fpzip shared library"
   pushd "$FPZIP/src" > /dev/null
-  make -f "$SRC/Makefile-fpzip-1.1.0"
+  make # -f "$SRC/Makefile-fpzip-1.1.0"
   popd > /dev/null
 	BUILD=1
 fi
@@ -181,8 +180,8 @@ fi
 
 if [[ $BUILD == 1 ]] ; then
   mkdir -p include/fpzip include/zfp include/cnoise include/sz
-  cp $FPZIP/inc/* include/fpzip
-  cp $ZFP/inc/* include/zfp
+  cp -r $FPZIP/include/* include/fpzip
+  cp -r $ZFP/include/* include/zfp
   cp cnoise/cnoise.h include/cnoise
   cp -r ./SZ/install/include/* include/sz
 
@@ -190,7 +189,7 @@ if [[ $BUILD == 1 ]] ; then
   cp $SRC/lz4/lib/lz4.h include/lz4/
   cp $SRC/zstd/lib/zstd.h include/zstd/
   cp $SRC/c-blosc/build/include/*.h include/blosc/
-  cp ./SZ/install/lib/libzlib.a ./SZ/install/lib/libsz.a ./zfp-0.5.0/lib/libzfp.a ./cnoise/libcnoise.a ./fpzip-1.1.0/lib/libfpzip.a .
+  cp ./SZ/install/lib/libzlib.a ./SZ/install/lib/libsz.a ./zfp-*/lib/libzfp.a ./cnoise/libcnoise.a ./fpzip-*/lib/libfpzip.a .
   cp $SRC/lz4/lib/liblz4.a .
   cp $SRC/zstd/lib/libzstd.a .
   cp $SRC/c-blosc/build/lib/libblosc.a .
